@@ -85,6 +85,8 @@
 
 import React from "react";
 import Image from 'next/image';
+import Link from 'next/link';
+<Link href="/"><a>Home</a></Link>
 import "../../public/ALL CSS/Header.css";
 
 function Header({ scrollToServices }) {
@@ -99,8 +101,8 @@ function Header({ scrollToServices }) {
         </div>
         <div className="menu">
           <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="#">About</a></li>
+            <li><Link href="/"><a>Home</a></Link></li>
+            {/* <li><a href="#">About</a></li> */}
             <li>
               <a href="#" onClick={(e) => { e.preventDefault(); scrollToServices(); }}>
                 Services
