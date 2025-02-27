@@ -84,7 +84,7 @@
 // export default Header;
 
 import React from "react";
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
 import "../../public/ALL CSS/Header.css";
 
