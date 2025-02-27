@@ -17,7 +17,7 @@ export async function POST(req) {
     // Email details
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: "saifcool457@gmail.com", // Replace with your email
+      to: "mohdsaif5542@gmail.com", // Replace with your email
       subject: `New Luggage Booking from ${fullName}`,
       text: `
         📦 Luggage Booking Details:
