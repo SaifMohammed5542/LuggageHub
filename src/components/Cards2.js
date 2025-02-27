@@ -1,4 +1,6 @@
 import "../../public/ALL CSS/Cards2.css"
+import Image from 'next/image';
+
 
 
 function Cards2() {
@@ -12,7 +14,7 @@ function Cards2() {
 						<li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<img src="/images/smartphone.png" alt="icon" />
+									<image src="/images/smartphone.png" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Book online or on the app</a></h2>
@@ -24,7 +26,7 @@ function Cards2() {
 						<li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<img src="/images/luggage (2).png" alt="icon" />
+									<image src="/images/luggage (2).png" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Head to the store</a></h2>
@@ -35,7 +37,7 @@ function Cards2() {
 						<li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<img src="/images/enjoy.png" alt="icon" />
+									<image src="/images/enjoy.png" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Enjoy the day</a></h2>
@@ -47,7 +49,7 @@ function Cards2() {
 						{/* <li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<img src="/images/booking.png" alt="icon" />
+									<image src="/images/booking.png" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Easy Online Booking</a></h2>

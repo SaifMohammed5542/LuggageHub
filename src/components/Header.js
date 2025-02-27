@@ -91,7 +91,7 @@ function Header({ scrollToServices }) {
     <nav>
       <div className="wrapper">
         <div className="logo">
-          <img src="/images/Luggage.png" alt="logo" />
+          <image src="/images/Luggage.png" alt="logo" />
           <a href="/">
             <h1>LUGGAGE<span>HUB</span></h1>
           </a>

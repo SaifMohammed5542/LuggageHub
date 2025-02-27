@@ -12,7 +12,7 @@ function Locations() {
 						<li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
-									<img src="/images/ezymart (1).jpg" alt="icon" />
+									<image src="/images/ezymart (1).jpg" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Melbourne</a></h2>
@@ -23,7 +23,7 @@ function Locations() {
 						<li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
-									<img src="/images/ezymart (1).jpg" alt="icon" />
+									<image src="/images/ezymart (1).jpg" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Sydney</a></h2>
@@ -34,7 +34,7 @@ function Locations() {
 						<li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
-									<img src="/images/ezymart (1).jpg" alt="icon" />
+									<image src="/images/ezymart (1).jpg" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Brisbane</a></h2>
@@ -45,7 +45,7 @@ function Locations() {
 						{/* <li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<img src="/images/booking.png" alt="icon" />
+									<image src="/images/booking.png" alt="icon" />
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Easy Online Booking</a></h2>

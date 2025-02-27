@@ -79,7 +79,7 @@ function Cards({ servicesRef }) {
  						<li>
 							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<img src="/images/suitcase.png" alt="icon" />
+ 									<image src="/images/suitcase.png" alt="icon" />
  								</div>
                                  <div className="single-list-topics-text1">
  								    <h2><a href="#">Short-Term Storage</a></h2>
@@ -90,7 +90,7 @@ function Cards({ servicesRef }) {
  						<li>
  							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<img src="/images/luggage.png" alt="icon" />
+ 									<image src="/images/luggage.png" alt="icon" />
  								</div>
                                  <div className="single-list-topics-text1">
  								    <h2><a href="#">Secure Lockers</a></h2>
@@ -101,7 +101,7 @@ function Cards({ servicesRef }) {
  						<li>
  							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<img src="/images/travel-luggage (1).png" alt="icon" />
+ 									<image src="/images/travel-luggage (1).png" alt="icon" />
  								</div>
                                  <div className="single-list-topics-text1">
  								    <h2><a href="#">Long-Term Storage</a></h2>
@@ -112,7 +112,7 @@ function Cards({ servicesRef }) {
  						<li>
  							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<img src="/images/booking.png" alt="icon" />
+ 									<image src="/images/booking.png" alt="icon" />
  								</div>
                                 <div className="single-list-topics-text1">
  								    <h2><a href="#">Easy Online Booking</a></h2>
@@ -123,7 +123,7 @@ function Cards({ servicesRef }) {
  					</ul>
  					</div>
  					<div className="list-image">
- 						<img src="/images/ban.jpg" alt="cards-image" />
+ 						<image src="/images/ban.jpg" alt="cards-image" />
  					</div>
  				</div>
     </section>
