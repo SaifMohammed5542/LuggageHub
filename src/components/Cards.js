@@ -72,7 +72,7 @@ import "../../public/ALL CSS/Cards.css";
 
 function Cards({ servicesRef }) {
   return (
-    <section ref={servicesRef} id="list-topics" className="list-topics">
+    <section ref={servicesRef} id="list-topics" className="list-topics1">
       <div className="list-topics-content1" >
  					<div className="list-cards">
  					<ul>
@@ -124,7 +124,7 @@ function Cards({ servicesRef }) {
  					</ul>
  					</div>
 					<div className="list-image" >
- 						<Image src="/images/ban.jpg" alt="cards-image"  width={500} height={300}/>
+ 						<Image src="/images/air.jpg" alt="cards-image"  width={500} height={300}/>
  					</div>
  				</div>
     </section>

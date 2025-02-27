@@ -28,6 +28,7 @@
 .welcome-hero-img img {
   width: 80%;
   height: 80%;
+  object-fit: cover;
   /* border-radius: 40%; */
   box-shadow:8px 8px 20px rgba(0, 0, 0, 0.684);
 }
@@ -200,6 +201,9 @@
   .hero-container {
     width: 85%;
   }
+  .welcome-hero {
+    margin-top: 50px;
+  }
   .welcome-hero-txt h2 {
     font-size: 2.8rem;
   }
@@ -210,7 +214,8 @@
     font-size: 1.3rem;
   }
   .welcome-hero-img img {
-    width: 70%;
+    object-fit: cover;
+    width: 100%;
   }
 }
 
@@ -229,14 +234,17 @@
     font-size: 1.2rem;
   }
   .welcome-hero-img img {
-    width: 65%;
+    object-fit: cover;
+    width: 100%;
   }
 }
 /* For 426px */
 @media (max-width: 426px) {
   .hero-container {
     width: 95%;
+    height: 85%;
     flex-direction: column;
+    gap: 20px;
   }
   .welcome-hero-txt h2 {
     font-size: 2rem;
@@ -250,7 +258,12 @@
     font-size: 1.2rem;
     width: 100%;
   }
+  .welcome-hero-img {
+    height: 40%;
+  }
   .welcome-hero-img img {
-    width: 50%;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
   }
 }

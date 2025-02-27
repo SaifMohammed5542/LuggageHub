@@ -6,7 +6,7 @@ import Image from 'next/image';
 function Locations() {
     return (
         <>
-<section id="list-topics" className="list-topics">
+<section id="list-topics" className="list-topics-loc">
 			{/* <div className="container"> */}
 				<div className="list-topics-content-loc">
 					<h2 className="topper">Our Locations</h2>

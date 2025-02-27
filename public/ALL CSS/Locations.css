@@ -1,4 +1,4 @@
-.list-topics {
+.list-topics-loc {
     justify-items: center;
 }
 .list-topics-content-loc {
@@ -116,10 +116,11 @@
         margin: 20px;
         padding: 10px;
     }
+
     .list-topics-content-loc ul li { 
         display: inline-block;
         flex-wrap: wrap;
-        justify-items: center;
+        justify-content: center;
     }
     .single-list-topics-content-loc {
         width: 100%;

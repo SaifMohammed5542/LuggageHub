@@ -3,10 +3,10 @@ import Image from 'next/image';
 
 
 
-function Cards2() {
+function Cards2({howItWorksRef}) {
     return (
         <>
-<section id="list-topics" className="list-topics">
+<section ref={howItWorksRef} id="list-topics" className="list-topics">
 			{/* <div className="container"> */}
 				<div className="list-topics-content">
 					<h2 className="topper">How it Works</h2>
