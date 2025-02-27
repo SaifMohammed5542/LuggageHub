@@ -14,7 +14,7 @@ function Cards2() {
 						<li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<image src="/images/smartphone.png" alt="icon" />
+									<Image src="/images/smartphone.png" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Book online or on the app</a></h2>
@@ -26,7 +26,7 @@ function Cards2() {
 						<li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<image src="/images/luggage (2).png" alt="icon" />
+									<Image src="/images/luggage (2).png" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Head to the store</a></h2>
@@ -37,7 +37,7 @@ function Cards2() {
 						<li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">
-									<image src="/images/enjoy.png" alt="icon" />
+									<Image src="/images/enjoy.png" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Enjoy the day</a></h2>

@@ -2,6 +2,8 @@
 import { useRouter } from "next/navigation";
 import "../../public/ALL CSS/BannerOne.css"
 import "../../public/images/pexels-vlada-karpovich-7368312.jpg"
+import Image from 'next/image';
+
 
 
 function BannerOne() {
@@ -19,7 +21,7 @@ function BannerOne() {
 					<button className="welcome-btn" onClick={() => router.push("/booking-form")}>Book Now!</button>
 				</div>
 				<div className="welcome-hero-img">
-					<img src="/images/suit.jpg" alt="welcome-hero-img" />
+					<Image src="/images/suit.jpg" alt="welcome-hero-img"  width={500} height={300}/>
 				</div>
 			</div>
 		</section>

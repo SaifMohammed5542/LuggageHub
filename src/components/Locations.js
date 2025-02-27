@@ -1,4 +1,6 @@
 import "../../public/ALL CSS/Locations.css"
+import Image from 'next/image';
+
 
 
 function Locations() {
@@ -12,7 +14,7 @@ function Locations() {
 						<li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
-									<image src="/images/ezymart (1).jpg" alt="icon" />
+									<Image src="/images/ezymart (1).jpg" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Melbourne</a></h2>
@@ -23,7 +25,7 @@ function Locations() {
 						<li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
-									<image src="/images/ezymart (1).jpg" alt="icon" />
+									<Image src="/images/ezymart (1).jpg" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Sydney</a></h2>
@@ -34,7 +36,7 @@ function Locations() {
 						<li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
-									<image src="/images/ezymart (1).jpg" alt="icon" />
+									<Image src="/images/ezymart (1).jpg" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Brisbane</a></h2>

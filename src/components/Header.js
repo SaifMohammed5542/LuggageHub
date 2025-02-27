@@ -84,6 +84,7 @@
 // export default Header;
 
 import React from "react";
+import Image from 'next/image';
 import "../../public/ALL CSS/Header.css";
 
 function Header({ scrollToServices }) {
@@ -91,7 +92,7 @@ function Header({ scrollToServices }) {
     <nav>
       <div className="wrapper">
         <div className="logo">
-          <image src="/images/Luggage.png" alt="logo" />
+          <Image src="/images/Luggage.png" alt="logo" width={500} height={300}/>
           <a href="/">
             <h1>LUGGAGE<span>HUB</span></h1>
           </a>

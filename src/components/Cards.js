@@ -67,6 +67,7 @@
 // export default Cards;
 
 import React from "react";
+import Image from 'next/image';
 import "../../public/ALL CSS/Cards.css";
 
 function Cards({ servicesRef }) {
@@ -79,7 +80,7 @@ function Cards({ servicesRef }) {
  						<li>
 							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<image src="/images/suitcase.png" alt="icon" />
+ 									<Image src="/images/suitcase.png" alt="icon"  width={500} height={300}/>
  								</div>
                                  <div className="single-list-topics-text1">
  								    <h2><a href="#">Short-Term Storage</a></h2>
@@ -90,7 +91,7 @@ function Cards({ servicesRef }) {
  						<li>
  							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<image src="/images/luggage.png" alt="icon" />
+ 									<Image src="/images/luggage.png" alt="icon"  width={500} height={300}/>
  								</div>
                                  <div className="single-list-topics-text1">
  								    <h2><a href="#">Secure Lockers</a></h2>
@@ -101,7 +102,7 @@ function Cards({ servicesRef }) {
  						<li>
  							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<image src="/images/travel-luggage (1).png" alt="icon" />
+ 									<Image src="/images/travel-luggage (1).png" alt="icon"  width={500} height={300}/>
  								</div>
                                  <div className="single-list-topics-text1">
  								    <h2><a href="#">Long-Term Storage</a></h2>
@@ -112,7 +113,7 @@ function Cards({ servicesRef }) {
  						<li>
  							<div className="single-list-topics-content1">
  								<div className="single-list-topics-icon1">
- 									<image src="/images/booking.png" alt="icon" />
+ 									<Image src="/images/booking.png" alt="icon"  width={500} height={300}/>
  								</div>
                                 <div className="single-list-topics-text1">
  								    <h2><a href="#">Easy Online Booking</a></h2>
@@ -122,8 +123,8 @@ function Cards({ servicesRef }) {
  						</li>
  					</ul>
  					</div>
- 					<div className="list-image">
- 						<image src="/images/ban.jpg" alt="cards-image" />
+					<div className="list-image" >
+ 						<Image src="/images/ban.jpg" alt="cards-image"  width={500} height={300}/>
  					</div>
  				</div>
     </section>
