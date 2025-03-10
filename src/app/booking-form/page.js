@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import "../../../public/ALL CSS/Input.css";
 import Header from "../../components/Header.js";
 import Payment from "../../components/Payment.js";
-import App from "../../components/find.js"
-import DumMap from "../../components/DumMap.js"
-import GoogleMapDirections from "../../components/EmbMap.js";
+// import App from "../../components/find.js"
+// import DumMap from "../../components/DumMap.js"
+// import GoogleMapDirections from "../../components/EmbMap.js";
 
 const LuggageBookingForm = () => {
 
