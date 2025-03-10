@@ -1,4 +1,4 @@
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import "../../public/ALL CSS/Locate.css"
 
 function Locate() {

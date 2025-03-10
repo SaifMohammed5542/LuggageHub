@@ -7,15 +7,15 @@ import BannerTwo from '../components/BannerTwo.js';
 import Cards from '../components/Cards.js';
 import Cards2 from '../components/Cards2.js';
 import Locations from '../components/Locations.js';
-import GoogleMapsComponent from "../components/Map.js"
+// import GoogleMapsComponent from "../components/Map.js"
 import Rotatingtext from '../components/Rotate.js';
-import Banerrr from '../components/tesxt'
+// import Banerrr from '../components/tesxt'
 import Footer from '../components/Footer.js';
 import Amount from '../components/Amount'
-import FindLocHere from '../components/FindLocHere.js' 
-import LuggageStorage from '../components/Leaflet'
-import MapWithDirections from "../components/Map.js";
-import MapButton from "../components/MapButton"
+// import FindLocHere from '../components/FindLocHere.js' 
+// import LuggageStorage from '../components/Leaflet'
+// import MapWithDirections from "../components/Map.js";
+// import MapButton from "../components/MapButton"
 
 function App() {
   const servicesRef = useRef<HTMLDivElement>(null);
