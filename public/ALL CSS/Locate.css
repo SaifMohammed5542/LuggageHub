@@ -1,0 +1,10 @@
+.Locate button {
+    border-radius: 50px;
+    background-color: blue;
+    color: white;
+    padding: 20px;
+    width: 100%;
+    border: none;
+    font-size:1.5rem;
+    cursor: pointer;
+}

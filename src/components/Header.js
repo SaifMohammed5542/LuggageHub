@@ -83,35 +83,116 @@
 // };
 // export default Header;
 
-import React from "react";
+// import React from "react";
 // import Image from 'next/image';
+// import Link from 'next/link';
+// import "../../public/ALL CSS/Header.css";
+
+// function Header({ scrollToServices , scrollTohowItWorks }) {
+//   return (
+//     <nav>
+//       <div className="wrapper">
+//         <div className="logo">
+//           <a href="/">
+//             <Image src="/images/nelo.png" alt="Logo" width={500} height={300}/>
+//           </a>
+//         </div>
+//         <div className="menu">
+//           <ul>
+//             <li><Link href="/">Home</Link></li>
+//             <li>
+//               <a href="#" onClick={(e) => { e.preventDefault(); scrollTohowItWorks(); }}>
+//                 How it Works
+//               </a>
+//             </li>
+//             <li>
+//               <a href="#" onClick={(e) => { e.preventDefault(); scrollToServices(); }}>
+//                 Services
+//               </a>
+//             </li>
+//           </ul>
+//         </div>
+//       </div>
+//     </nav>
+//   );
+// }
+
+// export default Header;
+
+
+import React, { useState } from "react";
+import Image from 'next/image';
 import Link from 'next/link';
 import "../../public/ALL CSS/Header.css";
 
-function Header({ scrollToServices , scrollTohowItWorks }) {
+function Header({ scrollToServices, scrollTohowItWorks}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleScroll = (scrollFunction) => {
+    if (scrollFunction) {
+      scrollFunction();
+    }
+    setIsMenuOpen(false); // Close the menu after clicking a link
+  };
+
   return (
     <nav>
       <div className="wrapper">
         <div className="logo">
-          {/* <Image src="/images/Luggage.png" alt="logo" width={500} height={300}/> */}
           <a href="/">
-            <h1>LUGGAGE<span>HUB</span></h1>
+            <Image src="/images/nelo.png" alt="Logo" width={500} height={300} />
           </a>
         </div>
-        <div className="menu">
+        <div className={`menu ${isMenuOpen ? "open" : ""}`}>
           <ul>
-            <li><Link href="/">Home</Link></li>
             <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); scrollTohowItWorks(); }}>
+              <Link href="/" onClick={() => setIsMenuOpen(false)}>
+                Home
+              </Link>
+            </li>
+            {/* <li>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleScroll(scrollTohowItWorks);
+                }}
+              >
+                Pricing
+              </a>
+            </li> */}
+            <li>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleScroll(scrollTohowItWorks);
+                }}
+              >
                 How it Works
               </a>
             </li>
             <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); scrollToServices(); }}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleScroll(scrollToServices);
+                }}
+              >
                 Services
               </a>
             </li>
           </ul>
+        </div>
+        <div className="hamburger" onClick={toggleMenu}>
+          <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+          <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+          <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
         </div>
       </div>
     </nav>

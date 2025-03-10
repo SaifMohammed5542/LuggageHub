@@ -1,15 +1,17 @@
+"use client"
+import { useRouter } from "next/navigation";
 import "../../public/ALL CSS/Locations.css"
 import Image from 'next/image';
 
-
-
 function Locations() {
+	const router = useRouter();
     return (
         <>
 <section id="list-topics" className="list-topics-loc">
 			{/* <div className="container"> */}
 				<div className="list-topics-content-loc">
 					<h2 className="topper">Our Locations</h2>
+					<p>(Currently We are available at only one Location)</p>
 					<ul>
 						<li>
 							<div className="single-list-topics-content-loc">
@@ -17,8 +19,8 @@ function Locations() {
 									<Image src="/images/ezymart (1).jpg" alt="icon"  width={500} height={300}/>
 								</div>
                                 <div className="single-list-topics-text">
-								    <h2><a href="#">Melbourne</a></h2>
-								    <button>Store here</button>
+								    <h2><a href="#">EzyMart, Melbourne</a></h2>
+								    <button  onClick={() => router.push("/booking-form")}>Store here</button>
                                 </div>
 							</div>
 						</li>
@@ -29,7 +31,7 @@ function Locations() {
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Sydney</a></h2>
-								    <button>Store here</button>
+								    <button>Coming Soon</button>
                                 </div>
 							</div>
 						</li>
@@ -40,7 +42,7 @@ function Locations() {
 								</div>
                                 <div className="single-list-topics-text">
 								    <h2><a href="#">Brisbane</a></h2>
-								    <button>Store here</button>
+								    <button>Coming Soon</button>
                                 </div>
                             </div>
 						</li>

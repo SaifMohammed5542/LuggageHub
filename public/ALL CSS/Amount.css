@@ -1,0 +1,53 @@
+/* Pricing Component Styling */
+.pricing-component {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    margin: 40px 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* .pricing-component:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  } */
+  
+  .pricing-header h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e3c72;
+    margin-bottom: 10px;
+  }
+  
+  .pricing-header p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .pricing-details .price-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .pricing-details .price-item .price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ff6f61;
+  }
+  
+  .pricing-details .price-item .per {
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .pricing-details .note {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 10px;
+  }

@@ -1,0 +1,22 @@
+.mapouter {
+    position: relative;
+    text-align: right;
+    width: 100%; /* Use percentage for responsiveness */
+    height: 100%;
+    /* margin-top: 20px;
+    margin-left: 20px; */
+    /* padding-bottom: 62.5%; Aspect ratio 16:10 (500px/800px) */
+}
+
+.gmap_canvas {
+    overflow: hidden;
+    background: none !important;
+    width: 100%; /* Use percentage for responsiveness */
+    height: 100%;
+}
+
+.gmap_iframe {
+    width: 100% !important; /* Use percentage for responsiveness */
+    height: 100% !important; /* Use percentage for responsiveness */
+    border: none;
+}

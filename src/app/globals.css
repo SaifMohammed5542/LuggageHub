@@ -75,7 +75,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #EAE7DC;
   }
 }
 
@@ -87,7 +87,7 @@ body {
 
 body {
   color: var(--foreground);
-  background-color: #ffffff;
+  background-color: #E9F1FA;
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
