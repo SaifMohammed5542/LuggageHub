@@ -8,7 +8,7 @@ const Amount = () => {
   </div>
   <div className="pricing-details">
     <div className="price-item">
-      <span className="price">8 AUD</span>
+      <span className="price">7.99 AUD</span>
       <span className="per">per bag / per day</span>
     </div>
     <p className="note">No hidden fees. Secure and hassle-free!</p>

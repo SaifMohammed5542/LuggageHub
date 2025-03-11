@@ -119,7 +119,7 @@
 
 // export default Header;
 
-
+"use client"
 import React, { useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
@@ -144,7 +144,7 @@ function Header({ scrollToServices, scrollTohowItWorks}) {
       <div className="wrapper">
         <div className="logo">
           <a href="/">
-            <Image src="/images/nelo.png" alt="Logo" width={500} height={300} />
+            <Image src="/images/licon.png" alt="Logo" width={500} height={300} />
           </a>
         </div>
         <div className={`menu ${isMenuOpen ? "open" : ""}`}>

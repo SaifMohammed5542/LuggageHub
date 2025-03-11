@@ -67,7 +67,7 @@ const Payment = ({ totalAmount, formData, onSuccess, onPaymentSuccess }) => {
   return (
     <button
       onClick={handlePayment}
-      style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
+      style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", backgroundColor: "#034078", width: "50%" }}
     >
       Pay Now
     </button>

@@ -1,0 +1,47 @@
+.banner-container {
+    text-align: center;
+    padding: 20px;
+    background: #fdfffc;
+    margin: 20px 0;
+  }
+  
+  .banner-title {
+    font-size: 27px;
+    color: #235789;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .accordion {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  .accordion-item {
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    color: #333;
+    padding: 10px 0;
+  }
+  
+  .accordion-content {
+    font-size: 16px;
+    color: #555;
+    padding: 10px 0;
+    padding-left: 10%;
+    text-align: left;
+  }
+  
+  .icon {
+    font-size: 22px;
+    font-weight: bold;
+    color: #235789;
+  }
+  

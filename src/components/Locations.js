@@ -24,7 +24,7 @@ function Locations() {
                                 </div>
 							</div>
 						</li>
-						<li>
+						{/* <li>
 							<div className="single-list-topics-content-loc">
 								<div className="single-list-topics-icon-loc">
 									<Image src="/images/ezymart (1).jpg" alt="icon"  width={500} height={300}/>
@@ -45,7 +45,7 @@ function Locations() {
 								    <button>Coming Soon</button>
                                 </div>
                             </div>
-						</li>
+						</li> */}
 						{/* <li>
 							<div className="single-list-topics-content">
 								<div className="single-list-topics-icon">

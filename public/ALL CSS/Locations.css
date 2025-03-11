@@ -3,11 +3,12 @@
     padding: 80px 20px;
     background: #ffffff;
     text-align: center;
+    margin: 20px 0;
 }
 
 /* Container for the Content */
 .list-topics-content-loc {
-    max-width: 1200px;
+    max-width: 450px;
     margin: 0 auto;
 }
 

@@ -34,7 +34,7 @@ export async function POST(req) {
     // Email details to the admin
     const mailOptionsAdmin = {
       from: process.env.EMAIL_USER,
-      to: "saifmohd5542.mail@gmail.com", // Replace with your admin email
+      to: "luggage5542@gmail.com", // Replace with your admin email
       subject: `📦 New Luggage Booking - ${fullName}`,
       text: `
         📦 Luggage Booking Details:

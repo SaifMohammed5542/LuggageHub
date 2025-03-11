@@ -18,7 +18,7 @@ const LuggageBookingForm = () => {
     termsAccepted: false,
   });
 
-  const ratePerLuggagePerDay = 8; // Price per luggage per day
+  const ratePerLuggagePerDay = 7.99; // Price per luggage per day
 
   // Function to calculate the number of days
   const calculateNumberOfDays = () => {
