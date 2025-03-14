@@ -34,7 +34,7 @@
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 // import FindLocHere from "../components/FindLocHere";
-import "../../public/ALL CSS/BannerOne.css";
+import "../../public/ALL CSS/BannerTwo.css";
 
 function BannerTwo() {
     const router = useRouter();

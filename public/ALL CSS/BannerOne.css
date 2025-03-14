@@ -873,7 +873,7 @@
 @media (max-width: 400px) {
 
   #home.hero {
-    min-height: 67vh;
+    min-height: 72vh;
   }
   .text-content h2 {
       font-size: 1.8rem;
@@ -893,3 +893,9 @@
       height: auto;
   }
 }
+
+/* @media (max-width: 385px) {
+  #home.hero {
+    min-height: 77vh;
+  }
+} */
