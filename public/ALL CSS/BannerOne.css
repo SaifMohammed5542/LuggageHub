@@ -822,6 +822,11 @@
 }
 
 @media (max-width: 768px) {
+
+  /* #home.hero {
+    min-height: 85vh;
+  } */
+
   .text-content h2 {
       font-size: 2rem;
   }
@@ -843,7 +848,7 @@
 
 @media (max-width: 576px) {
   #home.hero {
-    min-height: 77vh;
+    height: 75vh;
     align-items: flex-start;
     padding: 0;
     padding-top: 20px;
@@ -873,7 +878,7 @@
 @media (max-width: 400px) {
 
   #home.hero {
-    min-height: 72vh;
+    height: 75vh;
   }
   .text-content h2 {
       font-size: 1.8rem;
