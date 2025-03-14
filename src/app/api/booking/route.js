@@ -1,113 +1,82 @@
+// app/api/booking/route.js
+import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
-// API Route Handler
-export async function POST(req) {
+export async function POST(request) {
   try {
-    // Parse JSON from the request body
-    const body = await req.json();
-    const { fullName, email, phone, location, dropOffDate, pickUpDate, luggageCount, luggageSize, specialInstructions, paymentId } = body;
+    const { fullName, email, phone, dropOffDate, pickUpDate, luggageCount, specialInstructions, paymentId } =
+      await request.json();
 
-
-    // Generate a unique Order ID using Date.now() and a random string
-    const orderId = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-
-
-
-    // Ensure environment variables are set
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error("❌ Missing EMAIL_USER or EMAIL_PASS in environment variables.");
-      return new Response(
-        JSON.stringify({ success: false, message: "Server email configuration error." }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Create a transporter
+    // Create a Nodemailer transporter
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: "gmail", // Use your email service
       auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS, // App password
+        user: process.env.EMAIL_USER, // Your email address
+        pass: process.env.EMAIL_PASS, // Your email password or app password
       },
     });
 
-    // Email details to the admin
-    const mailOptionsAdmin = {
+    // Email content for admin
+    const adminMailOptions = {
       from: process.env.EMAIL_USER,
-      to: "luggage5542@gmail.com", // Replace with your admin email
-      subject: `📦 New Luggage Booking - ${fullName}`,
+      to: "luggage5542@gmail.com", // Your email address
+      subject: "New Luggage Storage Booking",
       text: `
-        📦 Luggage Booking Details:
-        ------------------------------
-        🆔 Order ID: ${orderId}
-        👤 Name: ${fullName}
-        ✉️ Email: ${email}
-        📞 Phone: ${phone}
-        📍 Location: ${location}
-        📅 Drop-off: ${dropOffDate}
-        📅 Pick-up: ${pickUpDate}
-        🎒 Luggage Count: ${luggageCount}
-        📏 Luggage Size: ${luggageSize}
-        📝 Special Instructions: ${specialInstructions || "None"}
-        💳 Payment ID: ${paymentId || "Not available"}
+        New Booking Details:
+        -------------------
+        Full Name: ${fullName}
+        Email: ${email}
+        Phone: ${phone}
+        Drop-off Date: ${dropOffDate}
+        Pick-up Date: ${pickUpDate}
+        Luggage Count: ${luggageCount}
+        Special Instructions: ${specialInstructions}
+        Payment ID: ${paymentId}
       `,
     };
 
-    // Email details to the user
-    const mailOptionsUser = {
+    // Email content for user
+    const userMailOptions = {
       from: process.env.EMAIL_USER,
-      to: email, // The user's email
-      subject: `📦 Your Luggage Booking Confirmation`,
+      to: email, // User's email address
+      subject: "Your Luggage Storage Booking Confirmation",
       text: `
         Dear ${fullName},
-    
-        Your booking has been successfully confirmed! Here are the details:
-        ---------------------------------------------------------------
-        🆔 Order ID: ${orderId}
-        👤 Name: ${fullName}
-        ✉️ Email: ${email}
-        📞 Phone: ${phone}
-        📍 Location: ${location}
-        📅 Drop-off: ${dropOffDate}
-        📅 Pick-up: ${pickUpDate}
-        🎒 Luggage Count: ${luggageCount}
-        📏 Luggage Size: ${luggageSize}
-        📝 Special Instructions: ${specialInstructions || "None"}
-        💳 Payment ID: ${paymentId || "Not available"}
-    
-        Thank you for using our service! We look forward to storing your luggage.
-    
+
+        Thank you for booking with us! Here are your booking details:
+
+        Full Name: ${fullName}
+        Email: ${email}
+        Phone: ${phone}
+        Drop-off Date: ${dropOffDate}
+        Pick-up Date: ${pickUpDate}
+        Luggage Count: ${luggageCount}
+        Special Instructions: ${specialInstructions}
+        Payment ID: ${paymentId}
+
+        If you have any questions, feel free to contact us.
+
         Best regards,
-        Luggage Storage Team
+        Your Luggage Storage Online Team
       `,
     };
 
-    // Send the email to the admin
-    await transporter.sendMail(mailOptionsAdmin);
+    // Send the emails
+    await transporter.sendMail(adminMailOptions);
+    await transporter.sendMail(userMailOptions);
 
-    // Send the email to the user
-    await transporter.sendMail(mailOptionsUser);
-
-    console.log(`✅ Booking email sent successfully for ${fullName}`);
-
-    return new Response(
-      JSON.stringify({ success: true, message: "Booking email sent!" }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+    // Send a success response
+    return NextResponse.json(
+      { success: true, message: "Emails sent successfully" },
+      { status: 200 }
     );
-
   } catch (error) {
-    console.error("❌ Email sending failed:", error);
-    return new Response(
-      JSON.stringify({ success: false, message: "Failed to send email." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+    console.error("Error sending email:", error);
+
+    // Send an error response
+    return NextResponse.json(
+      { success: false, message: "Failed to send emails" },
+      { status: 500 }
     );
   }
-}
-
-// (Optional) GET Method for testing API response
-export async function GET() {
-  return new Response(
-    JSON.stringify({ message: "Booking API is running!" }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
-  );
 }

@@ -1,15 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
+import '../../../public/ALL CSS/spinner.css'
 import Header from "../../components/Header.js";
-import Payment from "../../components/Payment.js";
+import PayPalPayment from "../../components/checkoutbutton.js";
 
 const LuggageBookingForm = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phone: "",
-    location: "",
     dropOffDate: "",
     pickUpDate: "",
     luggageCount: 1,
@@ -17,6 +17,10 @@ const LuggageBookingForm = () => {
     specialInstructions: "",
     termsAccepted: false,
   });
+
+  const [isFormValid, setIsFormValid] = useState(false); // Track form validity
+  const [errors, setErrors] = useState({}); // Track validation errors
+  const [isLoading, setIsLoading] = useState(false); // Track loading state
 
   const ratePerLuggagePerDay = 7.99; // Price per luggage per day
 
@@ -37,6 +41,7 @@ const LuggageBookingForm = () => {
   const numberOfDays = calculateNumberOfDays();
   const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
 
+  // Handle form field changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -45,23 +50,62 @@ const LuggageBookingForm = () => {
     });
   };
 
-  
+  // Validate the form whenever formData changes
+  useEffect(() => {
+    const errors = {};
 
+    // Check each field for errors
+    if (!formData.fullName) errors.fullName = "Full Name is required";
+    if (!formData.email) errors.email = "Email is required";
+    if (!formData.phone) errors.phone = "Phone is required";
+    if (!formData.dropOffDate) errors.dropOffDate = "Drop-off Date is required";
+    if (!formData.pickUpDate) errors.pickUpDate = "Pick-up Date is required";
+    if (!formData.termsAccepted) errors.termsAccepted = "You must agree to the terms";
+
+    // Update errors and form validity
+    setErrors(errors);
+    setIsFormValid(Object.keys(errors).length === 0);
+
+    // Debugging logs
+    console.log("Form Data:", JSON.stringify(formData, null, 2)); // Show full form data
+    console.log("Errors:", JSON.stringify(errors, null, 2)); // Show full errors
+    console.log("Is Form Valid:", Object.keys(errors).length === 0);
+  }, [formData]);
+
+  // Handle payment success
   const handlePaymentSuccess = async (paymentId) => {
-    // Send booking email after payment is completed
-    const response = await fetch("/api/booking", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...formData, paymentId }),
-    });
+    setIsLoading(true); // Start loading
+    try {
+      // Send booking email after payment is completed
+      const response = await fetch("/api/booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...formData, paymentId }),
+      });
 
-    const data = await response.json();
-    if (data.success) {
-      alert("✅ Booking Confirmed! Email sent.");
-    } else {
-      alert("❌ Failed to send booking email.");
+      // Check if the response is OK
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to send booking details.");
+      }
+
+      // Parse the response as JSON
+      const data = await response.json();
+
+      // Handle the response
+      if (data.success) {
+        // Redirect to the confirmation page
+        window.location.href = "/Booked";
+      } else {
+        alert("❌ Failed to send booking email.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(`An error occurred: ${error.message}`);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -72,52 +116,132 @@ const LuggageBookingForm = () => {
         <div className="booking-container">
           <h2>📦 Luggage Storage Booking</h2>
           <form>
+            {/* Full Name */}
             <div className="input-group">
               <label>👤 Full Name</label>
-              <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                required
+              />
+              {errors.fullName && <span className="error">{errors.fullName}</span>}
             </div>
+
+            {/* Email and Phone */}
             <div className="double-input">
               <div className="input-group">
                 <label>✉️ Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+                {errors.email && <span className="error">{errors.email}</span>}
               </div>
               <div className="input-group">
                 <label>📞 Phone</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                />
+                {errors.phone && <span className="error">{errors.phone}</span>}
               </div>
             </div>
 
+            {/* Drop-off and Pick-up */}
             <div className="double-input">
               <div className="input-group">
                 <label>📅 Drop-off</label>
-                <input type="datetime-local" name="dropOffDate" value={formData.dropOffDate} onChange={handleChange} required min={new Date().toISOString().slice(0, 16)} />
+                <input
+                  type="datetime-local"
+                  name="dropOffDate"
+                  value={formData.dropOffDate}
+                  onChange={handleChange}
+                  required
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+                {errors.dropOffDate && <span className="error">{errors.dropOffDate}</span>}
               </div>
               <div className="input-group">
                 <label>📅 Pick-up</label>
-                <input type="datetime-local" name="pickUpDate" value={formData.pickUpDate} onChange={handleChange} required min={formData.dropOffDate ? new Date(new Date(formData.dropOffDate).getTime() + 60 * 60 * 1000).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)} />
+                <input
+                  type="datetime-local"
+                  name="pickUpDate"
+                  value={formData.pickUpDate}
+                  onChange={handleChange}
+                  required
+                  min={
+                    formData.dropOffDate
+                      ? new Date(new Date(formData.dropOffDate).getTime() + 60 * 60 * 1000).toISOString().slice(0, 16)
+                      : new Date().toISOString().slice(0, 16)
+                  }
+                />
+                {errors.pickUpDate && <span className="error">{errors.pickUpDate}</span>}
               </div>
             </div>
 
+            {/* Luggage Count */}
             <div className="double-input">
               <div className="input-group">
                 <label>🎒 Luggage Count</label>
-                <input type="number" name="luggageCount" min="1" max="10" value={formData.luggageCount} onChange={handleChange} required />
+                <input
+                  type="number"
+                  name="luggageCount"
+                  min="1"
+                  max="10"
+                  value={formData.luggageCount}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
 
+            {/* Special Instructions */}
             <div className="input-group">
               <label>📝 Special Instructions</label>
-              <textarea name="specialInstructions" value={formData.specialInstructions} onChange={handleChange}></textarea>
+              <textarea
+                name="specialInstructions"
+                value={formData.specialInstructions}
+                onChange={handleChange}
+              ></textarea>
             </div>
 
+            {/* Terms and Conditions */}
             <div className="checkbox-container">
-              <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} required />
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                checked={formData.termsAccepted}
+                onChange={handleChange}
+                required
+              />
               <span>I agree to the terms and conditions</span>
+              {errors.termsAccepted && <span className="error">{errors.termsAccepted}</span>}
             </div>
           </form>
 
-          {/* Payment Button */}
-          <Payment totalAmount={totalAmount} formData={formData} onSuccess={handlePaymentSuccess} />
+          {/* Render PayPal button or loading spinner */}
+          {isLoading ? (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+              <p>Processing your booking...</p>
+            </div>
+          ) : isFormValid ? (
+            <PayPalPayment
+              totalAmount={totalAmount}
+              onPaymentSuccess={handlePaymentSuccess}
+              disabled={isLoading} // Disable the button when loading
+            />
+          ) : (
+            <p className="error">Please fill out all required fields and agree to the terms to continue.</p>
+          )}
         </div>
       </div>
     </>

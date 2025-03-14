@@ -1,50 +1,28 @@
-"use client"
-import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
-import 'leaflet/dist/leaflet.css';
+// app/Booked/page.js
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import '../../../public/ALL CSS/confirmation.css'
 
-const Map = dynamic(() => import('../../components/Leaflet'), { ssr: false });
+const Booked = () => {
+  const router = useRouter();
 
-const Home = () => {
-  const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  useEffect(() => {
+    // Redirect to home page after 5 seconds
+    const timer = setTimeout(() => {
+      router.push("/");
+    }, 5000);
 
-  const handleSearch = () => {
-    if (searchQuery.trim() !== '') {
-      console.log('Searching for:', searchQuery);
-      // Add logic to display results or update the map based on the search query
-    } else {
-      alert('Please enter a valid location');
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [router]);
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>Find Luggage Storage</h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault(); // Prevent page reload on form submission
-          handleSearch();
-        }}
-        style={{ marginBottom: '20px' }}
-      >
-        <input
-          type="text"
-          placeholder="Enter location"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // Update state on input change
-          style={{ marginRight: '10px', padding: '5px', width: '60%' }}
-        />
-        <button
-          type="submit"
-          style={{ padding: '5px', backgroundColor: '#0070f3', color: 'white', border: 'none' }}
-        >
-          Search
-        </button>
-      </form>
-      <p>No stores available around you. We are expanding rapidly!</p>
-      <Map />
+    <div className="confirmation-container">
+      <h1>✅ Booking Confirmed!</h1>
+      <p>Thank you for booking with us. A confirmation email has been sent to your inbox.</p>
+      <p>You will be redirected to the home page in 5 seconds...</p>
     </div>
   );
 };
 
-export default Home;
+export default Booked;

@@ -9,7 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^8.8.2",
     "@react-google-maps/api": "^2.20.6",
+    "@stripe/react-stripe-js": "^3.4.0",
+    "@stripe/stripe-js": "^6.0.0",
+    "axios": "^1.8.2",
     "leaflet": "^1.9.4",
     "next": "15.1.7",
     "nodemailer": "^6.10.0",
