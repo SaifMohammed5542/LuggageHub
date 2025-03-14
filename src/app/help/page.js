@@ -1,25 +1,25 @@
 "use client"
-import React, { useState } from 'react';
+import React from 'react';
 import '../../../public/ALL CSS/ContactUs.css'; // Assuming you'll create a ContactUs.css file
 
 function ContactUs() {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        message: '',
-    });
+    // const [formData, setFormData] = useState({
+    //     name: '',
+    //     email: '',
+    //     message: '',
+    // });
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    // const handleChange = (e) => {
+    //     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Here you would typically send the form data to a server
-        console.log(formData); // For demonstration
-        // Reset form after submission:
-        setFormData({ name: '', email: '', message: '' });
-    };
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     // Here you would typically send the form data to a server
+    //     console.log(formData); // For demonstration
+    //     // Reset form after submission:
+    //     setFormData({ name: '', email: '', message: '' });
+    // };
 
     return (
         <div className="cu-container">
