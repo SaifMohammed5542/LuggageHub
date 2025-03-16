@@ -21,20 +21,20 @@ const LuggageBookingForm = () => {
   const [errors, setErrors] = useState({}); // Track validation errors
   const [isLoading, setIsLoading] = useState(false); // Track loading state
 
-  const ratePerLuggagePerDay = 7.99; // Price per luggage per day
+  // const ratePerLuggagePerDay = 7.99; // Price per luggage per day
 
   // Function to calculate the number of days
-  const calculateNumberOfDays = () => {
-    if (!formData.dropOffDate || !formData.pickUpDate) return 1; // Default to 1 day if dates are empty
+  // const calculateNumberOfDays = () => {
+  //   if (!formData.dropOffDate || !formData.pickUpDate) return 1; 
 
-    const dropOff = new Date(formData.dropOffDate);
-    const pickUp = new Date(formData.pickUpDate);
-    const differenceInMs = pickUp - dropOff; // Time difference in milliseconds
+  //   const dropOff = new Date(formData.dropOffDate);
+  //   const pickUp = new Date(formData.pickUpDate);
+  //   const differenceInMs = pickUp - dropOff; 
 
-    const numberOfDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24)); // Convert to full days
+  //   const numberOfDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
 
-    return numberOfDays;
-  };
+  //   return numberOfDays;
+  // };
 
   // Calculate total amount dynamically
   const numberOfDays = calculateNumberOfDays();
