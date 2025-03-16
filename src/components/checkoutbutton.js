@@ -4,7 +4,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess }) => {
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": "Aboo23AYFeclfVf1t3LP7pa-jMK55lgOiUK5ngc1CmEb0fWh7G55DxwckrCxxoqvBNVPsWuWvO5sZc9o",
+        "client-id": "AWliQ4kjwXlFVh18OJKUgGhurn7xFqoQOgn9GVDJYJK_yb_xCy2LDP4osowL0f4iuWO669oR1mYHzdSD",
         currency: "AUD",
         locale: "en_AU" // Currency for the transaction
       }}
@@ -29,7 +29,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess }) => {
           return actions.order.capture().then((details) => {
             // Call the onPaymentSuccess function with the payment ID
             onPaymentSuccess(details.id);
-          });
+          });4111
         }}
         onError={(err) => {
           console.error("PayPal error:", err);
