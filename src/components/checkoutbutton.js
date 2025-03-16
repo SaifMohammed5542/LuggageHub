@@ -29,7 +29,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess }) => {
           return actions.order.capture().then((details) => {
             // Call the onPaymentSuccess function with the payment ID
             onPaymentSuccess(details.id);
-          });4111
+          });
         }}
         onError={(err) => {
           console.error("PayPal error:", err);
