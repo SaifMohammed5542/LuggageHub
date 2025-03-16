@@ -146,19 +146,23 @@ const LuggageBookingForm = () => {
             </div>
 
             <div className="double-input">
-              <div className="input-group">
-                <label>🎒 Luggage Count</label>
-                <input
-                  type="number"
-                  name="luggageCount"
-                  min="1"
-                  max="10"
-                  value={formData.luggageCount}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+  <div className="input-group">
+    <label>🎒 Luggage Count</label>
+    <select
+      name="luggageCount"
+      value={formData.luggageCount}
+      onChange={handleChange}
+      required
+    >
+      {[...Array(10).keys()].map((num) => (
+        <option key={num + 1} value={num + 1}>
+          {num + 1}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
 
 
             <div className="input-group">
