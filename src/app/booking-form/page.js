@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
-import '../../../public/ALL CSS/spinner.css'
+import '../../../public/ALL CSS/spinner.css';
 import Header from "../../components/Header.js";
-import PayPalPayment from "../../components/checkoutbutton.js";
 
 const LuggageBookingForm = () => {
   const [formData, setFormData] = useState({
@@ -44,10 +43,19 @@ const LuggageBookingForm = () => {
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
+    const updatedFormData = {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
-    });
+    };
+
+    // Automatically adjust pick-up time if drop-off time changes
+    if (name === "dropOffDate" && value) {
+      const dropOffTime = new Date(value);
+      const minPickUpTime = new Date(dropOffTime.getTime() + 60 * 60 * 1000); // 1 hour later
+      updatedFormData.pickUpDate = minPickUpTime.toISOString().slice(0, 16); // Set pick-up time to 1 hour after drop-off
+    }
+
+    setFormData(updatedFormData);
   };
 
   // Validate the form whenever formData changes
@@ -62,27 +70,33 @@ const LuggageBookingForm = () => {
     if (!formData.pickUpDate) errors.pickUpDate = "Pick-up Date is required";
     if (!formData.termsAccepted) errors.termsAccepted = "You must agree to the terms";
 
+    // Validate drop-off and pick-up times
+    if (formData.dropOffDate && formData.pickUpDate) {
+      const dropOff = new Date(formData.dropOffDate);
+      const pickUp = new Date(formData.pickUpDate);
+      const timeDifferenceInHours = (pickUp - dropOff) / (1000 * 60 * 60); // Difference in hours
+
+      if (timeDifferenceInHours < 1) {
+        errors.pickUpDate = "Pick-up time must be at least 1 hour after drop-off time.";
+      }
+    }
+
     // Update errors and form validity
     setErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
-
-    // Debugging logs
-    console.log("Form Data:", JSON.stringify(formData, null, 2)); // Show full form data
-    console.log("Errors:", JSON.stringify(errors, null, 2)); // Show full errors
-    console.log("Is Form Valid:", Object.keys(errors).length === 0);
   }, [formData]);
 
-  // Handle payment success
-  const handlePaymentSuccess = async (paymentId) => {
+  // Handle booking confirmation
+  const handleConfirmBooking = async () => {
     setIsLoading(true); // Start loading
     try {
-      // Send booking email after payment is completed
+      // Send booking email after confirmation
       const response = await fetch("/api/booking", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...formData, paymentId }),
+        body: JSON.stringify({ ...formData }),
       });
 
       // Check if the response is OK
@@ -177,11 +191,7 @@ const LuggageBookingForm = () => {
                   value={formData.pickUpDate}
                   onChange={handleChange}
                   required
-                  min={
-                    formData.dropOffDate
-                      ? new Date(new Date(formData.dropOffDate).getTime() + 60 * 60 * 1000).toISOString().slice(0, 16)
-                      : new Date().toISOString().slice(0, 16)
-                  }
+                  min={formData.dropOffDate ? new Date(new Date(formData.dropOffDate).getTime() + 60 * 60 * 1000).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)}
                 />
                 {errors.pickUpDate && <span className="error">{errors.pickUpDate}</span>}
               </div>
@@ -227,18 +237,16 @@ const LuggageBookingForm = () => {
             </div>
           </form>
 
-          {/* Render PayPal button or loading spinner */}
+          {/* Simple Confirm Booking Button */}
           {isLoading ? (
             <div className="loading-spinner">
               <div className="spinner"></div>
               <p>Processing your booking...</p>
             </div>
           ) : isFormValid ? (
-            <PayPalPayment
-              totalAmount={totalAmount}
-              onPaymentSuccess={handlePaymentSuccess}
-              disabled={isLoading} // Disable the button when loading
-            />
+            <button onClick={handleConfirmBooking} disabled={isLoading}>
+              Confirm Booking
+            </button>
           ) : (
             <p className="error">Please fill out all required fields and agree to the terms to continue.</p>
           )}
