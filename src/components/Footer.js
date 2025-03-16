@@ -26,7 +26,7 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Contact Us</h3>
           <ul>
-            <li>Email: <a href="mailto:contact@company.com">luggage5542@gmail.com</a></li>
+            <li>Email: <a href="mailto:contact@company.com">support@luggagestorageonline.com</a></li>
             {/* <li>Phone: <a href="tel:+1234567890">+1 234 567 890</a></li>
             <li>Address: 123 Main St, City, Country</li> */}
           </ul>

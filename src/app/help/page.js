@@ -28,7 +28,7 @@ function ContactUs() {
             <div className="contact-info">
                 {/* <p><strong>Address:</strong> 123 Main Street, Anytown, CA 12345</p>
                 <p><strong>Phone:</strong> (123) 456-7890</p> */}
-                <p><strong>Email:</strong> luggage5542@gmail.com</p>
+                <p><strong>Email:</strong> support@luggagestorageonline.com</p>
             </div>
 
             {/* <div className="map-container">
