@@ -38,7 +38,7 @@ const LuggageBookingForm = () => {
 
   // Calculate total amount dynamically
   const numberOfDays = calculateNumberOfDays();
-  const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
+  // const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
 
   // Handle form field changes
   const handleChange = (e) => {
