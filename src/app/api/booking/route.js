@@ -2,6 +2,18 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+export default async function handler(req, res) {
+  const emailServiceApiKey = process.env.EMAIL_SERVICE_API_KEY;
+  console.log('EMAIL_SERVICE_API_KEY:', emailServiceApiKey); // Log the variable
+
+  if (!emailServiceApiKey) {
+    return res.status(500).json({ error: 'Email service API key is missing!' });
+  }
+
+  // Your email sending logic here...
+}
+
+
 export async function POST(request) {
   try {
     const { fullName, email, phone, dropOffDate, pickUpDate, luggageCount, specialInstructions, paymentId } =
@@ -16,6 +28,9 @@ export async function POST(request) {
       },
     });
 
+
+
+    
     // Email content for admin
     const adminMailOptions = {
       from: process.env.EMAIL_USER,
