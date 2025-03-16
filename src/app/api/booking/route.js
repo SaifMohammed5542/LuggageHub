@@ -1,15 +1,13 @@
+// app/api/booking/route.js
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+
+
 
 export async function POST(request) {
   try {
     const { fullName, email, phone, dropOffDate, pickUpDate, luggageCount, specialInstructions, paymentId } =
       await request.json();
-
-    // Log environment variables to check if they're loaded correctly
-    console.log('EMAIL_USER:', process.env.EMAIL_USER);  // Check if the email user is correct
-    console.log('EMAIL_PASS:', process.env.EMAIL_PASS);  // Check if the email password/app password is correct
-    console.log('EMAIL_SERVICE_API_KEY:', process.env.EMAIL_SERVICE_API_KEY);  // Check if API key (if used) is correct
 
     // Create a Nodemailer transporter
     const transporter = nodemailer.createTransport({
@@ -20,6 +18,9 @@ export async function POST(request) {
       },
     });
 
+
+
+    
     // Email content for admin
     const adminMailOptions = {
       from: process.env.EMAIL_USER,
@@ -80,7 +81,7 @@ export async function POST(request) {
     // Send an error response
     return NextResponse.json(
       { success: false, message: "Failed to send emails" },
-      { status: 500 }
-    );
-  }
+      { status: 500 }
+    );
+  }
 }

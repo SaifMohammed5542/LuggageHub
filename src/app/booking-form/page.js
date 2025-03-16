@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
-import '../../../public/ALL CSS/spinner.css';
+import '../../../public/ALL CSS/spinner.css'
 import Header from "../../components/Header.js";
+import PayPalPayment from "../../components/checkoutbutton.js";
 
 const LuggageBookingForm = () => {
   const [formData, setFormData] = useState({
@@ -21,24 +22,24 @@ const LuggageBookingForm = () => {
   const [errors, setErrors] = useState({}); // Track validation errors
   const [isLoading, setIsLoading] = useState(false); // Track loading state
 
-  // const ratePerLuggagePerDay = 7.99; // Price per luggage per day
+  const ratePerLuggagePerDay = 7.99; // Price per luggage per day
 
   // Function to calculate the number of days
-  // const calculateNumberOfDays = () => {
-  //   if (!formData.dropOffDate || !formData.pickUpDate) return 1; 
+  const calculateNumberOfDays = () => {
+    if (!formData.dropOffDate || !formData.pickUpDate) return 1; // Default to 1 day if dates are empty
 
-  //   const dropOff = new Date(formData.dropOffDate);
-  //   const pickUp = new Date(formData.pickUpDate);
-  //   const differenceInMs = pickUp - dropOff; 
+    const dropOff = new Date(formData.dropOffDate);
+    const pickUp = new Date(formData.pickUpDate);
+    const differenceInMs = pickUp - dropOff; // Time difference in milliseconds
 
-  //   const numberOfDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
+    const numberOfDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24)); // Convert to full days
 
-  //   return numberOfDays;
-  // };
+    return numberOfDays;
+  };
 
   // Calculate total amount dynamically
-  // const numberOfDays = calculateNumberOfDays();
-  // const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
+  const numberOfDays = calculateNumberOfDays();
+  const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -84,19 +85,24 @@ const LuggageBookingForm = () => {
     // Update errors and form validity
     setErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
+
+    // Debugging logs
+    console.log("Form Data:", JSON.stringify(formData, null, 2)); // Show full form data
+    console.log("Errors:", JSON.stringify(errors, null, 2)); // Show full errors
+    console.log("Is Form Valid:", Object.keys(errors).length === 0);
   }, [formData]);
 
-  // Handle booking confirmation
-  const handleConfirmBooking = async () => {
+  // Handle payment success
+  const handlePaymentSuccess = async (paymentId) => {
     setIsLoading(true); // Start loading
     try {
-      // Send booking email after confirmation
+      // Send booking email after payment is completed
       const response = await fetch("/api/booking", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...formData }),
+        body: JSON.stringify({ ...formData, paymentId }),
       });
 
       // Check if the response is OK
@@ -191,7 +197,11 @@ const LuggageBookingForm = () => {
                   value={formData.pickUpDate}
                   onChange={handleChange}
                   required
-                  min={formData.dropOffDate ? new Date(new Date(formData.dropOffDate).getTime() + 60 * 60 * 1000).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)}
+                  min={
+                    formData.dropOffDate
+                      ? new Date(new Date(formData.dropOffDate).getTime() + 60 * 60 * 1000).toISOString().slice(0, 16)
+                      : new Date().toISOString().slice(0, 16)
+                  }
                 />
                 {errors.pickUpDate && <span className="error">{errors.pickUpDate}</span>}
               </div>
@@ -237,16 +247,18 @@ const LuggageBookingForm = () => {
             </div>
           </form>
 
-          {/* Simple Confirm Booking Button */}
+          {/* Render PayPal button or loading spinner */}
           {isLoading ? (
             <div className="loading-spinner">
               <div className="spinner"></div>
               <p>Processing your booking...</p>
             </div>
           ) : isFormValid ? (
-            <button onClick={handleConfirmBooking} disabled={isLoading}>
-              Confirm Booking
-            </button>
+            <PayPalPayment
+              totalAmount={totalAmount}
+              onPaymentSuccess={handlePaymentSuccess}
+              disabled={isLoading} // Disable the button when loading
+            />
           ) : (
             <p className="error">Please fill out all required fields and agree to the terms to continue.</p>
           )}
