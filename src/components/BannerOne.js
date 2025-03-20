@@ -85,6 +85,10 @@ function BannerOne() {
                         Low-Cost, High-Security Luggage Solutions
                     </p>
                     <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Now!</button>
+                    <link
+                        rel="stylesheet"
+                        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+                    />
                     <FindLocHere destination={"EzyMArt, Melbourne"} />
                 </div>
                 <div className="image-content">

@@ -44,8 +44,8 @@ function App() {
       {/* <MapButton /> */}
         <Rotatingtext />
       {/* <MapWithDirections origin="someOriginValue" /> */}
-      <Cards2 howItWorksRef={howItWorksRef} />
       <Amount />
+      <Cards2 howItWorksRef={howItWorksRef} />
       <Locations />
       {/* <Banerrr /> */}
       <Cards servicesRef={servicesRef} />

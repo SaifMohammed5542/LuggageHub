@@ -3,6 +3,7 @@
     overflow: hidden; /* Hide overflow */
     white-space: nowrap; /* Prevent text wrapping */
     position: relative;
+    margin: 2% 0;
   }
   
   .marquee {

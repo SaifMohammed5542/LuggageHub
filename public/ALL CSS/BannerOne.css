@@ -728,7 +728,7 @@
 
 .cta-btn.neon-glow:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 25px rgba(255, 111, 97, 0.8);
+  box-shadow: 0 0 25px gray;
 }
 
 /* Image Content Styling */
@@ -848,7 +848,7 @@
 
 @media (max-width: 576px) {
   #home.hero {
-    height: 75vh;
+    min-height: 75vh;
     align-items: flex-start;
     padding: 0;
     padding-top: 20px;
@@ -856,6 +856,11 @@
   .hero-content {
     padding: 0;
   }
+
+  .text-content {
+    padding-bottom: 5%;
+  }
+
   .text-content h2 {
       font-size: 1.8rem;
   }
@@ -878,8 +883,13 @@
 @media (max-width: 400px) {
 
   #home.hero {
-    height: 75vh;
+    min-height: 75vh;
   }
+
+  .text-content {
+    padding-bottom: 5%;
+  }
+
   .text-content h2 {
       font-size: 1.8rem;
   }

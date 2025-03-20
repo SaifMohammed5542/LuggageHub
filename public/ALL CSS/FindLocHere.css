@@ -25,14 +25,25 @@
     background-color: white;
     width: calc(100% - 2px); 
     position: relative;
-    z-index: 10;
+    z-index: 999;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
+  .suggestions li::before {
+    content: "\f3c5"; /* Unicode for Font Awesome location icon */
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; /* Ensures it uses the solid version */
+    margin-right: 8px; /* Adjust spacing */
+    color: #555; /* Change the color if needed */
+}
+
+
+
   .suggestions li {
     padding: 10px;
     cursor: pointer;
     font-size: 16px;
+    text-align: left;
   }
   
   .suggestions li:hover {
