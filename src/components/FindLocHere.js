@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import '../../public/ALL CSS/FindLocHere.css';
 
 const FindLocHere = ({ destination }) => {
