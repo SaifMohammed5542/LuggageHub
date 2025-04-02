@@ -234,14 +234,14 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     setUsername(null);
-    router.push("/auth/login"); // Redirect to login after logout
+    router.push("/auth/login");
   };
 
   const handleScroll = (scrollFunction) => {
     if (scrollFunction) {
       scrollFunction();
     }
-    setIsMenuOpen(false); // Close the menu after clicking a link
+    setIsMenuOpen(false);
   };
 
   return (
@@ -252,6 +252,8 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
             <Image src="/images/licon.png" alt="Logo" width={500} height={300} />
           </a>
         </div>
+        
+        {/* Desktop Menu */}
         <div className={`menu ${isMenuOpen ? "open" : ""}`}>
           <ul>
             <li>
@@ -281,24 +283,26 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
                 Services
               </a>
             </li>
-            {username ? (
-  <>
-    <li className="username">Welcome, {username}</li>
-    <li>
-      <button className="logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
-    </li>
-  </>
-) : (
-  <li>
-    <Link href="/auth/login" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-      Login
-    </Link>
-  </li>
-)}
           </ul>
         </div>
+        
+        {/* Auth State - Always Visible */}
+        <div className="auth-state">
+          {username ? (
+            <>
+              <span className="username">Welcome, {username}</span>
+              <button className="logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link href="/auth/login" className="login-btn">
+              Login
+            </Link>
+          )}
+        </div>
+        
+        {/* Mobile Hamburger */}
         <div className="hamburger" onClick={toggleMenu}>
           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
