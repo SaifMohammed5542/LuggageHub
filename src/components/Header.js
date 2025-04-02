@@ -119,17 +119,122 @@
 
 // export default Header;
 
-"use client"
-import React, { useState } from "react";
-import Image from 'next/image';
-import Link from 'next/link';
+
+
+
+
+
+// {"use client"
+// import React, { useState } from "react";
+// import Image from 'next/image';
+// import Link from 'next/link';
+// import "../../public/ALL CSS/Header.css";
+
+// function Header({ scrollToServices, scrollTohowItWorks}) {
+//   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+//   const toggleMenu = () => {
+//     setIsMenuOpen(!isMenuOpen);
+//   };
+
+//   const handleScroll = (scrollFunction) => {
+//     if (scrollFunction) {
+//       scrollFunction();
+//     }
+//     setIsMenuOpen(false); // Close the menu after clicking a link
+//   };
+
+//   return (
+//     <nav>
+//       <div className="wrapper">
+//         <div className="logo">
+//           <a href="/">
+//             <Image src="/images/licon.png" alt="Logo" width={500} height={300} />
+//           </a>
+//         </div>
+//         <div className={`menu ${isMenuOpen ? "open" : ""}`}>
+//           <ul>
+//             <li>
+//               <Link href="/" onClick={() => setIsMenuOpen(false)}>
+//                 Home
+//               </Link>
+//             </li>
+//             {/* <li>
+//               <a
+//                 href="#"
+//                 onClick={(e) => {
+//                   e.preventDefault();
+//                   handleScroll(scrollTohowItWorks);
+//                 }}
+//               >
+//                 Pricing
+//               </a>
+//             </li> */}
+//             <li>
+//               <a
+//                 href="#"
+//                 onClick={(e) => {
+//                   e.preventDefault();
+//                   handleScroll(scrollTohowItWorks);
+//                 }}
+//               >
+//                 How it Works
+//               </a>
+//             </li>
+//             <li>
+//               <a
+//                 href="#"
+//                 onClick={(e) => {
+//                   e.preventDefault();
+//                   handleScroll(scrollToServices);
+//                 }}
+//               >
+//                 Services
+//               </a>
+//             </li>
+//           </ul>
+//         </div>
+//         <div className="hamburger" onClick={toggleMenu}>
+//           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+//           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+//           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
+//         </div>
+//       </div>
+//     </nav>
+//   );
+// }
+
+// export default Header;}
+
+
+"use client";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import "../../public/ALL CSS/Header.css";
 
-function Header({ scrollToServices, scrollTohowItWorks}) {
+function Header({ scrollToServices, scrollTohowItWorks }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [username, setUsername] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    if (storedUser) {
+      setUsername(storedUser);
+    }
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    setUsername(null);
+    router.push("/auth/login"); // Redirect to login after logout
   };
 
   const handleScroll = (scrollFunction) => {
@@ -154,17 +259,6 @@ function Header({ scrollToServices, scrollTohowItWorks}) {
                 Home
               </Link>
             </li>
-            {/* <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(scrollTohowItWorks);
-                }}
-              >
-                Pricing
-              </a>
-            </li> */}
             <li>
               <a
                 href="#"
@@ -187,6 +281,22 @@ function Header({ scrollToServices, scrollTohowItWorks}) {
                 Services
               </a>
             </li>
+            {username ? (
+              <>
+                <li className="username">Welcome, {username}</li>
+                <li>
+                  <button className="logout-btn" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
+                  Login
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
         <div className="hamburger" onClick={toggleMenu}>
