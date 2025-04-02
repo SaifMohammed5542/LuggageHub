@@ -1,0 +1,189 @@
+.loginPage {
+    min-height: 60vh;
+    display: flex;
+    align-items:baseline;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 1rem;
+    padding-top: 3rem;
+  }
+  
+  .loginContainer {
+    width: 100%;
+    max-width: 500px;
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    margin: 1rem;
+  }
+  
+  .loginContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .loginTitle {
+    text-align: center;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  
+  .loginForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  
+  .inputGroup label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: clamp(1rem, 3vw, 1.1rem);
+  }
+  
+  .loginInput {
+    padding: clamp(0.8rem, 3vw, 1rem);
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    transition: all 0.3s ease;
+  }
+  
+  .loginInput:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  }
+  
+  .loginButton {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: clamp(0.8rem, 3vw, 1rem);
+    border: none;
+    border-radius: 8px;
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+  }
+  
+  .loginButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  .registerLink {
+    text-align: center;
+    margin-top: 2rem;
+    color: #718096;
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+  }
+  
+  .registerLink a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+  }
+  
+  .registerLink a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: currentColor;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .registerLink a:hover::after {
+    transform: scaleX(1);
+  }
+  
+  .orDivider {
+    display: flex;
+    align-items: center;
+    margin: 1.2rem 0;
+    color: #a0aec0;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+  }
+  
+  .orDivider::before,
+  .orDivider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 0 0.8rem;
+  }
+
+  /* All the same styles from login.css will apply */
+/* Only adding specific register page adjustments */
+
+.registerContainer .loginForm {
+    gap: 1.8rem; /* Slightly more gap for the extra field */
+  }
+  
+  .passwordHint {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    .registerContainer .loginForm {
+      gap: 1.5rem;
+    }
+  }
+  
+  /* Mobile-specific adjustments */
+  @media (max-width: 480px) {
+    .loginContainer {
+      padding: 1.8rem;
+      border-radius: 12px;
+    }
+    
+    .loginForm {
+      gap: 1.2rem;
+    }
+    
+    .loginButton {
+      margin-top: 0.3rem;
+    }
+    
+    .registerLink {
+      margin-top: 1.5rem;
+    }
+  }
+  
+  /* Very small devices (e.g., iPhone SE) */
+  @media (max-width: 320px) {
+    .loginContainer {
+      padding: 1.5rem;
+      margin: 0.5rem;
+    }
+    
+    .loginTitle {
+      margin-bottom: 1.2rem;
+    }
+  }

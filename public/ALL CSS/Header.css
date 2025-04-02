@@ -107,6 +107,91 @@ nav {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
+
+/* Username Display */
+.username {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.5rem;
+  /* padding: 0.5rem 1rem; */
+  border-radius: 6px;
+  /* background-color: rgba(79, 70, 229, 0.1); */
+  /* margin-right: 0.5rem; */
+  display: flex;
+  align-items: center;
+}
+
+/* Logout Button */
+.logout-btn {
+  background: #f43f5e;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.logout-btn:hover {
+  background: #e11d48;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(244, 63, 94, 0.2);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Login Link */
+.nav-link {
+  color: #4f46e5;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-link:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: #4338ca;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .username {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    justify-content: center;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem;
+  }
+  
+  .nav-link {
+    text-align: center;
+    padding: 0.6rem;
+  }
+}
+
+/* Icon Support (if you want to add icons later) */
+.logout-btn svg,
+.nav-link svg {
+  width: 1em;
+  height: 1em;
+}
+
+
+
 /* Responsive design for smaller screens */
 /* Add this to your existing CSS */
 

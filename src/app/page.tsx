@@ -1,5 +1,6 @@
 "use client"
 import React, { useRef, useEffect } from 'react';
+import Head from 'next/head';
 import "../../public/ALL CSS/Page.css"
 import Header from '../components/Header.js';
 import BannerOne from '../components/BannerOne.js';
@@ -36,6 +37,18 @@ function App() {
 
   return (
     <>
+    <Head>
+        <title>Luggage Storage Online | Safe & Secure in Australia</title>
+        <meta
+          name="keywords"
+          content="luggage storage online, luggage storage australia, luggage storage melbourne, secure luggage storage, travel storage solutions, baggage storage services"
+        />
+        <meta
+          name="description"
+          content="Find reliable and secure luggage storage in Australia, including Melbourne. Book online and store your bags safely while you travel."
+        />
+      </Head>
+
       <div className='Holder'>
       <Header scrollToServices={() => scrollToSection("services")} scrollTohowItWorks={() => scrollToSection("howItWorks")} />
       <BannerOne />

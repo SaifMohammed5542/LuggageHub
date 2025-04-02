@@ -282,21 +282,21 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
               </a>
             </li>
             {username ? (
-              <>
-                <li className="username">Welcome, {username}</li>
-                <li>
-                  <button className="logout-btn" onClick={handleLogout}>
-                    Logout
-                  </button>
-                </li>
-              </>
-            ) : (
-              <li>
-                <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
-                  Login
-                </Link>
-              </li>
-            )}
+  <>
+    <li className="username">Welcome, {username}</li>
+    <li>
+      <button className="logout-btn" onClick={handleLogout}>
+        Logout
+      </button>
+    </li>
+  </>
+) : (
+  <li>
+    <Link href="/auth/login" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+      Login
+    </Link>
+  </li>
+)}
           </ul>
         </div>
         <div className="hamburger" onClick={toggleMenu}>

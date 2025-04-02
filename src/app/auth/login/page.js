@@ -1,6 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Header from "../../../components/Header";
+import Footer from "../../../components/Footer";
+import "../../../../public/ALL CSS/Login.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,22 +24,55 @@ export default function LoginPage() {
 
     if (res.ok) {
       const data = await res.json();
-      localStorage.setItem("token", data.token); // Store JWT
-      localStorage.setItem("username", data.username); // Store username
-      localStorage.setItem("email", data.email); // ✅ Now stores email
-      router.push("/"); // Redirect to homepage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("email", data.email);
+      router.push("/");
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
-        <button type="submit">Login</button>
-      </form>
-      <p>Don't have an account? <a href="/auth/register">Register</a></p>
+    <>
+    <Header />
+    <div className="loginPage">
+      <div className="loginContainer">
+        <h1 className="loginTitle">Welcome Back</h1>
+        <form onSubmit={handleSubmit} className="loginForm">
+          <div className="inputGroup">
+            <label htmlFor="email">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              onChange={handleChange}
+              required
+              className="loginInput"
+            />
+          </div>
+          <div className="inputGroup">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              onChange={handleChange}
+              required
+              className="loginInput"
+            />
+          </div>
+          <button type="submit" className="loginButton">
+            Sign In
+          </button>
+        </form>
+        <div className="orDivider">or</div>
+        <p className="registerLink">
+          New here? <a href="/auth/register">Create an account</a>
+        </p>
+      </div>
     </div>
+    <Footer />
+    </>
   );
 }
