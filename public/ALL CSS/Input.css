@@ -14,7 +14,7 @@
 .booking-container {
   width: 100%;
   max-width: 600px;
-  background: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+  background: rgba(33, 233, 100, 0.596); /* Semi-transparent white */
   backdrop-filter: blur(10px); /* Glassmorphism effect */
   padding: 40px;
   border-radius: 12px;
