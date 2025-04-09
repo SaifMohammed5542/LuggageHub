@@ -32,13 +32,14 @@ export function middleware(req) {
       }
 
       return NextResponse.next();
-    } catch (err) {
+    } catch (error) { // Changed 'err' to 'error' for consistency
+      console.error("JWT Verification Error (API Middleware):", error);
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
   }
 
-  // ✅ 2. Protect /dashboard route for admin only
-  if (pathname.startsWith('/dashboard')) {
+  // ✅ 2. Protect /dashboard and /admin/dashboard routes for admin only
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin/dashboard')) {
     if (!token) {
       return NextResponse.redirect(new URL('/auth/login', req.url));
     }
@@ -48,8 +49,8 @@ export function middleware(req) {
       if (decoded.role !== 'admin') {
         return NextResponse.redirect(new URL('/auth/login', req.url));
       }
-    } catch (err) {
-      console.error('JWT verification failed:', err);
+    } catch (error) { // Changed 'err' to 'error' for consistency
+      console.error('JWT verification failed (Route Middleware):', error);
       return NextResponse.redirect(new URL('/auth/login', req.url));
     }
   }
@@ -59,5 +60,5 @@ export function middleware(req) {
 
 // ✅ This makes sure the middleware only runs on the right pages
 export const config = {
-  matcher: ['/api/:path*', '/dashboard/:path*'],
+  matcher: ['/api/:path*', '/dashboard/:path*', '/admin/dashboard/:path*'], // Added /admin/dashboard/:path*
 };

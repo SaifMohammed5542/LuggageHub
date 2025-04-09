@@ -10,15 +10,12 @@ export default function PartnerDashboard() {
   const [station, setStation] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [partnerName, setPartnerName] = useState('');
-  const [bookings, setBookings] = useState([
-    { id: 1, customer: 'Alice', luggageCount: 2, dropOff: '2025-04-05', pickUp: '2025-04-06', status: 'Confirmed' },
-    { id: 2, customer: 'Bob', luggageCount: 1, dropOff: '2025-04-06', pickUp: '2025-04-08', status: 'Pending' },
-  ]);
+  const [bookings, setBookings] = useState([]); // Initialize as an empty array
 
   const router = useRouter();
 
   useEffect(() => {
-    const fetchStation = async () => {
+    const fetchPartnerData = async () => {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       const role = localStorage.getItem('role');
@@ -38,25 +35,42 @@ export default function PartnerDashboard() {
       setPartnerName(decoded.username);
 
       try {
-        const res = await fetch(`/api/partner/${userId}/station`, {
+        // Fetch assigned station
+        const stationRes = await fetch(`/api/partner/${userId}/station`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        const data = await res.json();
+        const stationData = await stationRes.json();
 
-        if (res.ok) {
-          setStation(data.station);
+        if (stationRes.ok) {
+          setStation(stationData.station);
         } else {
-          console.error('Failed to fetch station', data.error);
+          console.error('Failed to fetch station', stationData.error);
         }
+
+        // Fetch bookings for the partner's station
+        const bookingsRes = await fetch(`/api/partner/${userId}/bookings`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const bookingsData = await bookingsRes.json();
+
+        if (bookingsRes.ok) {
+          setBookings(bookingsData.bookings || []);
+        } else {
+          console.error('Failed to fetch bookings', bookingsData.error);
+        }
+
       } catch (err) {
         console.error('Fetch error:', err);
       }
     };
 
-    fetchStation();
+    fetchPartnerData();
   }, [router]);
 
   if (!isAuthorized) {
@@ -64,51 +78,50 @@ export default function PartnerDashboard() {
   }
 
   return (
-
     <>
-    <Header />
+      <Header />
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <h1>Welcome, {partnerName}</h1>
+          <button
+            className="logout-btn"
+            onClick={() => {
+              localStorage.clear();
+              router.push('/login');
+            }}
+          >
+            Logout
+          </button>
+        </header>
 
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>Welcome, {partnerName}</h1>
-        <button
-          className="logout-btn"
-          onClick={() => {
-            localStorage.clear();
-            router.push('/login');
-          }}
-        >
-          Logout
-        </button>
-      </header>
-
-      <section className="station-card">
-        <h2>Your Assigned Station</h2>
-        {station ? (
-          <div className="station-info">
-            <p><strong>Name:</strong> {station.name}</p>
-            <p><strong>Location:</strong> {station.location}</p>
-          </div>
-        ) : (
-          <p>Loading station info...</p>
-        )}
-      </section>
-
-      <section className="bookings-section">
-        <h2>Recent Bookings</h2>
-        <div className="bookings-box">
-          {bookings.map((booking) => (
-            <div key={booking.id} className="booking-row">
-              <div><strong>{booking.customer}</strong></div>
-              <div>Luggage: {booking.luggageCount}</div>
-              <div>Drop-off: {booking.dropOff}</div>
-              <div>Pick-up: {booking.pickUp}</div>
-              <div className={`status-badge ${booking.status.toLowerCase()}`}>{booking.status}</div>
+        <section className="station-card">
+          <h2>Your Assigned Station</h2>
+          {station ? (
+            <div className="station-info">
+              <p><strong>Name:</strong> {station.name}</p>
+              <p><strong>Location:</strong> {station.location}</p>
             </div>
-          ))}
-        </div>
-      </section>
-    </div>
+          ) : (
+            <p>Loading station info...</p>
+          )}
+        </section>
+
+        <section className="bookings-section">
+          <h2>Recent Bookings</h2>
+          <div className="bookings-box">
+            {bookings.map((booking) => (
+              <div key={booking._id} className="booking-row">
+                <div><strong>{booking.fullName}</strong></div> {/* Assuming booking has fullName */}
+                <div>Luggage: {booking.luggageCount}</div>
+                <div>Drop-off: {booking.dropOffDate}</div> {/* Assuming booking has dropOffDate */}
+                <div>Pick-up: {booking.pickUpDate}</div> {/* Assuming booking has pickUpDate */}
+                <div className={`status-badge ${booking.status?.toLowerCase()}`}>{booking.status}</div> {/* Assuming booking has status */}
+              </div>
+            ))}
+            {bookings.length === 0 && <p>No bookings found for your station.</p>}
+          </div>
+        </section>
+      </div>
     </>
   );
 }

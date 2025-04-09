@@ -16,7 +16,8 @@ export async function GET(req) {
     jwt.verify(token, process.env.JWT_SECRET);
     const stations = await Station.find();
     return NextResponse.json({ stations });
-  } catch (error) {
+  } catch (err) { // Changed 'error' to 'err' to be consistent and potentially used
+    console.error("JWT Verification Error:", err); // Added logging for debugging
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
 }
