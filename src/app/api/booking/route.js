@@ -1,30 +1,32 @@
-// app/api/booking/route.js
+// /app/api/booking/route.js
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
-
-
 export async function POST(request) {
   try {
-    const { fullName, email, phone, dropOffDate, pickUpDate, luggageCount, specialInstructions, paymentId } =
-      await request.json();
+    const {
+      fullName,
+      email,
+      phone,
+      dropOffDate,
+      pickUpDate,
+      luggageCount,
+      specialInstructions,
+      paymentId,
+      stationId,
+    } = await request.json();
 
-    // Create a Nodemailer transporter
     const transporter = nodemailer.createTransport({
-      service: "gmail", // Use your email service
+      service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // Your email address
-        pass: process.env.EMAIL_PASS, // Your email password or app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-
-
-    
-    // Email content for admin
     const adminMailOptions = {
       from: process.env.EMAIL_USER,
-      to: "luggage5542@gmail.com", // Your email address
+      to: "luggage5542@gmail.com",
       subject: "New Luggage Storage Booking",
       text: `
         New Booking Details:
@@ -37,13 +39,13 @@ export async function POST(request) {
         Luggage Count: ${luggageCount}
         Special Instructions: ${specialInstructions}
         Payment ID: ${paymentId}
+        Station ID: ${stationId}
       `,
     };
 
-    // Email content for user
     const userMailOptions = {
       from: process.env.EMAIL_USER,
-      to: email, // User's email address
+      to: email,
       subject: "Your Luggage Storage Booking Confirmation",
       text: `
         Dear ${fullName},
@@ -58,6 +60,7 @@ export async function POST(request) {
         Luggage Count: ${luggageCount}
         Special Instructions: ${specialInstructions}
         Payment ID: ${paymentId}
+        Station ID: ${stationId}
 
         If you have any questions, feel free to contact us.
 
@@ -66,22 +69,18 @@ export async function POST(request) {
       `,
     };
 
-    // Send the emails
     await transporter.sendMail(adminMailOptions);
     await transporter.sendMail(userMailOptions);
 
-    // Send a success response
     return NextResponse.json(
       { success: true, message: "Emails sent successfully" },
       { status: 200 }
     );
   } catch (error) {
     console.error("Error sending email:", error);
-
-    // Send an error response
     return NextResponse.json(
       { success: false, message: "Failed to send emails" },
-      { status: 500 }
-    );
-  }
+      { status: 500 }
+    );
+  }
 }

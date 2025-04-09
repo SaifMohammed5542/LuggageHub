@@ -217,13 +217,14 @@ import "../../public/ALL CSS/Header.css";
 function Header({ scrollToServices, scrollTohowItWorks }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [username, setUsername] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("username");
-    if (storedUser) {
-      setUsername(storedUser);
-    }
+    const storedRole = localStorage.getItem("role");
+    setUsername(storedUser);
+    setUserRole(storedRole);
   }, []);
 
   const toggleMenu = () => {
@@ -233,7 +234,9 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    localStorage.removeItem("role"); // Clear the role on logout
     setUsername(null);
+    setUserRole(null);
     router.push("/auth/login");
   };
 
@@ -248,11 +251,11 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
     <nav>
       <div className="wrapper">
         <div className="logo">
-          <a href="/">
+          <Link href="/">
             <Image src="/images/licon.png" alt="Logo" width={500} height={300} />
-          </a>
+          </Link>
         </div>
-        
+
         {/* Desktop Menu */}
         <div className={`menu ${isMenuOpen ? "open" : ""}`}>
           <ul>
@@ -283,9 +286,23 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
                 Services
               </a>
             </li>
+            {userRole === 'admin' && (
+              <li>
+                <Link href="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
+                  Dashboard
+                </Link>
+              </li>
+            )}
+            {userRole === 'partner' && (
+              <li>
+                <Link href="/partner/dashboard" onClick={() => setIsMenuOpen(false)}>
+                  Dashboard
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
-        
+
         {/* Auth State - Always Visible */}
         <div className="auth-state">
           {username ? (
@@ -301,7 +318,7 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
             </Link>
           )}
         </div>
-        
+
         {/* Mobile Hamburger */}
         <div className="hamburger" onClick={toggleMenu}>
           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
@@ -309,6 +326,52 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {/* <div className={`mobile-menu ${isMenuOpen ? "open" : ""}`}>
+        <ul>
+          <li>
+            <Link href="/" onClick={toggleMenu}>
+              Home
+            </Link>
+          </li>
+          <li>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleScroll(scrollTohowItWorks); toggleMenu(); }}>
+              How it Works
+            </a>
+          </li>
+          <li>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleScroll(scrollToServices); toggleMenu(); }}>
+              Services
+            </a>
+          </li>
+          {userRole === 'admin' && (
+            <li>
+              <Link href="/admin/dashboard" onClick={toggleMenu}>
+                Dashboard
+              </Link>
+            </li>
+          )}
+          {userRole === 'partner' && (
+            <li>
+              <Link href="/partner/dashboard" onClick={toggleMenu}>
+                Dashboard
+              </Link>
+            </li>
+          )}
+          <li>
+            {username ? (
+              <button className="logout-btn mobile-logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            ) : (
+              <Link href="/auth/login" onClick={toggleMenu}>
+                Login
+              </Link>
+            )}
+          </li>
+        </ul>
+      </div> */}
     </nav>
   );
 }

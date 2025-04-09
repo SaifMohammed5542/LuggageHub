@@ -1,0 +1,113 @@
+.admin-dashboard {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: auto;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f4f7fa;
+    color: #333;
+  }
+  
+  .admin-title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+  }
+  
+  .admin-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+  }
+  
+  .admin-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: #34495e;
+  }
+  
+  .admin-form select {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background-color: #fafafa; /* same as inputs */
+    color: #333; /* text color */
+    font-size: 1rem;
+    appearance: none; /* removes native arrow styles */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20fill%3D'%23333'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%20width%3D'24'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M7%2010l5%205%205-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+  }
+
+  .admin-form input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background-color: #fafafa;
+    font-size: 1rem;
+    transition: border 0.2s ease;
+  }
+  
+  .admin-form input:focus,
+  .admin-form select:focus {
+    border-color: #3498db;
+    background-color: white;
+    outline: none;
+  }
+  
+  .admin-form button {
+    background-color: #3498db;
+    color: white;
+    padding: 0.75rem 1.2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+  
+  .admin-form button:hover {
+    background-color: #2980b9;
+  }
+
+
+  .booking-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .booking-card {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  
+  @media (max-width: 768px) {
+    .admin-form input,
+    .admin-form select,
+    .admin-form button {
+      font-size: 0.95rem;
+    }
+  }
+  

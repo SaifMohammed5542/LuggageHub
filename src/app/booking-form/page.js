@@ -1,3 +1,4 @@
+// /app/booking-form/page.js
 "use client";
 import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
@@ -16,8 +17,10 @@ const LuggageBookingForm = () => {
     luggageSize: "Small",
     specialInstructions: "",
     termsAccepted: false,
+    stationId: "",
   });
 
+  const [stations, setStations] = useState([]);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +43,28 @@ const LuggageBookingForm = () => {
       }));
       setIsUserLoggedIn(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch("/api/station/list", {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setStations(data.stations);
+      } catch (error) {
+        console.error("Failed to fetch stations:", error);
+      }
+    };
+
+    fetchStations();
   }, []);
 
   const calculateNumberOfDays = () => {
@@ -79,13 +104,15 @@ const LuggageBookingForm = () => {
     if (!formData.dropOffDate) errors.dropOffDate = "Drop-off Date is required";
     if (!formData.pickUpDate) errors.pickUpDate = "Pick-up Date is required";
     if (!formData.termsAccepted) errors.termsAccepted = "You must agree to the terms";
+    if (!formData.stationId) errors.stationId = "Please select a station";
 
     if (formData.dropOffDate && formData.pickUpDate) {
       const dropOff = new Date(formData.dropOffDate);
       const pickUp = new Date(formData.pickUpDate);
       const timeDifferenceInHours = (pickUp - dropOff) / (1000 * 60 * 60);
       if (timeDifferenceInHours < 1) {
-        errors.pickUpDate = "Pick-up time must be at least 1 hour after drop-off time.";
+        errors.pickUpDate =
+          "Pick-up time must be at least 1 hour after drop-off time.";
       }
     }
 
@@ -216,6 +243,25 @@ const LuggageBookingForm = () => {
                 />
                 {errors.pickUpDate && <span className="error">{errors.pickUpDate}</span>}
               </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="stationId">📍 Select Station:</label>
+              <select
+                id="stationId"
+                name="stationId"
+                value={formData.stationId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select a Station --</option>
+                {stations.map((station) => (
+                  <option key={station._id} value={station._id}>
+                    {station.name} ({station.location})
+                  </option>
+                ))}
+              </select>
+              {errors.stationId && <span className="error">{errors.stationId}</span>}
             </div>
 
             <div className="checkbox-container">

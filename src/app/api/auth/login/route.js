@@ -22,9 +22,13 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // ✅ Now includes email in the response
     const token = jwt.sign(
-      { userId: user._id, username: user.username, role: user.role },
+      {
+        userId: user._id,
+        username: user.username,
+        role: user.role,
+        assignedStation: user.assignedStation || null
+      },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -33,9 +37,11 @@ export async function POST(req) {
       {
         message: 'Login successful',
         token,
+        userId: user._id, // ✅ Include userId in the response
         username: user.username,
-        email: user.email, // Include email in the response
+        email: user.email,
         role: user.role,
+        assignedStation: user.assignedStation || null
       },
       { status: 200 }
     );

@@ -1,12 +1,16 @@
-// models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true }, // Add the email field here
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  role: { type: String, enum: ['user', 'admin', 'partner'], default: 'user' },
+  assignedStation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Station',
+    default: null
+  }
 });
 
 userSchema.pre('save', async function (next) {

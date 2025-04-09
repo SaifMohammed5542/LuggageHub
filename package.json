@@ -19,6 +19,7 @@
     "@stripe/react-stripe-js": "^3.4.0",
     "@stripe/stripe-js": "^6.0.0",
     "axios": "^1.8.4",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "firebase": "^11.5.0",
     "jsonwebtoken": "^9.0.2",
