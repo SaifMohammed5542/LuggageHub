@@ -92,7 +92,7 @@ function BannerOne() {
                     <FindLocHere destination={"EzyMArt, Melbourne"} />
                 </div>
                 <div className="image-content">
-                    <Image src="/images/night.jpg" alt="luggage storage" width={500} height={300} className="glowing-image" />
+                    <Image src="/images/Lone bag.png" alt="luggage storage" width={500} height={300} className="glowing-image" />
                 </div>
             </div>
         </section>

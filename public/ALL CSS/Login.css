@@ -50,6 +50,10 @@
     flex-direction: column;
     gap: 0.6rem;
   }
+
+  .inputGroup input{
+    color: #297abd;
+  }
   
   .inputGroup label {
     font-weight: 600;

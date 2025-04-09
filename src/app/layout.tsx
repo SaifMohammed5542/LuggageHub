@@ -36,6 +36,10 @@ import type { Metadata } from "next"; // Import metadata type for typing the met
 import { Geist, Geist_Mono } from "next/font/google"; // Import Google Fonts using next/font
 import "./globals.css"; // Import global CSS for consistent styling
 
+
+<link rel="icon" href="/favicon.ico" />
+
+
 // Define font configurations with variables for easy reference in styles
 const geistSans = Geist({
   variable: "--font-geist-sans",

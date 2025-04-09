@@ -42,7 +42,7 @@ function BannerTwo() {
         <section id="home" className="hero">
             <div className="hero-content">
                 <div className="text-content">
-                    <h2>Be Hands-free with your Luggage in just <br/>3 taps!</h2>
+                    <h2>Be Hands-free with your Luggage in just 3 taps!</h2>
                     <p>
                         Let us Handle your burden
                     </p>
@@ -50,7 +50,7 @@ function BannerTwo() {
                     {/* <FindLocHere destination={"EzyMArt, Melbourne"} /> */}
                 </div>
                 <div className="image-content">
-                    <Image src="/images/travel.jpg" alt="luggage storage" width={500} height={300} className="glowing-image" />
+                    <Image src="/images/night.jpg" alt="luggage storage" width={500} height={300} className="glowing-image" />
                 </div>
             </div>
         </section>

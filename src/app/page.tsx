@@ -19,6 +19,9 @@ import Amount from '../components/Amount'
 // import MapWithDirections from "../components/Map.js";
 // import MapButton from "../components/MapButton"
 
+<link rel="icon" href="/favicon.ico" />
+
+
 function App() {
   
   useEffect(() => {
