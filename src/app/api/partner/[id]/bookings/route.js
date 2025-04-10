@@ -27,8 +27,8 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: 'Station not found' }, { status: 404 });
     }
 
-    // Fetch all bookings for this station
-    const bookings = await Booking.find({ station: station._id }).sort({ createdAt: -1 });
+    // ✅ CORRECT FIELD NAME USED HERE
+    const bookings = await Booking.find({ stationId: station._id }).sort({ createdAt: -1 });
 
     return NextResponse.json({ bookings });
   } catch (err) {

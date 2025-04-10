@@ -1,9 +1,13 @@
 // /app/api/booking/route.js
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import dbConnect from "../../../lib/dbConnect";
+import Booking from "../../../models/booking";
 
 export async function POST(request) {
   try {
+    await dbConnect(); // Connect to MongoDB
+
     const {
       fullName,
       email,
@@ -14,8 +18,27 @@ export async function POST(request) {
       specialInstructions,
       paymentId,
       stationId,
+      userId, // optional if logged-in user is provided
     } = await request.json();
 
+    // ✅ Save the booking in MongoDB
+    const newBooking = new Booking({
+      fullName,
+      email,
+      phone,
+      dropOffDate,
+      pickUpDate,
+      luggageCount,
+      specialInstructions,
+      paymentId,
+      stationId,
+      userId,
+      status: "confirmed",
+    });
+
+    await newBooking.save();
+
+    // ✅ Email setup
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -73,13 +96,13 @@ export async function POST(request) {
     await transporter.sendMail(userMailOptions);
 
     return NextResponse.json(
-      { success: true, message: "Emails sent successfully" },
+      { success: true, message: "Booking saved and emails sent" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Booking Error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to send emails" },
+      { success: false, message: "Something went wrong" },
       { status: 500 }
     );
   }
