@@ -1,7 +1,7 @@
-import dbConnect from '../../../../lib/dbConnect';
-import Booking from '../../../../models/booking';
-import User from '../../../../models/User';
-import { verifyJWT } from '../../../../lib/auth';
+import dbConnect from '../../../../../lib/dbConnect';
+import Booking from '../../../../../models/booking';
+import User from '../../../../../models/User';
+import { verifyJWT } from '../../../../../lib/auth'; // ✅ import the helper
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
