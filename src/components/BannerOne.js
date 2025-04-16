@@ -1,102 +1,117 @@
-"use client"
-// import { useRouter } from "next/navigation";
-// import "../../public/ALL CSS/BannerOne.css"
-// import FindLocHere from '../components/FindLocHere.js' 
-// import "../../public/images/pexels-vlada-karpovich-7368312.jpg"
-// import "../../public/ALL CSS/Locate.css"
-// import Locate from "../components/Locate.js"
-// import Image from 'next/image';
-
-
-
-// function BannerOne() {
-// 	const router = useRouter();
-//     return (
-//         <>
-//         <section id="home" className="welcome-hero">
-// 			<div className="hero-container">
-// 				<div className="welcome-hero-txt">
-// 					<h2>Where your <span>luggage</span> rests,<br/> so you can roam</h2>
-// 					<p>
-// 						Convenient, secure, and affordable luggage storage, 
-// 						so you can explore freely without the burden of heavy bags. Book your spot in seconds and enjoy a hassle-free journey!
-// 					</p>
-// 					<button className="welcome-btn" onClick={() => router.push("/booking-form")}>Book Now!</button>
-// 					{/* <FindLocHere destination={"EzyMart, Melbourne"} /> */}
-// 				</div>
-// 				<div className="welcome-hero-img">
-// 					<Image src="/images/suit.jpg" alt="welcome-hero-img"  width={500} height={300}/>
-// 				</div>
-// 				{/* <div className="Locate">
-//             		<button onClick={() => router.push("/Location") }>Find the nearest Storage!</button>
-//         		</div> */}
-// 			</div>
-// 		</section>
-//         </>
-//     );
-// };
-// export default BannerOne;
-
-/**cherck */
-
-// "use client"
-// import { useRouter } from "next/navigation";
-// import Image from 'next/image';
-// import "../../public/ALL CSS/BannerOne.css";
-
-// function BannerOne() {
-//     const router = useRouter();
-//     return (
-//         <section id="home" className="hero">
-//             <div className="hero-content">
-//                 <div className="text-content">
-//                     <h2>Discover Stress-Free Luggage Storage</h2>
-//                     <p>
-//                         Convenient, secure, and affordable luggage storage, so you can roam freely. 
-//                         Book a spot with ease and enjoy your journey unburdened.
-//                     </p>
-//                     <button className="cta-btn" onClick={() => router.push("/booking-form")}>Book Now!</button>
-//                 </div>
-//                 <div className="image-content">
-//                     <Image src="/images/suit.jpg" alt="luggage storage" width={500} height={300} />
-//                 </div>
-//             </div>
-//         </section>
-//     );
-// }
-
-// export default BannerOne;
-
-
 "use client";
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
+import { useState } from "react";
 import FindLocHere from "../components/FindLocHere";
-import "../../public/ALL CSS/BannerOne.css";
+import "../../public/ALL CSS/BannerTwo.css";
 
 function BannerOne() {
-    const router = useRouter();
-    return (
-        <section id="home" className="hero">
-            <div className="hero-content">
-                <div className="text-content">
-                    <h2>Travel Light, Store Right!</h2>
-                    <p>
-                        Find Secure Luggage Storage Near You
-                    </p>
-                    <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Now!</button>
-                    <link
-                        rel="stylesheet"
-                        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-                    />
-                    <FindLocHere destination={"EzyMArt, Melbourne"} />
-                </div>
-                <div className="image-content">
-                    <Image src="/images/Lone bag.png" alt="luggage storage" width={500} height={300} className="glowing-image" />
-                </div>
+  const router = useRouter();
+  const [stations, setStations] = useState([]);  // State to store stations data
+  const [loading, setLoading] = useState(false); // State to track loading state
+  const [showStations, setShowStations] = useState(false); // State to toggle station list visibility
+
+  const findNearestStorage = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLoading(true);  // Set loading to true while fetching
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        const res = await fetch('/api/station/nearest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ latitude, longitude })
+        });
+
+        const data = await res.json();
+        console.log("Nearest Storages:", data);  // Log the stations found
+
+        if (data.length > 0) {
+          setStations(data);  // Store stations in state
+          setShowStations(true);  // Show stations list
+        } else {
+          alert("No nearby stations found.");
+        }
+
+      } catch (error) {
+        console.error("Error fetching nearest stations:", error);
+        alert("Error fetching nearest stations");
+      } finally {
+        setLoading(false);  // Set loading to false after request completes
+      }
+    }, () => {
+      alert("Unable to retrieve your location");
+      setLoading(false);  // Set loading to false if geolocation fails
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+  };
+
+  const handleStationClick = (station) => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+      const origin = `${position.coords.latitude},${position.coords.longitude}`;
+      const destination = `${station.coordinates.coordinates[1]},${station.coordinates.coordinates[0]}`;
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+      window.open(mapsUrl, '_blank');
+    }, () => {
+      alert("Unable to fetch your current location for directions.");
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+  };
+
+  return (
+    <section id="home" className="hero">
+      <div className="hero-content">
+        <div className="text-content">
+          <h2>Travel Light, Store Right!</h2>
+          <p>Find Secure Luggage Storage Near You</p>
+          <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Now!</button>
+
+          <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          />
+
+          {/* <FindLocHere destination={"EzyMart, Melbourne"} /> */}
+          <br/>
+          <button className="nearbtn" onClick={findNearestStorage}>Find Nearest Storage</button>
+
+          {/* Loading State */}
+          {loading && <p>Loading nearest stations...</p>}
+
+          {/* Display Stations */}
+          {showStations && stations.length > 0 && (
+            <div className="station-list">
+              <h3>Nearest Storage Locations:</h3>
+              <ul>
+                {stations.map((station, index) => (
+                  <li key={index}>
+                    <strong>{station.name}</strong> - {station.location}
+                    <br />
+                    <button onClick={() => handleStationClick(station)} className="directions-btn">
+                      View Directions
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-        </section>
-    );
+          )}
+        </div>
+
+        <div className="image-content">
+          <Image src="/images/Lone bag.png" alt="luggage storage" width={500} height={300} className="glowing-image" />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default BannerOne;
