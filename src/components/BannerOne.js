@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import { useState } from "react";
-import FindLocHere from "../components/FindLocHere";
+// import FindLocHere from "../components/FindLocHere";
 import "../../public/ALL CSS/BannerTwo.css";
 
 function BannerOne() {
