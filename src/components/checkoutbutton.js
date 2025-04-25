@@ -4,7 +4,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess }) => {
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": "AWliQ4kjwXlFVh18OJKUgGhurn7xFqoQOgn9GVDJYJK_yb_xCy2LDP4osowL0f4iuWO669oR1mYHzdSD",
+        "client-id": "Aboo23AYFeclfVf1t3LP7pa-jMK55lgOiUK5ngc1CmEb0fWh7G55DxwckrCxxoqvBNVPsWuWvO5sZc9o",
         currency: "AUD",
         locale: "en_AU" // Currency for the transaction
       }}

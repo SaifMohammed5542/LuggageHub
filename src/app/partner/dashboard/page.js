@@ -10,8 +10,8 @@ export default function PartnerDashboard() {
   const [station, setStation] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [partnerName, setPartnerName] = useState('');
-  const [bookings, setBookings] = useState([]); // Initialize as an empty array
-
+  const [bookings, setBookings] = useState([]);
+  const [handovers, setHandovers] = useState([]);      // ← new state
   const router = useRouter();
 
   useEffect(() => {
@@ -37,34 +37,25 @@ export default function PartnerDashboard() {
       try {
         // Fetch assigned station
         const stationRes = await fetch(`/api/partner/${userId}/station`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const stationData = await stationRes.json();
+        if (stationRes.ok) setStation(stationData.station);
 
-        if (stationRes.ok) {
-          setStation(stationData.station);
-        } else {
-          console.error('Failed to fetch station', stationData.error);
-        }
-
-        // Fetch bookings for the partner's station
+        // Fetch bookings
         const bookingsRes = await fetch(`/api/partner/${userId}/bookings`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const bookingsData = await bookingsRes.json();
+        if (bookingsRes.ok) setBookings(bookingsData.bookings || []);
 
-        if (bookingsRes.ok) {
-          setBookings(bookingsData.bookings || []);
-        } else {
-          console.error('Failed to fetch bookings', bookingsData.error);
-        }
-
+        // Fetch key handovers
+        const hoRes = await fetch(`/api/partner/${userId}/key-handovers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const hoData = await hoRes.json();
+        if (hoRes.ok) setHandovers(hoData.handovers || []);
+        else console.error('Failed to fetch key handovers', hoData.message);
       } catch (err) {
         console.error('Fetch error:', err);
       }
@@ -73,13 +64,12 @@ export default function PartnerDashboard() {
     fetchPartnerData();
   }, [router]);
 
-  if (!isAuthorized) {
-    return <p>Checking access...</p>;
-  }
+  if (!isAuthorized) return <p>Checking access...</p>;
 
   return (
     <>
       <Header />
+
       <div className="dashboard-container">
         <header className="dashboard-header">
           <h1>Welcome, {partnerName}</h1>
@@ -109,16 +99,42 @@ export default function PartnerDashboard() {
         <section className="bookings-section">
           <h2>Recent Bookings</h2>
           <div className="bookings-box">
-            {bookings.map((booking) => (
-              <div key={booking._id} className="booking-row">
-                <div><strong>{booking.fullName}</strong></div> {/* Assuming booking has fullName */}
-                <div>Luggage: {booking.luggageCount}</div>
-                <div>Drop-off: {booking.dropOffDate}</div> {/* Assuming booking has dropOffDate */}
-                <div>Pick-up: {booking.pickUpDate}</div> {/* Assuming booking has pickUpDate */}
-                <div className={`status-badge ${booking.status?.toLowerCase()}`}>{booking.status}</div> {/* Assuming booking has status */}
-              </div>
-            ))}
-            {bookings.length === 0 && <p>No bookings found for your station.</p>}
+            {bookings.length > 0 ? (
+              bookings.map((booking) => (
+                <div key={booking._id} className="booking-row">
+                  <div><strong>{booking.fullName}</strong></div>
+                  <div>Luggage: {booking.luggageCount}</div>
+                  <div>Drop-off: {booking.dropOffDate}</div>
+                  <div>Pick-up: {booking.pickUpDate}</div>
+                  <div className={`status-badge ${booking.status?.toLowerCase()}`}>
+                    {booking.status}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No bookings found for your station.</p>
+            )}
+          </div>
+        </section>
+
+        {/* ─────────── New Key Handovers Section ─────────── */}
+        <section className="handovers-section">
+          <h2>Key Handovers</h2>
+          <div className="handovers-box">
+            {handovers.length > 0 ? (
+              handovers.map((h) => (
+                <div key={h._id} className="handover-row">
+                  <div><strong>Drop-off:</strong> {h.dropOffPerson?.name}</div>
+                  <div><strong>Pick-up:</strong> {h.pickUpPerson?.name}</div>
+                  <div><strong>Drop-off Date:</strong> {new Date(h.dropOffDate).toLocaleDateString()}</div>
+                  <div><strong>Pick-up Date:</strong> {new Date(h.pickUpDate).toLocaleDateString()}</div>
+                  <div><strong>Code:</strong> <code>{h.keyCode}</code></div>
+                  <div className={`status-badge ${h.status}`}>{h.status}</div>
+                </div>
+              ))
+            ) : (
+              <p>No key handovers found for your station.</p>
+            )}
           </div>
         </section>
       </div>

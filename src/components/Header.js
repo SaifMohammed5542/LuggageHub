@@ -206,7 +206,6 @@
 
 // export default Header;}
 
-
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -286,6 +285,14 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
                 Services
               </a>
             </li>
+
+            {/* ✅ New Navigation Link */}
+            <li>
+              <Link href="/key-handover" onClick={() => setIsMenuOpen(false)}>
+                Book Now
+              </Link>
+            </li>
+
             {userRole === 'admin' && (
               <li>
                 <Link href="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
@@ -326,6 +333,11 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
           <div className={`bar ${isMenuOpen ? "open" : ""}`}></div>
         </div>
       </div>
+    </nav>
+  );
+}
+
+export default Header;
 
       {/* Mobile Menu */}
       {/* <div className={`mobile-menu ${isMenuOpen ? "open" : ""}`}>
@@ -372,8 +384,8 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
           </li>
         </ul>
       </div> */}
-    </nav>
-  );
-}
+//     </nav>
+//   );
+// }
 
-export default Header;
+// export default Header;
