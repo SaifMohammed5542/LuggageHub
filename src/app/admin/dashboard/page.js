@@ -18,9 +18,14 @@ export default function AdminDashboard() {
   });
   const [stations, setStations] = useState([]);
   const [token, setToken] = useState('');
+
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [bookingError, setBookingError] = useState('');
+
+  const [keyHandovers, setKeyHandovers] = useState([]);
+  const [loadingKeys, setLoadingKeys] = useState(true);
+  const [keyError, setKeyError] = useState('');
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -31,31 +36,25 @@ export default function AdminDashboard() {
       setUserRole('admin');
       fetchStations(storedToken);
       fetchBookings(storedToken);
+      fetchKeyHandovers(storedToken); // ✅ added
     } else {
-      // Redirect to homepage if not an admin or no token
       router.push('/');
     }
   }, [router]);
 
   const fetchStations = async (authToken) => {
     const res = await fetch('/api/station/list', {
-      headers: {
-        Authorization: `Bearer ${authToken}`
-      }
+      headers: { Authorization: `Bearer ${authToken}` }
     });
     const data = await res.json();
-    if (res.ok) {
-      setStations(data.stations);
-    }
+    if (res.ok) setStations(data.stations);
   };
 
   const fetchBookings = async (authToken) => {
     setLoadingBookings(true);
     try {
       const res = await fetch('/api/admin/bookings', {
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
+        headers: { Authorization: `Bearer ${authToken}` }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch bookings');
@@ -64,6 +63,22 @@ export default function AdminDashboard() {
       setBookingError(err.message);
     } finally {
       setLoadingBookings(false);
+    }
+  };
+
+  const fetchKeyHandovers = async (authToken) => {
+    setLoadingKeys(true);
+    try {
+      const res = await fetch('/api/admin/key-handovers', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch key handovers');
+      setKeyHandovers(data.handovers || []);
+    } catch (err) {
+      setKeyError(err.message);
+    } finally {
+      setLoadingKeys(false);
     }
   };
 
@@ -112,9 +127,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (userRole !== 'admin') {
-    return null; // Or render an "Unauthorized" message here
-  }
+  if (userRole !== 'admin') return null;
 
   return (
     <>
@@ -197,6 +210,32 @@ export default function AdminDashboard() {
                   <p><strong>Station:</strong> {booking.stationId?.name || 'N/A'}</p>
                   <p><strong>Payment ID:</strong> {booking.paymentId}</p>
                   <p><strong>Instructions:</strong> {booking.specialInstructions || '-'}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ✅ View Key Handovers Section */}
+        <div className="admin-section">
+          <h2>All Key Handovers</h2>
+          {loadingKeys ? (
+            <p>Loading key handovers...</p>
+          ) : keyError ? (
+            <p className="error">{keyError}</p>
+          ) : keyHandovers.length === 0 ? (
+            <p>No key handovers found.</p>
+          ) : (
+            <div className="booking-grid">
+              {keyHandovers.map((handover) => (
+                <div key={handover._id} className="booking-card">
+                  <p><strong>Name:</strong> {handover.fullName}</p>
+                  <p><strong>Email:</strong> {handover.email}</p>
+                  <p><strong>Phone:</strong> {handover.phone}</p>
+                  <p><strong>Handover Date:</strong> {handover.handoverDate}</p>
+                  <p><strong>Pickup Date:</strong> {handover.pickupDate}</p>
+                  <p><strong>Station:</strong> {handover.stationId?.name || 'N/A'}</p>
+                  <p><strong>Instructions:</strong> {handover.specialInstructions || '-'}</p>
                 </div>
               ))}
             </div>
