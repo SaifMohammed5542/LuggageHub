@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '../../../../lib/dbConnect';
 import KeyHandover from '../../../../models/keyHandover';
-import Station from '../../../../models/Station';  // Ensure Station model is registered
+import '../../../../models/Station';  // Ensure Station model is registered
 import { verifyJWT } from '../../../../lib/auth';
 
 export async function GET(req) {
@@ -33,6 +33,8 @@ export async function GET(req) {
     console.log(`📦 [key-handovers] fetched ${handovers.length} records`);
 
     // 4) Return
+    console.log(JSON.stringify(handovers, null, 2));
+
     return NextResponse.json({ success: true, handovers });
 
   } catch (err) {

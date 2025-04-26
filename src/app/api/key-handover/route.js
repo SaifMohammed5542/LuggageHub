@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "../../../lib/dbConnect";
 import KeyHandover from "../../../models/keyHandover";
 import Station from "../../../models/Station";
-import User from "../../../models/User"; // <-- 🔥 You forgot this import
+import "../../../models/User"; // <-- 🔥 You forgot this import
 import nodemailer from "nodemailer";
 
 export async function POST(request) {
