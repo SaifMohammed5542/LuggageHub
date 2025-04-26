@@ -312,18 +312,19 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
         {/* Auth State - Always Visible */}
         <div className="auth-state">
           {username ? (
-            <>
-              <span className="username">Welcome, {username}</span>
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
-            </>
+          <div className="user-info">
+            <span className="username">Welcome, {username}</span>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
           ) : (
-            <Link href="/auth/login" className="login-btn">
-              Login
-            </Link>
-          )}
-        </div>
+    <Link href="/auth/login" className="login-btn">
+      Login
+    </Link>
+  )}
+</div>
+
 
         {/* Mobile Hamburger */}
         <div className="hamburger" onClick={toggleMenu}>

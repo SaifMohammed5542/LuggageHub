@@ -86,6 +86,15 @@ nav {
   gap: 1rem;
 }
 
+/* New addition */
+.auth-state .user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px; /* small space between Welcome text and Logout button */
+}
+
+
 .username {
   color: #ffffff;
   font-weight: 600;
@@ -182,6 +191,14 @@ nav {
 
 
 /* Mobile Responsiveness */
+
+@media (max-width: 870px) {
+  .menu ul li a {
+    font-size: 0.8rem;
+  }
+}
+
+
 @media (max-width: 768px) {
   .wrapper {
     padding: 0 1rem;
@@ -254,6 +271,25 @@ nav {
     max-width: 80px; /* Adjust logo size for smaller screens */
   }
 }
+@media (max-width: 535px) {
+  .key-drop-link a {
+    font-size: 0.9rem; /* Adjust font size if needed */
+    padding: 0.4rem 0.4rem;
+  }
+}
+
+
+@media (max-width: 435px) {
+
+  .key-drop-link a {
+    font-size: 0.6rem; /* Adjust font size if needed */
+    padding: 0.4rem 0.4rem;
+  }
+  nav {
+    padding: 1rem 0.5rem;
+  }
+}
+
 
 /* Very small screens */
 @media (max-width: 480px) {
@@ -263,7 +299,7 @@ nav {
 
   .key-drop-link a {
     font-size: 0.9rem; /* Adjust font size if needed */
-    padding: 0.4rem 0.8rem;
+    padding: 0.4rem 0.4rem;
   }
 
   .auth-state {
@@ -281,12 +317,15 @@ nav {
   }
   
 }
-@media (max-width: 480px) {
+@media (max-width: 403px) {
   .key-drop-link a {
     font-size: 0.8rem; /* Adjust font size if needed */
-    padding: 0.4rem 0.8rem;
+    padding: 0.4rem 0.4rem;
   }
   .logo img {
     max-width: 80px; /* Adjust logo size for smaller screens */
+  }
+  nav {
+    padding: 1rem 0.5rem;
   }
 }
