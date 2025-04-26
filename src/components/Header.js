@@ -285,14 +285,6 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
                 Services
               </a>
             </li>
-
-            {/* ✅ New Navigation Link */}
-            <li>
-              <Link href="/key-handover" onClick={() => setIsMenuOpen(false)}>
-                Drop Your Key 🔑
-              </Link>
-            </li>
-
             {userRole === 'admin' && (
               <li>
                 <Link href="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
@@ -308,6 +300,13 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
               </li>
             )}
           </ul>
+        </div>
+
+        {/* ✅ "Drop Your Key 🔑" - Moved outside the menu */}
+        <div className="key-drop-link">
+          <Link href="/key-handover">
+            Drop Your Key 🔑
+          </Link>
         </div>
 
         {/* Auth State - Always Visible */}

@@ -69,6 +69,12 @@ function BannerOne() {
 
   return (
     <section id="home" className="hero">
+      {/* Background Video */}
+      <video className="background-video" autoPlay muted loop playsInline>
+
+        <source src="/Videos/walkvid.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+          </video>
       <div className="hero-content">
         <div className="text-content">
           <h2>Travel Light, Store Right!</h2>

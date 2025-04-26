@@ -1,6 +1,6 @@
 /* Base Styles */
 nav {
-  background-color: #235789;
+  background-color: #4595ca;
   padding: 1rem 2rem;
   position: sticky;
   top: 0;
@@ -50,7 +50,7 @@ nav {
 .menu ul li a {
   text-decoration: none;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   transition: color 0.3s ease, opacity 0.3s ease;
   opacity: 0.8;
@@ -112,7 +112,7 @@ nav {
 }
 
 .login-btn {
-  background: #4f46e5;
+  background: #1fcb6a;
   color: white;
   border: none;
   padding: 0.5rem 1.5rem;
@@ -157,10 +157,60 @@ nav {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
+.key-drop-link {
+  display: flex;
+  align-items: center;
+}
+
+.key-drop-link a {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease, opacity 0.3s ease;
+  opacity: 0.8;
+  padding: 0.5rem 1rem; /* Add some padding for better touch target */
+  border-radius: 6px; /* Optional: Add some rounded corners */
+  background-color: rgba(255, 255, 255, 0.1); /* Optional: Add a subtle background */
+}
+
+.key-drop-link a:hover {
+  color: #00ff88;
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2); /* Optional: Slightly darken on hover */
+}
+
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .wrapper {
     padding: 0 1rem;
+    display: grid; /* Use grid for more flexible layout */
+    grid-template-columns: auto 1fr auto auto; /* Define grid columns */
+    align-items: center;
+  }
+
+  .logo {
+    grid-column: 1 / 2; /* Logo in the first column */
+  }
+
+  .key-drop-link {
+    grid-column: 2 / 3; /* Key drop link in the second column (centered) */
+    justify-self: center; /* Center the key drop link within its column */
+  }
+
+  .auth-state {
+    grid-column: 3 / 4; /* Auth state in the third column */
+    justify-self: end; /* Align to the end of its column */
+    padding-right: 0.5rem; /* Add some right padding */
+  }
+
+  .hamburger {
+    display: flex; /* Make sure hamburger is visible */
+    grid-column: 4 / 5; /* Hamburger in the fourth column */
+    justify-self: end; /* Align to the end of its column */
+    margin-left: 1rem; /* Add some space from the login button */
+    order: 3; /* Ensure it appears after the logo and key */
   }
 
   .menu {
@@ -169,7 +219,7 @@ nav {
     left: 0;
     width: 100%;
     height: 100vh;
-    background-color: #235789;
+    background-color: #4595ca;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -195,34 +245,48 @@ nav {
     padding: 0.5rem 1rem;
   }
 
-  .hamburger {
-    display: flex;
-    order: 3; /* Position after auth state */
-  }
-
-  .auth-state {
-    order: 2; /* Position between logo and hamburger */
-    margin-left: auto;
-    padding-right: 1rem;
-  }
-
- 
-
   .logout-btn,
   .login-btn {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
+  .logo img {
+    max-width: 80px; /* Adjust logo size for smaller screens */
+  }
 }
 
 /* Very small screens */
 @media (max-width: 480px) {
-  .auth-state {
-    gap: 0.5rem;
+  .wrapper {
+    padding: 0; /* Adjust padding for smaller screens */
   }
-  
+
+  .key-drop-link a {
+    font-size: 0.9rem; /* Adjust font size if needed */
+    padding: 0.4rem 0.8rem;
+  }
+
+  .auth-state {
+    margin-left: 0.5rem; /* Adjust spacing */
+    padding-right: 0.2rem;
+  }
+
+  .hamburger {
+    margin-left: 0.5rem; /* Adjust spacing */
+  }
+
   .logout-btn,
   .login-btn {
     padding: 0.4rem 0.8rem;
+  }
+  
+}
+@media (max-width: 480px) {
+  .key-drop-link a {
+    font-size: 0.8rem; /* Adjust font size if needed */
+    padding: 0.4rem 0.8rem;
+  }
+  .logo img {
+    max-width: 80px; /* Adjust logo size for smaller screens */
   }
 }
