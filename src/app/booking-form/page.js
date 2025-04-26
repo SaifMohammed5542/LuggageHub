@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
 import "../../../public/ALL CSS/spinner.css";
 import Header from "../../components/Header.js";
-import PayPalPayment from "../../components/checkoutbutton.js";
+import PayPalPayment from "../../components/LuggagePay.js";
 
 const LuggageBookingForm = () => {
   const [formData, setFormData] = useState({
