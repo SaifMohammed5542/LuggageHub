@@ -1,3 +1,4 @@
+//app/admin/dashboard/page.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -234,7 +235,7 @@ export default function AdminDashboard() {
                   <p><strong>Phone:</strong> {handover.phone}</p>
                   <p><strong>Handover Date:</strong> {handover.handoverDate}</p>
                   <p><strong>Pickup Date:</strong> {handover.pickupDate}</p>
-                  <p><strong>Station:</strong> {handover.stationId?.name || 'N/A'}</p>
+                  <p><strong>Station:</strong> {handover.station?.name || 'N/A'}</p>
                   <p><strong>Instructions:</strong> {handover.specialInstructions || '-'}</p>
                 </div>
               ))}

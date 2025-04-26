@@ -9,7 +9,6 @@ export async function GET(req, { params }) {
   const { id: userId } = params;
 
   try {
-    // Fix: match `partner` field in Station schema
     const station = await Station.findOne({ partner: userId });
     if (!station) {
       return NextResponse.json(
@@ -18,7 +17,7 @@ export async function GET(req, { params }) {
       );
     }
 
-    const handovers = await KeyHandover.find({ stationId: station._id }).sort({
+    const handovers = await KeyHandover.find({ station: station._id }).sort({
       dropOffDate: -1,
     });
 

@@ -1,7 +1,9 @@
+// app/api/key-handover/route.js
 import { NextResponse } from "next/server";
 import dbConnect from "../../../lib/dbConnect";
 import KeyHandover from "../../../models/keyHandover";
 import Station from "../../../models/Station";
+import User from "../../../models/User"; // <-- 🔥 You forgot this import
 import nodemailer from "nodemailer";
 
 export async function POST(request) {
@@ -17,7 +19,6 @@ export async function POST(request) {
       stationId,
     } = reqBody;
 
-    // Normalize drop-off and pick-up details
     const dropOffName = dropOffPerson?.name || "No Name";
     const dropOffEmail = dropOffPerson?.email || null;
     const pickUpName = pickUpPerson?.name || "No Name";
@@ -34,17 +35,15 @@ export async function POST(request) {
     const partnerEmail = station.partner?.email;
     const keyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save the key handover details with keyCode
     const newHandover = await KeyHandover.create({
       dropOffPerson: { name: dropOffName, email: dropOffEmail },
       pickUpPerson: { name: pickUpName, email: pickUpEmail },
       dropOffDate,
       pickUpDate,
-      keyCode,  // Change this from handoverCode to keyCode
+      keyCode,
       station: stationId,
     });
 
-    // Setup Nodemailer transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -55,7 +54,6 @@ export async function POST(request) {
 
     const stationInfo = `${station.name} - ${station.location}`;
 
-    // Email to drop-off person (if email provided)
     if (dropOffEmail) {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -66,7 +64,7 @@ Hi ${dropOffName},
 
 Your key has been dropped off at ${stationInfo}.
 Pickup Date: ${pickUpDate}
-Your pickup code: ${keyCode}  // Use keyCode here
+Your pickup code: ${keyCode}
 
 Pickup Person: ${pickUpName} (${pickUpEmail || "no email provided"})
 
@@ -75,7 +73,6 @@ Thank you!
       });
     }
 
-    // Email to pick-up person (if email provided)
     if (pickUpEmail) {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -86,7 +83,7 @@ Hi ${pickUpName},
 
 A key is waiting for you at ${stationInfo}.
 Pickup Date: ${pickUpDate}
-Your pickup code: ${keyCode}  // Use keyCode here
+Your pickup code: ${keyCode}
 
 Dropped off by: ${dropOffName} (${dropOffEmail || "no email provided"})
 
@@ -95,7 +92,6 @@ Thank you!
       });
     }
 
-    // Email to station partner (if partner email exists)
     if (partnerEmail) {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -110,7 +106,7 @@ A new key handover has been scheduled at ${stationInfo}:
 • Pick-up:  ${pickUpName} (${pickUpEmail || "no email provided"})
 • Drop-off Date: ${dropOffDate}
 • Pick-up Date: ${pickUpDate}
-• Code: ${keyCode}  // Use keyCode here
+• Code: ${keyCode}
 
 Please verify the code when the pickup person arrives.
 

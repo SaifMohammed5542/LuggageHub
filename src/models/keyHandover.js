@@ -1,26 +1,31 @@
+// models/keyHandover.js
 import mongoose from 'mongoose';
 
 const keyHandoverSchema = new mongoose.Schema({
   dropOffPerson: {
     name: String,
-    email: String
+    email: String,
   },
   pickUpPerson: {
     name: String,
-    email: String
+    email: String,
   },
   dropOffDate: Date,
   pickUpDate: Date,
-  stationId: {
+  station: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Station'
+    ref: 'Station',
+    required: true,
   },
-  keyCode: String,  // Unique generated code for this handover
+  keyCode: {
+    type: String,
+    required: true,
+  },
   status: {
     type: String,
     enum: ['pending', 'picked-up'],
-    default: 'pending'
-  }
+    default: 'pending',
+  },
 }, { timestamps: true });
 
 export default mongoose.models.KeyHandover || mongoose.model('KeyHandover', keyHandoverSchema);
