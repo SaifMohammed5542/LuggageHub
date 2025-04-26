@@ -117,6 +117,12 @@ select.form-input {
   margin-top: 20px;
 }
 
+.total-amount{
+  color: #3498db;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {

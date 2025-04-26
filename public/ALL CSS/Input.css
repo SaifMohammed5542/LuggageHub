@@ -5,7 +5,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
+  padding: 10px;
   background: linear-gradient(135deg, #667eea, #764ba2); /* Gradient background */
   color: #fff; /* White text for contrast */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -16,7 +16,7 @@
   max-width: 600px;
   background: rgba(33, 233, 100, 0.596); /* Semi-transparent white */
   backdrop-filter: blur(10px); /* Glassmorphism effect */
-  padding: 40px;
+  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
@@ -71,8 +71,10 @@ textarea {
 
 .checkbox-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
   margin-top: 15px;
+  font-size: 0.8rem;
 }
 
 .checkbox-container input {
@@ -87,7 +89,7 @@ textarea {
 }
 
 .total-amount {
-  text-align: center;
+  text-align: left;
   font-size: 1.4rem;
   font-weight: 600;
   margin: 35px 0;
@@ -133,6 +135,6 @@ textarea {
     grid-template-columns: 1fr;
   }
   .booking-container {
-    padding: 30px;
+    padding: 10px;
   }
 }

@@ -1,7 +1,6 @@
 /* Base Styles */
 nav {
-  background-color: #4595ca;
-  padding: 1rem 2rem;
+  background: linear-gradient(to right, #1a8eb5, #22b1c4); /* Light Blue to Powder Blue */  padding: 1rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;

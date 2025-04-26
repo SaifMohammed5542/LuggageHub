@@ -303,9 +303,9 @@ const LuggageBookingForm = () => {
                   required
                 />
                 <label htmlFor="termsAccepted">I agree to the terms and conditions</label>
-                {errors.termsAccepted && (
+                {/* {errors.termsAccepted && (
                   <span className="error">{errors.termsAccepted}</span>
-                )}
+                )} */}
               </div>
             </div>
           </form>

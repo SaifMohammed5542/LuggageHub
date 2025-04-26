@@ -21,10 +21,10 @@ export default function KeyHandoverForm() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
-  const [paymentAmount, setPaymentAmount] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState("3.00"); // Default amount
   const [pendingFormData, setPendingFormData] = useState(null);
 
-  const today = new Date().toISOString().split("T")[0]; // Today's date in yyyy-mm-dd
+  const today = new Date().toISOString().split("T")[0]; // Today's date in YYYY-MM-DD
 
   useEffect(() => {
     async function loadStations() {
@@ -40,6 +40,26 @@ export default function KeyHandoverForm() {
     }
     loadStations();
   }, []);
+
+  useEffect(() => {
+    // Calculate amount whenever drop-off or pick-up date changes
+    if (formData.dropOffDate && formData.pickUpDate) {
+      const dropDate = new Date(formData.dropOffDate);
+      const pickDate = new Date(formData.pickUpDate);
+
+      // Ensure pick-up date is after drop-off date
+      if (pickDate > dropDate) {
+        const timeDiff = pickDate.getTime() - dropDate.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const amount = daysDiff * 3;
+        setPaymentAmount(amount.toFixed(2));
+      } else {
+        setPaymentAmount("3.00"); // Reset to default if dates are invalid
+      }
+    } else {
+      setPaymentAmount("3.00"); // Set to default if dates are not both selected
+    }
+  }, [formData.dropOffDate, formData.pickUpDate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -73,16 +93,7 @@ export default function KeyHandoverForm() {
     }
 
     setPendingFormData(formData);
-
-    // Calculate number of days between drop-off and pick-up
-    const timeDiff = pickDate.getTime() - dropDate.getTime();
-    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-    // Amount calculation: $3 per day
-    const amount = daysDiff * 3;
-    setPaymentAmount(amount.toFixed(2));
-    setPaymentStatus("pending");
-
+    setPaymentStatus("pending"); // Payment status becomes pending upon submission
     setLoading(false);
   };
 
@@ -224,7 +235,16 @@ export default function KeyHandoverForm() {
               </select>
             </div>
 
-            <button type="submit" className="submit-button" disabled={loading || paymentStatus === "pending"}>
+            {/* Total Amount Display */}
+            <div className="total-amount">
+              Total Amount: A${paymentAmount}
+            </div>
+
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={loading || paymentStatus === "pending"}
+            >
               {loading ? "Processing…" : "Book Key Handover"}
             </button>
 
