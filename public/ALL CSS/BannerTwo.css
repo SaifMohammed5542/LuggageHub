@@ -136,14 +136,14 @@
   
   .glowing-image {
     border-radius: 15px;
-    /* box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); */
+    /* box-shadow: -2px 2px 10px rgba(255, 255, 255, 0.955); */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
-  .glowing-image:hover {
+  /* .glowing-image:hover {
     transform: scale(1.05);
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-  }
+  } */
   
   /* Animations */
   @keyframes fadeInLeft {
@@ -319,12 +319,18 @@
         font-size: 1rem;
         margin-bottom: 5%;
     }
+    .cta-btn.neon-glow::after {
+        font-size: 1rem;
+    }
     .cta-btn.neon-glow1 {
       padding: 10px 20px;
       font-size: 1rem;
       margin-bottom: 5%;
   }
-  
+  .cta-btn.neon-glow1::after {
+    font-size: 1rem;
+}
+
     .glowing-image {
         width: 400px;
         height: auto;
@@ -363,18 +369,18 @@
       padding-top: 20px;
     }
     .hero-content {
-      padding: 0;
+      padding: 2%;
     }
     .text-content h2 {
-        font-size: 2.2rem;
+        font-size: 2rem;
     }
   
     .text-content p {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
     }
   
     .cta-btn.neon-glow {
-        padding: 8px 16px;
+        padding: 8px 15px;
         font-size: 1rem;
     }
     .cta-btn.neon-glow1 {
@@ -404,10 +410,12 @@
     .cta-btn.neon-glow {
         padding: 10px 17px;
         font-size: 1rem;
+        width: 60%;
     }
     .cta-btn.neon-glow1 {
       padding: 10px 17px;
       font-size: 1rem;
+      width: 60%;
   }
   
     .glowing-image {

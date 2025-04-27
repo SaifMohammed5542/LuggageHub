@@ -113,7 +113,7 @@ function BannerOne() {
         </div>
 
         <div className="image-content">
-          <Image src="/images/Lone bag.png" alt="luggage storage" width={500} height={300} className="glowing-image" />
+          <Image src="/images/Lone bag.png" alt="luggage storage" width={550} height={300} className="glowing-image" />
         </div>
       </div>
     </section>
