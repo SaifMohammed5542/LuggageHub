@@ -18,7 +18,7 @@ const Amount = () => {
   <div className="pricing-details">
     <h3>For Key-handovers 🔑</h3>
     <div className="price-item">
-      <span className="price">3 AUD</span>
+      <span className="price">9.99 AUD</span>
       <span className="per">per day</span>
     </div>
     <p className="note">No hidden fees. Secure and hassle-free!</p>

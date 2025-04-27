@@ -79,8 +79,8 @@ function BannerOne() {
         <div className="text-content">
           <h2>Travel Light, Store Right!</h2>
           <p>Find Secure Luggage Storage Near You</p>
-          <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Now!</button>
-
+          <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Your Luggage!</button>
+          <button className="cta-btn neon-glow1" onClick={() => router.push("/key-handover")}>Drop Your Key!</button>
           <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"

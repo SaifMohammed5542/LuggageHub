@@ -303,11 +303,11 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
         </div>
 
         {/* ✅ "Drop Your Key 🔑" - Moved outside the menu */}
-        <div className="key-drop-link">
+        {/* <div className="key-drop-link">
           <Link href="/key-handover">
             Drop Your Key 🔑
           </Link>
-        </div>
+        </div> */}
 
         {/* Auth State - Always Visible */}
         <div className="auth-state">

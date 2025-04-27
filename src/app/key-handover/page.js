@@ -21,7 +21,7 @@ export default function KeyHandoverForm() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
-  const [paymentAmount, setPaymentAmount] = useState("3.00"); // Default amount
+  const [paymentAmount, setPaymentAmount] = useState("9.99"); // Default amount
   const [pendingFormData, setPendingFormData] = useState(null);
 
   const today = new Date().toISOString().split("T")[0]; // Today's date in YYYY-MM-DD
@@ -51,13 +51,13 @@ export default function KeyHandoverForm() {
       if (pickDate > dropDate) {
         const timeDiff = pickDate.getTime() - dropDate.getTime();
         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        const amount = daysDiff * 3;
+        const amount = daysDiff * 9.99;
         setPaymentAmount(amount.toFixed(2));
       } else {
-        setPaymentAmount("3.00"); // Reset to default if dates are invalid
+        setPaymentAmount("9.99"); // Reset to default if dates are invalid
       }
     } else {
-      setPaymentAmount("3.00"); // Set to default if dates are not both selected
+      setPaymentAmount("9.99"); // Set to default if dates are not both selected
     }
   }, [formData.dropOffDate, formData.pickUpDate]);
 
