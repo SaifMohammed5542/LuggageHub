@@ -2,12 +2,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 90vh;
+  min-height: 140vh;
   background-color: transparent;
   color: #034078;
   padding: 20px;
   overflow: hidden;
   position: relative;
+  margin-top: -27%
 }
 
 #home.hero::before {
@@ -42,6 +43,7 @@
     width: 100%;
     gap: 40px;
     padding: 20px;
+    margin-top: 27%;
   }
   
   /* Text Content Styling */
@@ -255,6 +257,9 @@
   
   /* Responsive Design */
   @media (max-width: 1200px) {
+    #home.hero {
+        min-height: 125vh;
+    }
     .hero-content {
         gap: 30px;
     }
@@ -286,14 +291,14 @@
   
   @media (max-width: 1050px) {
     .cta-btn.neon-glow {
-      padding: 12px 25px;
-      font-size: 1rem;
-      width: 55%;
+      padding: 12px 14px;
+      font-size: 1.3rem;
+      width: 60%;
   }
   .cta-btn.neon-glow1 {
-    padding: 12px 25px;
-    font-size: 1rem;
-    width: 55%;
+    padding: 12px 14px;
+    font-size: 1.3rem;
+    width: 60%;
 }
   }
 
@@ -316,19 +321,21 @@
   
     .cta-btn.neon-glow {
         padding: 10px 20px;
-        font-size: 1rem;
+        font-size: 1.4rem;
+        width: 65%;
         margin-bottom: 5%;
     }
     .cta-btn.neon-glow::after {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
     .cta-btn.neon-glow1 {
       padding: 10px 20px;
-      font-size: 1rem;
-      margin-bottom: 5%;
+        font-size: 1.4rem;
+        width: 65%;
+        margin-bottom: 5%;
   }
   .cta-btn.neon-glow1::after {
-    font-size: 1rem;
+    font-size: 1.2rem;
 }
 
     .glowing-image {
@@ -338,6 +345,11 @@
   }
   
   @media (max-width: 768px) {
+    #home.hero {
+        align-items: flex-start;
+        min-height: 115vh;
+    }
+
     .text-content h2 {
         font-size: 2.2rem;
     }
@@ -348,11 +360,11 @@
   
     .cta-btn.neon-glow {
         padding: 10px 18px;
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
     .cta-btn.neon-glow1 {
       padding: 10px 18px;
-      font-size: 1rem;
+      font-size: 1.2rem;
   }
   
     .glowing-image {
@@ -363,8 +375,8 @@
   
   @media (max-width: 576px) {
     #home.hero {
-      min-height: 90vh;
-      align-items: center;
+      min-height: 109vh;
+      align-items: flex-start;
       padding: 0;
       padding-top: 20px;
     }
@@ -381,11 +393,11 @@
   
     .cta-btn.neon-glow {
         padding: 8px 15px;
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
     .cta-btn.neon-glow1 {
       padding: 8px 16px;
-      font-size: 1rem;
+      font-size: 1.2rem;
   }
   
     .glowing-image {
@@ -397,7 +409,7 @@
   @media (max-width: 400px) {
   
     #home.hero {
-      min-height: 90vh;
+      min-height: 101vh;
     }
     .text-content h2 {
         font-size: 1.9rem;
@@ -408,14 +420,14 @@
     }
   
     .cta-btn.neon-glow {
-        padding: 10px 17px;
-        font-size: 1rem;
-        width: 60%;
+        padding: 10px 10px;
+        font-size: 1.2rem;
+        width: 70%;
     }
     .cta-btn.neon-glow1 {
-      padding: 10px 17px;
-      font-size: 1rem;
-      width: 60%;
+      padding: 10px 10px;
+      font-size: 1.2rem;
+      width: 70%;
   }
   
     .glowing-image {
