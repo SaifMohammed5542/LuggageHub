@@ -45,7 +45,7 @@ function App() {
         <title>Luggage Storage Online | Safe & Secure in Australia</title>
         <meta
           name="keywords"
-          content="luggage storage online, luggage storage australia, luggage storage melbourne, secure luggage storage, travel storage solutions, baggage storage services"
+          content="luggage storage online, luggage, booking, luggage booking, luggage storage australia, luggage storage melbourne, secure luggage storage, travel storage solutions, baggage storage services"
         />
         <meta
           name="description"
