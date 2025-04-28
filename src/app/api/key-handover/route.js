@@ -111,7 +111,7 @@ A new key handover has been scheduled at ${stationInfo}:
 Please verify the code when the pickup person arrives.
 
 Regards,
-Luggage Storage Online
+Luggage Terminal Team
         `,
       });
     }

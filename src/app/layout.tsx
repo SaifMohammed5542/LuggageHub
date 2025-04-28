@@ -53,7 +53,7 @@ const geistMono = Geist_Mono({
 
 // Metadata for the page, useful for SEO and browser tabs
 export const metadata: Metadata = {
-  title: "Luggage Storage Online",
+  title: "Luggage Terminal",
   description: "Store your luggage",
 };
 

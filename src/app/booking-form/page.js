@@ -147,10 +147,10 @@ const LuggageBookingForm = () => {
     <>
       <Header />
       <div className="booking-wrapper">
-      <video className="background-video" autoPlay muted loop playsInline>
+      {/* <video className="background-video" autoPlay muted loop playsInline>
         <source src="/Videos/lugvid.mp4" type="video/mp4" />
           Your browser does not support the video tag.
-      </video>
+      </video> */}
         <div className="booking-container">
           <h2 className="booking-title">📦 Luggage Storage Booking</h2>
           <form className="booking-form">

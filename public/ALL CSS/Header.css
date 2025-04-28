@@ -176,7 +176,7 @@ nav {
   color: #ffffff;
   font-size: 1rem;
   font-weight: 500;
-  transition: color 0.3s ease, opacity 0.3s ease;
+  transition: color 0.5s ease, opacity 0.3s ease;
   opacity: 0.8;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -234,9 +234,9 @@ nav {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 70%;
     height: 100vh;
-    background-color: #4595ca;
+    background: linear-gradient(to right, #1a8eb5, #22b1c4);
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -249,12 +249,21 @@ nav {
 
   .menu.open {
     transform: translateX(0);
+    animation: slideIn 0.5s ease forwards;
+  }
+  @keyframes slideIn {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 
   .menu ul {
     flex-direction: column;
     gap: 2rem;
-    text-align: center;
+    text-align: left;
   }
 
   .menu ul li a {

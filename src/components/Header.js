@@ -251,7 +251,7 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
       <div className="wrapper">
         <div className="logo">
           <Link href="/">
-            <Image src="/images/licon.png" alt="Logo" width={500} height={300} />
+            <Image src="/images/NewLogo.png" alt="Logo" width={500} height={300} />
           </Link>
         </div>
 

@@ -77,7 +77,7 @@ function BannerOne() {
           </video>
       <div className="hero-content">
         <div className="text-content">
-          <h2>Travel Light, Store Right!</h2>
+          <h2>Trusted Luggage Storage Near You.</h2>
           <p>Find Secure Luggage Storage Near You</p>
           <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Your Luggage!</button>
           <button className="cta-btn neon-glow1" onClick={() => router.push("/key-handover")}>Drop Your Key!</button>

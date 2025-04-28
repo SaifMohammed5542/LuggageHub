@@ -69,6 +69,11 @@
 }
 
 /* Text Content Styling */
+
+.single-list-topics-text {
+    margin-top: 5%;
+    /* text-align: left; */
+}
 .single-list-topics-text h2 {
     font-size: 1.5rem;
     font-weight: 600;
