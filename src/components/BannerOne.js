@@ -1,15 +1,22 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSuitcaseRolling, faKey, faMapMarkerAlt, faDirections } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
 import { useState } from "react";
-// import FindLocHere from "../components/FindLocHere";
 import "../../public/ALL CSS/BannerTwo.css";
 
 function BannerOne() {
   const router = useRouter();
-  const [stations, setStations] = useState([]);  // State to store stations data
-  const [loading, setLoading] = useState(false); // State to track loading state
-  const [showStations, setShowStations] = useState(false); // State to toggle station list visibility
+  const [stations, setStations] = useState([]);
+  const [loadingNavigation, setLoadingNavigation] = useState(false);
+  const [loadingNearest, setLoadingNearest] = useState(false);
+  const [showStations, setShowStations] = useState(false);
+
+  const handleNavigation = (path) => {
+    setLoadingNavigation(true);
+    router.push(path);
+  };
 
   const findNearestStorage = () => {
     if (!navigator.geolocation) {
@@ -17,7 +24,7 @@ function BannerOne() {
       return;
     }
 
-    setLoading(true);  // Set loading to true while fetching
+    setLoadingNearest(true);
 
     navigator.geolocation.getCurrentPosition(async (position) => {
       const { latitude, longitude } = position.coords;
@@ -30,24 +37,23 @@ function BannerOne() {
         });
 
         const data = await res.json();
-        console.log("Nearest Storages:", data);  // Log the stations found
+        console.log("Nearest Storages:", data);
 
         if (data.length > 0) {
-          setStations(data);  // Store stations in state
-          setShowStations(true);  // Show stations list
+          setStations(data);
+          setShowStations(true);
         } else {
           alert("No nearby stations found.");
         }
-
       } catch (error) {
         console.error("Error fetching nearest stations:", error);
         alert("Error fetching nearest stations");
       } finally {
-        setLoading(false);  // Set loading to false after request completes
+        setLoadingNearest(false);
       }
     }, () => {
       alert("Unable to retrieve your location");
-      setLoading(false);  // Set loading to false if geolocation fails
+      setLoadingNearest(false);
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   };
 
@@ -69,31 +75,31 @@ function BannerOne() {
 
   return (
     <section id="home" className="hero">
-      {/* Background Video */}
       <video className="background-video" autoPlay muted loop playsInline>
-
         <source src="/Videos/walkvid.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-          </video>
+        Your browser does not support the video tag.
+      </video>
+
       <div className="hero-content">
         <div className="text-content">
           <h2>Trusted Luggage Storage Near You.</h2>
           <p>Find Secure Luggage Storage Near You</p>
-          <button className="cta-btn neon-glow" onClick={() => router.push("/booking-form")}>Book Your Luggage!</button>
-          <button className="cta-btn neon-glow1" onClick={() => router.push("/key-handover")}>Drop Your Key!</button>
-          <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-          />
 
-          {/* <FindLocHere destination={"EzyMart, Melbourne"} /> */}
-          <br/>
-          <button className="nearbtn" onClick={findNearestStorage}>Find Nearest Storage</button>
+          <button className="cta-btn neon-glow" onClick={() => handleNavigation("/booking-form")}>
+            Book Your Luggage! <FontAwesomeIcon icon={faSuitcaseRolling} />
+          </button>
 
-          {/* Loading State */}
-          {loading && <p>Loading nearest stations...</p>}
+          <button className="cta-btn neon-glow1" onClick={() => handleNavigation("/key-handover")}>
+            Drop Your Key! <FontAwesomeIcon icon={faKey} />
+          </button>
 
-          {/* Display Stations */}
+          <br />
+
+          <button className="nearbtn" onClick={findNearestStorage}>
+            Find Nearest Storage <FontAwesomeIcon icon={faMapMarkerAlt} />
+            {loadingNearest && <span className="button-spinner" />}
+          </button>
+
           {showStations && stations.length > 0 && (
             <div className="station-list">
               <h3>Nearest Storage Locations:</h3>
@@ -103,7 +109,7 @@ function BannerOne() {
                     <strong>{station.name}</strong> - {station.location}
                     <br />
                     <button onClick={() => handleStationClick(station)} className="directions-btn">
-                      View Directions
+                      View Directions <FontAwesomeIcon icon={faDirections} />
                     </button>
                   </li>
                 ))}

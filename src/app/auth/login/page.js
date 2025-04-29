@@ -9,6 +9,7 @@ import "../../../../public/ALL CSS/Login.css";
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false); // Loader state
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,6 +17,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loader
 
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -23,17 +25,17 @@ export default function LoginPage() {
       body: JSON.stringify(formData),
     });
 
+    setLoading(false); // Stop loader
+
     if (res.ok) {
       const data = await res.json();
-
-      // Store all necessary info in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", data.username);
       localStorage.setItem("email", data.email);
-      localStorage.setItem("userId", data.userId);  // ✅ Store user ID
-      localStorage.setItem("role", data.role);      // ✅ Store role
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("role", data.role);
 
-      // Role-based redirection
+      // Role-based redirect
       if (data.role === "admin") {
         router.push("/admin/dashboard");
       } else if (data.role === "partner") {
@@ -78,10 +80,17 @@ export default function LoginPage() {
                 className="loginInput"
               />
             </div>
-            <button type="submit" className="loginButton">
-              Sign In
+            <button type="submit" className="loginButton" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
+
+          {loading && (
+            <div className="loader">
+              <div className="spinner"></div>
+            </div>
+          )}
+
           <div className="orDivider">or</div>
           <p className="registerLink">
             New here? <a href="/auth/register">Create an account</a>

@@ -72,6 +72,14 @@ function App() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <Head>
+        <link
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+          rel="stylesheet"
+          />
+      </Head>
+
+
       <div className='Holder'>
         <Header scrollToServices={() => scrollToSection("services")} scrollTohowItWorks={() => scrollToSection("howItWorks")} />
         <BannerOne />
