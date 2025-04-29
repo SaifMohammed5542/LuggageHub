@@ -54,7 +54,7 @@
   
   .text-content h2 {
     font-size: 3rem;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 20px;
     line-height: 1.2;
     color: #ffffff;
@@ -69,7 +69,7 @@
   
   /* CTA Button Styling */
   .cta-btn.neon-glow {
-    background-color: #4595ca;
+    background-color: #1a73e8;
     border: none;
     padding: 10px 25px;
     margin: 1.5% 0;
@@ -84,8 +84,8 @@
   }
   
   .cta-btn.neon-glow:hover {
-    /* transform: scale(1.00); */
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    background: #155dc4;
+
   }
   
   .cta-btn.neon-glow::after {
@@ -99,7 +99,7 @@
 
 
   .cta-btn.neon-glow1 {
-    background-color: #4595ca;
+    background-color: #1a73e8;
     border: none;
     padding: 10px 25px;
     margin: 1.5% 0;
@@ -114,8 +114,8 @@
   }
   
   .cta-btn.neon-glow1:hover {
-    /* transform: scale(1.00); */
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    background: #155dc4;
+
   }
   
   .cta-btn.neon-glow1::after {

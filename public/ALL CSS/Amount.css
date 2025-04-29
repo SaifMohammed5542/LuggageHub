@@ -30,7 +30,7 @@
 
   .pricing-details {
     border: 1px solid #3dbddc2e;
-    background-color: #53d3ed38;
+    background-color: #f9f9f9;
     padding: 2%;
   }
   
@@ -50,7 +50,7 @@
   .pricing-details .price-item .price {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #ff6f61;
+    color: #1e3c72;
   }
   
   .pricing-details .price-item .per {
