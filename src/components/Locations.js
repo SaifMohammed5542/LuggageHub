@@ -1,7 +1,7 @@
 "use client"
 import { useRouter } from "next/navigation";
 import "../../public/ALL CSS/Locations.css"
-import Image from 'next/image';
+// import Image from 'next/image';
 
 function Locations() {
 	const router = useRouter();
