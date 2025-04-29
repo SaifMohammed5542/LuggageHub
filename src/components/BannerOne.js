@@ -9,12 +9,10 @@ import "../../public/ALL CSS/BannerTwo.css";
 function BannerOne() {
   const router = useRouter();
   const [stations, setStations] = useState([]);
-  const [loadingNavigation, setLoadingNavigation] = useState(false);
   const [loadingNearest, setLoadingNearest] = useState(false);
   const [showStations, setShowStations] = useState(false);
 
   const handleNavigation = (path) => {
-    setLoadingNavigation(true);
     router.push(path);
   };
 
