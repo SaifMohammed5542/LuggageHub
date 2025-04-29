@@ -88,7 +88,7 @@ export async function POST(request) {
         If you have any questions, feel free to contact us.
 
         Best regards,
-        Your Luggage Storage Online Team
+        Your Luggage Terminal Team
       `,
     };
 

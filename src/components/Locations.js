@@ -11,7 +11,7 @@ function Locations() {
 			{/* <div className="container"> */}
 				<div className="list-topics-content-loc">
 					<h2 className="topper">Our Locations</h2>
-					<p>(Currently We are available at only one Location)</p>
+					{/* <p>(Currently We are available at only one Location)</p> */}
 					<ul>
 						<li>
 							<div className="single-list-topics-content-loc">
@@ -23,7 +23,11 @@ function Locations() {
 								    <button  onClick={() => router.push("/booking-form")}>Store here</button>
                                 </div>
 							</div>
+						</li>
+					</ul>
 
+					<ul>
+						<li>
 							<div className="single-list-topics-content-loc">
 								{/* <div className="single-list-topics-icon-loc">
 									<Image src="/images/ezymart (1).jpg" alt="icon"  width={500} height={300}/>
