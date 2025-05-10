@@ -1,9 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSuitcaseRolling, faKey, faMapMarkerAlt, faDirections } from '@fortawesome/free-solid-svg-icons';
+import { faSuitcaseRolling, faKey, faMapMarkerAlt, faDirections, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../public/ALL CSS/BannerTwo.css";
 
 function BannerOne() {
@@ -11,6 +11,20 @@ function BannerOne() {
   const [stations, setStations] = useState([]);
   const [loadingNearest, setLoadingNearest] = useState(false);
   const [showStations, setShowStations] = useState(false);
+  const [showTopButton, setShowTopButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowTopButton(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleNavigation = (path) => {
     router.push(path);
@@ -120,6 +134,13 @@ function BannerOne() {
           <Image src="/images/Lone bag.png" alt="luggage storage" width={550} height={300} className="glowing-image" />
         </div>
       </div>
+
+      {showTopButton && (
+        <button className="top-button" onClick={scrollToTop}>
+          <FontAwesomeIcon icon={faArrowUp} /> <br/>
+          Top
+        </button>
+      )}
     </section>
   );
 }

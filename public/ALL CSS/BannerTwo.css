@@ -88,6 +88,33 @@
     color: #ffffff;
   }
   
+
+
+  .top-button {
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    padding: 1% 2%;
+    background-color: #ffffffc4;
+    border: 1px solid #1a73e8;
+    color: #1a73e8;
+    border-radius: 50%;
+    font-size: 100%;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .top-button:hover {
+    background-color: #ffffff;
+    transform: scale(1.1);
+  }
+  
+
+
+
+
   /* CTA Button Styling */
   .cta-btn.neon-glow {
     background-color: #1a73e8;
