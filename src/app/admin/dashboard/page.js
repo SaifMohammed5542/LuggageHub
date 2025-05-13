@@ -1,4 +1,3 @@
-//app/admin/dashboard/page.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,13 +19,18 @@ export default function AdminDashboard() {
   const [stations, setStations] = useState([]);
   const [token, setToken] = useState('');
 
-  const [bookings, setBookings] = useState([]);
+  const [allBookings, setAllBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
+  const [selectedStation, setSelectedStation] = useState(null);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [bookingError, setBookingError] = useState('');
 
-  const [keyHandovers, setKeyHandovers] = useState([]);
+  const [allKeyHandovers, setAllKeyHandovers] = useState([]);
+  const [filteredKeyHandovers, setFilteredKeyHandovers] = useState([]);
   const [loadingKeys, setLoadingKeys] = useState(true);
   const [keyError, setKeyError] = useState('');
+
+  const [activeView, setActiveView] = useState('stations'); // 'stations', 'bookings', or 'keys'
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -37,18 +41,39 @@ export default function AdminDashboard() {
       setUserRole('admin');
       fetchStations(storedToken);
       fetchBookings(storedToken);
-      fetchKeyHandovers(storedToken); // ✅ added
+      fetchKeyHandovers(storedToken);
     } else {
       router.push('/');
     }
   }, [router]);
 
+  // When selectedStation changes, filter the bookings and key handovers
+  useEffect(() => {
+    if (selectedStation) {
+      // Filter bookings by station ID
+      const stationBookings = allBookings.filter(
+        booking => booking.stationId?._id === selectedStation._id
+      );
+      setFilteredBookings(stationBookings);
+
+      // Filter key handovers by station ID
+      const stationKeyHandovers = allKeyHandovers.filter(
+        handover => handover.station?._id === selectedStation._id
+      );
+      setFilteredKeyHandovers(stationKeyHandovers);
+    }
+  }, [selectedStation, allBookings, allKeyHandovers]);
+
   const fetchStations = async (authToken) => {
-    const res = await fetch('/api/station/list', {
-      headers: { Authorization: `Bearer ${authToken}` }
-    });
-    const data = await res.json();
-    if (res.ok) setStations(data.stations);
+    try {
+      const res = await fetch('/api/station/list', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      if (res.ok) setStations(data.stations);
+    } catch (err) {
+      console.error('Failed to fetch stations:', err);
+    }
   };
 
   const fetchBookings = async (authToken) => {
@@ -59,7 +84,13 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch bookings');
-      setBookings(data.bookings || []);
+      
+      // Sort bookings by dropOffDate in descending order (newest first)
+      const sortedBookings = [...(data.bookings || [])].sort((a, b) => {
+        return new Date(b.dropOffDate) - new Date(a.dropOffDate);
+      });
+      
+      setAllBookings(sortedBookings);
     } catch (err) {
       setBookingError(err.message);
     } finally {
@@ -75,7 +106,13 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch key handovers');
-      setKeyHandovers(data.handovers || []);
+      
+      // Sort key handovers by handoverDate in descending order (newest first)
+      const sortedHandovers = [...(data.handovers || [])].sort((a, b) => {
+        return new Date(b.handoverDate) - new Date(a.handoverDate);
+      });
+      
+      setAllKeyHandovers(sortedHandovers);
     } catch (err) {
       setKeyError(err.message);
     } finally {
@@ -126,6 +163,20 @@ export default function AdminDashboard() {
     } else {
       alert(data.error || 'Error creating partner');
     }
+  };
+
+  const handleStationClick = (station) => {
+    setSelectedStation(station);
+    setActiveView('bookings'); // Switch to bookings view when a station is clicked
+  };
+
+  const handleBackToStations = () => {
+    setSelectedStation(null);
+    setActiveView('stations');
+  };
+
+  const toggleView = (view) => {
+    setActiveView(view);
   };
 
   if (userRole !== 'admin') return null;
@@ -189,57 +240,113 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* View Bookings Section */}
+        {/* Stations and Bookings Display Section */}
         <div className="admin-section">
-          <h2>All Bookings</h2>
-          {loadingBookings ? (
-            <p>Loading bookings...</p>
-          ) : bookingError ? (
-            <p className="error">{bookingError}</p>
-          ) : bookings.length === 0 ? (
-            <p>No bookings found.</p>
-          ) : (
-            <div className="booking-grid">
-              {bookings.map((booking) => (
-                <div key={booking._id} className="booking-card">
-                  <p><strong>Name:</strong> {booking.fullName}</p>
-                  <p><strong>Email:</strong> {booking.email}</p>
-                  <p><strong>Phone:</strong> {booking.phone}</p>
-                  <p><strong>Drop-off:</strong> {booking.dropOffDate}</p>
-                  <p><strong>Pick-up:</strong> {booking.pickUpDate}</p>
-                  <p><strong>Luggage:</strong> {booking.luggageCount}</p>
-                  <p><strong>Station:</strong> {booking.stationId?.name || 'N/A'}</p>
-                  <p><strong>Payment ID:</strong> {booking.paymentId}</p>
-                  <p><strong>Instructions:</strong> {booking.specialInstructions || '-'}</p>
+          {selectedStation ? (
+            <>
+              <div className="station-detail-header">
+                <button className="back-button" onClick={handleBackToStations}>
+                  ← Back to Stations
+                </button>
+                <h2>{selectedStation.name} - {selectedStation.location}</h2>
+                <div className="view-toggle">
+                  <button 
+                    className={activeView === 'bookings' ? 'active' : ''} 
+                    onClick={() => toggleView('bookings')}
+                  >
+                    Bookings
+                  </button>
+                  <button 
+                    className={activeView === 'keys' ? 'active' : ''} 
+                    onClick={() => toggleView('keys')}
+                  >
+                    Key Handovers
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
 
-        {/* ✅ View Key Handovers Section */}
-        <div className="admin-section">
-          <h2>All Key Handovers</h2>
-          {loadingKeys ? (
-            <p>Loading key handovers...</p>
-          ) : keyError ? (
-            <p className="error">{keyError}</p>
-          ) : keyHandovers.length === 0 ? (
-            <p>No key handovers found.</p>
+              {activeView === 'bookings' && (
+                <>
+                  <h3>Bookings</h3>
+                  {loadingBookings ? (
+                    <p>Loading bookings...</p>
+                  ) : bookingError ? (
+                    <p className="error">{bookingError}</p>
+                  ) : filteredBookings.length === 0 ? (
+                    <p>No bookings found for this station.</p>
+                  ) : (
+                    <div className="booking-grid">
+                      {filteredBookings.map((booking) => (
+                        <div key={booking._id} className="booking-card">
+                          <p><strong>Name:</strong> {booking.fullName}</p>
+                          <p><strong>Email:</strong> {booking.email}</p>
+                          <p><strong>Phone:</strong> {booking.phone}</p>
+                          <p><strong>Drop-off:</strong> {booking.dropOffDate}</p>
+                          <p><strong>Pick-up:</strong> {booking.pickUpDate}</p>
+                          <p><strong>Luggage:</strong> {booking.luggageCount}</p>
+                          <p><strong>Payment ID:</strong> {booking.paymentId}</p>
+                          <p><strong>Instructions:</strong> {booking.specialInstructions || '-'}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {activeView === 'keys' && (
+                <>
+                  <h3>Key Handovers</h3>
+                  {loadingKeys ? (
+                    <p>Loading key handovers...</p>
+                  ) : keyError ? (
+                    <p className="error">{keyError}</p>
+                  ) : filteredKeyHandovers.length === 0 ? (
+                    <p>No key handovers found for this station.</p>
+                  ) : (
+                    <div className="booking-grid">
+                      {filteredKeyHandovers.map((handover) => (
+                        <div key={handover._id} className="booking-card">
+                          <p><strong>Name:</strong> {handover.fullName}</p>
+                          <p><strong>Email:</strong> {handover.email}</p>
+                          <p><strong>Phone:</strong> {handover.phone}</p>
+                          <p><strong>Handover Date:</strong> {handover.handoverDate}</p>
+                          <p><strong>Pickup Date:</strong> {handover.pickupDate}</p>
+                          <p><strong>Instructions:</strong> {handover.specialInstructions || '-'}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
           ) : (
-            <div className="booking-grid">
-              {keyHandovers.map((handover) => (
-                <div key={handover._id} className="booking-card">
-                  <p><strong>Name:</strong> {handover.fullName}</p>
-                  <p><strong>Email:</strong> {handover.email}</p>
-                  <p><strong>Phone:</strong> {handover.phone}</p>
-                  <p><strong>Handover Date:</strong> {handover.handoverDate}</p>
-                  <p><strong>Pickup Date:</strong> {handover.pickupDate}</p>
-                  <p><strong>Station:</strong> {handover.station?.name || 'N/A'}</p>
-                  <p><strong>Instructions:</strong> {handover.specialInstructions || '-'}</p>
+            <>
+              <h2>Stations</h2>
+              {stations.length === 0 ? (
+                <p>No stations found. Create a station to get started.</p>
+              ) : (
+                <div className="stations-grid">
+                  {stations.map((station) => (
+                    <div 
+                      key={station._id} 
+                      className="station-card" 
+                      onClick={() => handleStationClick(station)}
+                    >
+                      <h3>{station.name}</h3>
+                      <p>{station.location}</p>
+                      <div className="station-stats">
+                        <span>
+                          {allBookings.filter(b => b.stationId?._id === station._id).length} Bookings
+                        </span>
+                        <span>
+                          {allKeyHandovers.filter(k => k.station?._id === station._id).length} Key Handovers
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
