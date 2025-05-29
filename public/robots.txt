@@ -1,9 +1,0 @@
-# *
-User-agent: *
-Allow: /
-
-# Host
-Host: https://luggageterminal.com
-
-# Sitemaps
-Sitemap: https://luggageterminal.com/sitemap.xml
