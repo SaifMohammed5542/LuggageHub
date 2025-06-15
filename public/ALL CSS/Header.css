@@ -1,7 +1,7 @@
 /* Base Styles - Frosted Glass with Border Accent */
 nav {
     /* Base for frosted glass: subtle background with strong blur */
-    background: rgba(15, 23, 42, 0.7); /* Slightly more opaque base than transparent */
+    background: linear-gradient(135deg, #04246f 0%, #011138 50%, #0f172a 100%); /* Slightly more opaque base than transparent */
     padding: 1rem 2rem;
     position: sticky; /* Keep it sticky */
     top: 0;
@@ -23,7 +23,7 @@ nav::after {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 3px; /* Thickness of the accent bar */
+    height: 1px; /* Thickness of the accent bar */
     background: linear-gradient(to right, #22d3ee, #a78bfa, #22d3ee); /* Vibrant gradient accent */
     filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.7)); /* Subtle glow effect */
     opacity: 0.8;

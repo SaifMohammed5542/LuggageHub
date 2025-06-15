@@ -147,10 +147,6 @@ const LuggageBookingForm = () => {
     <>
       <Header />
       <div className="booking-wrapper">
-      {/* <video className="background-video" autoPlay muted loop playsInline>
-        <source src="/Videos/lugvid.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-      </video> */}
         <div className="booking-container">
           <h2 className="booking-title">📦 Luggage Storage Booking</h2>
           <form className="booking-form">
@@ -307,9 +303,9 @@ const LuggageBookingForm = () => {
                   required
                 />
                 <label htmlFor="termsAccepted">I agree to the terms and conditions</label>
-                {/* {errors.termsAccepted && (
+                {errors.termsAccepted && (
                   <span className="error">{errors.termsAccepted}</span>
-                )} */}
+                )}
               </div>
             </div>
           </form>
