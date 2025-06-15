@@ -1,19 +1,17 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSuitcaseRolling, faKey, faMapMarkerAlt, faDirections, faArrowUp } from '@fortawesome/free-solid-svg-icons';
-import Image from 'next/image';
-import { useState, useEffect } from "react";
-import "../../public/ALL CSS/BannerTwo.css";
+import React, { useState, useEffect } from 'react';
+import { Luggage, Key, MapPin, Navigation, ChevronUp, Loader } from 'lucide-react';
+import '../../public/ALL CSS/BannerOne.css'
 
-function BannerOne() {
-  const router = useRouter();
+const BannerOne = () => {
   const [stations, setStations] = useState([]);
   const [loadingNearest, setLoadingNearest] = useState(false);
   const [showStations, setShowStations] = useState(false);
   const [showTopButton, setShowTopButton] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    setIsVisible(true);
+    
     const handleScroll = () => {
       setShowTopButton(window.scrollY > 300);
     };
@@ -27,122 +25,275 @@ function BannerOne() {
   };
 
   const handleNavigation = (path) => {
-    router.push(path);
+    console.log(`Navigating to: ${path}`);
+    window.location.href = path; // Added this line for navigation
   };
 
-  const findNearestStorage = () => {
+const findNearestStorage = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert("Geolocation is not supported by your browser. Please enable it to find nearest storage.");
       return;
     }
 
     setLoadingNearest(true);
+    
+    // Get current position
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
 
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
+        try {
+          // Make API call to your backend
+          const res = await fetch('/api/station/nearest', { // Ensure this matches your backend route
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude, longitude })
+          });
 
-      try {
-        const res = await fetch('/api/station/nearest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ latitude, longitude })
-        });
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
 
-        const data = await res.json();
-        console.log("Nearest Storages:", data);
+          const data = await res.json();
+          console.log("Nearest Storages:", data);
 
-        if (data.length > 0) {
-          setStations(data);
-          setShowStations(true);
-        } else {
-          alert("No nearby stations found.");
+          if (data && data.length > 0) {
+            setStations(data);
+            setShowStations(true);
+          } else {
+            alert("No nearby stations found. Try again later or adjust your location settings.");
+            setStations([]); // Clear previous stations if none found
+            setShowStations(false);
+          }
+        } catch (error) {
+          console.error("Error fetching nearest stations:", error);
+          alert("Error fetching nearest stations. Please try again.");
+          setStations([]);
+          setShowStations(false);
+        } finally {
+          setLoadingNearest(false);
         }
-      } catch (error) {
-        console.error("Error fetching nearest stations:", error);
-        alert("Error fetching nearest stations");
-      } finally {
+      },
+      (error) => {
+        // Geolocation error handler
+        console.error("Geolocation error:", error);
+        let errorMessage = "Unable to retrieve your location.";
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMessage = "Location access denied. Please enable location services in your browser settings.";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMessage = "Location information is unavailable.";
+        } else if (error.code === error.TIMEOUT) {
+          errorMessage = "The request to get user location timed out.";
+        }
+        alert(errorMessage);
         setLoadingNearest(false);
-      }
-    }, () => {
-      alert("Unable to retrieve your location");
-      setLoadingNearest(false);
-    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // Geolocation options
+    );
   };
 
+  // --- UPDATED handleStationClick FUNCTION ---
   const handleStationClick = (station) => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert("Geolocation is not supported by your browser. Cannot get directions.");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition((position) => {
-      const origin = `${position.coords.latitude},${position.coords.longitude}`;
-      const destination = `${station.coordinates.coordinates[1]},${station.coordinates.coordinates[0]}`;
-      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
-      window.open(mapsUrl, '_blank');
-    }, () => {
-      alert("Unable to fetch your current location for directions.");
-    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLatitude = position.coords.latitude;
+        const userLongitude = position.coords.longitude;
+        
+        // Ensure station coordinates are correctly ordered as [longitude, latitude] from your schema
+        const stationLongitude = station.coordinates.coordinates[0];
+        const stationLatitude = station.coordinates.coordinates[1];
+
+        // Correct Google Maps URL format for directions
+        const mapsUrl = `https://www.google.com/maps/dir/${userLatitude},${userLongitude}/${stationLatitude},${stationLongitude}`;
+        window.open(mapsUrl, '_blank');
+      },
+      (error) => {
+        console.error("Geolocation error for directions:", error);
+        alert("Unable to fetch your current location for directions. Please ensure location services are enabled.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   return (
-    <section id="home" className="hero">
-      <video className="background-video" autoPlay muted loop playsInline>
-        <source src="/Videos/walkvid.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+    <div className="container">
+      {/* Animated background patterns */}
+      <div className="backgroundOverlay">
+        <div className="backgroundBlob1"></div>
+        <div className="backgroundBlob2"></div>
+      </div>
 
-      <div className="hero-content">
-        <div className="text-content">
-          <h2>Trusted Luggage Storage Near You.</h2>
-          <p>Find Secure Luggage Storage Near You</p>
+      {/* Grid pattern overlay */}
+      <div className="patternOverlay"></div>
 
-          <button className="cta-btn neon-glow" onClick={() => handleNavigation("/booking-form")}>
-            Book Your Luggage! <FontAwesomeIcon icon={faSuitcaseRolling} />
-          </button>
+      {/* Main content */}
+      <div className="mainContent">
+        <div className="contentWrapper">
+          <div className="gridContainer">
+            
+            {/* Left content */}
+            <div className={`leftContent ${isVisible ? 'visible' : 'hidden-left'}`}>
+              <div className="contentSection">
+                <div className="badge">
+                  <span className="badgeText">✨ Trusted Storage Solutions</span>
+                </div>
+                
+<h1 className="mainHeading">
+  Secure Your
+  <br />
+  <span className="gradientText">Luggage</span>{' '}
+  Anywhere
+</h1>
 
-          <button className="cta-btn neon-glow1" onClick={() => handleNavigation("/key-handover")}>
-            Drop Your Key! <FontAwesomeIcon icon={faKey} />
-          </button>
+                
+                <p className="subtitle">
+                  Find trusted luggage storage locations near you. Safe, secure, and available 24/7 wherever your journey takes you.
+                </p>
+              </div>
 
-          <br />
+              {/* Action buttons */}
+              <div className="buttonContainer">
+                <button 
+                  onClick={() => handleNavigation("/booking-form")}
+                  className="primaryButton"
+                >
+                  <Luggage className="buttonIcon" />
+                  <span>Book Storage</span>
+                </button>
 
-          <button className="nearbtn" onClick={findNearestStorage}>
-            Find Nearest Storage <FontAwesomeIcon icon={faMapMarkerAlt} />
-            {loadingNearest && <span className="button-spinner" />}
-          </button>
+                <button 
+                  onClick={() => handleNavigation("/key-handover")}
+                  className="secondaryButton"
+                >
+                  <Key className="buttonIcon" />
+                  <span>Drop Your Key</span>
+                </button>
+              </div>
 
-          {showStations && stations.length > 0 && (
-            <div className="station-list">
-              <h3>Nearest Storage Locations:</h3>
-              <ul>
-                {stations.map((station, index) => (
-                  <li key={index}>
-                    <strong>{station.name}</strong> - {station.location}
-                    <br />
-                    <button onClick={() => handleStationClick(station)} className="directions-btn">
-                      View Directions <FontAwesomeIcon icon={faDirections} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              {/* Find nearest button */}
+              <button 
+                onClick={findNearestStorage}
+                disabled={loadingNearest}
+                className={`nearestButton ${loadingNearest ? 'loading' : ''}`}
+              >
+                {loadingNearest ? (
+                  <Loader className="buttonIcon spin" />
+                ) : (
+                  <MapPin className="buttonIcon" />
+                )}
+                <span>{loadingNearest ? 'Finding...' : 'Find Nearest Storage'}</span>
+              </button>
+
+              {/* Station list */}
+              {showStations && stations.length > 0 && (
+                <div className="stationList">
+                  <h3 className="stationHeading">
+                    <MapPin className="stationIcon" />
+                    <span>Nearest Storage Locations</span>
+                  </h3>
+                  <div className="stationContainer">
+                    {stations.map((station, index) => (
+                      <div key={index} className="stationItem">
+                        <div className="stationInfo">
+                          <div>
+                            <h4 className="stationName">{station.name}</h4>
+                            <p className="stationLocation">{station.location}</p>
+                          </div>
+                          <button
+                            onClick={() => handleStationClick(station)}
+                            className="directionsButton"
+                          >
+                            <Navigation className="directionIcon" />
+                            <span>Directions</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="image-content">
-          <Image src="/images/Lone bag.png" alt="luggage storage" width={550} height={300} className="glowing-image" />
+            {/* Right content - Visual */}
+            <div className={`rightContent ${isVisible ? 'visible' : 'hidden-right'}`}>
+              <div className="visualContainer">
+                {/* Floating elements */}
+                <div className="floatingElement1"></div>
+                <div className="floatingElement2"></div>
+                
+                {/* Main visual */}
+                <div className="mainVisual">
+                  <div className="visualContent">
+                    <div className="iconContainer">
+                      <Luggage className="mainIcon" />
+                    </div>
+                    <h3 className="visualHeading">24/7 Secure Storage</h3>
+                    <p className="visualSubtext">Your belongings are safe with our verified storage partners</p>
+                    <div className="featureGrid">
+                      <div className="featureItem">
+                        <div className="featureIcon">🔒</div>
+                        <p className="featureText">Secure</p>
+                      </div>
+                      <div className="featureItem">
+                        <div className="featureIcon">📍</div>
+                        <p className="featureText">Nearby</p>
+                      </div>
+                      <div className="featureItem">
+                        <div className="featureIcon">⚡</div>
+                        <p className="featureText">Instant</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {showTopButton && (
-        <button className="top-button" onClick={scrollToTop}>
-          <FontAwesomeIcon icon={faArrowUp} /> <br/>
-          Top
+      {/* Scroll to top button */}
+      {/* {showTopButton && (
+        <button
+          onClick={scrollToTop}
+          style={styles.topButton}
+          onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+        >
+          <ChevronUp style={styles.topButtonIcon} />
         </button>
-      )}
-    </section>
+      )} */}
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-float-delayed {
+          animation: float-delayed 8s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
   );
-}
+};
 
 export default BannerOne;

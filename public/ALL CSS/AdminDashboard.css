@@ -1,680 +1,734 @@
-/* Partner Form Styling */
-.partner-form {
-  max-width: 900px;
-  margin: 0 auto;
+/* Custom Properties (Variables) for consistent styling */
+:root {
+    --primary-color: #4CAF50; /* A fresh green for primary actions */
+    --primary-hover-color: #45a049;
+    --secondary-color: #007bff; /* A nice blue for links/secondary actions */
+    --secondary-hover-color: #0056b3;
+    --danger-color: #dc3545; /* Red for destructive actions */
+    --danger-hover-color: #c82333;
+    --text-color-dark: #333;
+    --text-color-medium: #555;
+    --text-color-light: #777;
+    --bg-light: #f4f6f9; /* Lighter background for dashboard */
+    --bg-card: #ffffff; /* White background for cards/sections */
+    --border-color: #e0e0e0;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --spacing-xs: 8px;
+    --spacing-sm: 12px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
 }
 
-.form-section {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+/* General Reset and Base Styles */
+body, h1, h2, h3, p, input, select, button, textarea {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+    box-sizing: border-box;
+    line-height: 1.6;
 }
 
-.section-title {
-  margin: 0 0 20px 0;
-  color: #495057;
-  font-size: 18px;
-  font-weight: 600;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 8px
-}
-
-
-/* General Reset */
-body, h1, h2, h3, p, input, select, button {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  box-sizing: border-box;
+body {
+    background-color: var(--bg-light);
+    color: var(--text-color-medium);
 }
 
 .admin-dashboard {
-  padding: 40px;
-  background-color: #f9f9f9;
-  min-height: 100vh;
+    padding: var(--spacing-lg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg); /* Consistent spacing between sections */
 }
 
 .admin-title {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  color: #333;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    font-size: 2.8rem; /* Slightly larger */
+    color: var(--text-color-dark);
+    font-weight: 700;
 }
 
 /* Sections */
 .admin-section {
-  background-color: #fff;
-  padding: 25px 30px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-card);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium); /* More pronounced shadow */
+    border: 1px solid var(--border-color); /* Subtle border */
 }
 
 .admin-section h2 {
-  margin-bottom: 20px;
-  font-size: 1.8rem;
-  color: #444;
+    margin-bottom: var(--spacing-md);
+    font-size: 2rem; /* Consistent heading size */
+    color: var(--text-color-dark);
+    border-bottom: 2px solid var(--primary-color); /* Green accent */
+    padding-bottom: var(--spacing-xs);
+    display: inline-block; /* Make border-bottom only as wide as text */
 }
 
 .admin-section h3 {
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  color: #444;
-}
-.admin-section p {
-  margin-bottom: 20px;
-  font-size: 1rem;
-  color: #444;
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.6rem;
+    color: var(--text-color-dark);
 }
 
-/* Forms */
+.admin-section p {
+    margin-bottom: var(--spacing-sm);
+    font-size: 1rem;
+    color: var(--text-color-medium);
+}
+
+/* Forms - General Inputs & Buttons */
 .admin-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+    display: grid; /* Use grid for better control */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
+    gap: var(--spacing-md);
+    align-items: start; /* Align items at the bottom for multi-line inputs */
 }
 
 .admin-form input,
-.admin-form select {
-  flex: 1 1 200px;
-  padding: 12px;
-  color: #000000;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: #fff;
-  transition: border 0.3s;
+.admin-form select,
+.admin-form textarea {
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    width: 100%; /* Ensure inputs take full width of their grid cell */
+}
+
+.admin-form textarea {
+    min-height: 80px; /* Adjust height for text areas */
+    resize: vertical;
 }
 
 .admin-form input:focus,
-.admin-form select:focus {
-  border-color: #0070f3;
-  outline: none;
+.admin-form select:focus,
+.admin-form textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); /* Light primary glow on focus */
+    outline: none;
 }
 
 .admin-form button {
-  padding: 12px 24px;
-  background-color: #0070f3;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: nowrap; /* Prevent button text from wrapping */
 }
 
 .admin-form button:hover {
-  background-color: #0059c1;
+    background-color: var(--primary-hover-color);
+    transform: translateY(-2px); /* Slight lift effect */
 }
 
-/* Enhanced Partner Form */
+/* Partner Form Specifics */
 .partner-form {
-  flex-direction: column;
-  gap: 20px;
+    display: flex; /* Override grid for main partner form structure */
+    flex-direction: column;
+    gap: var(--spacing-lg);
 }
 
-.partner-basic-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+.form-section {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-light); /* Lighter shadow for nested sections */
 }
 
-.partner-basic-info input,
-.partner-basic-info select {
-  flex: 1 1 200px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: #fff;
-  transition: border 0.3s;
+.section-title {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--text-color-dark);
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--secondary-color); /* Blue accent for sub-sections */
+    padding-bottom: var(--spacing-xs);
+    display: inline-block;
 }
 
-.partner-basic-info input:focus,
-.partner-basic-info select:focus {
-  border-color: #0070f3;
-  outline: none;
+.form-grid { /* For sub-sections within partner form */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.full-width {
+    grid-column: 1 / -1; /* Make elements span full width in a grid */
 }
 
 /* Store Timings Section */
-/* Store Timings Section */
-.store-timings-section {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  max-width: 800px;
-  margin: auto;
-}
-
-.store-timings-section h3 {
-  margin-bottom: 16px;
-  color: #343a40;
-  font-size: 1.4rem;
-  text-align: center;
-}
-
-/* Timing Option */
 .timing-option {
-  margin-bottom: 20px;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 1rem;
-  color: #495057;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: var(--text-color-medium);
+    cursor: pointer;
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+    appearance: none; /* Hide default checkbox */
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--secondary-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
 }
 
-/* Weekly Timings */
+.checkbox-label input[type="checkbox"]:checked {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.checkbox-label input[type="checkbox"]:checked::after {
+    content: '✔'; /* Checkmark */
+    color: #fff;
+    font-size: 14px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .weekly-timings {
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  overflow: hidden;
+    background-color: #ffffff;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-top: var(--spacing-md);
 }
 
 .day-timing {
-  border-bottom: 1px solid #dee2e6;
-  padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .day-timing:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .day-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  gap: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
 }
 
 .day-name {
-  font-weight: 600;
-  color: #333;
-  font-size: 1.1rem;
-  text-transform: capitalize;
+    font-weight: 600;
+    color: var(--text-color-dark);
+    font-size: 1.15rem;
+    text-transform: capitalize;
 }
 
 .apply-all-btn {
-  background-color: #6c757d;
-  color: #ffffff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
+    background-color: var(--secondary-color); /* Changed to secondary color */
+    color: #ffffff;
+    border: none;
+    padding: 8px 15px; /* Slightly larger padding */
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0; /* Prevent shrinking on smaller screens */
 }
 
 .apply-all-btn:hover {
-  background-color: #5a6268;
+    background-color: var(--secondary-hover-color);
 }
 
 .timing-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-  justify-content: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .closed-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.95rem;
-  color: #6c757d;
-  cursor: pointer;
-}
-
-.closed-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    color: var(--text-color-medium);
+    cursor: pointer;
 }
 
 .time-inputs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
 }
 
 .time-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 .time-group label {
-  font-size: 0.9rem;
-  color: #6c757d;
-  font-weight: 500;
-  min-width: 45px;
+    font-size: 0.9rem;
+    color: var(--text-color-medium);
+    font-weight: 500;
+    min-width: 45px;
 }
 
 .time-group input[type="time"] {
-  padding: 6px 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  background-color: #ffffff;
-  transition: border-color 0.3s;
-  min-width: 120px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease;
+    min-width: 130px; /* Slightly wider */
 }
 
 .time-group input[type="time"]:focus {
-  border-color: #0070f3;
-  outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    outline: none;
 }
-
-/* Media Queries for Mobile */
-@media (max-width: 600px) {
-  .store-timings-section {
-    padding: 16px;
-  }
-
-  .day-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .apply-all-btn {
-    width: 100%;
-    margin-top: 8px;
-  }
-
-  .time-inputs {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .time-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .time-group input[type="time"] {
-    width: 100%;
-  }
-}
-
 
 /* Create Partner Button */
 .create-partner-btn {
-  align-self: flex-start;
-  padding: 12px 30px;
-  background-color: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 10px;
+    align-self: flex-start; /* Align to the left/start */
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: var(--spacing-md);
 }
 
 .create-partner-btn:hover {
-  background-color: #218838;
+    background-color: var(--primary-hover-color);
+    transform: translateY(-2px);
 }
 
 /* Stations Grid */
 .stations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjusted minwidth for better responsiveness */
+    gap: var(--spacing-md);
 }
 
 .station-card {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 1px solid #ddd;
-  transition: box-shadow 0.3s;
+    background-color: var(--bg-card);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-light); /* Subtle shadow for cards */
+    transition: all 0.3s ease;
 }
 
 .station-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-medium); /* More pronounced on hover */
+    transform: translateY(-3px); /* Lift effect */
+    border-color: var(--primary-color);
 }
 
 .station-card h3 {
-  font-size: 1.4rem;
-  color: #333;
+    font-size: 1.5rem;
+    color: var(--text-color-dark);
+    margin-bottom: var(--spacing-xs);
 }
 
 .station-card p {
-  color: #666;
-  margin-top: 8px;
+    color: var(--text-color-light);
+    margin-top: 0;
+    font-size: 0.95rem;
 }
 
 .station-stats {
-  margin-top: 12px;
-  font-size: 0.95rem;
-  color: #0070f3;
-  display: flex;
-  justify-content: space-between;
+    margin-top: var(--spacing-sm);
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
-/* Back Button & Toggle */
+/* Station Detail Header (Back Button & Toggle) */
 .station-detail-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    justify-content: space-between; /* Space out elements */
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.station-detail-header h2 {
+    flex-grow: 1; /* Allow title to take available space */
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--text-color-dark);
+    border-bottom: none; /* Remove section H2 border */
 }
 
 .back-button {
-  background: none;
-  border: none;
-  color: #0070f3;
-  font-size: 1rem;
-  cursor: pointer;
-  text-decoration: underline;
-  padding: 0;
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    font-size: 1.05rem;
+    cursor: pointer;
+    text-decoration: none; /* Remove default underline */
+    padding: var(--spacing-xs);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+.back-button:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+    text-decoration: underline;
+}
+
+.view-toggle {
+    display: flex;
+    gap: var(--spacing-xs);
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    padding: 3px;
+    border: 1px solid var(--border-color);
 }
 
 .view-toggle button {
-  padding: 10px 20px;
-  margin-left: 10px;
-  border: 1px solid #0070f3;
-  background-color: transparent;
-  color: #0070f3;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s;
+    padding: 8px 18px;
+    border: none; /* Remove individual button borders */
+    background-color: transparent;
+    color: var(--secondary-color);
+    border-radius: 6px; /* Slightly smaller radius for toggle buttons */
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.view-toggle .active,
-.view-toggle button:hover {
-  background-color: #0070f3;
-  color: #fff;
+.view-toggle button.active {
+    background-color: var(--secondary-color);
+    color: #fff;
+    box-shadow: var(--shadow-light);
 }
 
-/* Booking Cards */
+.view-toggle button:not(.active):hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Booking & Key Handovers Display */
+.monthly-bookings, .monthly-handovers {
+    margin-top: var(--spacing-md);
+}
+
+.month-section {
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+}
+
+.month-header {
+    background-color: var(--secondary-color); /* Primary color for month headers */
+    color: #fff;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: 0; /* Remove margin-bottom to connect with weeks */
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-left: none; /* Remove left border */
+}
+
+.week-section {
+    margin-bottom: 0; /* Remove margin between weeks */
+    border-top: 1px solid var(--border-color); /* Separator between weeks */
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: #fcfcfc;
+}
+.week-section:first-of-type {
+    border-top: none; /* No top border for the first week */
+}
+
+.week-header {
+    background-color: transparent; /* Remove background */
+    padding: 0;
+    margin-bottom: var(--spacing-sm);
+    border-left: none; /* Remove left border */
+    font-size: 1.05rem;
+    color: var(--text-color-dark);
+    font-weight: 500;
+}
+
 .booking-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md); /* Add margin from week header */
 }
 
 .booking-card {
-  background-color: #fff;
-  padding: 16px 20px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    background-color: var(--bg-card);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-light);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
 }
 
 .booking-card p {
-  margin-bottom: 8px;
-  color: #444;
+    margin-bottom: 0; /* Remove default paragraph margin */
+    font-size: 0.95rem;
+    color: var(--text-color-medium);
 }
 
 .booking-card p strong {
-  color: #222;
+    color: var(--text-color-dark);
 }
 
 /* Messages */
 .error {
-  color: red;
-  font-weight: 500;
-  margin-top: 10px;
-}
-
-.week-section {
-  margin-bottom: 20px;
-  margin-left: 20px;
-}
-
-.week-header {
-  background-color: #e9ecef;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  border-left: 3px solid #6c757d;
-  font-size: 0.95em;
-  color: #495057;
-  font-weight: 500;
-}
-
-.month-section {
-  margin-bottom: 40px;
-}
-
-.month-header {
-  background-color: #f5f5f5;
-  padding: 12px 15px;
-  margin-bottom: 20px;
-  border-left: 4px solid #007bff;
-  font-size: 1.1em;
-  color: #333;
-  font-weight: 600;
+    color: var(--danger-color);
+    font-weight: 600;
+    margin-top: var(--spacing-sm);
+    text-align: center;
 }
 
 /* ----------------------------
-   📱 Mobile Responsiveness
+    📱 Mobile Responsiveness
 ----------------------------- */
+@media (max-width: 992px) { /* Adjust breakpoint for larger tablets */
+    .admin-dashboard {
+        padding: var(--spacing-md);
+    }
+    .admin-title {
+        font-size: 2.2rem;
+    }
+    .admin-section {
+        padding: var(--spacing-md);
+    }
+    .admin-section h2 {
+        font-size: 1.7rem;
+    }
+    .form-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .stations-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+    .booking-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
-  .admin-dashboard {
-    padding: 20px;
-  }
+    .admin-dashboard {
+        padding: var(--spacing-sm); /* Even less padding on smaller devices */
+        gap: var(--spacing-md);
+    }
 
-  .admin-title {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-  }
+    .admin-title {
+        font-size: 1.8rem;
+        margin-bottom: var(--spacing-md);
+    }
 
-  .admin-section {
-    padding: 20px;
-  }
+    .admin-section {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
 
-  .admin-section h2 {
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-  }
+    .admin-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    .admin-section h3 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-sm);
+    }
 
-  .admin-form {
-    flex-direction: column;
-    gap: 12px;
-  }
+    .admin-form {
+        grid-template-columns: 1fr; /* Stack columns on mobile */
+        gap: var(--spacing-sm);
+    }
 
-  .admin-form input,
-  .admin-form select,
-  .admin-form button {
-    width: 100%;
-    font-size: 1rem;
-    flex: 1 1 60px;
-  }
-  
-  .admin-form button {
-    padding: 12px 24px;
-  }
+    .admin-form input,
+    .admin-form select,
+    .admin-form textarea,
+    .admin-form button {
+        width: 100%;
+        font-size: 0.95rem; /* Slightly smaller text for inputs */
+        padding: 10px 15px; /* Adjust padding for touch targets */
+    }
+    
+    .create-partner-btn {
+        width: 100%;
+        margin-top: var(--spacing-sm);
+    }
 
-  /* Partner Form Mobile */
-  .partner-basic-info {
-    flex-direction: column;
-    gap: 12px;
-  }
+    /* Partner Form Mobile */
+    .form-section {
+       width: 100%;
+        font-size: 0.95rem; /* Slightly smaller text for inputs */
+        padding: 10px 15px; /* Adjust padding for touch targets */
+    }
+    .section-title {
+        font-size: 1.1rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    .form-grid {
+        grid-template-columns: 1fr; /* Stack columns */
+        gap: var(--spacing-sm);
+    }
 
-  .partner-basic-info input,
-  .partner-basic-info select {
-    width: 100%;
-    flex: 1 1 60px;
-  }
+    /* Store Timings Mobile */
+    .store-timings-section {
+        padding: var(--spacing-sm);
+    }
+    .day-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
+    }
+    .apply-all-btn {
+        width: 100%; /* Full width button */
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    .timing-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+    .time-inputs {
+        flex-direction: column;
+        width: 100%;
+    }
+    .time-group {
+        width: 100%;
+        flex-direction: row; /* Keep label and input on same line */
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    .time-group label {
+        min-width: unset; /* Let it shrink */
+        font-size: 0.9rem;
+    }
+    .time-group input[type="time"] {
+        flex-grow: 1; /* Take remaining space */
+        min-width: 100px;
+    }
 
-  .store-timings-section {
-    padding: 15px;
-  }
+    /* Stations and Bookings Mobile */
+    .stations-grid,
+    .booking-grid {
+        grid-template-columns: 1fr; /* Single column layout */
+        gap: var(--spacing-md);
+    }
 
-  .store-timings-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 12px;
-  }
+    .station-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+    .station-detail-header h2 {
+        font-size: 1.5rem;
+        text-align: center;
+        width: 100%; /* Ensure it takes full width for centering */
+    }
+    .back-button {
+        font-size: 0.95rem;
+        align-self: flex-start;
+    }
+    .view-toggle {
+        width: 100%;
+        justify-content: stretch; /* Stretch buttons */
+        gap: 0; /* Remove gap */
+    }
+    .view-toggle button {
+        flex: 1; /* Equal width buttons */
+        margin: 0;
+        border-radius: 0; /* Remove individual radius for a connected look */
+    }
+    .view-toggle button:first-child {
+        border-top-left-radius: 6px;
+        border-bottom-left-radius: 6px;
+    }
+    .view-toggle button:last-child {
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+    }
 
-  .day-timing {
-    padding: 12px 15px;
-  }
-
-  .day-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  .day-name {
-    font-size: 1rem;
-  }
-
-  .apply-all-btn {
-    align-self: flex-end;
-    font-size: 0.8rem;
-    padding: 5px 10px;
-  }
-
-  .timing-controls {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .time-inputs {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .time-group {
-    flex: 1;
-    min-width: 120px;
-  }
-
-  .time-group input[type="time"] {
-    width: 100%;
-    padding: 10px;
-  }
-
-  .create-partner-btn {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.1rem;
-  }
-
-  .stations-grid,
-  .booking-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .station-card,
-  .booking-card {
-    padding: 16px;
-  }
-
-  .station-detail-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .back-button {
-    font-size: 0.95rem;
-  }
-
-  .view-toggle {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
-
-  .view-toggle button {
-    flex: 1;
-    margin: 0 5px;
-    font-size: 0.95rem;
-  }
+    .month-header {
+        font-size: 1.1rem;
+        padding: var(--spacing-sm);
+    }
+    .week-header {
+        font-size: 0.95rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    .booking-card {
+        padding: var(--spacing-sm);
+        font-size: 0.9rem;
+    }
+    .booking-card p {
+        font-size: 0.9rem;
+    }
 }
 
 @media (max-width: 480px) {
-  .admin-title {
-    font-size: 1.6rem;
-  }
-
-  .admin-section h2 {
-    font-size: 1.3rem;
-  }
-
-  .station-card h3 {
-    font-size: 1.1rem;
-  }
-
-  .booking-card p {
-    font-size: 0.95rem;
-  }
-
-  .station-stats span {
-    font-size: 0.85rem;
-  }
-  
-  .admin-form input,
-  .admin-form select {
-    flex: 1 1 60px;
-  }
-
-  /* Store Timings Mobile Adjustments */
-  .store-timings-section {
-    padding: 12px;
-  }
-
-  .day-timing {
-    padding: 10px 12px;
-  }
-
-  .day-name {
-    font-size: 0.95rem;
-  }
-
-  .apply-all-btn {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-  }
-
-  .time-inputs {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .time-group {
-    width: 100%;
-  }
-
-  .time-group label {
-    min-width: 40px;
-    font-size: 0.85rem;
-  }
-
-  .checkbox-label {
-    font-size: 0.9rem;
-  }
-
-  .closed-label {
-    font-size: 0.85rem;
-  }
+    .admin-title {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    .admin-section h2 {
+        font-size: 1.3rem;
+    }
+    .station-card h3 {
+        font-size: 1.2rem;
+    }
+    .station-stats span {
+        font-size: 0.8rem;
+    }
+    .view-toggle button {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
 }

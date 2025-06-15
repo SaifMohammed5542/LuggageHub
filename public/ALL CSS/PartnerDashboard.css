@@ -1,96 +1,368 @@
-/* PartnerDashboard.css */
+/* Custom Properties (Variables) for consistent styling */
+:root {
+    --primary-color: #4CAF50; /* A fresh green for primary actions */
+    --primary-hover-color: #45a049;
+    --secondary-color: #007bff; /* A nice blue for links/secondary actions */
+    --secondary-hover-color: #0056b3;
+    --danger-color: #dc3545; /* Red for destructive actions */
+    --danger-hover-color: #c82333;
+    --text-color-dark: #333;
+    --text-color-medium: #555;
+    --text-color-light: #777;
+    --bg-light: #f4f6f9; /* Lighter background for dashboard */
+    --bg-card: #ffffff; /* White background for cards/sections */
+    --border-color: #e0e0e0;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --spacing-xs: 8px;
+    --spacing-sm: 12px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+}
 
+/* General Reset and Base Styles */
+body, h1, h2, h3, p, input, select, button, textarea {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+    box-sizing: border-box;
+    line-height: 1.6;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-color-medium);
+}
+
+/* Main Dashboard Container */
 .dashboard-container {
-    padding: 2rem;
-    max-width: 1000px;
-    margin: auto;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f4f7fa;
-    color: #333;
-  }
-  
-  .dashboard-header {
+    padding: var(--spacing-lg);
+    max-width: 1000px; /* Constrain width as before */
+    margin: auto; /* Center the container */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg); /* Consistent spacing between major sections */
+}
+
+/* Dashboard Header (Welcome & Logout) */
+.dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-  }
-  
-  .logout-btn {
-    padding: 0.5rem 1rem;
-    background-color: #ef4444;
-    color: white;
+    margin-bottom: var(--spacing-md); /* Consistent with --spacing-lg gap in container */
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color); /* Add a separator */
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-color-dark);
+    font-weight: 700;
+}
+
+.logout-btn {
+    padding: 0.7rem 1.5rem; /* Larger padding for better touch target */
+    background-color: var(--danger-color); /* Using danger color for logout */
+    color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: var(--danger-hover-color);
+    transform: translateY(-2px);
+}
+
+/* General Section Styles (for Station, Bookings, Handovers) */
+.station-card,
+.bookings-section,
+.handovers-section {
+    background-color: var(--bg-card); /* White card background */
+    padding: var(--spacing-lg); /* Generous padding */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium); /* More pronounced shadow */
+    border: 1px solid var(--border-color); /* Subtle border */
+    /* margin-bottom is handled by gap in dashboard-container */
+}
+
+.station-card h2,
+.bookings-section h2,
+.handovers-section h2 {
+    margin-bottom: var(--spacing-md);
+    font-size: 2rem; /* Consistent heading size */
+    color: var(--text-color-dark);
+    border-bottom: 2px solid var(--primary-color); /* Green accent */
+    padding-bottom: var(--spacing-xs);
+    display: inline-block; /* Make border-bottom only as wide as text */
+}
+
+.station-info p {
+    margin-bottom: var(--spacing-xs); /* Smaller margin for info paragraphs */
+    font-size: 1rem;
+    color: var(--text-color-medium);
+}
+
+.station-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* Bookings & Key Handovers List Box */
+/* We're simplifying; the 'bookings-box' / 'handovers-box' might just be the section itself if content is direct */
+/* If you want an inner box, keep it, otherwise these styles can go directly on the section */
+.bookings-box,
+.handovers-box {
+    /* These can be removed if the section itself takes these styles */
+    /* For now, keeping them as you had them for structure, but they may be redundant */
+    background: transparent; /* Assuming main section already has background */
+    border-radius: var(--border-radius);
+    padding: 0; /* Remove inner padding if outer section has it */
+    box-shadow: none; /* Remove inner shadow if outer section has it */
+}
+
+
+.booking-grid{
+    margin-bottom: 0; /* Remove margin between weeks */
+    border-top: 1px solid var(--border-color); /* Separator between weeks */
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: #fcfcfc;
+}
+.week-section:first-of-type {
+    border-top: none; /* No top border for the first week */
+}
+
+.week-header {
+    background-color: transparent; /* Remove background */
+    padding: 0;
+    margin-bottom: var(--spacing-sm);
+    border-left: none; /* Remove left border */
+    font-size: 1.05rem;
+    color: var(--text-color-dark);
     font-weight: 500;
-  }
-  
-  .logout-btn:hover {
-    background-color: #dc2626;
-  }
-  
-  .station-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-  }
-  
-  .bookings-section h2 {
-    margin-bottom: 1rem;
-  }
-  
-  .bookings-box {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  }
-  
-  .booking-row {
+}
+
+.booking-card {
+    background-color: var(--bg-card);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-light);
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.booking-card p {
+    margin-bottom: 0; /* Remove default paragraph margin */
+    font-size: 0.95rem;
+    color: var(--text-color-medium);
+}
+
+.booking-card p strong {
+    color: var(--text-color-dark);
+}
+
+
+/* Individual Row Styles for Bookings and Handovers */
+.booking-row,
+.handover-row {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: var(--spacing-sm); /* Consistent gap between items in a row */
     align-items: center;
     justify-content: space-between;
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .booking-row:last-child {
-    border-bottom: none;
-  }
-  
-  .status-badge {
-    padding: 0.3rem 0.8rem;
-    border-radius: 9999px;
-    font-size: 0.9rem;
+    padding: var(--spacing-sm) var(--spacing-md); /* Consistent padding for rows */
+    border-bottom: 1px solid var(--border-color); /* Separator between rows */
+    background-color: var(--bg-card); /* White background for each row item */
+    transition: background-color 0.2s ease; /* Smooth transition on hover */
+}
+
+.booking-row:hover,
+.handover-row:hover {
+    background-color: rgba(var(--secondary-color), 0.03); /* Light blue highlight on hover */
+}
+
+.booking-row:last-child,
+.handover-row:last-child {
+    border-bottom: none; /* No border for the last item */
+}
+
+.booking-row div,
+.handover-row div {
+    /* Basic styling for text within the rows */
+    font-size: 0.95rem;
+    color: var(--text-color-medium);
+}
+
+.booking-row strong,
+.handover-row strong {
+    color: var(--text-color-dark); /* Darker text for strong emphasis */
+}
+
+/* Status Badges - Using the new variables for consistency */
+.status-badge {
+    padding: 0.35rem 0.9rem; /* Slightly more padding */
+    border-radius: 9999px; /* Pill shape */
+    font-size: 0.85rem; /* Slightly smaller font */
     font-weight: 600;
     text-transform: uppercase;
-  }
-  
-  .status-badge.confirmed {
-    background-color: #d1fae5;
-    color: #065f46;
-  }
-  
-  .status-badge.pending {
-    background-color: #fef9c3;
-    color: #92400e;
-  }
-  
-  @media (max-width: 768px) {
-    .booking-row {
-      flex-direction: column;
-      align-items: flex-start;
+    text-align: center;
+    min-width: 80px; /* Ensure a minimum width for consistency */
+}
+
+.status-badge.confirmed, /* For Booking status */
+.status-badge.picked-up { /* For Key Handover status */
+    background-color: #d4edda; /* Lighter green */
+    color: #155724; /* Darker green text */
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.pending {
+    background-color: #fff3cd; /* Lighter yellow */
+    color: #856404; /* Darker yellow text */
+    border: 1px solid #ffeeba;
+}
+
+/* If you have other statuses, define them here: */
+.status-badge.failed,
+.status-badge.cancelled {
+    background-color: #f8d7da; /* Lighter red */
+    color: #721c24; /* Darker red text */
+    border: 1px solid #f5c6cb;
+}
+
+/* Code styling for key codes */
+.handover-row code {
+    background-color: var(--bg-light);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 0.85rem;
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
+}
+
+
+.month-header {
+  background-color: var(--secondary-color); /* Primary color for month headers */
+    color: #fff;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: 0; /* Remove margin-bottom to connect with weeks */
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-left: none; /* Remove left border */
+}
+
+.week-header {
+  background-color: transparent; /* Remove background */
+    padding: 0;
+    margin-bottom: var(--spacing-sm);
+    border-left: none; /* Remove left border */
+    font-size: 1.05rem;
+    color: var(--text-color-dark);
+    font-weight: 500;
+}
+
+
+/* ----------------------------
+    📱 Mobile Responsiveness
+----------------------------- */
+@media (max-width: 992px) { /* Adjust breakpoint for larger tablets */
+    .dashboard-container {
+        padding: var(--spacing-md);
     }
-  
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    .logout-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+    .station-card,
+    .bookings-section,
+    .handovers-section {
+        padding: var(--spacing-md);
+    }
+    .station-card h2,
+    .bookings-section h2,
+    .handovers-section h2 {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: var(--spacing-sm); /* Even less padding on smaller devices */
+        gap: var(--spacing-md);
+    }
+
     .dashboard-header {
-      flex-direction: column;
-      gap: 1rem;
-      align-items: flex-start;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm); /* Reduced gap */
     }
-  }
-  
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0; /* No margin below title if header is column */
+    }
+    .logout-btn {
+        width: 100%; /* Full width button on mobile */
+        text-align: center;
+    }
+
+    .station-card,
+    .bookings-section,
+    .handovers-section {
+        padding: var(--spacing-md);
+    }
+
+    .station-card h2,
+    .bookings-section h2,
+    .handovers-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .booking-row,
+    .handover-row {
+        flex-direction: column; /* Stack items vertically */
+        align-items: flex-start;
+        gap: var(--spacing-xs); /* Smaller gap when stacked */
+        padding: var(--spacing-sm); /* Adjust padding for smaller rows */
+    }
+
+    .booking-row div,
+    .handover-row div {
+        width: 100%; /* Ensure each piece of info takes full width */
+        font-size: 0.9rem;
+    }
+    .status-badge {
+        align-self: flex-end; /* Align status badge to the right if desired, or center */
+        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: var(--spacing-xs);
+    }
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    .station-card,
+    .bookings-section,
+    .handovers-section {
+        padding: var(--spacing-sm);
+    }
+    .station-card h2,
+    .bookings-section h2,
+    .handovers-section h2 {
+        font-size: 1.3rem;
+    }
+}

@@ -1,154 +1,369 @@
-/* Input.css - Revamped Design */
+/* Input.css - Revamped Design with Banner-like Styling */
 
-body{
-  background-color:rgb(0, 0, 0);
+/* Base body style - for overall page background if no wrapper covers it */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff; /* Default text color for the page */
+    background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%); /* Consistent with BannerOne */
+    min-height: 100vh; /* Ensure body takes full height for background */
+    display: flex; /* Helps in centering content if booking-wrapper isn't flexed */
+    flex-direction: column; /* Allows Header to be at top, then booking wrapper */
 }
+
+/* Background elements (similar to BannerOne) */
+.booking-page-bg { /* New wrapper for background elements */
+    position: fixed; /* Fixed so it doesn't scroll with content */
+    inset: 0; /* Cover entire viewport */
+    overflow: hidden;
+    z-index: -3; /* Behind everything */
+    background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%); /* Base gradient */
+}
+
+.booking-page-blob1 {
+    position: absolute;
+    top: -30%; /* Adjusted for better placement */
+    left: -30%; /* Adjusted for better placement */
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2));
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float 8s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.booking-page-blob2 {
+    position: absolute;
+    bottom: -30%; /* Adjusted for better placement */
+    right: -30%; /* Adjusted for better placement */
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(225deg, rgba(6, 182, 212, 0.2), rgba(37, 99, 235, 0.2));
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float-delayed 10s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.booking-page-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-size: 60px 60px;
+}
+
+/* Booking Wrapper and Container */
 .booking-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 10px;
-  background-image: url('/images/suit.jpg');
-  background-size: cover;
-  color: #fff; /* White text for contrast */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative; /* Needed for z-index to work against fixed background */
+    z-index: -1; /* Place slightly above the background but below header */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1; /* Allow it to take up remaining vertical space */
+    padding: 20px; /* Consistent padding around the form */
+    /* background-image: url('/images/suit.jpg'); */ /* Remove this if using gradient/blobs */
+    background-size: cover; /* Still useful if you enable the image again */
+    /* color: #fff; */ /* Moved to body or specific elements */
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */ /* Moved to body */
 }
-
-/* .background-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -2; 
-} */
 
 .booking-container {
-  width: 100%;
-  max-width: 600px;
-  background:linear-gradient(to right, #1a8eb5a7, #22b1c4a2);
-  backdrop-filter: blur(10px); /* Glassmorphism effect */
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    width: 100%;
+    max-width: 700px; /* Slightly increased max-width for better form layout */
+    background: rgba(255, 255, 255, 0.08); /* Lighter glassmorphism, consistent with BannerOne */
+    backdrop-filter: blur(20px); /* Increased blur for stronger effect */
+    -webkit-backdrop-filter: blur(20px); /* For Safari support */
+    padding: 30px; /* Increased padding */
+    border-radius: 16px; /* Slightly larger border-radius */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border for glass effect */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Retain shadow */
+    box-sizing: border-box; /* Ensures padding doesn't add to width */
 }
 
 .booking-container h2 {
-  text-align: center;
-  color: #fff;
-  font-size: 28px;
-  margin-bottom: 30px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    color: #fff;
+    font-size: clamp(24px, 4vw, 36px); /* Fluid font size for title */
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4); /* Stronger shadow */
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
-.input-group {
-  margin-bottom: 25px;
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Consistent spacing between form rows/groups */
 }
 
-.double-input {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between label and input */
+    position: relative; /* For error positioning */
 }
 
 label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 500;
-  color: #fff;
+    display: block;
+    margin-bottom: 0; /* Managed by form-group gap */
+    font-weight: 500;
+    color: #e0e7ff; /* Slightly bluish white for labels */
+    font-size: 15px;
 }
 
 input,
 select,
 textarea {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent input fields */
-  color: #fff;
+    width: 100%;
+    padding: 14px 18px; /* Slightly more horizontal padding */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Defined border */
+    border-radius: 8px; /* Slightly larger radius */
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.1); /* Lighter semi-transparent background */
+    color: #fff;
+    box-sizing: border-box; /* Include padding in width */
+    transition: all 0.3s ease; /* Smooth transitions for focus */
+    -webkit-appearance: none; /* Remove default browser styling for selects/inputs */
+    -moz-appearance: none;
+    appearance: none; /* For custom select arrow */
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: none;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    outline: none;
+    border-color: #22d3ee; /* Cyan border on focus */
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.3); /* Glow effect */
+    background: rgba(255, 255, 255, 0.15); /* Slightly darker on focus */
 }
 
+/* Style for disabled inputs */
+input:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Custom arrow for select */
+select {
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px top 50%;
+    background-size: 20px;
+    padding-right: 40px; /* Make space for the custom arrow */
+}
+
+
 textarea {
-  min-height: 120px;
+    min-height: 100px; /* Slightly reduced min-height */
+    resize: vertical; /* Allow vertical resizing */
 }
 
 .checkbox-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-top: 15px;
-  font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    margin-top: 10px; /* Adjusted margin */
+    font-size: 15px; /* Adjust font size */
+    color: #e0e7ff; /* Consistent with labels */
+    gap: 8px; /* Space between checkbox and label */
 }
 
-.checkbox-container input {
-  margin-right: 12px;
-  width: 18px;
-  height: 18px;
+.checkbox-container input[type="checkbox"] {
+    width: 20px; /* Larger checkbox */
+    height: 20px;
+    min-width: 20px; /* Prevent shrinking on flex containers */
+    margin: 0; /* Remove default margin */
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15); /* Match input background */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Match input border */
+    border-radius: 4px; /* Slightly rounded */
+    /* Custom checkbox styling (hide default) */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.checkbox-container span {
-  font-size: 16px;
-  color: #fff;
+.checkbox-container input[type="checkbox"]:checked {
+    background-color: #22d3ee; /* Cyan when checked */
+    border-color: #22d3ee;
 }
+
+.checkbox-container input[type="checkbox"]:checked::after {
+    content: '✔'; /* Checkmark symbol */
+    color: white;
+    font-size: 14px;
+}
+
+/* Error Message Styling */
+.error {
+    color: #ff6b6b; /* More vibrant red for errors */
+    font-size: 13px; /* Slightly smaller font for errors */
+    margin-top: 4px; /* Smaller margin below input */
+    position: absolute; /* Position relative to form-group */
+    bottom: -20px; /* Place below input */
+    left: 0;
+    white-space: nowrap; /* Prevent wrapping for single line errors */
+}
+
+/* Global error message at the bottom */
+p.error {
+    text-align: center;
+    margin-top: 25px;
+    padding: 10px;
+    background-color: rgba(255, 107, 107, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 107, 107, 0.4);
+}
+
 
 .total-amount {
-  text-align: left;
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin: 35px 0;
-  color: #a0f0a0; /* Light green for positive indication */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    text-align: center; /* Centered total amount */
+    font-size: 1.6rem; /* Larger font size */
+    font-weight: 600;
+    margin: 35px 0 25px; /* Adjusted margins */
+    color: #8bff8b; /* Brighter green for total amount */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-.error {
-  color: #ffcccc; /* Light red for errors */
-  font-size: 14px;
-  margin-top: 8px;
-}
-
+/* Loading Spinner */
 .loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 25px;
+    color: #e0e7ff; /* Consistent color */
 }
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-left-color: #fff;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-left-color: #fff;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
+
+/* Animations for background blobs */
+@keyframes float {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+    50% {
+        transform: translateY(-20px) translateX(20px);
+    }
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+@keyframes float-delayed {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+    50% {
+        transform: translateY(20px) translateX(-20px);
+    }
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .double-input {
-    grid-template-columns: 1fr;
-  }
-  .booking-container {
-    padding: 10px;
-  }
+    .form-row {
+        grid-template-columns: 1fr; /* Stack inputs on smaller screens */
+        gap: 25px; /* Slightly more space between stacked inputs */
+    }
+
+    .booking-container {
+        padding: 20px; /* Reduced padding for smaller screens */
+        border-radius: 12px;
+    }
+
+    .booking-container h2 {
+        font-size: clamp(22px, 7vw, 28px); /* Further adjust title font size */
+        margin-bottom: 25px;
+    }
+
+    label {
+        font-size: 14px;
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 12px 15px; /* Slightly smaller padding for inputs */
+        font-size: 15px;
+    }
+
+    .checkbox-container {
+        font-size: 14px;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    .error {
+        font-size: 12px;
+        bottom: -18px;
+    }
+
+    .total-amount {
+        font-size: 1.3rem;
+        margin: 25px 0 20px;
+    }
+
+    /* Hide blobs on very small screens if they cause performance issues or clutter */
+    .booking-page-blob1,
+    .booking-page-blob2 {
+        display: none;
+    }
+}
+
+/* Adjustments for even smaller screens (e.g., iPhone SE) */
+@media (max-width: 480px) {
+    .booking-wrapper {
+        padding: 10px;
+    }
+
+    .booking-container {
+        padding: 15px;
+    }
+
+    .booking-container h2 {
+        font-size: clamp(20px, 6vw, 26px);
+        margin-bottom: 20px;
+    }
 }

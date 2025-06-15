@@ -1,916 +1,823 @@
-/* Reset some default styling */
-/* * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Base Styles */
+.container {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+    display: flex; /* Use flex to center content vertically */
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
+    padding: 24px; /* Add base padding for small screens */
 }
 
-.hero {
-  position: relative;
-  width: 100%;
-  height: 700px;
-  background-image: url('/images/pexels-vlada-karpovich-7368312.jpg');
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  overflow: hidden;
+.backgroundOverlay {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    /* Ensure blobs extend outside for blur effect */
 }
 
-.hero-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 90%;
-  max-width: 1200px;
-  margin: auto;
+.backgroundBlob1 {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 100%; /* Relative to parent, good */
+    height: 100%; /* Relative to parent, good */
+    background: linear-gradient(45deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2));
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float 8s ease-in-out infinite;
+    transform-origin: center; /* Ensures animation works consistently */
 }
 
-.text-content {
-  flex: 1;
-  max-width: 50%;
-  padding: 30px;
-  text-align: left;
-  background: rgba(0, 0, 0, 0.5); 
-  border-radius: 8px;
+.backgroundBlob2 {
+    position: absolute;
+    bottom: -50%;
+    right: -50%;
+    width: 100%; /* Relative to parent, good */
+    height: 100%; /* Relative to parent, good */
+    background: linear-gradient(225deg, rgba(6, 182, 212, 0.2), rgba(37, 99, 235, 0.2));
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float-delayed 10s ease-in-out infinite;
+    transform-origin: center; /* Ensures animation works consistently */
 }
 
-.text-content h2 {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #ff9f00;
-  margin-bottom: 15px;
+.patternOverlay {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-size: 60px 60px;
 }
 
-.text-content p {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  color: #ffffff;
-  margin-bottom: 30px;
+.mainContent {
+    position: relative;
+    z-index: 10;
+    /* min-height: 100vh; */ /* Removed as container now handles centering */
+    padding: 80px 0; /* Vertical padding, horizontal padding handled by contentWrapper */
+    width: 100%; /* Ensure it takes full width of container's padding */
 }
 
-.cta-btn {
-  font-size: 1.5rem;
-  padding: 15px 30px;
-  background-color: #ff9f00;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.contentWrapper {
+    max-width: 1400px; /* Max width for large screens */
+    width: 100%; /* Ensure it fills available space up to max-width */
+    margin: 0 auto; /* Center content wrapper */
+    padding: 0 24px; /* Internal padding for content, moved from mainContent */
 }
 
-.cta-btn:hover {
-  background-color: #f76c00;
+.gridContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Start with a flexible 2-column layout */
+    gap: 48px;
+    align-items: center;
 }
 
-.image-content {
-  flex: 1;
-  text-align: center;
-}
-
-.image-content img {
-  width: 100%;
-  max-width: 450px;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-}
-
-@media (max-width: 1024px) {
-  .hero {
-    height: 600px;
-  }
-
-  .hero-content {
+.leftContent {
+    display: flex;
     flex-direction: column;
+    gap: 32px;
+    transition: all 1s ease-out;
+    /* Added initial visibility state to handle animation */
+    opacity: 0;
+    transform: translateX(-50px);
+}
+
+.leftContent.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Removed hidden-left and hidden-right as transitions will handle initial state */
+
+
+.contentSection {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: fit-content;
+    /* flex-shrink: 0; Prevent badge from shrinking */
+}
+
+.badgeText {
+    color: #22d3ee;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.mainHeading {
+    font-size: clamp(2.5rem, 6vw, 4.5rem); /* Slightly adjusted clamp values for better scaling */
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+    margin: 0;
+    /* Max width for text block */
+    max-width: 600px;
+}
+
+.gradientText {
+    background: linear-gradient(45deg, #22d3ee, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* display: block; Keep as-is if you want line break */
+}
+
+.subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem); /* Slightly adjusted clamp values */
+    color: #d1d5db;
+    line-height: 1.6;
+    max-width: 600px; /* Constrain max width for readability */
+    margin: 0;
+}
+
+.buttonContainer {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    gap: 16px;
+}
+
+.primaryButton,
+.secondaryButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 32px;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    flex-grow: 1; /* Allow buttons to grow and take available space */
+    min-width: 180px; /* Ensure a minimum width */
+}
+
+.primaryButton {
+    background: linear-gradient(45deg, #06b6d4, #2563eb);
+    color: white;
+}
+
+.primaryButton:hover {
+    transform: translateY(-3px); /* Stronger lift effect */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.secondaryButton {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.secondaryButton:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.nearestButton {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: fit-content; /* Keep fit-content for desktop */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nearestButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nearestButton.loading {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.buttonIcon {
+    width: 20px;
+    height: 20px;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+.stationList {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stationHeading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.stationIcon {
+    width: 20px;
+    height: 20px;
+    color: #22d3ee;
+}
+
+.stationContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stationItem {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.stationItem:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.stationInfo {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    align-items: center; /* Vertically align items */
+    justify-content: space-between;
+    gap: 12px; /* Smaller gap for wrapped items */
+}
+
+.stationName {
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+    font-size: 16px;
+    flex-grow: 1; /* Allow name to take more space */
+}
+
+.stationLocation {
+    color: #d1d5db;
+    font-size: 14px;
+    margin: 0;
+}
+
+.directionsButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #0d9488, #06b6d4);
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.directionsButton:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.directionIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.rightContent {
+    position: relative;
+    display: flex; /* Use flex to center visual content */
+    align-items: center;
+    justify-content: center;
+    min-height: 400px; /* Ensure some height even if content is small */
+    transition: all 1s ease-out 0.3s;
+    /* Added initial visibility state to handle animation */
+    opacity: 0;
+    transform: translateX(50px);
+}
+
+.rightContent.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
+.visualContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Ensure it expands to available space */
+    max-width: 500px; /* Limit max width for visual block */
+}
+
+.floatingElement1 {
+    position: absolute;
+    top: -2rem;
+    left: -24px;
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(45deg, #22d3ee, #3b82f6);
+    border-radius: 16px;
+    opacity: 0.8;
+    animation: float 6s ease-in-out infinite;
+    z-index: -1; /* Place behind main visual */
+}
+
+.floatingElement2 {
+    position: absolute;
+    bottom: -2rem;
+    right: 100px;
+    width: 128px;
+    height: 128px;
+    background: linear-gradient(45deg, #a855f7, #ec4899);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: float-delayed 8s ease-in-out infinite;
+    z-index: -1; /* Place behind main visual */
+}
+
+.mainVisual {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    /* bottom: 1rem; Removed this, positioning relative to flex container is better */
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    width: 100%; /* Occupy full width of visualContainer */
+    max-width: 500px; /* Control max size of the visual card */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.visualContent {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 16px;
+    padding: 32px;
     text-align: center;
-  }
-
-  .text-content {
-    max-width: 90%;
-    margin-bottom: 20px;
-  }
-
-  .image-content img {
-    width: 80%;
-  }
+    width: 100%; /* Occupy full width of mainVisual padding */
+    box-sizing: border-box; /* Include padding in width */
 }
 
-@media (max-width: 768px) {
-  .hero {
-    height: 500px;
-  }
-
-  .text-content h2 {
-    font-size: 2.5rem;
-  }
-
-  .text-content p {
-    font-size: 1rem;
-  }
-
-  .cta-btn {
-    font-size: 1.2rem;
-    padding: 12px 25px;
-  }
-
-  .image-content img {
-    width: 90%;
-  }
+.iconContainer {
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(45deg, #22d3ee, #3b82f6);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
 }
 
-@media (max-width: 480px) {
-  .hero {
-    height: 400px;
-  }
-
-  .text-content h2 {
-    font-size: 2rem;
-  }
-
-  .text-content p {
-    font-size: 0.9rem;
-  }
-
-  .cta-btn {
-    font-size: 1rem;
-    padding: 10px 20px;
-  }
-
-  .image-content img {
-    width: 100%;
-  }
-} */
-
-/*banner 2*/
-
-/* Container */
-
-
-/* General Styles */
-/* .hero {
-  background: linear-gradient(135deg, #0077b6, #00a8e8);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 600px;
-  text-align: center;
-  padding: 50px 20px;
+.mainIcon {
+    width: 48px;
+    height: 48px;
+    color: white;
 }
 
-.hero-content {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  max-width: 1200px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+.visualHeading {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
 }
 
-.text-content {
-  flex: 1;
-  text-align: left;
+.visualSubtext {
+    color: #d1d5db;
+    margin-bottom: 24px;
+    line-height: 1.5;
 }
 
-.text-content h2 {
-  font-size: 2.8rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  line-height: 1.3;
+.featureGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    text-align: center;
 }
 
-.text-content p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  opacity: 0.9;
+.featureItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.cta-btn {
-  display: inline-block;
-  padding: 12px 30px;
-  font-size: 1.3rem;
-  color: white;
-  background-color: #ff6f61;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.featureIcon {
+    width: 48px;
+    height: 48px;
+    background-color: rgba(34, 211, 238, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
 }
 
-.cta-btn:hover {
-  background-color: #d85b4c;
-  transform: translateY(-2px);
+.featureText {
+    color: #9ca3af;
+    font-size: 12px;
+    margin: 0;
 }
 
-.image-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Scroll to top button - consider moving to a separate component if always present */
+.topButton {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    padding: 16px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 50;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-.image-content img {
-  width: 100%;
-  max-width: 500px;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
+.topButtonIcon {
+    width: 24px;
+    height: 24px;
 }
 
-.image-content img:hover {
-  transform: scale(1.05);
+/* Keyframe Animations - No change, they are fine */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-@media (max-width: 1024px) {
-  .hero-content {
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-  }
-
-  .text-content {
-      text-align: center;
-      margin-bottom: 20px;
-  }
-
-  .cta-btn {
-      width: 100%;
-  }
-
-  .image-content img {
-      max-width: 80%;
-  }
+@keyframes float {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+    50% {
+        transform: translateY(-20px) translateX(20px);
+    }
+    100% {
+        transform: translateY(0) translateX(0);
+    }
 }
 
-@media (max-width: 768px) {
-  .hero {
-      height: auto;
-      padding: 40px 15px;
-  }
-
-  .text-content h2 {
-      font-size: 2.2rem;
-  }
-
-  .text-content p {
-      font-size: 1.1rem;
-  }
-
-  .cta-btn {
-      font-size: 1.2rem;
-  }
+@keyframes float-delayed {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+    50% {
+        transform: translateY(20px) translateX(-20px);
+    }
+    100% {
+        transform: translateY(0) translateX(0);
+    }
 }
 
-@media (max-width: 480px) {
-  .text-content h2 {
-      font-size: 1.8rem;
-  }
+/* -------------------------------------
+    📱 Media Queries for Responsiveness
+------------------------------------- */
 
-  .text-content p {
-      font-size: 1rem;
-  }
+/* Default for screens smaller than 768px (common mobile breakpoint) */
+@media (max-width: 767px) {
+    .container {
+        padding: 40px 16px; /* Adjust container padding for mobile */
+        min-height: auto; /* Allow height to adjust to content */
+    }
 
-  .cta-btn {
-      font-size: 1rem;
-      padding: 10px 20px;
-  }
-} */
+    .mainContent {
+        padding: 0; /* Remove extra padding, contentWrapper handles it */
+    }
 
+    .contentWrapper {
+        padding: 0; /* Remove inner padding, container handles it */
+    }
 
-/* Hero Section */
-/* .hero {
-  background: url('/images/background.jpg') center/cover no-repeat;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 600px;
-  text-align: center;
-  padding: 50px 20px;
-  position: relative;
-  overflow: hidden;
+    .gridContainer {
+        grid-template-columns: 1fr; /* Stack columns on small screens */
+        gap: 48px; /* Maintain gap between stacked sections */
+    }
+
+    .mainHeading {
+        font-size: 300%; /* Larger fluid font for mobile heading */
+        text-align:start; /* Center heading on mobile */
+        max-width: none; /* Remove max-width constraint */
+    }
+
+    .subtitle {
+        font-size: clamp(1rem, 4vw, 1.125rem); /* Adjust subtitle font for mobile */
+        text-align: center; /* Center subtitle on mobile */
+        max-width: none; /* Remove max-width constraint */
+    }
+
+    .contentSection {
+        align-items: center; /* Center badge, heading, subtitle */
+        text-align: center;
+    }
+
+    .badge {
+        margin: 0 auto; /* Center badge */
+    }
+
+    .buttonContainer {
+        flex-direction: column; /* Stack buttons vertically */
+        align-items: stretch; /* Stretch buttons to full width */
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        width: 100%; /* Full width for stacked buttons */
+        min-width: unset; /* Remove min-width constraint */
+    }
+
+    .nearestButton {
+        width: 100%; /* Full width for nearest button */
+        margin: 0 auto; /* Center button if it doesn't stretch */
+    }
+
+    .stationList {
+        padding: 20px;
+    }
+
+    .stationHeading {
+        justify-content: center; /* Center station heading */
+    }
+
+    .stationInfo {
+        flex-direction: column; /* Stack station name/location and directions button */
+        align-items: flex-start; /* Align text left */
+        gap: 10px;
+    }
+
+    .directionsButton {
+        width: 100%; /* Full width directions button */
+        justify-content: center; /* Center text and icon */
+        margin-top: 8px; /* Add some space above button */
+    }
+
+    .rightContent {
+        min-height: auto; /* Allow visual content to define its height */
+    }
+
+    .visualContainer {
+        max-width: 500px; /* Constrain visual container on mobile */
+        margin: 0 auto; /* Center the visual container */
+    }
+
+    .mainVisual {
+        padding: 24px;
+        width: 100%; /* Take full width of visualContainer */
+        max-width: none; /* Remove max width to allow 100% */
+    }
+
+    .visualContent {
+        padding: 24px;
+        width: 100%; /* Take full width of mainVisual */
+    }
+
+    .featureGrid {
+        grid-template-columns: repeat(3, 1fr); /* 2 columns for features */
+    }
+
+    .floatingElement1,
+    .floatingElement2 {
+        display: none; /* Hide floating elements on very small screens */
+    }
+
+    .topButton {
+        bottom: 16px;
+        right: 16px;
+        padding: 12px;
+        width: 48px; /* Fixed size for mobile top button */
+        height: 48px;
+    }
+    .topButtonIcon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* Medium devices (tablets, 768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .container {
+        padding: 40px 24px;
+    }
+
+    .contentWrapper {
+        padding: 0; /* Already centered by container flex and max-width */
+    }
+
+    .gridContainer {
+        grid-template-columns: 1fr; /* Stack columns on tablets too for better readability */
+        gap: 60px; /* Larger gap when stacked */
+    }
+
+    .mainHeading {
+        font-size: clamp(3rem, 6vw, 4rem); /* Adjust heading size for tablets */
+        max-width: 700px; /* Give it a reasonable max-width */
+        margin: 0 auto; /* Center it */
+    }
+    .subtitle {
+        max-width: 700px; /* Give it a reasonable max-width */
+        margin: 0 auto; /* Center it */
+    }
+
+    .contentSection {
+        align-items: center; /* Center badge, heading, subtitle */
+        text-align: center;
+    }
+
+    .badge {
+        margin: 0 auto;
+    }
+
+    .buttonContainer {
+        flex-direction: row; /* Keep buttons in a row if space allows */
+        justify-content: center; /* Center them */
+        flex-wrap: wrap; /* Allow wrap if necessary */
+    }
+    .primaryButton,
+    .secondaryButton {
+        flex-grow: unset; /* Don't force grow if row */
+        width: auto; /* Let content define width */
+        min-width: 200px; /* Ensure a decent size */
+    }
+
+    .nearestButton {
+        margin: 0 auto; /* Center the button */
+    }
+
+    .stationHeading {
+        justify-content: center; /* Center station heading */
+    }
+
+    .stationInfo {
+        /* Keep as flex-start column if that's preferred, or row based on space */
+        flex-direction: row; /* Allow row layout if it fits */
+        align-items: center;
+    }
+
+    .directionsButton {
+        width: auto; /* Let content define width */
+        margin-top: 0;
+    }
+
+    .visualContainer {
+        max-width: 450px; /* Keep max-width for visual on tablets */
+        margin: 0 auto; /* Center the visual */
+    }
+
+    .mainVisual {
+        width: 100%; /* Fill max-width of visualContainer */
+    }
+
+    .floatingElement1 {
+        top: -1.5rem;
+        left: -20px;
+        width: 88px;
+        height: 88px;
+        display: block; /* Show on tablets */
+    }
+
+    .floatingElement2 {
+        bottom: -1.5rem;
+        right: 90px;
+        width: 110px;
+        height: 110px;
+        display: block; /* Show on tablets */
+    }
 }
 
 
-.hero::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+/* Large devices (laptops/desktops, 1025px to 1440px) */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .gridContainer {
+        /* Adjusted grid to be more flexible */
+        grid-template-columns: minmax(400px, 1fr) minmax(400px, 1fr); /* Flexible columns, min width 400px */
+        gap: 60px; /* Larger gap for more space */
+    }
+
+    .mainHeading {
+        font-size: clamp(3.5rem, 4.5vw, 4.5rem); /* Fine-tune clamp for large screens */
+    }
+
+    .subtitle {
+        font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+    }
+
+    .mainVisual {
+        max-width: 480px; /* Slightly larger max-width for visual */
+    }
+
+    .floatingElement1 {
+        top: -2.5rem;
+        left: -30px;
+        width: 100px;
+        height: 100px;
+    }
+
+    .floatingElement2 {
+        bottom: -2.5rem;
+        right: 110px;
+        width: 130px;
+        height: 130px;
+    }
 }
 
-.hero-content {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 85%;
-  max-width: 1200px;
-  z-index: 1;
+/* Extra large devices (large desktops, 1441px and up) */
+@media (min-width: 1441px) {
+    .gridContainer {
+        grid-template-columns: minmax(500px, 1fr) minmax(500px, 1fr); /* Even more space for content */
+        gap: 80px; /* Larger gap */
+    }
+
+    .mainHeading {
+        font-size: 4.5rem; /* Max out at 4.5rem for huge screens */
+    }
+    .subtitle {
+        font-size: 1.25rem; /* Max out at 1.25rem */
+    }
+
+    .mainVisual {
+        max-width: 550px; /* Larger max-width for visual */
+    }
 }
 
-.text-content {
-  flex: 1;
-  text-align: left;
-  animation: fadeInLeft 1s ease-in-out;
+/* General Hover Effects and Transitions */
+.primaryButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 }
 
-.text-content h2 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 15px;
-  color: #f5f5f5;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+.secondaryButton:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
 }
 
-.text-content p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  opacity: 0.9;
-  color: #ddd;
+.nearestButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.cta-btn {
-  display: inline-block;
-  padding: 12px 30px;
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #fff;
-  background: linear-gradient(45deg, #ff9800, #ff5722);
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
+.stationItem:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
-.cta-btn:hover {
-  background: linear-gradient(45deg, #ff5722, #ff9800);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(255, 87, 34, 0.5);
+.directionsButton:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
 }
 
-.image-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  animation: fadeInRight 1s ease-in-out;
+/* Animations for initial visibility */
+/* Already defined in JSX's style block, but adding here for clarity if you prefer external CSS */
+/* @keyframes spin { ... } */
+/* @keyframes float { ... } */
+/* @keyframes float-delayed { ... } */
+
+/*
+.leftContent.visible {
+    opacity: 1;
+    transform: translateX(0);
 }
 
-.image-content img {
-  width: 100%;
-  max-width: 450px;
-  border-radius: 15px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease-in-out;
+.rightContent.visible {
+    opacity: 1;
+    transform: translateX(0);
 }
-
-.image-content img:hover {
-  transform: scale(1.08);
-}
-
-@keyframes fadeInLeft {
-  from {
-      opacity: 0;
-      transform: translateX(-50px);
-  }
-  to {
-      opacity: 1;
-      transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-      opacity: 0;
-      transform: translateX(50px);
-  }
-  to {
-      opacity: 1;
-      transform: translateX(0);
-  }
-}
-
-@media (max-width: 1024px) {
-  .hero-content {
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-  }
-
-  .text-content {
-      text-align: center;
-      margin-bottom: 20px;
-  }
-
-  .cta-btn {
-      width: 100%;
-  }
-
-  .image-content img {
-      max-width: 80%;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero {
-      height: auto;
-      padding: 40px 15px;
-  }
-
-  .text-content h2 {
-      font-size: 2.5rem;
-  }
-
-  .text-content p {
-      font-size: 1.1rem;
-  }
-
-  .cta-btn {
-      font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .text-content h2 {
-      font-size: 2rem;
-  }
-
-  .text-content p {
-      font-size: 1rem;
-  }
-
-  .cta-btn {
-      font-size: 1rem;
-      padding: 10px 20px;
-  }
-} */
-
-
-/* Hero Section */
-/* .hero {
-  background: url('/images/background.jpg') center/cover no-repeat;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 600px;
-  text-align: center;
-  padding: 50px 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.hero-content {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 85%;
-  max-width: 1200px;
-  z-index: 1;
-}
-
-.text-content {
-  flex: 1;
-  text-align: left;
-  padding: 30px;
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
-  animation: fadeInLeft 1s ease-in-out;
-}
-
-.text-content h2 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 15px;
-  color: #f5f5f5;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-.text-content p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  opacity: 0.9;
-  color: #ddd;
-}
-
-.cta-btn {
-  display: inline-block;
-  padding: 12px 30px;
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #fff;
-  background: linear-gradient(135deg, #2196f3, #0d47a1);
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
-}
-
-.cta-btn:hover {
-  background: linear-gradient(135deg, #0d47a1, #2196f3);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(33, 150, 243, 0.5);
-}
-
-.image-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  animation: fadeInRight 1s ease-in-out;
-}
-
-.image-content img {
-  width: 100%;
-  max-width: 450px;
-  border-radius: 15px;
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s ease-in-out;
-}
-
-.image-content img:hover {
-  transform: scale(1.08);
-}
-
-@keyframes fadeInLeft {
-  from {
-      opacity: 0;
-      transform: translateX(-50px);
-  }
-  to {
-      opacity: 1;
-      transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-      opacity: 0;
-      transform: translateX(50px);
-  }
-  to {
-      opacity: 1;
-      transform: translateX(0);
-  }
-}
-
-@media (max-width: 1024px) {
-  .hero-content {
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-  }
-
-  .text-content {
-      text-align: center;
-      margin-bottom: 20px;
-  }
-
-  .cta-btn {
-      width: 100%;
-  }
-
-  .image-content img {
-      max-width: 80%;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero {
-      height: auto;
-      padding: 40px 15px;
-  }
-
-  .text-content h2 {
-      font-size: 2.5rem;
-  }
-
-  .text-content p {
-      font-size: 1.1rem;
-  }
-
-  .cta-btn {
-      font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .text-content h2 {
-      font-size: 2rem;
-  }
-
-  .text-content p {
-      font-size: 1rem;
-  }
-
-  .cta-btn {
-      font-size: 1rem;
-      padding: 10px 20px;
-  }
-} */
-
-
-/*neon
-
-/* Neon Futuristic Hero Section */
-/* Minimalist & Elegant Hero Section */
-/* Minimalist & Elegant Hero Section */
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* BannerOne.css */
-
-/* Fullscreen Hero Banner with Overlay and Gradient */
-/* Fullscreen Hero Banner with Overlay and Gradient */
-/* Minimalistic Hero Banner Styling */
-/* General Reset */
-/* General Section Styling */
-/* General Section Styling */
-#home.hero {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 87vh;
-  background-color: #fdfffc;
-  color: #034078;
-  padding: 20px;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Hero Content Container */
-.hero-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  width: 100%;
-  gap: 40px;
-  padding: 20px;
-}
-
-/* Text Content Styling */
-.text-content {
-  max-width: 600px;
-  animation: fadeInLeft 1s ease-in-out;
-}
-
-.text-content h2 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-  line-height: 1.2;
-  color: #034078;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.text-content p {
-  font-size: 1.25rem;
-  margin-bottom: 30px;
-  color: #034078c2;
-}
-
-/* CTA Button Styling */
-.cta-btn.neon-glow {
-  background-color: #235789;
-  border: none;
-  padding: 15px 30px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: white;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-}
-
-.cta-btn.neon-glow:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 25px gray;
-}
-
-/* Image Content Styling */
-.image-content {
-  animation: fadeInRight 1s ease-in-out;
-}
-
-.glowing-image {
-  border-radius: 15px;
-  /* box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.glowing-image:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-}
-
-/* Animations */
-@keyframes fadeInLeft {
-  from {
-      opacity: 0;
-      transform: translateX(-50px);
-  }
-  to {
-      opacity: 1;
-      transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-      opacity: 0;
-      transform: translateX(50px);
-  }
-  to {
-      opacity: 1;
-      transform: translateX(0);
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .hero-content {
-      gap: 30px;
-  }
-
-  .text-content h2 {
-      font-size: 2.5rem;
-  }
-
-  .text-content p {
-      font-size: 1.1rem;
-  }
-
-  .cta-btn.neon-glow {
-      padding: 12px 25px;
-      font-size: 1rem;
-  }
-
-  .glowing-image {
-      width: 450px;
-      height: auto;
-  }
-}
-
-@media (max-width: 992px) {
-  .hero-content {
-      flex-direction: column-reverse;
-      text-align: center;
-      gap: 20px;
-  }
-
-  .text-content h2 {
-      font-size: 2.2rem;
-  }
-
-  .text-content p {
-      font-size: 1rem;
-  }
-
-  .cta-btn.neon-glow {
-      padding: 10px 20px;
-      font-size: 0.9rem;
-  }
-
-  .glowing-image {
-      width: 400px;
-      height: auto;
-  }
-}
-
-@media (max-width: 768px) {
-
-  /* #home.hero {
-    min-height: 85vh;
-  } */
-
-  .text-content h2 {
-      font-size: 2rem;
-  }
-
-  .text-content p {
-      font-size: 0.9rem;
-  }
-
-  .cta-btn.neon-glow {
-      padding: 10px 18px;
-      font-size: 0.85rem;
-  }
-
-  .glowing-image {
-      width: 350px;
-      height: auto;
-  }
-}
-
-@media (max-width: 576px) {
-  #home.hero {
-    min-height: 75vh;
-    align-items: flex-start;
-    padding: 0;
-    padding-top: 20px;
-  }
-  .hero-content {
-    padding: 0;
-  }
-
-  .text-content {
-    padding-bottom: 5%;
-  }
-
-  .text-content h2 {
-      font-size: 1.8rem;
-  }
-
-  .text-content p {
-      font-size: 0.85rem;
-  }
-
-  .cta-btn.neon-glow {
-      padding: 8px 16px;
-      font-size: 0.8rem;
-  }
-
-  .glowing-image {
-      width: 300px;
-      height: auto;
-  }
-}
-
-@media (max-width: 400px) {
-
-  #home.hero {
-    min-height: 75vh;
-  }
-
-  .text-content {
-    padding-bottom: 5%;
-  }
-
-  .text-content h2 {
-      font-size: 1.8rem;
-  }
-
-  .text-content p {
-      font-size: 0.9rem;
-  }
-
-  .cta-btn.neon-glow {
-      padding: 10px 17px;
-      font-size: 1rem;
-  }
-
-  .glowing-image {
-      width: 250px;
-      height: auto;
-  }
-}
-
-/* @media (max-width: 385px) {
-  #home.hero {
-    min-height: 77vh;
-  }
-} */
+*/
