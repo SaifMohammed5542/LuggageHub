@@ -12,9 +12,29 @@ export default function AdminDashboard() {
   const [stationLocation, setStationLocation] = useState('');
   const [partnerInfo, setPartnerInfo] = useState({
     username: '',
-    email: '',
     password: '',
-    stationId: ''
+    businessName: '',
+    businessAddress: '',
+    email: '',
+    phone: '',
+    stationId: '',
+    accountDetails: {
+      bsb: '',
+      accountNumber: '',
+      accountHolderName: '',
+      bankName: '',
+      accountType: 'savings'
+    },
+    is24Hours: false,
+    storeTimings: {
+      monday: { open: '09:00', close: '18:00', closed: false },
+      tuesday: { open: '09:00', close: '18:00', closed: false },
+      wednesday: { open: '09:00', close: '18:00', closed: false },
+      thursday: { open: '09:00', close: '18:00', closed: false },
+      friday: { open: '09:00', close: '18:00', closed: false },
+      saturday: { open: '09:00', close: '18:00', closed: false },
+      sunday: { open: '09:00', close: '18:00', closed: false }
+    }
   });
   const [stations, setStations] = useState([]);
   const [token, setToken] = useState('');
@@ -31,6 +51,8 @@ export default function AdminDashboard() {
   const [keyError, setKeyError] = useState('');
 
   const [activeView, setActiveView] = useState('stations'); // 'stations', 'bookings', or 'keys'
+
+  const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -63,6 +85,53 @@ export default function AdminDashboard() {
       setFilteredKeyHandovers(stationKeyHandovers);
     }
   }, [selectedStation, allBookings, allKeyHandovers]);
+
+  // Function to handle account details changes
+  const handleAccountDetailsChange = (field, value) => {
+    setPartnerInfo(prev => ({
+      ...prev,
+      accountDetails: {
+        ...prev.accountDetails,
+        [field]: value
+      }
+    }));
+  };
+
+  // Function to handle store timing changes
+  const handleTimingChange = (day, field, value) => {
+    setPartnerInfo(prev => ({
+      ...prev,
+      storeTimings: {
+        ...prev.storeTimings,
+        [day]: {
+          ...prev.storeTimings[day],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  // Function to handle 24 hours toggle
+  const handle24HoursToggle = () => {
+    setPartnerInfo(prev => ({
+      ...prev,
+      is24Hours: !prev.is24Hours
+    }));
+  };
+
+  // Function to apply same timing to all days
+  const applyToAllDays = (day) => {
+    const dayTiming = partnerInfo.storeTimings[day];
+    const newTimings = {};
+    daysOfWeek.forEach(d => {
+      newTimings[d] = { ...dayTiming };
+    });
+    
+    setPartnerInfo(prev => ({
+      ...prev,
+      storeTimings: newTimings
+    }));
+  };
 
   // Function to get week range string
   const getWeekRange = (date) => {
@@ -297,9 +366,29 @@ export default function AdminDashboard() {
       alert('Partner created');
       setPartnerInfo({
         username: '',
-        email: '',
         password: '',
-        stationId: ''
+        businessName: '',
+        businessAddress: '',
+        email: '',
+        phone: '',
+        stationId: '',
+        accountDetails: {
+          bsb: '',
+          accountNumber: '',
+          accountHolderName: '',
+          bankName: '',
+          accountType: 'savings'
+        },
+        is24Hours: false,
+        storeTimings: {
+          monday: { open: '09:00', close: '18:00', closed: false },
+          tuesday: { open: '09:00', close: '18:00', closed: false },
+          wednesday: { open: '09:00', close: '18:00', closed: false },
+          thursday: { open: '09:00', close: '18:00', closed: false },
+          friday: { open: '09:00', close: '18:00', closed: false },
+          saturday: { open: '09:00', close: '18:00', closed: false },
+          sunday: { open: '09:00', close: '18:00', closed: false }
+        }
       });
     } else {
       alert(data.error || 'Error creating partner');
@@ -349,35 +438,181 @@ export default function AdminDashboard() {
         {/* Create Partner Section */}
         <div className="admin-section">
           <h2>Create Partner</h2>
-          <div className="admin-form">
-            <input
-              value={partnerInfo.username}
-              onChange={(e) => setPartnerInfo({ ...partnerInfo, username: e.target.value })}
-              placeholder="Username"
-            />
-            <input
-              value={partnerInfo.email}
-              onChange={(e) => setPartnerInfo({ ...partnerInfo, email: e.target.value })}
-              placeholder="Email"
-            />
-            <input
-              type="password"
-              value={partnerInfo.password}
-              onChange={(e) => setPartnerInfo({ ...partnerInfo, password: e.target.value })}
-              placeholder="Password"
-            />
-            <select
-              value={partnerInfo.stationId}
-              onChange={(e) => setPartnerInfo({ ...partnerInfo, stationId: e.target.value })}
-            >
-              <option value="">Select Station</option>
-              {stations.map((station) => (
-                <option key={station._id} value={station._id}>
-                  {station.name}
-                </option>
-              ))}
-            </select>
-            <button onClick={handleCreatePartner}>Create Partner</button>
+          <div className="admin-form partner-form">
+            
+            {/* Login Information */}
+            <div className="form-section">
+              <h3 className="section-title">Login Information</h3>
+              <div className="form-grid">
+                <input
+                  value={partnerInfo.username}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, username: e.target.value })}
+                  placeholder="Username"
+                />
+                <input
+                  type="password"
+                  value={partnerInfo.password}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, password: e.target.value })}
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+
+            {/* Business Information */}
+            <div className="form-section">
+              <h3 className="section-title">Business Information</h3>
+              <div className="form-grid">
+                <input
+                  value={partnerInfo.businessName}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, businessName: e.target.value })}
+                  placeholder="Business Name"
+                  className="full-width"
+                />
+                <textarea
+                  value={partnerInfo.businessAddress}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, businessAddress: e.target.value })}
+                  placeholder="Business Address"
+                  className="full-width"
+                  rows="3"
+                />
+                <input
+                  type="email"
+                  value={partnerInfo.email}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, email: e.target.value })}
+                  placeholder="Business Email"
+                />
+                <input
+                  value={partnerInfo.phone}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, phone: e.target.value })}
+                  placeholder="Business Phone"
+                />
+                <select
+                  value={partnerInfo.stationId}
+                  onChange={(e) => setPartnerInfo({ ...partnerInfo, stationId: e.target.value })}
+                  className="full-width"
+                >
+                  <option value="">Select Station</option>
+                  {stations.map((station) => (
+                    <option key={station._id} value={station._id}>
+                      {station.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Bank Account Details */}
+            <div className="form-section">
+              <h3 className="section-title">Bank Account Details</h3>
+              <div className="form-grid">
+                <input
+                  value={partnerInfo.accountDetails.accountHolderName}
+                  onChange={(e) => handleAccountDetailsChange('accountHolderName', e.target.value)}
+                  placeholder="Account Holder Name"
+                  className="full-width"
+                />
+                <input
+                  value={partnerInfo.accountDetails.bankName}
+                  onChange={(e) => handleAccountDetailsChange('bankName', e.target.value)}
+                  placeholder="Bank Name"
+                  className="full-width"
+                />
+                <input
+                  value={partnerInfo.accountDetails.bsb}
+                  onChange={(e) => handleAccountDetailsChange('bsb', e.target.value)}
+                  placeholder="BSB (e.g., 062000)"
+                  maxLength="6"
+                />
+                <input
+                  value={partnerInfo.accountDetails.accountNumber}
+                  onChange={(e) => handleAccountDetailsChange('accountNumber', e.target.value)}
+                  placeholder="Account Number"
+                />
+                <select
+                  value={partnerInfo.accountDetails.accountType}
+                  onChange={(e) => handleAccountDetailsChange('accountType', e.target.value)}
+                  className="full-width"
+                >
+                  <option value="savings">Savings Account</option>
+                  <option value="checking">Checking Account</option>
+                  <option value="business">Business Account</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Store Timings Section */}
+            <div className="form-section">
+              <h3 className="section-title">Store Operating Hours</h3>
+              
+              <div className="timing-option">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={partnerInfo.is24Hours}
+                    onChange={handle24HoursToggle}
+                  />
+                  Open 24 Hours
+                </label>
+              </div>
+
+              {!partnerInfo.is24Hours && (
+                <div className="weekly-timings">
+                  {daysOfWeek.map((day) => (
+                    <div key={day} className="day-timing">
+                      <div className="day-header">
+                        <span className="day-name">
+                          {day.charAt(0).toUpperCase() + day.slice(1)}
+                        </span>
+                        <button 
+                          type="button"
+                          className="apply-all-btn"
+                          onClick={() => applyToAllDays(day)}
+                          title="Apply this timing to all days"
+                        >
+                          Apply to All
+                        </button>
+                      </div>
+                      
+                      <div className="timing-controls">
+                        <label className="closed-label">
+                          <input
+                            type="checkbox"
+                            checked={partnerInfo.storeTimings[day].closed}
+                            onChange={(e) => handleTimingChange(day, 'closed', e.target.checked)}
+                          />
+                          Closed
+                        </label>
+                        
+                        {!partnerInfo.storeTimings[day].closed && (
+                          <div className="time-inputs">
+                            <div className="time-group">
+                              <label>Open:</label>
+                              <input
+                                type="time"
+                                value={partnerInfo.storeTimings[day].open}
+                                onChange={(e) => handleTimingChange(day, 'open', e.target.value)}
+                              />
+                            </div>
+                            <div className="time-group">
+                              <label>Close:</label>
+                              <input
+                                type="time"
+                                value={partnerInfo.storeTimings[day].close}
+                                onChange={(e) => handleTimingChange(day, 'close', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button onClick={handleCreatePartner} className="create-partner-btn">
+              Create Partner
+            </button>
           </div>
         </div>
 

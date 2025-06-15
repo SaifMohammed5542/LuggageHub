@@ -16,7 +16,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { username, email, password, stationId } = await req.json();
+const { username, email, password, stationId, accountDetails } = await req.json();
     if (!username || !email || !password || !stationId) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
@@ -26,13 +26,15 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Partner already exists' }, { status: 409 });
     }
 
-    const partner = new User({
-      username,
-      email,
-      password,
-      role: 'partner',
-      assignedStation: stationId
-    });
+const partner = new User({
+  username,
+  email,
+  password,
+  role: 'partner',
+  assignedStation: stationId,
+  accountDetails
+});
+
 
     await partner.save();
 

@@ -1,3 +1,27 @@
+/* Partner Form Styling */
+.partner-form {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.form-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  margin: 0 0 20px 0;
+  color: #495057;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 8px
+}
+
+
 /* General Reset */
 body, h1, h2, h3, p, input, select, button {
   margin: 0;
@@ -56,6 +80,7 @@ body, h1, h2, h3, p, input, select, button {
 .admin-form select {
   flex: 1 1 200px;
   padding: 12px;
+  color: #000000;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
@@ -82,6 +107,230 @@ body, h1, h2, h3, p, input, select, button {
 
 .admin-form button:hover {
   background-color: #0059c1;
+}
+
+/* Enhanced Partner Form */
+.partner-form {
+  flex-direction: column;
+  gap: 20px;
+}
+
+.partner-basic-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.partner-basic-info input,
+.partner-basic-info select {
+  flex: 1 1 200px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff;
+  transition: border 0.3s;
+}
+
+.partner-basic-info input:focus,
+.partner-basic-info select:focus {
+  border-color: #0070f3;
+  outline: none;
+}
+
+/* Store Timings Section */
+/* Store Timings Section */
+.store-timings-section {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  max-width: 800px;
+  margin: auto;
+}
+
+.store-timings-section h3 {
+  margin-bottom: 16px;
+  color: #343a40;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+/* Timing Option */
+.timing-option {
+  margin-bottom: 20px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1rem;
+  color: #495057;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Weekly Timings */
+.weekly-timings {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  overflow: hidden;
+}
+
+.day-timing {
+  border-bottom: 1px solid #dee2e6;
+  padding: 16px;
+}
+
+.day-timing:last-child {
+  border-bottom: none;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.day-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+  text-transform: capitalize;
+}
+
+.apply-all-btn {
+  background-color: #6c757d;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.apply-all-btn:hover {
+  background-color: #5a6268;
+}
+
+.timing-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.closed-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+.closed-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.time-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.time-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.time-group label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+  min-width: 45px;
+}
+
+.time-group input[type="time"] {
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  transition: border-color 0.3s;
+  min-width: 120px;
+}
+
+.time-group input[type="time"]:focus {
+  border-color: #0070f3;
+  outline: none;
+}
+
+/* Media Queries for Mobile */
+@media (max-width: 600px) {
+  .store-timings-section {
+    padding: 16px;
+  }
+
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .apply-all-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .time-inputs {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .time-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .time-group input[type="time"] {
+    width: 100%;
+  }
+}
+
+
+/* Create Partner Button */
+.create-partner-btn {
+  align-self: flex-start;
+  padding: 12px 30px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.create-partner-btn:hover {
+  background-color: #218838;
 }
 
 /* Stations Grid */
@@ -191,8 +440,6 @@ body, h1, h2, h3, p, input, select, button {
   margin-top: 10px;
 }
 
-
-
 .week-section {
   margin-bottom: 20px;
   margin-left: 20px;
@@ -221,21 +468,6 @@ body, h1, h2, h3, p, input, select, button {
   color: #333;
   font-weight: 600;
 }
-
-/* @media (max-width: 600px) {
-  .admin-form {
-    flex-direction: column;
-  }
-
-  .station-detail-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .view-toggle {
-    margin-top: 10px;
-  }
-} */
 
 /* ----------------------------
    📱 Mobile Responsiveness
@@ -270,10 +502,79 @@ body, h1, h2, h3, p, input, select, button {
     width: 100%;
     font-size: 1rem;
     flex: 1 1 60px;
-    
   }
+  
   .admin-form button {
     padding: 12px 24px;
+  }
+
+  /* Partner Form Mobile */
+  .partner-basic-info {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .partner-basic-info input,
+  .partner-basic-info select {
+    width: 100%;
+    flex: 1 1 60px;
+  }
+
+  .store-timings-section {
+    padding: 15px;
+  }
+
+  .store-timings-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+
+  .day-timing {
+    padding: 12px 15px;
+  }
+
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .day-name {
+    font-size: 1rem;
+  }
+
+  .apply-all-btn {
+    align-self: flex-end;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+
+  .timing-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .time-inputs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .time-group {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .time-group input[type="time"] {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .create-partner-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
   }
 
   .stations-grid,
@@ -331,9 +632,49 @@ body, h1, h2, h3, p, input, select, button {
   .station-stats span {
     font-size: 0.85rem;
   }
+  
   .admin-form input,
   .admin-form select {
-  flex: 1 1 60px;
-}
+    flex: 1 1 60px;
+  }
 
+  /* Store Timings Mobile Adjustments */
+  .store-timings-section {
+    padding: 12px;
+  }
+
+  .day-timing {
+    padding: 10px 12px;
+  }
+
+  .day-name {
+    font-size: 0.95rem;
+  }
+
+  .apply-all-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+
+  .time-inputs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .time-group {
+    width: 100%;
+  }
+
+  .time-group label {
+    min-width: 40px;
+    font-size: 0.85rem;
+  }
+
+  .checkbox-label {
+    font-size: 0.9rem;
+  }
+
+  .closed-label {
+    font-size: 0.85rem;
+  }
 }
