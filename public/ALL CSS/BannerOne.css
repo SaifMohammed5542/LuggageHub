@@ -453,26 +453,45 @@
 }
 
 /* Scroll to top button - consider moving to a separate component if always present */
-.topButton {
+/* Add these styles to your existing BannerOne.css file */
+
+.scrollToTopButton {
     position: fixed;
-    bottom: 32px;
-    right: 32px;
-    padding: 16px;
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
+    bottom: 20px;
+    right: 20px;
+    background-color: #a78bfa; /* Soft purple, matches your theme */
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
+    border: none;
+    border-radius: 50%; /* Makes it circular */
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    z-index: 50;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 999; /* Ensure it's above other content */
 }
 
-.topButtonIcon {
-    width: 24px;
+.scrollToTopButton:hover {
+    background-color: #8b5cf6; /* Slightly darker purple on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.scrollToTopIcon {
+    width: 24px; /* Size of the Lucide icon */
     height: 24px;
 }
+
+/* You already have the keyframes in the JSX <style> block,
+   but for better organization, you could move them here too if you prefer.
+   I've left them in JSX as they were, but noting it for best practices. */
+/* @keyframes spin { ... } */
+/* @keyframes float { ... } */
+/* @keyframes float-delayed { ... } */
+/* .animate-float { ... } */
+/* .animate-float-delayed { ... } */
 
 /* Keyframe Animations - No change, they are fine */
 @keyframes spin {
