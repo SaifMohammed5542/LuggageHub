@@ -18,8 +18,9 @@ import Amount from '../components/Amount'
 // import LuggageStorage from '../components/Leaflet'
 // import MapWithDirections from "../components/Map.js";
 // import MapButton from "../components/MapButton"
-
 import Loader from '../components/Loader'; // ✅ Import your Loader
+import Testimonials from '../components/testimonials'; // ✅ Import Testimonials if needed
+
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -90,6 +91,7 @@ function App() {
       <Amount />
       <Cards2 howItWorksRef={howItWorksRef} />
       <Locations />
+      <Testimonials />
       <Cards servicesRef={servicesRef} />
       <ConBanner />
       <Footer />
