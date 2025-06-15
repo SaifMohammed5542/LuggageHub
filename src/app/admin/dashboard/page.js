@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import '../../../../public/ALL CSS/AdminDashboard.css';
 import { useRouter } from 'next/navigation';
@@ -10,6 +9,8 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [stationName, setStationName] = useState('');
   const [stationLocation, setStationLocation] = useState('');
+  const [stationLatitude, setStationLatitude] = useState('');
+  const [stationLongitude, setStationLongitude] = useState('');
   const [partnerInfo, setPartnerInfo] = useState({
     username: '',
     password: '',
@@ -331,13 +332,29 @@ export default function AdminDashboard() {
   };
 
   const handleCreateStation = async () => {
+    // 1. Convert latitude and longitude inputs to numbers
+    const lat = parseFloat(stationLatitude);
+    const lon = parseFloat(stationLongitude);
+
+    // 2. Basic validation: make sure they are valid numbers
+    if (isNaN(lat) || isNaN(lon)) {
+      alert('Latitude and Longitude must be valid numbers.');
+      return; // Stop the function if validation fails
+    }
+
     const res = await fetch('/api/admin/station', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ name: stationName, location: stationLocation })
+      // 3. Include latitude and longitude in the data sent to the backend
+      body: JSON.stringify({
+        name: stationName,
+        location: stationLocation,
+        latitude: lat,   // New: Sending latitude
+        longitude: lon   // New: Sending longitude
+      })
     });
 
     const data = await res.json();
@@ -345,6 +362,9 @@ export default function AdminDashboard() {
       alert('Station created');
       setStationName('');
       setStationLocation('');
+      // 4. Clear the new latitude and longitude fields after success
+      setStationLatitude('');
+      setStationLongitude('');
       fetchStations(token);
     } else {
       alert(data.error || 'Error creating station');
@@ -430,6 +450,18 @@ export default function AdminDashboard() {
               value={stationLocation}
               onChange={(e) => setStationLocation(e.target.value)}
               placeholder="Station Location"
+            />
+            <input
+              type="text" // Use text for decimal numbers
+              value={stationLatitude}
+              onChange={(e) => setStationLatitude(e.target.value)}
+              placeholder="Latitude (e.g., -33.86)"
+            />
+            <input
+              type="text" // Use text for decimal numbers
+              value={stationLongitude}
+              onChange={(e) => setStationLongitude(e.target.value)}
+              placeholder="Longitude (e.g., 151.20)"
             />
             <button onClick={handleCreateStation}>Create Station</button>
           </div>

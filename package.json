@@ -22,6 +22,7 @@
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
     "firebase": "^11.5.0",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
@@ -38,6 +39,7 @@
     "react-leaflet": "^5.0.0",
     "react-map-gl": "^8.0.1",
     "resend": "^4.5.1",
+    "slugify": "^1.6.6",
     "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
