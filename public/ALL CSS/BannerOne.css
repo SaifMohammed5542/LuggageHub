@@ -553,7 +553,7 @@
 
     .mainHeading {
         font-size: 300%; /* Larger fluid font for mobile heading */
-        text-align:start; /* Center heading on mobile */
+        text-align:center; /* Center heading on mobile */
         max-width: none; /* Remove max-width constraint */
     }
 
