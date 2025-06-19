@@ -39,58 +39,69 @@ export async function POST(request) {
     await newBooking.save();
 
     // ✅ Email setup
+    console.log("USER:", process.env.EMAIL_USER);
+console.log("PASS length:", process.env.EMAIL_PASS?.length);
+
+
+
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+      host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT),
+  secure: true, // true for 465, false for 587
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
-    const adminMailOptions = {
-      from: process.env.EMAIL_USER,
-      to: "luggage5542@gmail.com",
-      subject: "New Luggage Storage Booking",
-      text: `
-        New Booking Details:
-        -------------------
-        Full Name: ${fullName}
-        Email: ${email}
-        Phone: ${phone}
-        Drop-off Date: ${dropOffDate}
-        Pick-up Date: ${pickUpDate}
-        Luggage Count: ${luggageCount}
-        Special Instructions: ${specialInstructions}
-        Payment ID: ${paymentId}
-        Station ID: ${stationId}
-      `,
-    };
+const adminMailOptions = {
+  from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
+  to: "luggage5542@gmail.com",
+  subject: "🧳 New Luggage Storage Booking",
+  text: `
+    📦 New Booking Details:
+    -------------------------
+    🙍 Full Name: ${fullName}
+    📧 Email: ${email}
+    📱 Phone: ${phone}
+    📅 Drop-off Date: ${dropOffDate}
+    📦 Pick-up Date: ${pickUpDate}
+    🎒 Luggage Count: ${luggageCount}
+    📝 Special Instructions: ${specialInstructions}
+    💳 Payment ID: ${paymentId}
+    📍 Station ID: ${stationId}
 
-    const userMailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Your Luggage Storage Booking Confirmation",
-      text: `
-        Dear ${fullName},
+    ❓ For any admin inquiries, reach out to support@luggageterminal.com
+  `,
+};
 
-        Thank you for booking with us! Here are your booking details:
+const userMailOptions = {
+  from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
+  to: email,
+  subject: "✅ Your Luggage Storage Booking Confirmation",
+  html: `
+    <p>Dear ${fullName},</p>
 
-        Full Name: ${fullName}
-        Email: ${email}
-        Phone: ${phone}
-        Drop-off Date: ${dropOffDate}
-        Pick-up Date: ${pickUpDate}
-        Luggage Count: ${luggageCount}
-        Special Instructions: ${specialInstructions}
-        Payment ID: ${paymentId}
-        Station ID: ${stationId}
+    <p>🙏 Thank you for booking with us! Here are your booking details:</p>
 
-        If you have any questions, feel free to contact us.
+    <p>🙍 <strong>Full Name:</strong> ${fullName}</p>
+    <p>📧 <strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+    <p>📱 <strong>Phone:</strong> ${phone}</p>
+    <p>📅 <strong>Drop-off Date:</strong> ${dropOffDate}</p>
+    <p>📦 <strong>Pick-up Date:</strong> ${pickUpDate}</p>
+    <p>🎒 <strong>Luggage Count:</strong> ${luggageCount}</p>
+    <p>📝 <strong>Special Instructions:</strong> ${specialInstructions}</p>
+    <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
+    <p>📍 <strong>Station ID:</strong> ${stationId}</p>
 
-        Best regards,
-        Your Luggage Terminal Team
-      `,
-    };
+    <p>❓ If you have any questions, feel free to contact us at 
+    <a href="mailto:support@luggageterminal.com">support@luggageterminal.com</a>.</p>
+
+    <p>Best regards,<br/>
+    🧳 <strong>Your Luggage Terminal Team</strong></p>
+  `,
+};
+
 
     await transporter.sendMail(adminMailOptions);
     await transporter.sendMail(userMailOptions);

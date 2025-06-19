@@ -79,14 +79,6 @@ function App() {
           rel="stylesheet"
           />
       </Head>
-      <Head>
-        <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
-<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="MyWebSite" />
-<link rel="manifest" href="%PUBLIC_URL%/site.webmanifest" />
-      </Head>
 
 
       <div className='Holder'>

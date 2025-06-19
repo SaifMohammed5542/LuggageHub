@@ -31,9 +31,8 @@ export const metadata: Metadata = {
     // You can add more properties here as needed, e.g.,
     // statusBarStyle: 'default',
     // capable: true,
-  },
-  // Theme color for Android browser (often comes from RealFaviconGenerator)
-  themeColor: '#ffffff', // Example, use the color provided by RealFaviconGenerator
+  }
+  // Theme color for Android browser (often comes from RealFaviconGenerator// Example, use the color provided by RealFaviconGenerator
 };
 // --- END OF KEY CHANGE ---
 

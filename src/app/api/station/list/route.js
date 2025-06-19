@@ -5,10 +5,14 @@ import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
+  
   await dbConnect();
 
   const authHeader = req.headers.get('authorization');
+  console.log("Auth Header:", authHeader); // ✅ Add this
   const token = authHeader?.split(' ')[1];
+  console.log("Token extracted:", token); // ✅ Add this
+
 
   try {
     // If a token is present, verify it (optional, for potential future use)
