@@ -56,7 +56,7 @@ console.log("PASS length:", process.env.EMAIL_PASS?.length);
 
 const adminMailOptions = {
   from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
-  to: "luggage5542@gmail.com",
+  to: process.env.EMAIL_ADMIN,
   subject: "🧳 New Luggage Storage Booking",
   text: `
     📦 New Booking Details:
