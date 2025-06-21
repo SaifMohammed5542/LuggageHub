@@ -8,7 +8,6 @@ import Station from "../../../models/Station";
 import User from "../../../models/User";
 void User;
 
-
 export async function POST(request) {
   try {
     await dbConnect(); // Connect to MongoDB
@@ -99,21 +98,24 @@ export async function POST(request) {
       `,
     };
 
-    // ✅ Fetch partner for the station
-    const station = await Station.findById(stationId).populate("partner");
+    // ✅ Fetch station and all assigned partners
+    const station = await Station.findById(stationId).populate("partners");
 
-    if (station?.partner?.email) {
-      const partnerMailOptions = {
-        from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
-        to: station.partner.email,
-        subject: "🧳 New Luggage Storage Booking at Your Station",
-        text: adminMailOptions.text, // same content as admin
-      };
-
-      await transporter.sendMail(partnerMailOptions);
+    // ✅ Email to all partners of that station
+    if (station?.partners?.length) {
+      for (const partner of station.partners) {
+        if (partner?.email && partner.role === 'partner') {
+          await transporter.sendMail({
+            from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
+            to: partner.email,
+            subject: "🧳 New Luggage Storage Booking at Your Station",
+            text: adminMailOptions.text,
+          });
+        }
+      }
     }
 
-    // ✅ Send all mails
+    // ✅ Send admin and user emails
     await transporter.sendMail(adminMailOptions);
     await transporter.sendMail(userMailOptions);
 

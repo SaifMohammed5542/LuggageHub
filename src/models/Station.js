@@ -21,11 +21,11 @@ const StationSchema = new mongoose.Schema({
       required: true
     }
   },
-  partner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
+  partners: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User'
+}],
+
   createdAt: { type: Date, default: Date.now }
 });
 
