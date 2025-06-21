@@ -64,7 +64,7 @@ function App() {
         <title>Luggage Terminal | Safe & Secure in Australia</title>
         <meta
           name="keywords"
-          content="luggage storage online, luggage, booking,luggage terminal, luggage booking, luggage storage australia, luggage storage melbourne, secure luggage storage, travel storage solutions, baggage storage services"
+          content="luggage storage online, luggage, booking,luggage terminal, luggage booking, luggage storage australia, luggage terminal melbourne, luggage storage melbourne, secure luggage storage, travel storage solutions, baggage storage services"
         />
         <meta
           name="description"
