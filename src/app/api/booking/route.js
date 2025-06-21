@@ -6,6 +6,7 @@ import Booking from "../../../models/booking";
 import Station from "../../../models/Station";
 // eslint-disable-next-line no-unused-vars
 import User from "../../../models/User";
+void User;
 
 
 export async function POST(request) {
