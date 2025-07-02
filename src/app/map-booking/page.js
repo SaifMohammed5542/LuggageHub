@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import InteractiveMap from "../../components/InteractiveMap";
-import LuggageBookingForm from "../booking-form/page";
+import LuggageBookingForm from "../../components/LuggageBookingForm";
 import GoogleMapsWrapper from "../../components/GoogleMapsWrapper";
 import "../../../public/ALL CSS/MapBooking.css";
 import { motion, AnimatePresence } from "framer-motion";
