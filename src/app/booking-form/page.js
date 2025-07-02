@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
 import "../../../public/ALL CSS/spinner.css";
 import PayPalPayment from "../../components/LuggagePay";
-// import Header from "../../components/Header";
+import Header from "../../components/Header";
 
 const LuggageBookingForm = ({ prefilledStation = null }) => {
   const [formData, setFormData] = useState({
@@ -152,7 +152,7 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
 
   return (
     <>
-      {/* {!prefilledStation && <Header />} */}
+      {!prefilledStation && <Header />}
       <div className="booking-wrapper">
         <div className="booking-container">
           <h2 className="booking-title">📦 Luggage Storage Booking</h2>
