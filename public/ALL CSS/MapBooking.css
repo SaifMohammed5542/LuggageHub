@@ -1,0 +1,190 @@
+.map-booking-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.map-container {
+  flex: 2;
+  position: relative;
+}
+
+.form-container {
+  flex: 1;
+  background-color: #fff;
+  overflow-y: auto;
+  transition: all 0.3s ease-in-out;
+  padding: 20px;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.form-container.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-container.visible,
+.form-container.always-visible {
+  transform: translateX(0%);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.custom-info-window {
+  font-family: Arial, sans-serif;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.custom-info-window strong {
+  font-weight: 600;
+}
+
+.custom-info-window .distance {
+  font-size: 13px;
+  color: #444;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .map-booking-wrapper {
+    flex-direction: column;
+  }
+
+  .map-container {
+    flex: none;
+    height: 50vh;
+  }
+
+  .form-container {
+    flex: none;
+    height: 50vh;
+    padding: 15px;
+  }
+
+  .form-container,
+  .form-container.desktop-only {
+    display: none !important;
+  }
+}
+
+/* Desktop Form Layout Fix */
+@media (min-width: 769px) {
+  .form-container.desktop-only.always-visible {
+    display: block;
+    max-height: 100vh;
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
+/* Selected Station Banner */
+.selected-station-banner {
+  background-color: #f5f5f5;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-left: 4px solid #0077cc;
+}
+
+/* Framer Motion Drawer for Mobile */
+.form-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 95vh;
+  background: rgba(0, 0, 0, 0.95);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 9999;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Close button inside drawer */
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 10000;
+}
+
+/* Enhanced Station Search Bar */
+.station-search-bar {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+}
+
+.station-search-bar input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 16px 12px 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  font-size: 16px;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  background-image: url("/icons/search-icon.png");
+  background-repeat: no-repeat;
+  background-size: 18px;
+  background-position: 12px center;
+  transition: all 0.3s ease;
+}
+
+.station-search-bar input::placeholder {
+  color: #555;
+}
+
+.station-search-bar input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Suggestions Dropdown */
+.suggestions-list {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  list-style: none;
+  padding: 0;
+  overflow: hidden;
+  z-index: 11;
+}
+
+.suggestions-list li {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 15px;
+  color: #111;
+}
+
+.suggestions-list li:hover {
+  background-color: #f3f4f6;
+}

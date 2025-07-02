@@ -1,11 +1,12 @@
+// /app/booking-form/page.js
 "use client";
 import React, { useState, useEffect } from "react";
-import "../../../public/ALL CSS/Input.css";
+import "../../../public/ALL CSS/directbooking.css";
 import "../../../public/ALL CSS/spinner.css";
-import PayPalPayment from "../../components/LuggagePay";
-import Header from "../../components/Header";
+import Header from "../../components/Header.js";
+import PayPalPayment from "../../components/LuggagePay.js";
 
-const LuggageBookingForm = ({ prefilledStation = null }) => {
+const LuggageBookingForm = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -24,9 +25,12 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const ratePerLuggagePerDay = 7.99;
   const [hasSpecialInstructions, setHasSpecialInstructions] = useState(false);
 
-  const ratePerLuggagePerDay = 7.99;
+  const handleSpecialInstructionsChange = (e) => {
+    setHasSpecialInstructions(e.target.checked);
+  };
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -44,11 +48,15 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         const response = await fetch("/api/station/list", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         setStations(data.stations);
       } catch (error) {
@@ -59,22 +67,12 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
     fetchStations();
   }, []);
 
-  // Auto-select prefilled station if different
-  useEffect(() => {
-    if (prefilledStation?._id && prefilledStation._id !== formData.stationId) {
-      setFormData((prev) => ({
-        ...prev,
-        stationId: prefilledStation._id,
-      }));
-    }
-  }, [prefilledStation]);
-
   const calculateNumberOfDays = () => {
     if (!formData.dropOffDate || !formData.pickUpDate) return 1;
     const dropOff = new Date(formData.dropOffDate);
     const pickUp = new Date(formData.pickUpDate);
-    const diffInMs = pickUp - dropOff;
-    return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+    const differenceInMs = pickUp - dropOff;
+    return Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
   };
 
   const numberOfDays = calculateNumberOfDays();
@@ -113,7 +111,8 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
       const pickUp = new Date(formData.pickUpDate);
       const timeDifferenceInHours = (pickUp - dropOff) / (1000 * 60 * 60);
       if (timeDifferenceInHours < 1) {
-        errors.pickUpDate = "Pick-up time must be at least 1 hour after drop-off.";
+        errors.pickUpDate =
+          "Pick-up time must be at least 1 hour after drop-off time.";
       }
     }
 
@@ -129,12 +128,10 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, paymentId }),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to send booking details.");
       }
-
       const data = await response.json();
       if (data.success) window.location.href = "/Booked";
       else alert("❌ Failed to send booking email.");
@@ -146,45 +143,37 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
     }
   };
 
-  const handleSpecialInstructionsChange = (e) => {
-    setHasSpecialInstructions(e.target.checked);
-  };
-
   return (
     <>
-      {/* {!prefilledStation && <Header />} */}
+      <Header />
       <div className="booking-wrapper">
         <div className="booking-container">
           <h2 className="booking-title">📦 Luggage Storage Booking</h2>
-
-          {prefilledStation && (
-            <div className="selected-station-banner">
-              Booking for: <strong>{prefilledStation.name}</strong> (
-              {prefilledStation.location})
-            </div>
-          )}
-
           <form className="booking-form">
             <div className="form-row">
               <div className="form-group">
-                <label>👤 Full Name</label>
+                <label htmlFor="fullName">👤 Full Name</label>
                 <input
                   type="text"
+                  id="fullName"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   disabled={isUserLoggedIn}
+                  required
                 />
                 {errors.fullName && <span className="error">{errors.fullName}</span>}
               </div>
               <div className="form-group">
-                <label>✉️ Email</label>
+                <label htmlFor="email">✉️ Email</label>
                 <input
                   type="email"
+                  id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isUserLoggedIn}
+                  required
                 />
                 {errors.email && <span className="error">{errors.email}</span>}
               </div>
@@ -192,26 +181,29 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>📞 Phone</label>
+                <label htmlFor="phone">📞 Phone</label>
                 <input
                   type="tel"
+                  id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  required
                 />
                 {errors.phone && <span className="error">{errors.phone}</span>}
               </div>
-
               <div className="form-group">
-                <label>🎒 Luggage Count</label>
+                <label htmlFor="luggageCount">🎒 Luggage Count</label>
                 <select
+                  id="luggageCount"
                   name="luggageCount"
                   value={formData.luggageCount}
                   onChange={handleChange}
+                  required
                 >
-                  {[...Array(10).keys()].map((n) => (
-                    <option key={n + 1} value={n + 1}>
-                      {n + 1}
+                  {[...Array(10).keys()].map((num) => (
+                    <option key={num + 1} value={num + 1}>
+                      {num + 1}
                     </option>
                   ))}
                 </select>
@@ -220,23 +212,27 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>📅 Drop-off</label>
+                <label htmlFor="dropOffDate">📅 Drop-off</label>
                 <input
                   type="datetime-local"
+                  id="dropOffDate"
                   name="dropOffDate"
                   value={formData.dropOffDate}
                   onChange={handleChange}
+                  required
                   min={new Date().toISOString().slice(0, 16)}
                 />
                 {errors.dropOffDate && <span className="error">{errors.dropOffDate}</span>}
               </div>
               <div className="form-group">
-                <label>📅 Pick-up</label>
+                <label htmlFor="pickUpDate">📅 Pick-up</label>
                 <input
                   type="datetime-local"
+                  id="pickUpDate"
                   name="pickUpDate"
                   value={formData.pickUpDate}
                   onChange={handleChange}
+                  required
                   min={
                     formData.dropOffDate
                       ? new Date(new Date(formData.dropOffDate).getTime() + 4 * 60 * 60 * 1000)
@@ -250,21 +246,21 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
             </div>
 
             <div className="form-group">
-              <label>📍 Selected Station:</label>
-<select
-  name="stationId"
-  value={formData.stationId}
-  onChange={handleChange}
-  disabled={!!prefilledStation} // 🔒 disables dropdown if a station is prefilled
->
-  <option value="">-- Select a Station --</option>
-  {stations.map((station) => (
-    <option key={station._id} value={station._id}>
-      {station.name} ({station.location})
-    </option>
-  ))}
-</select>
-
+              <label htmlFor="stationId">📍 Select Station:</label>
+              <select
+                id="stationId"
+                name="stationId"
+                value={formData.stationId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select a Station --</option>
+                {stations.map((station) => (
+                  <option key={station._id} value={station._id}>
+                    {station.name} ({station.location})
+                  </option>
+                ))}
+              </select>
               {errors.stationId && <span className="error">{errors.stationId}</span>}
             </div>
 
@@ -272,6 +268,7 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
               <input
                 type="checkbox"
                 id="hasSpecialInstructions"
+                name="hasSpecialInstructions"
                 checked={hasSpecialInstructions}
                 onChange={handleSpecialInstructionsChange}
               />
@@ -279,14 +276,14 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
             </div>
 
             {hasSpecialInstructions && (
-              <div className="form-group">
+              <div className="input-group">
                 <label>📝 Special Instructions</label>
                 <select
                   name="specialInstructions"
                   value={formData.specialInstructions}
                   onChange={handleChange}
                 >
-                  <option value="">Select</option>
+                  <option value="">Select instructions</option>
                   <option value="Fragile items">Fragile items</option>
                   <option value="Oversized luggage">Oversized luggage</option>
                   <option value="Specific delivery time">Specific delivery time</option>
@@ -295,17 +292,21 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
               </div>
             )}
 
-            <div className="form-group checkbox-container">
-              <input
-                type="checkbox"
-                name="termsAccepted"
-                checked={formData.termsAccepted}
-                onChange={handleChange}
-              />
-              <label>I agree to the terms and conditions</label>
-              {errors.termsAccepted && (
-                <span className="error">{errors.termsAccepted}</span>
-              )}
+            <div className="form-group">
+              <div className="checkbox-container">
+                <input
+                  type="checkbox"
+                  id="termsAccepted"
+                  name="termsAccepted"
+                  checked={formData.termsAccepted}
+                  onChange={handleChange}
+                  required
+                />
+                <label htmlFor="termsAccepted">I agree to the terms and conditions</label>
+                {errors.termsAccepted && (
+                  <span className="error">{errors.termsAccepted}</span>
+                )}
+              </div>
             </div>
           </form>
 
@@ -326,7 +327,7 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
             />
           ) : (
             <p className="error">
-              Please fill out all required fields and agree to the terms.
+              Please fill out all required fields and agree to the terms to continue.
             </p>
           )}
         </div>

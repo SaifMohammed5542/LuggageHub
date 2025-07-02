@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Luggage, Key, MapPin, Navigation, Loader, ChevronUp } from 'lucide-react'; // Added ChevronUp
+import { Luggage, Key, MapPin, Navigation, Loader, ChevronUp, PackageSearch } from 'lucide-react'; // Added ChevronUp
 import '../../public/ALL CSS/BannerOne.css'
 
 const BannerOne = () => {
@@ -155,12 +155,21 @@ const BannerOne = () => {
                             {/* Action buttons */}
                             <div className="buttonContainer">
                                 <button
-                                    onClick={() => handleNavigation("/booking-form")}
+                                    onClick={() => handleNavigation("/map-booking")}
+                                    className="primaryButton"
+                                >
+                                    <PackageSearch className="buttonIcon" />
+                                    <span>Find & Book Nearest Storage</span>
+                                </button>
+                                
+                                 <button
+                                    onClick={() => handleNavigation("/direct-booking")}
                                     className="primaryButton"
                                 >
                                     <Luggage className="buttonIcon" />
-                                    <span>Book Storage</span>
+                                    <span>Direct Booking</span>
                                 </button>
+
 
                                 <button
                                     onClick={() => handleNavigation("/key-handover")}
@@ -182,7 +191,7 @@ const BannerOne = () => {
                                 ) : (
                                     <MapPin className="buttonIcon" />
                                 )}
-                                <span>{loadingNearest ? 'Finding...' : 'Find Nearest Storage'}</span>
+                                <span>{loadingNearest ? 'Finding...' : 'Directions to Nearest Storage'}</span>
                             </button>
 
                             {/* Station list */}
