@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../../../public/ALL CSS/Input.css";
 import "../../../public/ALL CSS/spinner.css";
 import PayPalPayment from "../../components/LuggagePay";
-import Header from "../../components/Header";
+// import Header from "../../components/Header";
 
 const LuggageBookingForm = ({ prefilledStation = null }) => {
   const [formData, setFormData] = useState({
