@@ -163,11 +163,11 @@ const BannerOne = () => {
                                 </button>
                                 
                                  <button
-                                    onClick={() => handleNavigation("/direct-booking")}
+                                    onClick={() => handleNavigation("/booking-form")}
                                     className="primaryButton"
                                 >
                                     <Luggage className="buttonIcon" />
-                                    <span>Direct Booking</span>
+                                    <span>Book Now!</span>
                                 </button>
 
 
