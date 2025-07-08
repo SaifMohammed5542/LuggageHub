@@ -14,7 +14,7 @@ export default function MelbourneAirportBlog() {
 
         <p className="blog-paragraph">
           Flying into or out of <strong>Melbourne Airport (MEL)</strong> and not sure what to do with your luggage?
-          Whether you're on a long layover or just landed early before check-in, carrying heavy bags is the last thing you need.
+          Whether you&apos;re on a long layover or just landed early before check-in, carrying heavy bags is the last thing you need.
         </p>
 
         <h2 className="blog-heading">🧳 Why Travelers Need Luggage Storage at the Airport</h2>
