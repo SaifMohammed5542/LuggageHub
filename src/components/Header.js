@@ -264,6 +264,11 @@ function Header({ scrollToServices, scrollTohowItWorks }) {
               </Link>
             </li>
             <li>
+              <Link href="/blog" onClick={() => setIsMenuOpen(false)}>
+                Blogs
+              </Link>
+            </li>
+            <li>
               <a
                 href="#"
                 onClick={(e) => {

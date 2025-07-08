@@ -92,6 +92,15 @@ export async function POST(request) {
         <p>📝 <strong>Special Instructions:</strong> ${specialInstructions}</p>
         <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
         <p>📍 <strong>Station ID:</strong> ${stationId}</p>
+
+        <hr />
+    <p>⭐️ <strong>We’d love your feedback!</strong> It helps fellow travelers and helps us improve.</p>
+    <p>
+      👉 <a href="https://www.trustpilot.com/review/luggageterminal.com" target="_blank" style="background-color: #00b67a; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+        Leave a Review on Trustpilot
+      </a>
+    </p>
+
         <p>❓ If you have any questions, feel free to contact us at 
         <a href="mailto:support@luggageterminal.com">support@luggageterminal.com</a>.</p>
         <p>Best regards,<br/>🧳 <strong>Your Luggage Terminal Team</strong></p>

@@ -20,6 +20,7 @@ import Amount from '../components/Amount'
 // import MapButton from "../components/MapButton"
 import Loader from '../components/Loader'; // ✅ Import your Loader
 import Testimonials from '../components/testimonials'; // ✅ Import Testimonials if needed
+import Trustpilot from '../components/TrustPilot'; // ✅ Import Trustpilot if needed
 
 
 function App() {
@@ -72,6 +73,11 @@ function App() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Head>
+
+<script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" async></script>
+
+      </Head>
 
       <Head>
         <link
@@ -92,6 +98,7 @@ function App() {
       <Cards2 howItWorksRef={howItWorksRef} />
       <Locations />
       <Testimonials />
+      <Trustpilot />
       <Cards servicesRef={servicesRef} />
       <ConBanner />
       <Footer />
