@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FaSubway } from "react-icons/fa";
+import { FaSubway } from "react-icons/fa6";
 import "../../public/ALL CSS/TransitWidget.css";
 
 const TransitWidget = () => {
