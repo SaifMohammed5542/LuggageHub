@@ -6,6 +6,7 @@ import LuggageBookingForm from "../../components/LuggageBookingForm";
 import GoogleMapsWrapper from "../../components/GoogleMapsWrapper";
 import "../../../public/ALL CSS/MapBooking.css";
 import { motion, AnimatePresence } from "framer-motion";
+import Header from "../../components/Header";
 
 const MapBookingPage = () => {
   const [selectedStation, setSelectedStation] = useState(null);
@@ -74,6 +75,8 @@ const MapBookingPage = () => {
   };
 
   return (
+    <>
+      <Header />
     <GoogleMapsWrapper>
       <div className="map-booking-wrapper">
         <div className="map-container">
@@ -128,6 +131,7 @@ const MapBookingPage = () => {
         </AnimatePresence>
       </div>
     </GoogleMapsWrapper>
+    </>
   );
 };
 
