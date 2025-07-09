@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import './blog-list.css'; // optional CSS (see below)
+import Header from '../../components/Header';
 
 const blogPosts = [
   {
@@ -33,6 +34,8 @@ export const metadata = {
 
 export default function BlogListingPage() {
   return (
+    <>
+      <Header />
     <main className="blog-list-main">
       <h1 className="blog-list-title">📰 Travel & Luggage Tips</h1>
       <div className="blog-card-container">
@@ -49,5 +52,6 @@ export default function BlogListingPage() {
         ))}
       </div>
     </main>
+    </>
   );
 }

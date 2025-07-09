@@ -172,7 +172,7 @@ const BannerOne = () => {
 
 
                                 <button
-                                    onClick={() => handleNavigation("/key-handover")}
+                                    onClick={() => handleNavigation("/coming-soon")}
                                     className="secondaryButton"
                                 >
                                     <Key className="buttonIcon" />
