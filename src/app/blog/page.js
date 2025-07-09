@@ -17,6 +17,12 @@ const blogPosts = [
     title: '🏎️ Melbourne Events – Grand Prix, NYE, MCG & More',
     excerpt: 'Attending an event in Melbourne? Learn where to store your bags safely during...',
   },
+
+  {
+    slug: 'store-luggage-near-southern-cross',
+    title: '👉 Book Luggage Storage Near Southern Cross',
+    excerpt: 'Looking for luggage storage near Southern Cross Station...',
+  },
   // Add more blogs here
 ];
 
