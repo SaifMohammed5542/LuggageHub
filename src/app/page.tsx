@@ -21,6 +21,7 @@ import Amount from '../components/Amount'
 import Loader from '../components/Loader'; // ✅ Import your Loader
 import Testimonials from '../components/testimonials'; // ✅ Import Testimonials if needed
 import Trustpilot from '../components/TrustPilot'; // ✅ Import Trustpilot if needed
+import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
 
 
 function App() {
@@ -94,6 +95,7 @@ function App() {
 
       {/* Other Components */}
       <Rotatingtext />
+      <TransitWidget />
       <Amount />
       <Cards2 howItWorksRef={howItWorksRef} />
       <Locations />
