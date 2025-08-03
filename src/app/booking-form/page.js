@@ -272,7 +272,10 @@ const LuggageBookingForm = () => {
                 checked={hasSpecialInstructions}
                 onChange={handleSpecialInstructionsChange}
               />
-              <label htmlFor="hasSpecialInstructions">I have special instructions</label>
+             <label htmlFor="hasSpecialInstructions" style={{ color: "black" }}>
+  I have special instructions
+</label>
+
             </div>
 
             {hasSpecialInstructions && (

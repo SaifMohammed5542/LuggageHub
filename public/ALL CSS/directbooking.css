@@ -53,7 +53,9 @@
   border-radius: 6px;
   font-size: 15px;
   background-color: #fff;
+  color: #000; /* <-- add this line */
 }
+
 
 .form-group input:disabled {
   background-color: #f2f2f2;
