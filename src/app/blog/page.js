@@ -24,6 +24,12 @@ const blogPosts = [
     title: '👉 Book Luggage Storage Near Southern Cross',
     excerpt: 'Looking for luggage storage near Southern Cross Station...',
   },
+
+  {
+    slug: 'one-day-melbourne-itinerary',
+    title: '🚠 One-Day Melbourne Itinerary',
+    excerpt: 'Want a Quick guid for a One-Day MElbourne Itinerary? Well....',
+  },
   // Add more blogs here
 ];
 

@@ -85,13 +85,32 @@ const LuggageBookingForm = () => {
       [name]: type === "checkbox" ? checked : value,
     };
 
-    if (name === "dropOffDate" && value) {
-      const dropOffTime = new Date(value);
-      const pickUpTime = new Date(dropOffTime.getTime() + 4 * 60 * 60 * 1000);
-      const timezoneOffset = dropOffTime.getTimezoneOffset() * 60 * 1000;
-      const adjustedPickUpTime = new Date(pickUpTime.getTime() - timezoneOffset);
-      updatedFormData.pickUpDate = adjustedPickUpTime.toISOString().slice(0, 16);
-    }
+if (name === "dropOffDate" && value) {
+  // Only set drop-off time if not already selected
+  if (!formData.dropOffDate) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 10); // Add 10 mins
+
+    // Format for datetime-local in browser's local time
+    const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+
+    updatedFormData.dropOffDate = `${value.slice(0, 10)}T${localISOTime.split("T")[1]}`;
+  }
+
+  // Pickup time = 4 hours after drop-off
+  const dropOffTime = new Date(updatedFormData.dropOffDate || value);
+  dropOffTime.setHours(dropOffTime.getHours() + 4);
+
+  const localPickUpISO = new Date(dropOffTime.getTime() - dropOffTime.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
+  updatedFormData.pickUpDate = localPickUpISO;
+}
+
+
 
     setFormData(updatedFormData);
   };
