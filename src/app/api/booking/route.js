@@ -25,7 +25,7 @@ export async function POST(request) {
       userId,
     } = await request.json();
 
-    // ✅ Save the booking
+    // ✅ Save the booking first
     const newBooking = new Booking({
       fullName,
       email,
@@ -41,6 +41,17 @@ export async function POST(request) {
     });
 
     await newBooking.save();
+
+    // ✅ Fetch station and partners once
+    const station = await Station.findById(stationId).populate("partners");
+
+    let stationName = station?.name || stationId;
+
+// 🔹 Override for one specific station
+if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
+  stationName = "EzyMart 660 Bourke street";
+}
+
 
     // ✅ Setup mail transporter
     const transporter = nodemailer.createTransport({
@@ -69,7 +80,7 @@ export async function POST(request) {
 🎒 Luggage Count: ${luggageCount}
 📝 Special Instructions: ${specialInstructions}
 💳 Payment ID: ${paymentId}
-📍 Station ID: ${stationId}
+📍 Station: ${stationName}
 
 ❓ For any admin inquiries, reach out to support@luggageterminal.com
       `,
@@ -91,15 +102,16 @@ export async function POST(request) {
         <p>🎒 <strong>Luggage Count:</strong> ${luggageCount}</p>
         <p>📝 <strong>Special Instructions:</strong> ${specialInstructions}</p>
         <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
-        <p>📍 <strong>Station ID:</strong> ${stationId}</p>
+        <p>📍 <strong>Station:</strong> ${stationName}</p>
 
         <hr />
-    <p>⭐️ <strong>We’d love your feedback!</strong> It helps fellow travelers and helps us improve.</p>
-    <p>
-      👉 <a href="https://www.trustpilot.com/review/luggageterminal.com" target="_blank" style="background-color: #00b67a; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
-        Leave a Review on Trustpilot
-      </a>
-    </p>
+        <p>⭐️ <strong>We’d love your feedback!</strong></p>
+        <p>
+          👉 <a href="https://www.trustpilot.com/review/luggageterminal.com" target="_blank"
+          style="background-color: #00b67a; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+            Leave a Review on Trustpilot
+          </a>
+        </p>
 
         <p>❓ If you have any questions, feel free to contact us at 
         <a href="mailto:support@luggageterminal.com">support@luggageterminal.com</a>.</p>
@@ -107,13 +119,10 @@ export async function POST(request) {
       `,
     };
 
-    // ✅ Fetch station and all assigned partners
-    const station = await Station.findById(stationId).populate("partners");
-
     // ✅ Email to all partners of that station
     if (station?.partners?.length) {
       for (const partner of station.partners) {
-        if (partner?.email && partner.role === 'partner') {
+        if (partner?.email && partner.role === "partner") {
           await transporter.sendMail({
             from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
             to: partner.email,
@@ -133,9 +142,13 @@ export async function POST(request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Booking Error:", error);
+    console.error("💥 Booking API Error:", error);
     return NextResponse.json(
-      { success: false, message: "Something went wrong" },
+      {
+        success: false,
+        message: error.message || "Internal Server Error",
+        stack: error.stack, // only keep during debugging
+      },
       { status: 500 }
     );
   }
