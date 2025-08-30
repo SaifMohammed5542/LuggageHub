@@ -80,7 +80,7 @@ if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
 🎒 Luggage Count: ${luggageCount}
 📝 Special Instructions: ${specialInstructions}
 💳 Payment ID: ${paymentId}
-📍 Station: ${stationName}
+📍 Drop-off location: ${stationName}
 
 ❓ For any admin inquiries, reach out to support@luggageterminal.com
       `,
@@ -102,7 +102,7 @@ if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
         <p>🎒 <strong>Luggage Count:</strong> ${luggageCount}</p>
         <p>📝 <strong>Special Instructions:</strong> ${specialInstructions}</p>
         <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
-        <p>📍 <strong>Station:</strong> ${stationName}</p>
+        <p>📍 <strong>Drop-off location:</strong> ${stationName}</p>
 
         <hr />
         <p>⭐️ <strong>We’d love your feedback!</strong></p>
