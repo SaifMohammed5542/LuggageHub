@@ -7,40 +7,43 @@ const ShippingPolicy = () => {
     <>
       <Header />
       <div style={{ padding: '2rem', color: 'black' }}>
-        <h1 style={{ color: '#235789' }}>Shipping & Service Delivery Policy</h1>
+        <h1 style={{ color: '#235789' }}>Shipping & Delivery Policy</h1>
         <p>
           Luggage Terminal does not ship physical products. 
-          Instead, we provide on-location services such as luggage storage and key handover 
-          at the station selected during your booking.
+          All services provided through our platform are digital bookings and 
+          on-location services such as luggage storage and key handover.
         </p>
 
-        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>1. Booking Confirmation</h3>
+        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>1. Service Delivery</h3>
         <p>
-          Once your booking and payment are completed, you will receive a confirmation email 
-          with your booking details. Please keep this confirmation for check-in at the station.
+          Upon successful booking and payment, customers will receive an 
+          <strong> instant email confirmation</strong> with their booking details. 
+          The booked service is delivered at the selected station/location on the 
+          date and time chosen by the customer.
         </p>
 
-        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>2. Service Fulfilment</h3>
+        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>2. No Physical Shipping</h3>
         <p>
-          Our services are delivered at the exact location, date, and time you selected during booking. 
-          Customers must arrive at the station and show their booking confirmation to access the service.
+          Since our business is service-based, we do not ship or deliver 
+          any physical goods. The term “Shipping” refers only to the 
+          confirmation and fulfillment of booked services.
         </p>
 
-        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>3. No Physical Shipping</h3>
+        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>3. Customer Responsibilities</h3>
         <p>
-          Since our services are location-based, no physical goods are shipped. 
-          All bookings are service-only and fulfilled in person.
+          Customers must arrive at the booked station on time and show their 
+          booking confirmation to access the service.
         </p>
 
-        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>4. Rescheduling & Changes</h3>
+        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>4. Delivery Issues</h3>
         <p>
-          Customers can request rescheduling of services depending on availability. 
-          For assistance, please contact us at <strong>support@luggageterminal.com</strong>.
+          In case of any issues with service fulfillment, please contact us immediately 
+          at <strong>support@luggageterminal.com</strong>. Our support team will assist you promptly.
         </p>
 
-        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>5. Support</h3>
+        <h3 style={{ marginTop: '1.5rem', color: '#235789' }}>5. Contact</h3>
         <p>
-          For any issues regarding service delivery, please contact:<br/>
+          For any questions about our Shipping & Delivery Policy, please contact us:<br />
           📩 <strong>support@luggageterminal.com</strong>
         </p>
       </div>
