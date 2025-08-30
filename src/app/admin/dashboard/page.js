@@ -53,6 +53,14 @@ export default function AdminDashboard() {
 
   const [activeView, setActiveView] = useState('stations'); // 'stations', 'bookings', or 'keys'
 
+  // === NEW: edit state for selected station ===
+  const [editStation, setEditStation] = useState({
+    name: '',
+    location: '',
+    latitude: '',
+    longitude: ''
+  });
+
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
   useEffect(() => {
@@ -84,6 +92,14 @@ export default function AdminDashboard() {
         handover => handover.station?._id === selectedStation._id
       );
       setFilteredKeyHandovers(stationKeyHandovers);
+
+      // === NEW: prefill edit form with selected station values ===
+      setEditStation({
+        name: selectedStation.name || '',
+        location: selectedStation.location || '',
+        latitude: selectedStation.latitude !== undefined && selectedStation.latitude !== null ? String(selectedStation.latitude) : '',
+        longitude: selectedStation.longitude !== undefined && selectedStation.longitude !== null ? String(selectedStation.longitude) : ''
+      });
     }
   }, [selectedStation, allBookings, allKeyHandovers]);
 
@@ -429,6 +445,89 @@ export default function AdminDashboard() {
     setActiveView(view);
   };
 
+  // === NEW: Update station ===
+  const handleUpdateStation = async () => {
+    if (!selectedStation?._id) return;
+
+    // Build payload only with provided fields
+    const payload = {
+      name: editStation.name?.trim(),
+      location: editStation.location?.trim()
+    };
+
+    // latitude/longitude optional but if provided must be valid numbers
+    const lat = editStation.latitude === '' ? null : parseFloat(editStation.latitude);
+    const lon = editStation.longitude === '' ? null : parseFloat(editStation.longitude);
+
+    if (editStation.latitude !== '' && isNaN(lat)) {
+      alert('Latitude must be a valid number.');
+      return;
+    }
+    if (editStation.longitude !== '' && isNaN(lon)) {
+      alert('Longitude must be a valid number.');
+      return;
+    }
+
+    if (editStation.latitude !== '') payload.latitude = lat;
+    if (editStation.longitude !== '') payload.longitude = lon;
+
+    try {
+      const res = await fetch(`/api/admin/station/${selectedStation._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update station');
+      }
+
+      // Update local state
+      const updated = data.station;
+      setStations(prev => prev.map(s => (s._id === updated._id ? updated : s)));
+      setSelectedStation(updated);
+      alert('Station updated');
+    } catch (e) {
+      console.error(e);
+      alert(e.message || 'Error updating station');
+    }
+  };
+
+  // === NEW: Delete station ===
+  const handleDeleteStation = async () => {
+    if (!selectedStation?._id) return;
+
+    const sure = window.confirm(`Delete station "${selectedStation.name}"? This cannot be undone.`);
+    if (!sure) return;
+
+    try {
+      const res = await fetch(`/api/admin/station/${selectedStation._id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete station');
+      }
+
+      // Remove from list and go back
+      setStations(prev => prev.filter(s => s._id !== selectedStation._id));
+      setSelectedStation(null);
+      setActiveView('stations');
+      alert('Station deleted successfully');
+    } catch (e) {
+      console.error(e);
+      alert(e.message || 'Error deleting station');
+    }
+  };
+
   if (userRole !== 'admin') return null;
 
   return (
@@ -670,6 +769,41 @@ export default function AdminDashboard() {
                   >
                     Key Handovers
                   </button>
+                </div>
+              </div>
+
+              {/* === NEW: Inline Edit/Delete for the selected station === */}
+              <div className="admin-section" style={{ marginTop: 16 }}>
+                <h3>Edit Station</h3>
+                <div className="admin-form">
+                  <input
+                    value={editStation.name}
+                    onChange={(e) => setEditStation(s => ({ ...s, name: e.target.value }))}
+                    placeholder="Station Name"
+                  />
+                  <input
+                    value={editStation.location}
+                    onChange={(e) => setEditStation(s => ({ ...s, location: e.target.value }))}
+                    placeholder="Station Location"
+                  />
+                  <input
+                    type="text"
+                    value={editStation.latitude}
+                    onChange={(e) => setEditStation(s => ({ ...s, latitude: e.target.value }))}
+                    placeholder="Latitude (optional)"
+                  />
+                  <input
+                    type="text"
+                    value={editStation.longitude}
+                    onChange={(e) => setEditStation(s => ({ ...s, longitude: e.target.value }))}
+                    placeholder="Longitude (optional)"
+                  />
+                  <div className="station-actions">
+                    <button onClick={handleUpdateStation}>Update Station</button>
+                    <button onClick={handleDeleteStation} className="danger">
+                      Delete Station
+                    </button>
+                  </div>
                 </div>
               </div>
 

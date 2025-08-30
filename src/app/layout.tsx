@@ -1,6 +1,8 @@
-import type { Metadata } from "next"; // Import metadata type
-import { Geist, Geist_Mono } from "next/font/google"; // Import fonts
-import "./globals.css"; // Global styles
+// app/layout.tsx
+import type { Metadata } from "next"; 
+import { Geist, Geist_Mono } from "next/font/google"; 
+import "./globals.css"; 
+import { Toaster } from "react-hot-toast"; // ✅ Import toaster
 
 // Font setup
 const geistSans = Geist({
@@ -13,21 +15,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// ✅ Add viewport to metadata
+// ✅ Metadata
 export const metadata: Metadata = {
   title: "Luggage Terminal",
   description: "Store your luggage",
-  viewport: "width=device-width, initial-scale=1", // ← ✅ Required for mobile responsiveness
-
+  viewport: "width=device-width, initial-scale=1", 
   icons: {
-    icon: "/favicon.ico", // Optional: can use app/favicon.ico or public/favicon.ico
+    icon: "/favicon.ico",
     apple: "/apple-icon.png",
   },
-
   appleWebApp: {
     title: "Luggage Terminal",
-    // statusBarStyle: "default",
-    // capable: true,
   },
 };
 
@@ -41,6 +39,23 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <main>{children}</main>
+        <Toaster // ✅ Add toaster provider
+          position="top-right"
+          toastOptions={{
+            success: {
+              style: {
+                background: "#4caf50",
+                color: "#fff",
+              },
+            },
+            error: {
+              style: {
+                background: "#f44336",
+                color: "#fff",
+              },
+            },
+          }}
+        />
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 import dbConnect from '../../../../lib/dbConnect';
-import User from '../../../../models/User';
+import User from '../../../../models/User'; 
 import Station from '../../../../models/Station';
 import { verifyJWT } from '../../../../lib/auth';
 import { NextResponse } from 'next/server';

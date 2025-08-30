@@ -1,3 +1,4 @@
+// models/Station.js
 import mongoose from 'mongoose';
 import slugify from 'slugify'; // <--- ADD THIS LINE
 

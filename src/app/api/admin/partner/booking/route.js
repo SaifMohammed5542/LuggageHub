@@ -1,3 +1,4 @@
+// app/api/admin/partner/booking/route.js
 import dbConnect from '../../../../../lib/dbConnect';
 import Booking from '../../../../../models/booking';
 import User from '../../../../../models/User';

@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import "../../../../public/ALL CSS/Login.css";
+import toast, { Toaster } from "react-hot-toast"; // ✅ Import toast
 
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false); // Loader state
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,41 +18,52 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loader
+    setLoading(true);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    setLoading(false); // Stop loader
-
-    if (res.ok) {
       const data = await res.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("email", data.email);
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("role", data.role);
 
-      // Role-based redirect
-      if (data.role === "admin") {
-        router.push("/admin/dashboard");
-      } else if (data.role === "partner") {
-        router.push("/partner/dashboard");
+      if (res.ok) {
+        toast.success("Login successful! 🎉");
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("email", data.email);
+        localStorage.setItem("userId", data.userId);
+        localStorage.setItem("role", data.role);
+
+        setTimeout(() => {
+          if (data.role === "admin") router.push("/admin/dashboard");
+          else if (data.role === "partner") router.push("/partner/dashboard");
+          else router.push("/");
+        }, 1500);
       } else {
-        router.push("/");
+        // Field-specific errors
+        if (data.errors) {
+          if (data.errors.email) toast.error(data.errors.email);
+          if (data.errors.password) toast.error(data.errors.password);
+        } else if (data.error) {
+          toast.error(data.error);
+        } else {
+          toast.error("Login failed, please try again.");
+        }
       }
-    } else {
-      const errorData = await res.json();
-      alert(errorData.error || "Login failed");
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
       <Header />
+      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ Add toaster */}
       <div className="loginPage">
         <div className="loginContainer">
           <h1 className="loginTitle">Welcome Back</h1>

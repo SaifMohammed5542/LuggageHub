@@ -2,7 +2,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '../../../../lib/dbConnect';
 import KeyHandover from '../../../../models/keyHandover';
-import '../../../../models/Station';  // Ensure Station model is registered
 import { verifyJWT } from '../../../../lib/auth';
 
 export async function GET(req) {

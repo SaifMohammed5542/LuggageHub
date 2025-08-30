@@ -80,6 +80,7 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
   const numberOfDays = calculateNumberOfDays();
   const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
 
+  // ✅ Updated handleChange to include +10 min logic (like direct form)
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const updatedFormData = {
@@ -88,11 +89,31 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
     };
 
     if (name === "dropOffDate" && value) {
-      const dropOffTime = new Date(value);
-      const pickUpTime = new Date(dropOffTime.getTime() + 4 * 60 * 60 * 1000);
-      const timezoneOffset = dropOffTime.getTimezoneOffset() * 60 * 1000;
-      const adjustedPickUpTime = new Date(pickUpTime.getTime() - timezoneOffset);
-      updatedFormData.pickUpDate = adjustedPickUpTime.toISOString().slice(0, 16);
+      // Only set drop-off time if not already selected
+      if (!formData.dropOffDate) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 10); // Add 10 mins
+
+        // Format for datetime-local in browser's local time
+        const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16);
+
+        // keep user’s selected DATE but use +10 min as time
+        updatedFormData.dropOffDate = `${value.slice(0, 10)}T${localISOTime.split("T")[1]}`;
+      }
+
+      // Pickup time = 4 hours after drop-off
+      const dropOffTime = new Date(updatedFormData.dropOffDate || value);
+      dropOffTime.setHours(dropOffTime.getHours() + 4);
+
+      const localPickUpISO = new Date(
+        dropOffTime.getTime() - dropOffTime.getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .slice(0, 16);
+
+      updatedFormData.pickUpDate = localPickUpISO;
     }
 
     setFormData(updatedFormData);
@@ -251,19 +272,19 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
 
             <div className="form-group">
               <label>📍 Selected Station:</label>
-<select
-  name="stationId"
-  value={formData.stationId}
-  onChange={handleChange}
-  disabled={!!prefilledStation} // 🔒 disables dropdown if a station is prefilled
->
-  <option value="">-- Select a Station --</option>
-  {stations.map((station) => (
-    <option key={station._id} value={station._id}>
-      {station.name} ({station.location})
-    </option>
-  ))}
-</select>
+              <select
+                name="stationId"
+                value={formData.stationId}
+                onChange={handleChange}
+                disabled={!!prefilledStation} // 🔒 disables dropdown if a station is prefilled
+              >
+                <option value="">-- Select a Station --</option>
+                {stations.map((station) => (
+                  <option key={station._id} value={station._id}>
+                    {station.name} ({station.location})
+                  </option>
+                ))}
+              </select>
 
               {errors.stationId && <span className="error">{errors.stationId}</span>}
             </div>

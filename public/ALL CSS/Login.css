@@ -8,6 +8,24 @@
     padding-top: 3rem;
   }
   
+.errorMessage {
+  color: #e63946;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.successMessage {
+  color: #2a9d8f;
+  font-size: 0.95rem;
+  margin: 10px 0;
+}
+
+.passwordHint {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+}
+
   .loader {
     display: flex;
     justify-content: center;

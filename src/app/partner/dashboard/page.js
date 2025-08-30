@@ -1,5 +1,5 @@
+//app/partner/dashboard/page.js
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../../components/Header';
@@ -208,7 +208,7 @@ export default function PartnerDashboard() {
           });
           setHandovers(sortedHandovers);
         } else {
-          console.error('Failed to fetch key handovers', hoData.message);
+          console.error('Failed to fetch key handovers', hoData.error);
         }
       } catch (err) {
         console.error('Fetch error:', err);
