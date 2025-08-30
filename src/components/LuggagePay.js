@@ -43,6 +43,17 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
             },
           });
         }}
+
+        onClick={(_, actions) => {
+    return actions.resolve().catch((err) => {
+      console.error("PayPal card validation error:", err);
+      logPaymentError("PayPal popup: card was rejected (not usable / could not be added)");
+      alert("This card cannot be used. Please try another card.");
+      return actions.reject(); // stop checkout flow
+    });
+  }}
+
+
         onApprove={(data, actions) => {
           return actions.order.capture().then((details) => {
             onPaymentSuccess(details.id);
