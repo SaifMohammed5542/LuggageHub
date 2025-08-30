@@ -343,6 +343,7 @@ const LuggageBookingForm = ({ prefilledStation = null }) => {
             <PayPalPayment
               totalAmount={totalAmount}
               onPaymentSuccess={handlePaymentSuccess}
+              formData={formData}
               disabled={isLoading}
             />
           ) : (

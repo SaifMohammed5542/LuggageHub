@@ -1,12 +1,30 @@
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-const PayPalPayment = ({ totalAmount, onPaymentSuccess }) => {
+const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
+  // formData will have user email, stationId etc. (we’ll pass it from booking form)
+
+  const logPaymentError = async (errorMessage) => {
+    try {
+      await fetch("/api/log-payment-error", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: formData?.email || "Unknown",
+          station: formData?.stationId || "Unknown",
+          error: errorMessage,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to log payment error:", err);
+    }
+  };
+
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": "AdTTcQKcCdPjZwYhTP4onsB_xdphyWA4kUaDoiZqlu9eFe17yoRR_mze_0wTz-skAtsSwNxY_T2D5adR", // Your PayPal client ID
+        "client-id": "AdTTcQKcCdPjZwYhTP4onsB_xdphyWA4kUaDoiZqlu9eFe17yoRR_mze_0wTz-skAtsSwNxY_T2D5adR",
         currency: "AUD",
-        locale: "en_AU" // Currency for the transaction
+        locale: "en_AU",
       }}
     >
       <PayPalButtons
@@ -15,32 +33,37 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess }) => {
             purchase_units: [
               {
                 amount: {
-                  value: totalAmount, // Total amount in AUD
-                  currency_code: "AUD", // Currency for the transaction
+                  value: totalAmount.toFixed(2), // Ensure it's string/decimal
+                  currency_code: "AUD",
                 },
               },
             ],
             application_context: {
-              shipping_preference: "NO_SHIPPING", // Disable shippin  ` g address
+              shipping_preference: "NO_SHIPPING",
             },
           });
         }}
         onApprove={(data, actions) => {
           return actions.order.capture().then((details) => {
-            // Call the onPaymentSuccess function with the payment ID
             onPaymentSuccess(details.id);
           });
         }}
         onError={(err) => {
           console.error("PayPal error:", err);
-          alert("Payment failed. Please try again.");
+          logPaymentError(err?.message || err.toString());
+          alert("Payment failed. Please try again or use a different card.");
+        }}
+        onCancel={() => {
+          console.warn("User cancelled PayPal checkout");
+          logPaymentError("User cancelled PayPal checkout");
+          alert("Payment was cancelled.");
         }}
         style={{
-          layout: "vertical", // Button layout
-          color: "blue", // Button color
-          shape: "rect", // Button shape
-          label: "checkout", // Button label (shows "Pay with Card")
-          tagline: false, // Hide the tagline
+          layout: "vertical",
+          color: "blue",
+          shape: "rect",
+          label: "checkout",
+          tagline: false,
         }}
       />
     </PayPalScriptProvider>

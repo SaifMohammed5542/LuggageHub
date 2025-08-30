@@ -4,13 +4,16 @@ import nodemailer from "nodemailer";
 import dbConnect from "../../../lib/dbConnect";
 import Booking from "../../../models/booking";
 import Station from "../../../models/Station";
-// eslint-disable-next-line no-unused-vars
 import User from "../../../models/User";
+import ErrorLog from "../../../models/ErrorLog"; // ✅ new model
+import { sendErrorNotification } from "../../../utils/mailer"; // ✅ new util
+
 void User;
 
 export async function POST(request) {
   try {
     await dbConnect(); // Connect to MongoDB
+    
 
     const {
       fullName,
@@ -42,16 +45,14 @@ export async function POST(request) {
 
     await newBooking.save();
 
-    // ✅ Fetch station and partners once
+    // ✅ Fetch station and partners
     const station = await Station.findById(stationId).populate("partners");
-
     let stationName = station?.name || stationId;
 
-// 🔹 Override for one specific station
-if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
-  stationName = "EzyMart 660 Bourke street";
-}
-
+    // Override station name for special case
+    if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
+      stationName = "EzyMart 660 Bourke street";
+    }
 
     // ✅ Setup mail transporter
     const transporter = nodemailer.createTransport({
@@ -81,8 +82,6 @@ if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
 📝 Special Instructions: ${specialInstructions}
 💳 Payment ID: ${paymentId}
 📍 Drop-off location: ${stationName}
-
-❓ For any admin inquiries, reach out to support@luggageterminal.com
       `,
     };
 
@@ -94,32 +93,15 @@ if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
       html: `
         <p>Dear ${fullName},</p>
         <p>🙏 Thank you for booking with us! Here are your booking details:</p>
-        <p>🙍 <strong>Full Name:</strong> ${fullName}</p>
-        <p>📧 <strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-        <p>📱 <strong>Phone:</strong> ${phone}</p>
-        <p>📅 <strong>Drop-off Date:</strong> ${dropOffDate}</p>
-        <p>📦 <strong>Pick-up Date:</strong> ${pickUpDate}</p>
+        <p>📅 <strong>Drop-off:</strong> ${dropOffDate}</p>
+        <p>📦 <strong>Pick-up:</strong> ${pickUpDate}</p>
         <p>🎒 <strong>Luggage Count:</strong> ${luggageCount}</p>
-        <p>📝 <strong>Special Instructions:</strong> ${specialInstructions}</p>
         <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
         <p>📍 <strong>Drop-off location:</strong> ${stationName}</p>
-
-        <hr />
-        <p>⭐️ <strong>We’d love your feedback!</strong></p>
-        <p>
-          👉 <a href="https://www.trustpilot.com/review/luggageterminal.com" target="_blank"
-          style="background-color: #00b67a; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
-            Leave a Review on Trustpilot
-          </a>
-        </p>
-
-        <p>❓ If you have any questions, feel free to contact us at 
-        <a href="mailto:support@luggageterminal.com">support@luggageterminal.com</a>.</p>
-        <p>Best regards,<br/>🧳 <strong>Your Luggage Terminal Team</strong></p>
       `,
     };
 
-    // ✅ Email to all partners of that station
+    // ✅ Notify partners of that station
     if (station?.partners?.length) {
       for (const partner of station.partners) {
         if (partner?.email && partner.role === "partner") {
@@ -133,7 +115,7 @@ if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
       }
     }
 
-    // ✅ Send admin and user emails
+    // ✅ Send admin + user emails
     await transporter.sendMail(adminMailOptions);
     await transporter.sendMail(userMailOptions);
 
@@ -142,14 +124,53 @@ if (stationId.toString() === "67fb37ffa0f2f5d8223497d7") {
       { status: 200 }
     );
   } catch (error) {
-    console.error("💥 Booking API Error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: error.message || "Internal Server Error",
-        stack: error.stack, // only keep during debugging
-      },
-      { status: 500 }
-    );
+  console.error("💥 Booking API Error:", error);
+
+  // ✅ Try to extract user + station from request
+  let userEmail = "Unknown";
+  let stationName = "Unknown";
+
+  try {
+    // Clone request because body can only be read once
+    const clonedReq = request.clone();
+    const body = await clonedReq.json();
+
+    if (body?.email) userEmail = body.email;
+    if (body?.stationId) {
+      try {
+        // Lookup station name
+        const stationDoc = await Station.findById(body.stationId);
+        stationName = stationDoc?.name || body.stationId;
+      } catch {
+        stationName = body.stationId;
+      }
+    }
+  } catch (parseErr) {
+    console.warn("⚠️ Could not parse request body in error handler:", parseErr);
+  }
+
+  // ✅ Save error to DB
+  await ErrorLog.create({
+    user: userEmail,
+    station: stationName,
+    errorType: "BOOKING_API_ERROR",
+    message: error.message,
+    stack: error.stack,
+  });
+
+  // ✅ Send error alert email
+  await sendErrorNotification({
+    user: userEmail,
+    station: stationName,
+    error: error.message,
+  });
+
+  return NextResponse.json(
+    {
+      success: false,
+      message: error.message || "Internal Server Error",
+    },
+    { status: 500 }
+  );
   }
 }
