@@ -34,6 +34,7 @@ const ContactUs = () => {
         setStatus("❌ Failed to send. Try again.");
       }
     } catch (error) {
+      console.error("Contact form error:", error); // 👈 ESLint fix & useful logging
       setStatus("❌ Error sending message.");
     }
   };
@@ -82,7 +83,10 @@ const ContactUs = () => {
               style={{ width: '100%', padding: '0.5rem' }} 
             />
           </div>
-          <button type="submit" style={{ background: '#235789', color: 'white', padding: '0.7rem 1.5rem', border: 'none', cursor: 'pointer' }}>
+          <button 
+            type="submit" 
+            style={{ background: '#235789', color: 'white', padding: '0.7rem 1.5rem', border: 'none', cursor: 'pointer' }}
+          >
             Send Message
           </button>
         </form>
