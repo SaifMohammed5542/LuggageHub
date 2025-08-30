@@ -54,6 +54,7 @@ export default function LoginPage() {
         }
       }
     } catch (err) {
+      console.error("Login error:", err); // ✅ Now error is used
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -63,7 +64,7 @@ export default function LoginPage() {
   return (
     <>
       <Header />
-      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ Add toaster */}
+      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ Toast Container */}
       <div className="loginPage">
         <div className="loginContainer">
           <h1 className="loginTitle">Welcome Back</h1>

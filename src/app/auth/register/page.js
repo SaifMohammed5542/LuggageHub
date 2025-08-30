@@ -18,14 +18,14 @@ export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
-  setFormData({ ...formData, [e.target.name]: e.target.value });
-  setFieldErrors({ ...fieldErrors, [e.target.name]: "" });
-};
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFieldErrors({ ...fieldErrors, [e.target.name]: "" });
+  };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setFieldErrors({});
+    e.preventDefault();
+    setLoading(true);
+    setFieldErrors({});
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -37,7 +37,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Account created successfully! 🎉"); // ✅ success toast
+        toast.success("Account created successfully! 🎉");
         setTimeout(() => {
           router.push("/auth/login");
         }, 1500);
@@ -46,12 +46,13 @@ export default function RegisterPage() {
           setFieldErrors(data.errors);
           toast.error("Please fix the errors and try again.");
         } else if (data.error) {
-          toast.error(data.error); // ✅ show backend error
+          toast.error(data.error);
         } else {
           toast.error("Registration failed, please try again.");
         }
       }
     } catch (err) {
+      console.error("Registration error:", err); // ✅ error is now used
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
