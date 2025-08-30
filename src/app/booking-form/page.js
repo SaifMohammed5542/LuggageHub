@@ -345,6 +345,7 @@ if (name === "dropOffDate" && value) {
             <PayPalPayment
               totalAmount={totalAmount}
               onPaymentSuccess={handlePaymentSuccess}
+              formData={formData}
               disabled={isLoading}
             />
           ) : (
