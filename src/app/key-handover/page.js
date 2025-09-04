@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import PayPalCheckout from "../../components/KeyPay";
+import React, { useState, useEffect } from "react";
 import "./key.css";
+import "../../../public/ALL CSS/spinner.css";
+import Header from "../../components/Header.js";
+import PayPalPayment from "../../components/LuggagePay.js"; // ✅ reuse luggage PayPal
+import Footer from "../../components/Footer.js";
 
-export default function KeyHandoverForm() {
+const KeyHandoverForm = () => {
   const [formData, setFormData] = useState({
     dropOffName: "",
     dropOffEmail: "",
@@ -15,249 +15,303 @@ export default function KeyHandoverForm() {
     dropOffDate: "",
     pickUpDate: "",
     stationId: "",
+    termsAccepted: false,
   });
 
   const [stations, setStations] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState(null);
-  const [paymentAmount, setPaymentAmount] = useState("9.99"); // Default amount
-  const [pendingFormData, setPendingFormData] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const today = new Date().toISOString().split("T")[0]; // Today's date in YYYY-MM-DD
+  // ✅ Success data object (station, dates, code, etc.)
+  const [successData, setSuccessData] = useState(null);
 
+  const keyRatePerDay = 9.99;
+
+  // fetch stations
   useEffect(() => {
-    async function loadStations() {
+    const fetchStations = async () => {
       try {
-        const res = await fetch("/api/station/list");
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
+        const token = localStorage.getItem("token");
+        const response = await fetch("/api/station/list", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
         setStations(data.stations || []);
-      } catch (err) {
-        console.error("Could not load stations:", err);
-        setResult("❌ Unable to load stations. Try again later.");
+      } catch (error) {
+        console.error("Failed to fetch stations:", error);
       }
-    }
-    loadStations();
+    };
+    fetchStations();
   }, []);
 
-  useEffect(() => {
-    // Calculate amount whenever drop-off or pick-up date changes
-    if (formData.dropOffDate && formData.pickUpDate) {
-      const dropDate = new Date(formData.dropOffDate);
-      const pickDate = new Date(formData.pickUpDate);
+  // calculate days between drop & pick
+  const calculateNumberOfDays = () => {
+    if (!formData.dropOffDate || !formData.pickUpDate) return 1;
+    const dropOff = new Date(formData.dropOffDate);
+    const pickUp = new Date(formData.pickUpDate);
+    const diff = pickUp - dropOff;
+    return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  };
 
-      // Ensure pick-up date is after drop-off date
-      if (pickDate > dropDate) {
-        const timeDiff = pickDate.getTime() - dropDate.getTime();
-        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        const amount = daysDiff * 9.99;
-        setPaymentAmount(amount.toFixed(2));
-      } else {
-        setPaymentAmount("9.99"); // Reset to default if dates are invalid
-      }
-    } else {
-      setPaymentAmount("9.99"); // Set to default if dates are not both selected
-    }
-  }, [formData.dropOffDate, formData.pickUpDate]);
+  const numberOfDays = calculateNumberOfDays();
+  const totalAmount = numberOfDays * keyRatePerDay;
 
+  // handle form changes
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult(null);
+  // validation
+  useEffect(() => {
+    const errors = {};
+    if (!formData.dropOffName) errors.dropOffName = "Drop-off name is required";
+    if (!formData.pickUpName) errors.pickUpName = "Pick-up name is required";
+    if (!formData.dropOffDate) errors.dropOffDate = "Drop-off date is required";
+    if (!formData.pickUpDate) errors.pickUpDate = "Pick-up date is required";
+    if (!formData.stationId) errors.stationId = "Please select a station";
+    if (!formData.termsAccepted) errors.termsAccepted = "You must agree to the terms";
 
-    if (!formData.dropOffName || !formData.pickUpName || !formData.stationId) {
-      setResult("Please fill in all required fields.");
-      setLoading(false);
-      return;
+    if (formData.dropOffDate && formData.pickUpDate) {
+      const dropOff = new Date(formData.dropOffDate);
+      const pickUp = new Date(formData.pickUpDate);
+      if (pickUp <= dropOff) {
+        errors.pickUpDate = "Pick-up date must be after drop-off date";
+      }
     }
 
-    const dropDate = new Date(formData.dropOffDate);
-    const pickDate = new Date(formData.pickUpDate);
-    const now = new Date(today);
+    setErrors(errors);
+    setIsFormValid(Object.keys(errors).length === 0);
+  }, [formData]);
 
-    if (dropDate < now) {
-      setResult("❌ Drop-off date cannot be in the past.");
-      setLoading(false);
-      return;
-    }
-
-    if (pickDate <= dropDate) {
-      setResult("❌ Pick-up date must be after drop-off date.");
-      setLoading(false);
-      return;
-    }
-
-    setPendingFormData(formData);
-    setPaymentStatus("pending"); // Payment status becomes pending upon submission
-    setLoading(false);
-  };
-
-  const handlePaymentSuccess = async (details) => {
-    if (!pendingFormData) {
-      console.error("No pending form data available.");
-      return;
-    }
-
-    setLoading(true);
+  // when PayPal succeeds
+  const handlePaymentSuccess = async (paymentId) => {
+    setIsLoading(true);
     try {
-      const res = await fetch("/api/key-handover", {
+      const response = await fetch("/api/key-handover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          dropOffPerson: { name: pendingFormData.dropOffName, email: pendingFormData.dropOffEmail },
-          pickUpPerson: { name: pendingFormData.pickUpName, email: pendingFormData.pickUpEmail },
-          dropOffDate: pendingFormData.dropOffDate,
-          pickUpDate: pendingFormData.pickUpDate,
-          stationId: pendingFormData.stationId,
-          paymentId: details.id,
-          paymentStatus: "completed",
+          dropOffPerson: { name: formData.dropOffName, email: formData.dropOffEmail },
+          pickUpPerson: { name: formData.pickUpName, email: formData.pickUpEmail },
+          dropOffDate: formData.dropOffDate,
+          pickUpDate: formData.pickUpDate,
+          stationId: formData.stationId,
+          paymentId,
         }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
+      if (data.success && data.handover) {
+        // ✅ Save all confirmation info
+        const station = stations.find((s) => s._id === formData.stationId);
+        setSuccessData({
+          keyCode: data.handover.keyCode,
+          dropOffDate: data.handover.dropOffDate,
+          pickUpDate: data.handover.pickUpDate,
+          station: station || null,
+        });
 
-      if (res.ok && data.success) {
-        setPaymentStatus("completed");
-        setResult(`✅ Booking successful! Share this pickup code: ${data.handover.keyCode}`);
+        // ✅ Clear form
+        setFormData({
+          dropOffName: "",
+          dropOffEmail: "",
+          pickUpName: "",
+          pickUpEmail: "",
+          dropOffDate: "",
+          pickUpDate: "",
+          stationId: "",
+          termsAccepted: false,
+        });
       } else {
-        setPaymentStatus("failed");
-        setResult(data.message || "❌ Booking failed after payment. Please contact support.");
+        alert("❌ Failed to complete key handover booking.");
       }
-    } catch (err) {
-      console.error("Payment success handling error:", err);
-      setPaymentStatus("failed");
-      setResult("❌ Error during booking after payment.");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong while saving your booking.");
     } finally {
-      setLoading(false);
-      setPendingFormData(null);
+      setIsLoading(false);
     }
   };
 
   return (
     <>
       <Header />
-      <PayPalScriptProvider options={{ "client-id": "Aboo23AYFeclfVf1t3LP7pa-jMK55lgOiUK5ngc1CmEb0fWh7G55DxwckrCxxoqvBNVPsWuWvO5sZc9o", currency: "AUD", locale: "en_AU" }}>
-        <div className="handover-form-container">
-          <h1 className="handover-form-title">Key Handover Booking 🔑</h1>
+      <div className="booking-wrapper">
+        <div className="booking-container">
+          <h2 className="booking-title">🔑 Key Handover Booking</h2>
 
-          <form onSubmit={handleSubmit} className="handover-form">
-            {/* Drop-off Person */}
-            <div className="form-section">
-              <h3 className="form-section-title">Drop-off Person</h3>
-              <input
-                className="form-input"
-                type="text"
-                name="dropOffName"
-                placeholder="Full Name"
-                value={formData.dropOffName}
-                onChange={handleChange}
-                required
-              />
-              <input
-                className="form-input"
-                type="email"
-                name="dropOffEmail"
-                placeholder="Email (optional)"
-                value={formData.dropOffEmail}
-                onChange={handleChange}
-              />
-            </div>
+          {/* ✅ If confirmation exists, show success message */}
+          {successData ? (
+            <div className="success-box">
+              <h3>✅ Key Handover Confirmed!</h3>
+              <p>
+                Please share this pickup code <b>only with the pickup person</b>:
+              </p>
+              <div className="key-code">{successData.keyCode}</div>
 
-            {/* Pick-up Person */}
-            <div className="form-section">
-              <h3 className="form-section-title">Pick-up Person</h3>
-              <input
-                className="form-input"
-                type="text"
-                name="pickUpName"
-                placeholder="Full Name"
-                value={formData.pickUpName}
-                onChange={handleChange}
-                required
-              />
-              <input
-                className="form-input"
-                type="email"
-                name="pickUpEmail"
-                placeholder="Email (optional)"
-                value={formData.pickUpEmail}
-                onChange={handleChange}
-              />
-            </div>
+              
 
-            {/* Dates */}
-            <div className="form-group">
-              <label className="form-label">Drop-off Date:</label>
-              <input
-                className="form-input"
-                type="date"
-                name="dropOffDate"
-                value={formData.dropOffDate}
-                onChange={handleChange}
-                min={today}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Pick-up Date:</label>
-              <input
-                className="form-input"
-                type="date"
-                name="pickUpDate"
-                value={formData.pickUpDate}
-                onChange={handleChange}
-                min={formData.dropOffDate || today}
-                required
-              />
-            </div>
+              <div className="handover-dates">
+                <p><strong>📍 Station:</strong> {successData.station?.name} ({successData.station?.location})</p>
+                <p><strong>📅 Drop-off:</strong> {new Date(successData.dropOffDate).toLocaleDateString()}</p>
+                <p><strong>📅 Pick-up:</strong> {new Date(successData.pickUpDate).toLocaleDateString()}</p>
+              </div>
 
-            {/* Station dropdown */}
-            <div className="form-group">
-              <label className="form-label">Station:</label>
-              <select
-                className="form-input"
-                name="stationId"
-                value={formData.stationId}
-                onChange={handleChange}
-                required
+              <button
+                className="copy-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(successData.keyCode);
+                  alert("Pickup code copied!");
+                }}
               >
-                <option value="">-- Select a station --</option>
-                {stations.map((station) => (
-                  <option key={station._id} value={station._id}>
-                    {station.name} — {station.location || ""}
-                  </option>
-                ))}
-              </select>
+                Copy Code
+              </button>
             </div>
+          ) : (
+            <>
+              <form className="booking-form">
+                {/* Drop-off person */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Drop-off Name</label>
+                    <input
+                      type="text"
+                      name="dropOffName"
+                      value={formData.dropOffName}
+                      onChange={handleChange}
+                      required
+                    />
+                    {errors.dropOffName && <span className="error">{errors.dropOffName}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label>Drop-off Email (optional)</label>
+                    <input
+                      type="email"
+                      name="dropOffEmail"
+                      value={formData.dropOffEmail}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
 
-            {/* Total Amount Display */}
-            <div className="total-amount">
-              Total Amount: A${paymentAmount}
-            </div>
+                {/* Pick-up person */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Pick-up Name</label>
+                    <input
+                      type="text"
+                      name="pickUpName"
+                      value={formData.pickUpName}
+                      onChange={handleChange}
+                      required
+                    />
+                    {errors.pickUpName && <span className="error">{errors.pickUpName}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label>Pick-up Email (optional)</label>
+                    <input
+                      type="email"
+                      name="pickUpEmail"
+                      value={formData.pickUpEmail}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
 
-            <button
-              type="submit"
-              className="submit-button"
-              disabled={loading || paymentStatus === "pending"}
-            >
-              {loading ? "Processing…" : "Book Key Handover"}
-            </button>
+                {/* Dates */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Drop-off Date</label>
+                    <input
+                      type="date"
+                      name="dropOffDate"
+                      value={formData.dropOffDate}
+                      onChange={handleChange}
+                      required
+                      min={new Date().toISOString().split("T")[0]}
+                    />
+                    {errors.dropOffDate && <span className="error">{errors.dropOffDate}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label>Pick-up Date</label>
+                    <input
+                      type="date"
+                      name="pickUpDate"
+                      value={formData.pickUpDate}
+                      onChange={handleChange}
+                      required
+                      min={formData.dropOffDate || new Date().toISOString().split("T")[0]}
+                    />
+                    {errors.pickUpDate && <span className="error">{errors.pickUpDate}</span>}
+                  </div>
+                </div>
 
-            {/* PayPal Checkout */}
-            {paymentStatus === "pending" && paymentAmount && (
-              <PayPalCheckout amount={paymentAmount} onSuccess={handlePaymentSuccess} />
-            )}
+                {/* Station */}
+                <div className="form-group">
+                  <label>📍 Select Station</label>
+                  <select
+                    name="stationId"
+                    value={formData.stationId}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">-- Select a Station --</option>
+                    {stations.map((station) => (
+                      <option key={station._id} value={station._id}>
+                        {station.name} ({station.location})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.stationId && <span className="error">{errors.stationId}</span>}
+                </div>
 
-            {result && <div className="result-message">{result}</div>}
-          </form>
+                {/* Terms */}
+                <div className="form-group checkbox-container">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="termsAccepted"
+                      checked={formData.termsAccepted}
+                      onChange={handleChange}
+                      required
+                    />
+                    I agree to the Terms and Conditions
+                  </label>
+                  {errors.termsAccepted && <span className="error">{errors.termsAccepted}</span>}
+                </div>
+              </form>
+
+              <div className="total-amount">
+                <h3>Total Amount: A${totalAmount.toFixed(2)}</h3>
+              </div>
+
+              {isLoading ? (
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <p>Processing your booking...</p>
+                </div>
+              ) : isFormValid ? (
+                <PayPalPayment
+                  totalAmount={totalAmount}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  formData={formData}
+                  disabled={isLoading}
+                />
+              ) : (
+                <p className="error">Please fill out all required fields to continue.</p>
+              )}
+            </>
+          )}
         </div>
-      </PayPalScriptProvider>
+      </div>
       <Footer />
     </>
   );
-}
+};
+
+export default KeyHandoverForm;

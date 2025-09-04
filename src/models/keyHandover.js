@@ -1,23 +1,39 @@
-// models/KeyHandover.js
-
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const keyHandoverSchema = new mongoose.Schema({
-  dropOffPerson: { name: String, email: String },
-  pickUpPerson: { name: String, email: String },
-  dropOffDate: Date,
-  pickUpDate: Date,
-  station: { type: mongoose.Schema.Types.ObjectId, ref: 'Station', required: true },
-  keyCode: { type: String, required: true },
-  // ← new fields for payment
-  paymentId: { type: String, default: null },
+  dropOffPerson: {
+    name: { type: String, required: true },
+    email: { type: String, default: null }
+  },
+  pickUpPerson: {
+    name: { type: String, required: true },
+    email: { type: String, default: null }
+  },
+  dropOffDate: { type: Date, required: true },
+  pickUpDate: { type: Date, required: true },
+
+  stationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Station",
+    required: true,
+  },
+
+  keyCode: { type: String, required: true }, // 6-digit pickup code
+
+  // Payment info
+  paymentId: { type: String, required: true },
+  price: { type: Number, required: true },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending'
+    enum: ["pending", "confirmed", "failed"],
+    default: "confirmed",
   },
-  status: { type: String, enum: ['pending','picked-up'], default: 'pending' }
+
+  status: {
+    type: String,
+    enum: ["pending", "picked-up"],
+    default: "pending",
+  },
 }, { timestamps: true });
 
-export default mongoose.models.KeyHandover
-  || mongoose.model('KeyHandover', keyHandoverSchema);
+export default mongoose.models.KeyHandover || mongoose.model("KeyHandover", keyHandoverSchema);
