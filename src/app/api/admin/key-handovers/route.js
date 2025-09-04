@@ -27,7 +27,7 @@ export async function GET(req) {
 
     // 3) Fetch & populate - Change stationId to station
     const handovers = await KeyHandover.find()
-      .populate('station', 'name location')  // Corrected path to 'station'
+      .populate('stationId', 'name location')  // Corrected path to 'station'
       .sort({ createdAt: -1 });
     console.log(`📦 [key-handovers] fetched ${handovers.length} records`);
 

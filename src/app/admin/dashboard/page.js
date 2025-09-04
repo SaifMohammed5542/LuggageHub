@@ -89,8 +89,9 @@ export default function AdminDashboard() {
 
       // Filter key handovers by station ID
       const stationKeyHandovers = allKeyHandovers.filter(
-        handover => handover.station?._id === selectedStation._id
-      );
+  handover => handover.stationId?._id === selectedStation._id
+);
+
       setFilteredKeyHandovers(stationKeyHandovers);
 
       // === NEW: prefill edit form with selected station values ===
@@ -887,17 +888,20 @@ export default function AdminDashboard() {
                                 {weekRange} ({weekData.handovers.length} handovers)
                               </h5>
                               <div className="booking-grid">
-                                {weekData.handovers.map((handover) => (
-                                  <div key={handover._id} className="booking-card">
-                                    <p><strong>Name:</strong> {handover.fullName}</p>
-                                    <p><strong>Email:</strong> {handover.email}</p>
-                                    <p><strong>Phone:</strong> {handover.phone}</p>
-                                    <p><strong>Handover Date:</strong> {handover.handoverDate}</p>
-                                    <p><strong>Pickup Date:</strong> {handover.pickupDate}</p>
-                                    <p><strong>Instructions:</strong> {handover.specialInstructions || '-'}</p>
-                                  </div>
-                                ))}
-                              </div>
+  {weekData.handovers.map((handover) => (
+    <div key={handover._id} className="booking-card">
+      <p><strong>Drop-off:</strong> {handover.dropOffPerson?.name} ({handover.dropOffPerson?.email || "no email"})</p>
+      <p><strong>Pick-up:</strong> {handover.pickUpPerson?.name} ({handover.pickUpPerson?.email || "no email"})</p>
+      <p><strong>Drop-off Date:</strong> {handover.dropOffDate}</p>
+      <p><strong>Pick-up Date:</strong> {handover.pickUpDate}</p>
+      <p><strong>Pickup Code:</strong> {handover.keyCode}</p>
+      <p><strong>Amount:</strong> A${handover.price?.toFixed(2)}</p>
+      <p><strong>Payment ID:</strong> {handover.paymentId}</p>
+      <p><strong>Status:</strong> {handover.status}</p>
+    </div>
+  ))}
+</div>
+
                             </div>
                           ))}
                         </div>
@@ -927,7 +931,7 @@ export default function AdminDashboard() {
                           {allBookings.filter(b => b.stationId?._id === station._id).length} Bookings
                         </span>
                         <span>
-                          {allKeyHandovers.filter(k => k.station?._id === station._id).length} Key Handovers
+                          {allKeyHandovers.filter(k => k.stationId?._id === station._id).length} Key Handovers
                         </span>
                       </div>
                     </div>
