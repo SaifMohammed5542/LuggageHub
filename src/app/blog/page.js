@@ -30,6 +30,12 @@ const blogPosts = [
     title: '🚠 One-Day Melbourne Itinerary',
     excerpt: 'Want a Quick guid for a One-Day MElbourne Itinerary? Well....',
   },
+
+  {
+    slug: 'why-choose-luggage-terminal',
+    title: '🧳 Why choose Luggage Terminal?',
+    excerpt: 'TO begin with, Luggage Terminal is the cheapest and most Easy to store luggage...',
+  },
   // Add more blogs here
 ];
 
