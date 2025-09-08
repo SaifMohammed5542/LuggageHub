@@ -142,6 +142,11 @@ textarea {
   margin-bottom: 12px;
 }
 
+.loading-spinner p {
+  font-size: 0.9rem;
+  color: #2563eb;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
