@@ -118,6 +118,12 @@
   margin-bottom: 10px;
 }
 
+
+.loading-spinner p {
+  font-size: 0.9rem;
+  color: #2563eb;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

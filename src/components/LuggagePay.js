@@ -20,9 +20,28 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
   };
 
   return (
+  <div style={{ marginTop: "15px" }}>
+    {/* Helper note for tourists */}
+    <div
+      style={{
+        fontSize: "0.95rem",
+        color: "#333",
+        marginBottom: "10px",
+        background: "#f8f9fa",
+        padding: "10px 12px",
+        borderLeft: "4px solid #0070ba", // PayPal blue accent
+        borderRadius: "6px",
+        lineHeight: "1.4",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      ℹ️ <strong>If your card was issued outside Australia,</strong> please select your card’s
+      billing country from the dropdown before paying.💳
+    </div>
+
     <PayPalScriptProvider
       options={{
-        "client-id": "AdTTcQKcCdPjZwYhTP4onsB_xdphyWA4kUaDoiZqlu9eFe17yoRR_mze_0wTz-skAtsSwNxY_T2D5adR",
+        "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
         currency: "AUD",
         locale: "en_AU",
       }}
@@ -43,25 +62,39 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
             },
           });
         }}
-
         onClick={(_, actions) => {
-    return actions.resolve().catch((err) => {
-      console.error("PayPal card validation error:", err);
-      logPaymentError("PayPal popup: card was rejected (not usable / could not be added)");
-      alert("This card cannot be used. Please try another card.");
-      return actions.reject(); // stop checkout flow
-    });
-  }}
-
-
+          return actions.resolve().catch((err) => {
+            console.error("PayPal card validation error:", err);
+            logPaymentError("PayPal popup: card was rejected (not usable / could not be added)");
+            alert("This card cannot be used. Please try another card.");
+            return actions.reject(); // stop checkout flow
+          });
+        }}
         onApprove={(data, actions) => {
           return actions.order.capture().then((details) => {
             onPaymentSuccess(details.id);
           });
         }}
         onError={(err) => {
-          console.error("PayPal error:", err);
-          logPaymentError(err?.message || err.toString());
+          // improved logging for debugging & PayPal support
+          console.error("PayPal error (raw):", err);
+          const payload = {
+            message: err?.message || "Unknown PayPal error",
+            name: err?.name || null,
+            details: err?.details || null,
+            debug_id: err?.debug_id || err?.debugId || null,
+            raw: err,
+            formDataSnippet: { email: formData?.email, station: formData?.stationId },
+            ts: new Date().toISOString(),
+          };
+          // send detailed log to your logging endpoint
+          fetch("/api/log-payment-error", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }).catch((e) => console.error("failed to log payment error:", e));
+
+          logPaymentError(payload.message);
           alert("Payment failed. Please try again or use a different card.");
         }}
         onCancel={() => {
@@ -78,7 +111,8 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
         }}
       />
     </PayPalScriptProvider>
-  );
+  </div>
+);
 };
 
 export default PayPalPayment;
