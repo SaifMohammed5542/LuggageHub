@@ -22,6 +22,7 @@ import Loader from '../components/Loader'; // ✅ Import your Loader
 import Testimonials from '../components/testimonials'; // ✅ Import Testimonials if needed
 import Trustpilot from '../components/TrustPilot'; // ✅ Import Trustpilot if needed
 // import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
+import WhatsAppFloating from "../components/WhatsAppFloating" // WhatsApp Floating Button;
 
 
 function App() {
@@ -98,6 +99,7 @@ function App() {
       {/* <TransitWidget /> */}
       <Amount />
       <Cards2 howItWorksRef={howItWorksRef} />
+      <WhatsAppFloating />
       <Locations />
       <Testimonials />
       <Trustpilot />

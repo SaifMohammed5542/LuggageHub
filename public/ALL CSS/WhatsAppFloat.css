@@ -1,0 +1,58 @@
+:root {
+  --lt-accent: #0f766e; /* Luggage Terminal accent */
+  --wa-green: #25d366;  /* WhatsApp green */
+}
+
+/* Floating WhatsApp button (always bottom-left) */
+.lt-whatsapp-btn {
+  position: fixed;
+  left: 20px;    /* 👈 left side */
+  bottom: 20px;
+  z-index: 9999;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--wa-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.lt-whatsapp-btn img {
+  width: 28px;
+  height: 28px;
+}
+
+.lt-whatsapp-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+/* CTA text (desktop only, sits to the right of button) */
+.lt-whatsapp-cta {
+  position: fixed;
+  left: 92px; /* sits right of button */
+  bottom: 28px;
+  z-index: 9998;
+  display: none;
+}
+
+.lt-whatsapp-cta-link {
+  background: linear-gradient(90deg, var(--lt-accent), #10b981);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+}
+
+/* Show CTA on medium+ screens */
+@media (min-width: 768px) {
+  .lt-whatsapp-cta {
+    display: block;
+  }
+}
