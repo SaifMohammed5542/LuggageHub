@@ -1,0 +1,77 @@
+/* theme.css
+   Pure design tokens: colors, gradients, shadows, blobs
+   Keep this file dependency-free and easy to tweak for brand changes.
+*/
+
+/* ----- Light theme (default) ----- */
+:root {
+  --bg: #ffffff;
+  --bg-grad-start: #ffffff;
+  --bg-grad-end: #f6f7fb;
+
+  --text: #0b1221;
+  --text-muted: rgba(11, 18, 33, 0.72);
+
+  --primary: #4c67f0;
+  --primary-rgb: 76, 103, 240;
+  --secondary: #7a56b8;
+  --secondary-rgb: 122, 86, 184;
+
+  --glass-bg: rgba(var(--primary-rgb), 0.06);
+  --glass-border: rgba(var(--primary-rgb), 0.20);
+  --panel-bg: #ffffff;
+  --panel-border: #e7eaf3;
+  --soft-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+
+  --cta-grad: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --cta-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.25);
+  --cta-hover-shadow: 0 15px 40px rgba(var(--primary-rgb), 0.35);
+  --cta-fg: #ffffff;
+
+  --pattern-line: rgba(var(--primary-rgb), 0.06);
+  --blob1: rgba(var(--primary-rgb), 0.18);
+  --blob2: rgba(var(--secondary-rgb), 0.18);
+
+  --outline: var(--primary);
+  --icon-on-primary: #ffffff;
+
+  /* legacy bridge */
+  --background: var(--bg);
+  --foreground: var(--text);
+}
+
+/* ----- Dark theme overrides ----- */
+:root[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --bg-grad-start: #0a0a0a;
+  --bg-grad-end: #1a1a1a;
+
+  --text: #ffffff;
+  --text-muted: rgba(255,255,255,0.8);
+
+  --primary: #667eea;
+  --primary-rgb: 102,126,234;
+  --secondary: #764ba2;
+  --secondary-rgb: 118,75,162;
+
+  --glass-bg: rgba(var(--primary-rgb), 0.10);
+  --glass-border: rgba(var(--primary-rgb), 0.30);
+  --panel-bg: rgba(255,255,255,0.03);
+  --panel-border: rgba(255,255,255,0.10);
+  --soft-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.40);
+
+  --cta-grad: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --cta-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.40);
+  --cta-hover-shadow: 0 15px 40px rgba(var(--primary-rgb), 0.60);
+  --cta-fg: #ffffff;
+
+  --pattern-line: rgba(var(--primary-rgb), 0.03);
+  --blob1: rgba(var(--primary-rgb), 0.25);
+  --blob2: rgba(var(--secondary-rgb), 0.25);
+
+  --outline: var(--primary);
+  --icon-on-primary: #ffffff;
+
+  --background: var(--bg);
+  --foreground: var(--text);
+}

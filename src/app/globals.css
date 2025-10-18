@@ -1,111 +1,128 @@
+/* globals.css
+   - Reset, typography, layout helpers, accessibility
+   - Maps semantic tokens to values provided by theme.css
+*/
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html, body { height: 100%; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; }
+
+/* ===== FONT VARIABLES (set by layout.tsx via next/font or loaded fonts) ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-/* .hero-container{
-  display: flex;
-  flex-direction: row;
-  padding: 100px 60px;
-  background-color: rgb(15, 127, 152);
-  margin: 10px;
-  border-radius: 10px;
-  align-items: center;
-}
-.welcome-hero-txt { 
-  flex:2;
-  width: 100%;
-  height: 100%;
-  text-align: left;
-  font-family: Arial, Helvetica, sans-serif;
-  align-items: center;
-}
-.welcome-hero-img {
-  flex: 1;
-  width: 100%;
-  height: 100%;   
-}
-.welcome-hero-img img {
-  width: 100%;
-  height: 100%;
-  border-radius: 40%;
-  box-shadow:8px 8px 20px rgba(0, 0, 0, 0.684);
-}
-.welcome-btn{
-  padding: 10px;
-  font-size: 2rem;
-  color: #ffff;
-  margin-top: 20px;
-  background-color: rgb(211, 122, 32);
-  border: 1px solid red;
-}
-.welcome-hero {
-  position: relative;
-  background:none;
-  background-position:center;
-  background-size:cover;
-  text-align: center;
-  margin-top: 0px;
-  height:800px;
-  z-index: 1;
-}
-.welcome-hero:before{
-  position: absolute;
-  content: " ";
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
 }
 
+/* ===== THEME TOKEN MAPPING (semantic tokens -> theme.css tokens) =====
+   theme.css defines --bg/--text/etc. We map to nicer semantic names
+   so component modules should use --color-* variables.
+*/
+:root {
+  /* semantic colors (used in components) */
+  --color-bg: var(--bg, #ffffff);
+  --color-fg: var(--text, #0b1221);
+  --color-muted: var(--text-muted, rgba(11,18,33,0.72));
 
-.welcome-hero-txt h2 {
-  font-size: 48px;
-  color: #fff;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2.4px;
-  line-height: 1.4;
+  --color-primary: var(--primary, #4c67f0);
+  --color-primary-rgb: var(--primary-rgb, 76,103,240);
+  --color-secondary: var(--secondary, #7a56b8);
+
+  --color-panel: var(--panel-bg, #ffffff);
+  --color-border: var(--panel-border, #e7eaf3);
+
+  --shadow-soft: var(--soft-shadow, 0 10px 30px rgba(16,24,40,0.08));
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --page-max: 1200px;
+  --page-gutter: clamp(16px, 4vw, 32px);
+
+  /* Backwards compat */
+  --background: var(--color-bg);
+  --foreground: var(--color-fg);
+
+  /* sensible color-scheme */
+  color-scheme: light;
 }
-.welcome-hero-txt p {
-  font-size: 18px;
-  color: #fcfcfc;
-  margin-top: 25px;
-} */
+
+/* If user set data-theme="dark" on <html>, let the theme file override colors.
+   but keep color-scheme mapping for browsers */
+:root[data-theme="dark"] { color-scheme: dark; }
+
+/* respect system preference initially if no explicit theme set (reduces flash) */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #EAE7DC;
-  }
+  :root:not([data-theme]) { color-scheme: dark; }
 }
 
-html,
+/* ===== APP BASE ===== */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
 body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  line-height: 1.6;
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background-color: #E9F1FA;
-  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
+/* ===== CONTAINERS ===== */
+/* Full-bleed page section with safe gutters */
+.container {
+  width: 100%;
   margin: 0;
+  padding-inline: var(--page-gutter);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Use .container.is-max when you want centered fixed width */
+.container.is-max {
+  max-width: var(--page-max);
+  margin-inline: auto;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* ===== SELECTION & FOCUS ===== */
+::selection { background: rgb(var(--color-primary-rgb)); color: #fff; }
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ===== SUBTLE SCROLLBARS ===== */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.15);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* ===== MOTION REDUCTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: #fff; color: #000; }
+  nav, .hamburger, .scrollTop { display: none !important; }
+}
+/* ===== THEME VARIABLES ===== */
