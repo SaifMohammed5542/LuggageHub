@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/firebaseConfig.js", "src/app/middleware.js", "src/app/middleware.js", "src/components/BannerOne.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/firebaseConfig.js", "src/app/middleware.js", "src/app/middleware.js", "src/components/BannerOne/Banner.js"],
   "exclude": ["node_modules"]
 }

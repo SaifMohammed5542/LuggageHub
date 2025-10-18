@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import Head from 'next/head';
 import "../../public/ALL CSS/Page.css"
 import Header from '../components/Header.js';
-import BannerOne from '../components/BannerOne.js';
+import Banner from '@/components/Banner';
 // import BannerTwo from '../components/BannerTwo.js';
 import Cards from '../components/Cards.js';
 import Cards2 from '../components/Cards2.js';
@@ -23,6 +23,7 @@ import Testimonials from '../components/testimonials'; // ✅ Import Testimonial
 import Trustpilot from '../components/TrustPilot'; // ✅ Import Trustpilot if needed
 // import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
 import WhatsAppFloating from "../components/WhatsAppFloating" // WhatsApp Floating Button;
+import Test from "../components/Testing/Test"
 
 
 function App() {
@@ -91,7 +92,7 @@ function App() {
 
       <div className='Holder'>
         <Header scrollToServices={() => scrollToSection("services")} scrollTohowItWorks={() => scrollToSection("howItWorks")} />
-        <BannerOne />
+        <Banner />
       </div>
 
       {/* Other Components */}
