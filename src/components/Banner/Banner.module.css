@@ -370,12 +370,7 @@
 .scrollTop:hover { transform: translateY(-4px); box-shadow: var(--cta-hover-shadow); }
 .scrollTopIcon { width: 22px; height:22px; color: var(--icon-on-primary); }
 
-/* ---------- FOCUS (accessibility) ---------- */
-button:focus-visible, a:focus-visible {
-  outline: 3px solid var(--outline);
-  outline-offset: 3px;
-  border-radius: 8px;
-}
+
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1024px) {
@@ -391,29 +386,17 @@ button:focus-visible, a:focus-visible {
    Place this block BEFORE your existing @media (max-width: 768px) block. */
 @media (min-width: 769px) {
   /* make the main grid single-column so text occupies full width */
-  .grid {
-    grid-template-rows: 1fr;
-    grid-template-columns: 2fr 1fr;
-    gap: 10px;
-    
-  }
+  .grid {grid-template-rows: 1fr; grid-template-columns: 2fr 1fr; gap: 10px;}
 
   /* hide the visual/right column and any image/logo elements */
   .imageBox,
-  .logo {
-    display: none !important;
-  }
+  .logo {display: none !important;}
 
   /* ensure the text area fills the available space */
-  .textImageRow {
-    display: block;
-  }
+  .textImageRow {display: block;}
+  .text {flex: none; width: 100%; max-width: 100%;}
+  .actions { flex-direction: column; width: 85%; }
 
-  .text {
-    flex: none;
-    width: 100%;
-    max-width: 100%;
-  }
 }
 
 
