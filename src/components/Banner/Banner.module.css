@@ -395,7 +395,7 @@
   /* ensure the text area fills the available space */
   .textImageRow {display: block;}
   .text {flex: none; width: 100%; max-width: 100%;}
-  .actions { flex-direction: column; width: 86%; }
+  .actions { flex-direction: column; width: 85%; }
 
 }
 
