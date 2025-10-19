@@ -23,7 +23,6 @@ import Testimonials from '../components/testimonials'; // ✅ Import Testimonial
 import Trustpilot from '../components/TrustPilot'; // ✅ Import Trustpilot if needed
 // import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
 import WhatsAppFloating from "../components/WhatsAppFloating" // WhatsApp Floating Button;
-import Test from "../components/Testing/Test"
 
 
 function App() {
