@@ -1,4 +1,5 @@
-/* Banner.module.css
+/*@components/Banner/Banner.module.css
+
    Scoped module for Banner component.
    Uses global theme tokens from theme.css / globals.css (no duplication).
 */
@@ -6,7 +7,7 @@
 /* ---------- SHELL ---------- */
 .banner {
   min-height: 100vh;
-  padding-top: 85px; /* header offset */
+  padding-top: 10px; /* header offset */
   position: relative;
   overflow: hidden;
   background: var(--bg);
@@ -311,7 +312,7 @@
   transition: all .7s cubic-bezier(.22,1,.36,1) .12s;
   z-index: 2;
   align-self: flex-start;
-  margin-top: 20%;
+  margin-top: 0;
 }
 .right.show { opacity: 1; transform: translateY(0); }
 
@@ -359,7 +360,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--cta-grad);
+  background: linear-gradient(var(--primary), var(--secondary)50%);
   display:flex;
   align-items:center;
   justify-content:center;
