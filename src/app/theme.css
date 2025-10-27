@@ -42,7 +42,6 @@
 
 /* ----- Dark theme overrides ----- */
 :root[data-theme="dark"] {
-
   --bg: #0a0a0a;
   --bg-grad-start: #0a0a0a;
   --bg-grad-end: #1a1a1a;
@@ -75,11 +74,4 @@
 
   --background: var(--bg);
   --foreground: var(--text);
-
-
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  /* ...all other variables... */
-
-
 }
