@@ -2,25 +2,25 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Head from 'next/head';
 import "../../public/ALL CSS/Page.css"
-import Header from '@/components/Header';
+import Header from '../components/Header.js';
 import Banner from '@/components/Banner';
-import Amount from '@/components/Amount';
-import HowItWorks from '@/components/HowItWorks';
-import Testimonials from '@/components/Testimonials';
-import OurTopServices from '@/components/OurTopServices';
-import Queries from '@/components/Queries';
-import Footer from '@/components/Footer';
-import Trustpilot from '@/components/Trustpilot';
-import Rotatingtext from '@/components/Rotator';
 // import BannerTwo from '../components/BannerTwo.js';
-// import Locations from '../components/Locations.js';
+import Cards from '../components/Cards.js';
+import Cards2 from '../components/Cards2.js';
+import Locations from '../components/Locations.js';
 // import GoogleMapsComponent from "../components/Map.js"
+import Rotatingtext from '../components/Rotate.js';
+import ConBanner from '../components/Cons'
 // import Banerrr from '../components/tesxt'
+import Footer from '../components/Footer.js';
+import Amount from '../components/Amount'
 // import FindLocHere from '../components/FindLocHere.js' 
 // import LuggageStorage from '../components/Leaflet'
 // import MapWithDirections from "../components/Map.js";
 // import MapButton from "../components/MapButton"
 import Loader from '../components/Loader'; // ✅ Import your Loader
+import Testimonials from '../components/testimonials'; // ✅ Import Testimonials if needed
+import Trustpilot from '../components/TrustPilot'; // ✅ Import Trustpilot if needed
 // import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
 import WhatsAppFloating from "../components/WhatsAppFloating" // WhatsApp Floating Button;
 
@@ -42,34 +42,6 @@ function App() {
       return () => window.removeEventListener("load", handleLoad);
     }
   }, []);
-
-  // ---------- ADD THIS (one-time hash handler) ----------
-useEffect(() => {
-  if (typeof window === "undefined") return;
-
-  const hash = window.location.hash.replace("#", ""); // e.g. "services" or "how-it-works"
-  if (!hash) return;
-
-  const t = setTimeout(() => {
-    if (hash === "services") {
-      scrollToSection("services");
-    } else if (
-      hash === "how-it-works" ||
-      hash === "howItWorks" ||
-      hash === "howitworks"
-    ) {
-      scrollToSection("howItWorks");
-    } else {
-      // fallback: try ID-based scroll
-      const el = document.getElementById(hash);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  }, 100); // small delay so refs mount & layout stabilises
-
-  return () => clearTimeout(t);
-}, []); 
-// ---------- END ADDITION ----------
-
 
   const servicesRef = useRef<HTMLDivElement | null>(null);
   const howItWorksRef = useRef<HTMLDivElement | null>(null);
@@ -126,19 +98,13 @@ useEffect(() => {
       <Rotatingtext />
       {/* <TransitWidget /> */}
       <Amount />
-      <br />
-      <HowItWorks howItWorksRef={howItWorksRef} />
-      <br />
+      <Cards2 howItWorksRef={howItWorksRef} />
       <WhatsAppFloating />
-      {/* <Locations /> */}
+      <Locations />
       <Testimonials />
-      <br />
       <Trustpilot />
-      <br />
-      <OurTopServices servicesRef={servicesRef} />
-      <br />
-      <Queries />
-      <br />
+      <Cards servicesRef={servicesRef} />
+      <ConBanner />
       <Footer />
     </>
   );
