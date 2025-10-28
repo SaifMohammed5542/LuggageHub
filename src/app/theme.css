@@ -9,6 +9,8 @@
   --bg-grad-start: #ffffff;
   --bg-grad-end: #f6f7fb;
 
+   --header-logo: url('/NewLogo2.png');
+
   --text: #0b1221;
   --text-muted: rgba(11, 18, 33, 0.72);
 
@@ -42,9 +44,14 @@
 
 /* ----- Dark theme overrides ----- */
 :root[data-theme="dark"] {
+
   --bg: #0a0a0a;
   --bg-grad-start: #0a0a0a;
-  --bg-grad-end: #1a1a1a;
+  --bg-grad-end: #001e44be;
+
+
+ --header-logo: url('/NewLogo.png');
+
 
   --text: #ffffff;
   --text-muted: rgba(255,255,255,0.8);
@@ -74,4 +81,11 @@
 
   --background: var(--bg);
   --foreground: var(--text);
+
+
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  /* ...all other variables... */
+
+
 }

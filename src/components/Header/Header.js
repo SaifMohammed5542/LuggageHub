@@ -130,7 +130,22 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
           {/* Logo */}
           <div className={styles.logo}>
             <Link href="/" onClick={closeMenu}>
-              <Image src="/images/NewLogo.png" alt="Logo" width={500} height={300} priority />
+              <Image
+      src="/images/NewLogoDark.png"
+      alt="Logo Light"
+      width={500}
+      height={300}
+      priority
+      className={styles.logoLight}
+    />
+    <Image
+      src="/images/NewLogo.png"
+      alt="Logo Dark"
+      width={500}
+      height={300}
+      priority
+      className={styles.logoDark}
+    />
             </Link>
           </div>
 
