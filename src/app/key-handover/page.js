@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import "./key.css";
 import "../../../public/ALL CSS/spinner.css";
-import Header from "../../components/Header.js";
+import Header from "@/components/Header";
 import PayPalPayment from "../../components/LuggagePay.js"; // ✅ reuse luggage PayPal
-import Footer from "../../components/Footer.js";
+import Footer from "@/components/Footer";
 
 const KeyHandoverForm = () => {
   const [formData, setFormData] = useState({
