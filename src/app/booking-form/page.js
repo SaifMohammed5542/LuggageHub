@@ -29,6 +29,21 @@ const LuggageBookingForm = () => {
   
   const ratePerLuggagePerDay = 7.99;
 
+  // Theme detection - apply theme from root
+  useEffect(() => {
+    // Check if theme is already set in root element
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme');
+    
+    // If no theme is set, check localStorage or system preference
+    if (!currentTheme) {
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+      root.setAttribute('data-theme', theme);
+    }
+  }, []);
+
   // Auto-fill user data if logged in
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -554,12 +569,12 @@ const LuggageBookingForm = () => {
               </div>
             </div>
 
-            {/* Pricing Sidebar - UPDATED WITH COLLAPSIBLE FUNCTIONALITY */}
+            {/* Pricing Sidebar */}
             <div className={styles.sidebar}>
               <div className={styles.priceCard}>
                 <h3 className={styles.priceTitle}>Booking Summary</h3>
                 
-                {/* Collapsible Content - Shows ABOVE button on mobile */}
+                {/* Collapsible Content */}
                 <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
                   <div className={styles.priceBreakdown}>
                     <div className={styles.priceRow}>
@@ -596,7 +611,7 @@ const LuggageBookingForm = () => {
                   </div>
                 </div>
 
-                {/* Always Visible Total & Toggle Combined */}
+                {/* Toggle Button with Total */}
                 <button
                   type="button"
                   onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}

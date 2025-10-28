@@ -249,15 +249,33 @@
 
 /* nearest btn */
 .nearestBtn {
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 22px;
-  background: var(--glass-bg);
-  border-radius: var(--radius-md);
-  border: 2px solid var(--glass-border);
-  cursor:pointer;
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
+
+.nearestBtn:hover {
+  box-shadow: var(--cta-hover-shadow);
+}
+
+.nearestBtn svg {
+  stroke: currentColor;
+  width: 18px;
+  height: 18px;
+}
+/* .nearestBtn span {
+  font-weight:600;
+  color: var(--text);
+} */
+
 .nearestBtn:disabled { opacity: .6; cursor: not-allowed; }
 .loading { background: rgba(var(--primary-rgb), 0.14); border-color: rgba(var(--primary-rgb), 0.36); }
 

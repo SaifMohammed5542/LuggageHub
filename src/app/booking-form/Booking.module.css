@@ -1,8 +1,9 @@
 /* Page Wrapper */
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   padding: 2rem 1rem;
+  transition: background 0.3s ease;
 }
 
 .container {
@@ -25,7 +26,7 @@
 .heroTitle {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #6366f1 0%, #818cf8 50%, #a5b4fc 100%);
+  background: var(--cta-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -58,6 +59,7 @@
   padding: 2.5rem;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--color-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 /* Progress Bar */
@@ -94,10 +96,10 @@
 }
 
 .step.active .stepCircle {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: var(--cta-grad);
   border-color: var(--color-primary);
   color: white;
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+  box-shadow: var(--cta-shadow);
 }
 
 .stepLabel {
@@ -189,7 +191,7 @@
 .input:focus,
 .select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
 }
 
 .input:disabled {
@@ -228,13 +230,13 @@
 .sizeCard:hover {
   border-color: var(--color-primary-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
 .sizeCard.selected {
   border-color: var(--color-primary);
-  background: rgba(99, 102, 241, 0.1);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  background: var(--glass-bg);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
 }
 
 .radioInput {
@@ -277,7 +279,7 @@
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: var(--color-primary);
+  background: var(--cta-grad);
   color: white;
   font-size: 1.5rem;
   font-weight: 700;
@@ -286,10 +288,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--cta-shadow);
 }
 
 .counterBtn:hover {
-  background: var(--color-primary-dark);
+  box-shadow: var(--cta-hover-shadow);
   transform: scale(1.1);
 }
 
@@ -344,14 +347,14 @@
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  box-shadow: var(--cta-shadow);
 }
 
 .btnPrimary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  box-shadow: var(--cta-hover-shadow);
 }
 
 .btnPrimary:disabled {
@@ -368,7 +371,7 @@
 
 .btnSecondary:hover:not(:disabled) {
   border-color: var(--color-primary);
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--glass-bg);
 }
 
 .buttonRow {
@@ -408,7 +411,7 @@
   display: flex;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .reviewItem:last-child {
@@ -433,7 +436,7 @@
 }
 
 .priceCard {
-  background: var(--color-bg-card);
+  background: var(--color-bg);
   border-radius: var(--radius-lg);
   padding: 2rem;
   box-shadow: var(--shadow-xl);
@@ -490,7 +493,7 @@
 .totalValue {
   font-size: 1.75rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: var(--cta-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -518,7 +521,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.2);
   color: var(--color-success);
   font-weight: 700;
   font-size: 0.75rem;
@@ -530,8 +533,8 @@
   width: 100%;
   padding: 1.25rem;
   margin-top: 1rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
-  border: 2px solid var(--color-primary);
+  background: linear-gradient(135deg, rgba(99, 102, 241, .1), rgba(129, 140, 248, .1));
+  border: 2px solid var(--glass-border);
   border-radius: var(--radius);
   color: var(--color-text);
   cursor: pointer;
@@ -542,9 +545,9 @@
 }
 
 .toggleButton:hover {
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(var(--primary-rgb), 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
 .toggleButtonContent {
@@ -563,10 +566,11 @@
 .toggleButton .totalValue {
   font-size: 1.75rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: var(--cta-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: inline-block;
 }
 
 .toggleAction {
@@ -607,7 +611,7 @@
 
 .collapsibleContent .priceFeatures {
   margin-top: 0;
-  padding-top: 0rem;
+  padding-top: 1rem;
   border-top: none;
 }
 
@@ -701,7 +705,7 @@
     top: auto;
     order: 2;
     z-index: 100;
-    background: var(--color-bg);
+    background: var(--color-bg-card);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
   }
 
