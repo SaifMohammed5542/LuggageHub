@@ -76,7 +76,7 @@ function HowItWorks({ howItWorksRef }) {
             <h3 className={styles["step-title"]}>Enjoy the Day!!</h3>
             <p className={styles["step-description"]}>
               Make the most out of your day, then show your confirmation to pick
-              up your stuff whenever you're ready.
+              up your stuff whenever {"you're"} ready.
             </p>
           </div>
         </div>
