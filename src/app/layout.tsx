@@ -47,12 +47,14 @@ const themeInitScript = `
     var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = (saved === 'light' || saved === 'dark') ? saved : (prefersDark ? 'dark' : 'light');
     if (saved === 'system') theme = prefersDark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
   } catch (e) {
-    // nothing — defensive
+    // defensive
   }
 })();
 `;
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
