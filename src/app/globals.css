@@ -42,7 +42,8 @@ button { cursor: pointer; }
   --radius-lg: 16px;
 
   --page-max: 1200px;
-  --page-gutter: clamp(16px, 4vw, 32px);
+  --page-max-wide: 1525px;
+  --page-gutter: clamp(18px, 4vw, 36px);
 
   /* Backwards compat */
   --background: var(--color-bg);

@@ -8,7 +8,7 @@
   position: fixed;
   left: 20px;    /* 👈 left side */
   bottom: 20px;
-  z-index: 9999;
+  z-index: 999;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 

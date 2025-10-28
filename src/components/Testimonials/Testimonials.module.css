@@ -1,0 +1,139 @@
+/* Testimonials.module.css - Themed & Glassified Version
+   Matches your Banner / global theme aesthetic.
+*/
+
+.testimonials-section {
+  position: relative;
+  padding: clamp(60px, 8vw, 100px) 20px;
+  background: linear-gradient(
+    135deg,
+    var(--bg-grad-start),
+    var(--bg-grad-end)
+  );
+  color: var(--text);
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Decorative backdrop glow (like Banner blobs) */
+.testimonials-section::before,
+.testimonials-section::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.45;
+  z-index: 0;
+  pointer-events: none;
+}
+.testimonials-section::before {
+  top: -100px;
+  left: -150px;
+  background: radial-gradient(circle, var(--blob1), transparent 70%);
+}
+.testimonials-section::after {
+  bottom: -120px;
+  right: -160px;
+  background: radial-gradient(circle, var(--blob2), transparent 70%);
+}
+
+.testimonials-title {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  margin-bottom: 60px;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 2;
+}
+
+/* underline gradient accent */
+.testimonials-title::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  margin: 16px auto 0;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 2px;
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(20px, 3vw, 36px);
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Testimonial Card - glassy with hover lift */
+.testimonial-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg, 18px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 40px rgba(var(--primary-rgb), 0.08);
+  padding: clamp(22px, 2vw, 32px);
+  color: var(--text);
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 60px rgba(var(--primary-rgb), 0.12);
+  border-color: var(--primary);
+}
+
+/* Feedback text */
+.testimonial-feedback {
+  font-style: italic;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+
+/* Rating stars */
+.testimonial-rating {
+  font-size: 1.25rem;
+  color: #ffd86b;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+/* Author section */
+.testimonial-author {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+/* Light theme adjustment */
+:global(:root:not([data-theme="dark"])) .testimonial-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .testimonials-title {
+    margin-bottom: 40px;
+  }
+
+  .testimonial-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .testimonials-section {
+    padding: 50px 16px;
+  }
+  .testimonials-title {
+    font-size: 1.6rem;
+  }
+}
