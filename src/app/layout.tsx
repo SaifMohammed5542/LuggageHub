@@ -44,16 +44,26 @@ const themeInitScript = `
   try {
     var KEY = 'theme';
     var saved = localStorage.getItem(KEY);
-    // Force dark as default
-    var theme = (saved === 'light' || saved === 'dark') ? saved : 'dark';
+    
+    // If user has explicitly set a preference, respect it
+    // Otherwise, default to dark (even for first-time visitors)
+    var theme = saved || 'dark';
+    
+    // Only check system preference if user explicitly chose 'system'
     if (saved === 'system') {
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       theme = prefersDark ? 'dark' : 'light';
     }
-    if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-    else document.documentElement.removeAttribute('data-theme');
+    
+    // Apply dark theme
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
   } catch (e) {
-    // defensive
+    // Fallback to dark theme if anything fails
+    document.documentElement.setAttribute('data-theme', 'dark');
   }
 })();
 `;
