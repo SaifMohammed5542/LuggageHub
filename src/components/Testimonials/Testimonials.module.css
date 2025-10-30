@@ -5,11 +5,8 @@
 .testimonials-section {
   position: relative;
   padding: clamp(60px, 8vw, 100px) 20px;
-  background: linear-gradient(
-    135deg,
-    var(--bg-grad-start),
-    var(--bg-grad-end)
-  );
+    background: linear-gradient(90deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+
   color: var(--text);
   text-align: center;
   overflow: hidden;

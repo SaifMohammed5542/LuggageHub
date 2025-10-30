@@ -2,7 +2,7 @@
 
 .servicesSection {
   padding: 100px 0;
-  background: var(--bg);
+  background: linear-gradient(-80deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   position: relative;
   overflow: hidden;
 }
