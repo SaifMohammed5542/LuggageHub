@@ -7,11 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postbuild": "next-sitemap",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -58,9 +54,6 @@
     "@storybook/addon-vitest": "^9.1.13",
     "@storybook/nextjs": "^9.1.13",
     "@storybook/nextjs-vite": "^9.1.13",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -70,8 +63,6 @@
     "eslint-config-next": "15.1.7",
     "eslint-plugin-storybook": "^9.1.13",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0",
     "playwright": "^1.56.1",
     "typescript": "^5",
     "vitest": "^3.2.4"
