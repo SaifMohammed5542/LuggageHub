@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Header from "../../../components/Header";
-import Footer from "../../../components/Footer";
-import "../../../../public/ALL CSS/Login.css";
-import toast from "react-hot-toast"; // ✅ Import toast
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import toast from "react-hot-toast";
+import styles from "./register.module.css";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function RegisterPage() {
         toast.success("Account created successfully! 🎉");
         setTimeout(() => {
           router.push("/auth/login");
-        }, 1500);
+        }, 1200);
       } else {
         if (data.errors) {
           setFieldErrors(data.errors);
@@ -52,7 +52,7 @@ export default function RegisterPage() {
         }
       }
     } catch (err) {
-      console.error("Registration error:", err); // ✅ error is now used
+      console.error("Registration error:", err);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -62,11 +62,12 @@ export default function RegisterPage() {
   return (
     <>
       <Header />
-      <div className="loginPage">
-        <div className="loginContainer registerContainer">
-          <h1 className="loginTitle">Create Account</h1>
-          <form onSubmit={handleSubmit} className="loginForm">
-            <div className="inputGroup">
+      <main className={styles.loginPage}>
+        <div className={`${styles.loginContainer} ${styles.registerContainer}`}>
+          <h1 className={styles.loginTitle}>Create Account</h1>
+
+          <form onSubmit={handleSubmit} className={styles.loginForm} noValidate>
+            <div className={styles.inputGroup}>
               <label htmlFor="username">Username</label>
               <input
                 id="username"
@@ -75,14 +76,18 @@ export default function RegisterPage() {
                 placeholder="Choose a username"
                 onChange={handleChange}
                 required
-                className="loginInput"
+                className={styles.loginInput}
+                aria-invalid={!!fieldErrors.username}
+                aria-describedby={fieldErrors.username ? "username-error" : undefined}
               />
               {fieldErrors.username && (
-                <p className="errorMessage">{fieldErrors.username}</p>
+                <p id="username-error" className={styles.errorMessage}>
+                  {fieldErrors.username}
+                </p>
               )}
             </div>
 
-            <div className="inputGroup">
+            <div className={styles.inputGroup}>
               <label htmlFor="email">Email Address</label>
               <input
                 id="email"
@@ -91,14 +96,18 @@ export default function RegisterPage() {
                 placeholder="Enter your email"
                 onChange={handleChange}
                 required
-                className="loginInput"
+                className={styles.loginInput}
+                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
               {fieldErrors.email && (
-                <p className="errorMessage">{fieldErrors.email}</p>
+                <p id="email-error" className={styles.errorMessage}>
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
 
-            <div className="inputGroup">
+            <div className={styles.inputGroup}>
               <label htmlFor="password">Password</label>
               <input
                 id="password"
@@ -107,32 +116,42 @@ export default function RegisterPage() {
                 placeholder="Create a password"
                 onChange={handleChange}
                 required
-                className="loginInput"
+                className={styles.loginInput}
+                aria-invalid={!!fieldErrors.password}
+                aria-describedby={fieldErrors.password ? "password-error" : undefined}
               />
-              <p className="passwordHint">Use at least 8 characters</p>
+              <p className={styles.passwordHint}>Use at least 8 characters</p>
               {fieldErrors.password && (
-                <p className="errorMessage">{fieldErrors.password}</p>
+                <p id="password-error" className={styles.errorMessage}>
+                  {fieldErrors.password}
+                </p>
               )}
             </div>
 
-            <button type="submit" className="loginButton" disabled={loading}>
+            <button
+              type="submit"
+              className={styles.loginButton}
+              disabled={loading}
+              aria-busy={loading}
+            >
               {loading ? "Signing Up..." : "Sign Up"}
             </button>
           </form>
 
           {loading && (
-            <div className="loader">
-              <div className="spinner"></div>
+            <div className={styles.loader}>
+              <div className={styles.spinner} />
             </div>
           )}
 
-          <div className="orDivider">or</div>
+          <div className={styles.orDivider}>or</div>
 
-          <p className="registerLink">
+          <p className={styles.registerLink}>
             Already have an account? <a href="/auth/login">Sign in</a>
           </p>
         </div>
-      </div>
+      </main>
+
       <Footer />
     </>
   );
