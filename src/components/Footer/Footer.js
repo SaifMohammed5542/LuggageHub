@@ -5,6 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./Footer.module.css";
 
+
+  const phoneNumber = "918978881569"; // change to your full WhatsApp number
+  const defaultMessage = "Hi Luggage Terminal! I need help with my booking.";
+  const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
+
 const Footer = () => {
   return (
     <footer
@@ -88,8 +93,15 @@ const Footer = () => {
                 support@luggageterminal.com
               </a>
             </li>
-            <li>Mon - Fri: 9:00 AM — 6:00 PM (AEST)</li>
-            <li>Phone: <a href="tel:+611234567890" className={styles.link}>+61 12 3456 7890</a></li>
+            <li>
+              WhatsApp:{" "}
+              <a
+                href={waUrl}
+                className={styles["mailto"]}
+              >
+                +91 897888 1569
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -97,7 +109,30 @@ const Footer = () => {
           <h3>Follow Us</h3>
 
           <div className={styles["social-row"]}>
+           
             <a
+              className={styles["social-btn"]}
+              href="https://instagram.com/LuggageTerminal"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Luggage Terminal on Instagram"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.3a4.7 4.7 0 1 0 0 9.4 4.7 4.7 0 0 0 0-9.4zM18.4 6.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span className={styles["social-text"]}>Instagram</span>
+            </a>
+
+             <a
               className={styles["social-btn"]}
               href="https://facebook.com"
               target="_blank"
@@ -141,27 +176,7 @@ const Footer = () => {
               <span className={styles["social-text"]}>Twitter</span>
             </a>
 
-            <a
-              className={styles["social-btn"]}
-              href="https://instagram.com/LuggageTerminal"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Luggage Terminal on Instagram"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.3a4.7 4.7 0 1 0 0 9.4 4.7 4.7 0 0 0 0-9.4zM18.4 6.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z"
-                  fill="currentColor"
-                />
-              </svg>
-              <span className={styles["social-text"]}>Instagram</span>
-            </a>
+
           </div>
 
           {/* small legal / small print on mobile under socials */}

@@ -3,7 +3,8 @@
 .footer {
   position: relative;
   width: 100%;
-  background: var(--color-panel);
+    background: linear-gradient(80deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+
   border-top: 1px solid var(--color-border);
   padding: clamp(2rem, 5vw, 4rem) 0 1.5rem;
   margin-top: auto;
