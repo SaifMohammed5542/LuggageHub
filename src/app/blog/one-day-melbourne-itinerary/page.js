@@ -1,6 +1,6 @@
 import '../style.css';
 import Link from 'next/link';
-import Header from "../../../components/Header";
+import Header from "@/components/Header";
 
 export const metadata = {
   title: 'The Perfect One-Day Melbourne Itinerary for First-Time Visitors (2025)',

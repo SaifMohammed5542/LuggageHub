@@ -6,7 +6,7 @@ import LuggageBookingForm from "../../components/LuggageBookingForm";
 import GoogleMapsWrapper from "../../components/GoogleMapsWrapper";
 import "../../../public/ALL CSS/MapBooking.css";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "../../components/Header";
+import Header from "@/components/Header";
 
 const MapBookingPage = () => {
   const [selectedStation, setSelectedStation] = useState(null);

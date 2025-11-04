@@ -1,6 +1,6 @@
 import '../style.css';
 import Link from 'next/link';
-import Header from "../../../components/Header";
+import Header from "@/components/Header";
 
 export const metadata = {
   title: 'Cheap Luggage Storage Near Southern Cross Station – Secure, Easy & Convenient',

@@ -1,5 +1,5 @@
 import '../../../public/ALL CSS/ComingSoon.css';
-import Header from '../../components/Header';
+import Header from '@/components/Header';
 
 export const metadata = {
   title: 'Coming Soon – Luggage Terminal',

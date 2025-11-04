@@ -2,7 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '../../../components/Header';
+import Header from '@/components/Header';
 import { decodeToken } from '../../../utils/decodeToken';
 import '../../../../public/ALL CSS/PartnerDashboard.css';
 
