@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import './blog-list.css'; // optional CSS (see below)
-import Header from '../../components/Header';
+import Header from '@/components/Header';
 
 const blogPosts = [
   {
