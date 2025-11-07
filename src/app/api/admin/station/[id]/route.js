@@ -1,86 +1,123 @@
 // /app/api/admin/station/[id]/route.js
-import dbConnect from "../../../../../lib/dbConnect";
-import Station from "../../../../../models/Station";
-import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import dbConnect from '../../../../../lib/dbConnect';
+import Station from '../../../../../models/Station';
+import { verifyJWT } from '../../../../../lib/auth';
+import { NextResponse } from 'next/server';
 
-// ✅ Middleware helper
+// ✅ Helper to verify admin
 async function verifyAdmin(req) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { error: 'Unauthorized', status: 401 };
+  }
+
+  const token = authHeader.split(' ')[1];
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return { error: "Unauthorized", status: 401 };
+    const decoded = verifyJWT(token);
+    if (!decoded || decoded.role !== 'admin') {
+      return { error: 'Forbidden: Admin access only', status: 403 };
     }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (!decoded || decoded.role !== "admin") {
-      return { error: "Forbidden: Admin access only", status: 403 };
-    }
-
     return { decoded };
-  } catch (err) {
-    console.error("Auth error:", err);
-    return { error: "Invalid or expired token", status: 401 };
+  } catch (error) {
+    console.error('verifyAdmin error:', error);
+    return { error: 'Invalid token', status: 401 };
   }
 }
 
-// 🔹 Update Station
+// 🔵 PUT - Update Station
 export async function PUT(req, { params }) {
   await dbConnect();
 
   const auth = await verifyAdmin(req);
   if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {
     const { id } = params;
     const data = await req.json();
 
-    const updatedStation = await Station.findByIdAndUpdate(id, data, { 
-      new: true, 
-      runValidators: true   // ✅ Ensure schema validation
-    });
-
-    if (!updatedStation) {
-      return NextResponse.json({ success: false, error: "Station not found" }, { status: 404 });
+    // If updating coordinates, ensure proper format
+    if (data.latitude !== undefined && data.longitude !== undefined) {
+      data.coordinates = {
+        type: 'Point',
+        coordinates: [parseFloat(data.longitude), parseFloat(data.latitude)]
+      };
+      delete data.latitude;
+      delete data.longitude;
     }
 
-    return NextResponse.json(
-      { success: true, message: "Station updated", station: updatedStation },
-      { status: 200 }
-    );
+    const updatedStation = await Station.findByIdAndUpdate(
+      id, 
+      { ...data, updatedAt: Date.now() },
+      { 
+        new: true, 
+        runValidators: true 
+      }
+    ).populate('partners', 'username email phone');
+
+    if (!updatedStation) {
+      return NextResponse.json({ 
+        error: 'Station not found' 
+      }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      message: 'Station updated successfully',
+      station: updatedStation
+    }, { status: 200 });
   } catch (error) {
-    console.error("Update Station Error:", error);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    console.error('Update station error:', error);
+    return NextResponse.json({ 
+      error: 'Server error updating station' 
+    }, { status: 500 });
   }
 }
 
-// 🔹 Delete Station
+// 🔴 DELETE - Delete Station
 export async function DELETE(req, { params }) {
   await dbConnect();
 
   const auth = await verifyAdmin(req);
   if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {
     const { id } = params;
+
+    // Optional: Check if station has bookings/handovers before deleting
+    // const Booking = (await import('../../../../../models/booking')).default;
+    // const hasBookings = await Booking.exists({ 'stationId': id });
+    // if (hasBookings) {
+    //   return NextResponse.json({ 
+    //     error: 'Cannot delete station with existing bookings' 
+    //   }, { status: 400 });
+    // }
+
     const deletedStation = await Station.findByIdAndDelete(id);
 
     if (!deletedStation) {
-      return NextResponse.json({ success: false, error: "Station not found" }, { status: 404 });
+      return NextResponse.json({ 
+        error: 'Station not found' 
+      }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { success: true, message: "Station deleted successfully" },
-      { status: 200 }
+    // Optional: Clean up partners assigned to this station
+    const User = (await import('../../../../../models/User')).default;
+    await User.updateMany(
+      { assignedStation: id },
+      { assignedStation: null }
     );
+
+    return NextResponse.json({
+      message: 'Station deleted successfully',
+      deletedStation
+    }, { status: 200 });
   } catch (error) {
-    console.error("Delete Station Error:", error);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    console.error('Delete station error:', error);
+    return NextResponse.json({ 
+      error: 'Server error deleting station' 
+    }, { status: 500 });
   }
 }
