@@ -146,7 +146,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.9rem;
 }
 
 .menu li {
@@ -155,8 +155,8 @@
 
 .menu a {
   display: block;
-  padding: 0.875rem 1rem;
-  color: var(--color-fg);
+  padding: 0.775rem 1rem;
+  background: linear-gradient(-90deg, var(--primary) 0%, var(--secondary) 100%);
   font-size: 1rem;
   font-weight: 500;
   border-radius: var(--radius-sm);

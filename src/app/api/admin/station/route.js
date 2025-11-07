@@ -4,58 +4,124 @@ import Station from '../../../../models/Station';
 import { verifyJWT } from '../../../../lib/auth';
 import { NextResponse } from 'next/server';
 
-export async function POST(req) {
+// ✅ Helper to verify admin
+async function verifyAdmin(req) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { error: 'Unauthorized', status: 401 };
+  }
+
+  const token = authHeader.split(' ')[1];
   try {
-    console.log('🔁 Connecting to DB...');
-    await dbConnect();
-    console.log('✅ DB Connected');
-
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    console.log('🔐 Token:', token);
-
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const decoded = verifyJWT(token);
-    console.log('🧾 Decoded Token:', decoded);
-
     if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return { error: 'Forbidden: Admin access only', status: 403 };
     }
+    return { decoded };
+  } catch (error) {
+    console.error('verifyAdmin error:', error);
+    return { error: 'Invalid token', status: 401 };
+  }
+}
 
-    let body;
-    try {
-      body = await req.json();
-      console.log('📦 Request Body:', body);
-    } catch (jsonErr) {
-      console.error('❌ JSON Parsing Error:', jsonErr);
-      return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
-    }
+// 🟢 POST - Create New Station
+export async function POST(req) {
+  await dbConnect();
 
-    const { name, location, latitude, longitude } = body;
+  const auth = await verifyAdmin(req);
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
 
-    if (!name || !location || latitude === undefined || longitude === undefined) {
-      console.log('❌ Missing required fields');
-      return NextResponse.json({ error: 'Missing name, location, or coordinates' }, { status: 400 });
-    }
+  let body;
+  try {
+    body = await req.json();
+  } catch (error) {
+    console.error('Invalid JSON in POST /admin/station:', error);
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
+  const { 
+    name, 
+    location, 
+    latitude, 
+    longitude, 
+    bankDetails, 
+    timings, 
+    capacity, 
+    description, 
+    photos,
+    timezone 
+  } = body;
+
+  // Validation
+  if (!name || !location || latitude === undefined || longitude === undefined) {
+    return NextResponse.json({ 
+      error: 'Missing required fields: name, location, latitude, longitude' 
+    }, { status: 400 });
+  }
+
+  try {
     const newStation = new Station({
       name,
       location,
-      coordinates: {
-        type: 'Point',
-        coordinates: [longitude, latitude], // NOTE: GeoJSON uses [lng, lat]
-      }
+      coordinates: { 
+        type: 'Point', 
+        coordinates: [parseFloat(longitude), parseFloat(latitude)] 
+      },
+      bankDetails: bankDetails || {},
+      timings: timings || {},
+      capacity: capacity || 0,
+      description: description || '',
+      photos: photos || [],
+      timezone: timezone || 'Australia/Melbourne',
+      status: 'active'
     });
 
-    console.log('📌 Saving Station:', newStation);
     await newStation.save();
-    console.log('✅ Station Saved');
 
-    return NextResponse.json({ message: 'Station created', station: newStation });
-  } catch (err) {
-    console.error('🔥 Station Creation Error:', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ 
+      message: 'Station created successfully', 
+      station: newStation 
+    }, { status: 201 });
+  } catch (error) {
+    console.error('Station creation error:', error);
+    
+    if (error && error.code === 11000) {
+      return NextResponse.json({ 
+        error: 'Station with this name already exists' 
+      }, { status: 409 });
+    }
+    
+    return NextResponse.json({ 
+      error: 'Server error creating station' 
+    }, { status: 500 });
+  }
+}
+
+// 🟢 GET - List All Stations
+export async function GET(req) {
+  await dbConnect();
+
+  const auth = await verifyAdmin(req);
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  try {
+    const stations = await Station.find()
+      .populate('partners', 'username email phone') // Include partner info
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json({ 
+      stations,
+      count: stations.length 
+    }, { status: 200 });
+  } catch (error) {
+    console.error('Fetch stations error:', error);
+    return NextResponse.json({ 
+      error: 'Server error fetching stations' 
+    }, { status: 500 });
   }
 }

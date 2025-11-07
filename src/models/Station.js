@@ -1,69 +1,150 @@
 // models/Station.js
 import mongoose from 'mongoose';
-import slugify from 'slugify'; // <--- ADD THIS LINE
+import slugify from 'slugify';
 
 const StationSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true }, // Keeping name unique as it helps with slug generation
-  slug: { // <--- ADD THIS SLUG FIELD BACK
-    type: String,
-    unique: true, // <--- We want it unique!
-    lowercase: true,
-    index: true, // <--- Add index for faster queries
+  // Basic Info
+  name: { 
+    type: String, 
+    required: true, 
+    unique: true,
+    trim: true 
   },
-  location: { type: String, required: true },
+  slug: { 
+    type: String,
+    unique: true,
+    lowercase: true,
+    index: true
+  },
+  location: { 
+    type: String, 
+    required: true,
+    trim: true 
+  },
   coordinates: {
     type: {
       type: String,
       enum: ['Point'],
       default: 'Point'
     },
-    coordinates: { // [longitude, latitude]
-      type: [Number],
+    coordinates: { 
+      type: [Number], // [longitude, latitude]
       required: true
     }
   },
-  partners: [{
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'User'
-}],
 
-  createdAt: { type: Date, default: Date.now }
+  // 🏦 Bank Details (MOVED FROM USER MODEL)
+  bankDetails: {
+    accountHolderName: { type: String, default: '' },
+    bankName: { type: String, default: '' },
+    bsb: { type: String, default: '' },
+    accountNumberEncrypted: { type: String, default: '' }, // Store encrypted
+    accountType: { 
+      type: String, 
+      enum: ['savings', 'checking', 'business'],
+      default: 'savings'
+    },
+    payoutEmail: { type: String, default: '' } // For PayPal/Wise
+  },
+
+  // ⏰ Operating Hours (MOVED FROM USER MODEL)
+  timings: {
+    is24Hours: { type: Boolean, default: false },
+    monday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    },
+    tuesday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    },
+    wednesday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    },
+    thursday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    },
+    friday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    },
+    saturday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    },
+    sunday: {
+      open: { type: String, default: '09:00' },
+      close: { type: String, default: '18:00' },
+      closed: { type: Boolean, default: false }
+    }
+  },
+
+  // 📊 Operational Details
+  capacity: { type: Number, default: 0 },
+  description: { type: String, default: '' },
+  photos: [{ type: String }],
+  
+  // 🔗 Partner References (Multiple partners can be assigned)
+  partners: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
+  // 📍 Status
+  status: { 
+    type: String, 
+    enum: ['active', 'inactive', 'pending'], 
+    default: 'active' 
+  },
+
+  timezone: { 
+    type: String, 
+    default: 'Australia/Melbourne' 
+  },
+
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
-// <--- ADD THIS PRE-SAVE HOOK
+// Auto-generate slug from name
 StationSchema.pre('save', async function(next) {
   if (this.isModified('name') && this.name) {
     let baseSlug = slugify(this.name, { lower: true, strict: true });
     let uniqueSlug = baseSlug;
     let counter = 1;
 
-    // Check for existing slug if not a new document
     if (!this.isNew && this.slug && this.slug === baseSlug) {
-      return next(); // Slug hasn't changed or is already the same as base, no need to re-generate uniqueness
+      return next();
     }
     
-    // Loop to ensure uniqueness
     while (true) {
-      // Find a station with the generated slug, but not the current station itself (if updating)
       const existingStation = await mongoose.models.Station.findOne({ 
         slug: uniqueSlug, 
-        _id: { $ne: this._id } // Exclude current document if it's an update
+        _id: { $ne: this._id }
       });
 
-      if (!existingStation) {
-        break; // Slug is unique
-      }
-
-      // If not unique, append a counter
+      if (!existingStation) break;
+      
       uniqueSlug = `${baseSlug}-${counter}`;
       counter++;
     }
     this.slug = uniqueSlug;
   }
+
+  this.updatedAt = Date.now();
   next();
 });
 
-StationSchema.index({ coordinates: "2dsphere" }); // Enable geospatial queries
+// Geospatial index for nearby search
+StationSchema.index({ coordinates: "2dsphere" });
 
 const Station = mongoose.models.Station || mongoose.model('Station', StationSchema);
 
