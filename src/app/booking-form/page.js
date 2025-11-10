@@ -1,14 +1,19 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../../components/LuggagePay.js";
+import { 
+  getNearestAvailableTime, 
+  formatDateTime, 
+  formatDateTimeLocal 
+} from "@/utils/stationTimingValidator";
 
 const LuggageBookingForm = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    phone: "",
+    phone: "+61 ",
     dropOffDate: "",
     pickUpDate: "",
     luggageCount: 1,
@@ -19,6 +24,7 @@ const LuggageBookingForm = () => {
   });
 
   const [stations, setStations] = useState([]);
+  const [stationTimings, setStationTimings] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -27,15 +33,79 @@ const LuggageBookingForm = () => {
   const [hasSpecialInstructions, setHasSpecialInstructions] = useState(false);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
   
+  // Timing validation states
+  const [timingAlert, setTimingAlert] = useState(null);
+  const [isCheckingTimings, setIsCheckingTimings] = useState(false);
+  
   const ratePerLuggagePerDay = 7.99;
 
-  // Theme detection - apply theme from root
+  // ---- validateStationTimings (moved up so effects can call it) ----
+  const validateStationTimings = useCallback(() => {
+    if (!stationTimings) {
+      console.log('⏭️ Skipping validation - no timings available');
+      return;
+    }
+
+    console.log('🔍 ========== VALIDATION START ==========');
+    console.log('📋 Current form data:', {
+      dropOff: formData.dropOffDate,
+      pickUp: formData.pickUpDate
+    });
+    console.log('🏢 Station timings:', stationTimings);
+
+    setIsCheckingTimings(true);
+    let alerts = [];
+
+    // Check drop-off time
+    if (formData.dropOffDate) {
+      console.log('📥 Validating drop-off time:', formData.dropOffDate);
+      const dropOffValidation = getNearestAvailableTime(formData.dropOffDate, stationTimings);
+      console.log('📥 Drop-off result:', {
+        isValid: dropOffValidation.isValid,
+        reason: dropOffValidation.reason
+      });
+      
+      if (!dropOffValidation.isValid) {
+        alerts.push({
+          type: 'dropOff',
+          message: `Drop-off time falls when station is closed`,
+          details: dropOffValidation,
+          selectedTime: formData.dropOffDate
+        });
+      }
+    }
+
+    // Check pick-up time
+    if (formData.pickUpDate) {
+      console.log('📤 Validating pick-up time:', formData.pickUpDate);
+      const pickUpValidation = getNearestAvailableTime(formData.pickUpDate, stationTimings);
+      console.log('📤 Pick-up result:', {
+        isValid: pickUpValidation.isValid,
+        reason: pickUpValidation.reason
+      });
+      
+      if (!pickUpValidation.isValid) {
+        alerts.push({
+          type: 'pickUp',
+          message: `Pick-up time falls when station is closed`,
+          details: pickUpValidation,
+          selectedTime: formData.pickUpDate
+        });
+      }
+    }
+
+    console.log('🚨 Total alerts generated:', alerts.length);
+    console.log('🔍 ========== VALIDATION END ==========');
+    
+    setTimingAlert(alerts.length > 0 ? alerts : null);
+    setIsCheckingTimings(false);
+  }, [formData.dropOffDate, formData.pickUpDate, stationTimings]);
+
+  // Theme detection
   useEffect(() => {
-    // Check if theme is already set in root element
     const root = document.documentElement;
     const currentTheme = root.getAttribute('data-theme');
     
-    // If no theme is set, check localStorage or system preference
     if (!currentTheme) {
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -76,6 +146,186 @@ const LuggageBookingForm = () => {
     fetchStations();
   }, []);
 
+  // Fetch station timings when station is selected
+  useEffect(() => {
+    const fetchStationTimings = async () => {
+      if (!formData.stationId) {
+        setStationTimings(null);
+        return;
+      }
+
+      console.log('🏢 Fetching timings for station:', formData.stationId);
+
+      try {
+        const response = await fetch(`/api/station/${formData.stationId}/timings`);
+        if (!response.ok) {
+          console.warn(`⚠️ Station timings API returned ${response.status}. Using default 24/7 mode.`);
+          setStationTimings({ is24Hours: true });
+          return;
+        }
+        const data = await response.json();
+        console.log('✅ Station timings received:', data);
+        
+        if (data.success && data.timings) {
+          setStationTimings(data.timings);
+        } else {
+          console.warn("⚠️ No timings data received. Using default 24/7 mode.");
+          setStationTimings({ is24Hours: true });
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch station timings:", error);
+        setStationTimings({ is24Hours: true });
+      }
+    };
+
+    fetchStationTimings();
+  }, [formData.stationId]);
+
+  // Validate timing whenever dropOffDate or pickUpDate changes
+  useEffect(() => {
+    if (formData.stationId && stationTimings && (formData.dropOffDate || formData.pickUpDate)) {
+      console.log('🔄 Times changed, validating...');
+      validateStationTimings();
+    }
+  }, [formData.stationId, stationTimings, validateStationTimings]);
+
+  // Apply suggested time - improved handling:
+  // - when applying a dropOff suggestion we set dropOff AND compute pickUp = dropOff + 4hrs
+  // - we then validate that pickUp immediately and only show a pickUp alert if there truly are no valid pick-up options
+  const applySuggestedTime = (timeType, suggestedDateTime) => {
+    console.log('🎯 ========== APPLYING SUGGESTION ==========');
+    console.log('🎯 Type:', timeType);
+    console.log('🎯 Suggested time:', suggestedDateTime);
+    
+    const asDate = (d) => (d instanceof Date ? d : new Date(d));
+
+    const getMinAllowedPickUp = (dropOffDt) => {
+      return dropOffDt ? new Date(dropOffDt.getTime() + 1 * 60 * 60 * 1000) : null;
+    };
+
+    // PICK-UP suggestion clicked -> ensure >= dropOff +1hr and set it
+    if (timeType === 'pickUp') {
+      let chosen = asDate(suggestedDateTime);
+
+      const dropOffDateObj = formData.dropOffDate ? new Date(formData.dropOffDate) : null;
+      const minAllowedPickUp = getMinAllowedPickUp(dropOffDateObj);
+
+      if (minAllowedPickUp && chosen.getTime() < minAllowedPickUp.getTime()) {
+        console.log('⚠️ Suggested pick-up is too close to drop-off. Bumping to dropOff + 1 hour.');
+        chosen = minAllowedPickUp;
+      }
+
+      const formattedPickUp = formatDateTimeLocal(chosen);
+      console.log('📤 Setting pick-up (ENFORCED >= dropOff+1hr):', formattedPickUp);
+
+      setFormData(prev => ({ ...prev, pickUpDate: formattedPickUp }));
+      // Immediately re-validate (the effect will also run later)
+      if (stationTimings) {
+        const pickUpValidation = getNearestAvailableTime(formattedPickUp, stationTimings);
+        if (pickUpValidation.isValid) setTimingAlert(null);
+        else setTimingAlert([{
+          type: 'pickUp',
+          message: 'Pick-up time falls when station is closed',
+          details: pickUpValidation,
+          selectedTime: formattedPickUp
+        }]);
+      } else {
+        setTimingAlert(null);
+      }
+      console.log('🎯 ========== SUGGESTION APPLIED ==========');
+      return;
+    }
+
+    // DROP-OFF suggestion clicked -> set dropOff, compute +4h pickUp, validate and pick best option
+    if (timeType === 'dropOff') {
+      const dropOffDateObj = asDate(suggestedDateTime);
+      const formattedDropOff = formatDateTimeLocal(dropOffDateObj);
+      console.log('📥 Setting drop-off to suggested:', formattedDropOff);
+
+      // Calculate +4 hours pickUp (default behaviour)
+      const calculatedPickup = new Date(dropOffDateObj.getTime() + 3 * 60 * 60 * 1000);
+      const minAllowedPickUp = getMinAllowedPickUp(dropOffDateObj);
+      if (minAllowedPickUp && calculatedPickup.getTime() < minAllowedPickUp.getTime()) {
+        calculatedPickup.setTime(minAllowedPickUp.getTime());
+      }
+
+      // We'll decide finalPickUpDateObj and the timingAlert state here (don't rely on effect timing)
+      let finalPickUpDateObj = calculatedPickup;
+      let finalTimingAlert = null;
+
+      if (stationTimings) {
+        const pickUpValidation = getNearestAvailableTime(calculatedPickup.toISOString(), stationTimings);
+        console.log('🔎 pickUpValidation for calculated +4h:', pickUpValidation);
+
+        if (pickUpValidation.isValid) {
+          // +4h is valid — no alert
+          finalPickUpDateObj = calculatedPickup;
+          finalTimingAlert = null;
+          console.log('✅ Calculated +4h pick-up is within open hours; no pick-up alert.');
+        } else {
+          // Try to find a suggestion >= dropOff + 1hr
+          const allSuggestions = pickUpValidation.suggestions || [];
+          const dropMinTs = minAllowedPickUp ? minAllowedPickUp.getTime() : null;
+
+          const suitable = allSuggestions.find((s) => {
+            const sTs = new Date(s.dateTime).getTime();
+            return dropMinTs ? sTs >= dropMinTs : true;
+          });
+
+          if (suitable) {
+            finalPickUpDateObj = new Date(suitable.dateTime);
+            finalTimingAlert = null; // we applied a valid suggestion so no alert
+            console.log('✅ Found suitable suggestion for pick-up >= drop+1hr:', suitable.dateTime);
+          } else if (allSuggestions.length > 0) {
+            // Earliest suggestion exists but may be < drop+1h — bump it if needed; still treat as a suggestion
+            const earliest = new Date(allSuggestions[0].dateTime);
+            if (dropMinTs && earliest.getTime() < dropMinTs) {
+              // Bump to drop+1hr
+              finalPickUpDateObj = minAllowedPickUp || earliest;
+              console.log('⚠️ Earliest suggestion earlier than drop+1hr; bumping to drop+1hr.');
+            } else {
+              finalPickUpDateObj = earliest;
+            }
+            finalTimingAlert = {
+              type: 'pickUp',
+              message: 'Pick-up time adjusted based on station hours',
+              details: pickUpValidation,
+              selectedTime: finalPickUpDateObj.toISOString(),
+            };
+            // We allow showing a helpful suggestion alert (not the "no suggestions" message)
+            console.log('ℹ️ Using earliest suggestion for pick-up:', finalPickUpDateObj.toISOString());
+          } else {
+            // No suggestions at all — fallback to dropOff + 1 hour but show a pickUp alert so user can adjust if needed
+            finalPickUpDateObj = minAllowedPickUp || calculatedPickup;
+            finalTimingAlert = {
+              type: 'pickUp',
+              message: 'No pick-up slots found; please choose a different drop-off or pick-up time',
+              details: pickUpValidation,
+              selectedTime: finalPickUpDateObj.toISOString(),
+            };
+            console.log('⚠️ No suggestions returned for pick-up; falling back to dropOff + 1 hour and showing alert.');
+          }
+        }
+      } else {
+        // No stationTimings -> assume OK
+        finalPickUpDateObj = calculatedPickup;
+        finalTimingAlert = null;
+      }
+
+      const formattedPickUp = formatDateTimeLocal(finalPickUpDateObj);
+      console.log('📤 Final pick-up chosen after validation:', formattedPickUp);
+
+      // apply both drop-off and pick-up together AND update timing alert accordingly
+      setFormData(prev => ({ ...prev, dropOffDate: formattedDropOff, pickUpDate: formattedPickUp }));
+      setTimingAlert(finalTimingAlert ? [finalTimingAlert] : null);
+
+      console.log('🎯 ========== SUGGESTION APPLIED ==========');
+      return;
+    }
+
+    console.log('🎯 ========== SUGGESTION APPLIED (no-op) ==========');
+  };
+
   // Calculate storage duration
   const calculateNumberOfDays = () => {
     if (!formData.dropOffDate || !formData.pickUpDate) return 1;
@@ -88,9 +338,12 @@ const LuggageBookingForm = () => {
   const numberOfDays = calculateNumberOfDays();
   const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
 
-  // Handle form field changes
+  // Handle form field changes - WITH normal +4 hour logic
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    console.log('📝 Form field changed:', { name, value });
+    
     const updatedFormData = {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -98,6 +351,9 @@ const LuggageBookingForm = () => {
 
     // Auto-calculate pickup time when drop-off is selected
     if (name === "dropOffDate" && value) {
+      console.log('📥 ========== DROP-OFF CHANGED ==========');
+      
+      // Initialize drop-off if first time
       if (!formData.dropOffDate) {
         const now = new Date();
         now.setMinutes(now.getMinutes() + 10);
@@ -107,12 +363,21 @@ const LuggageBookingForm = () => {
         updatedFormData.dropOffDate = `${value.slice(0, 10)}T${localISOTime.split("T")[1]}`;
       }
 
+      console.log('📥 Drop-off set to:', updatedFormData.dropOffDate);
+
+      // ALWAYS calculate pickup as +4 hours (normal behavior)
       const dropOffTime = new Date(updatedFormData.dropOffDate || value);
-      dropOffTime.setHours(dropOffTime.getHours() + 4);
-      const localPickUpISO = new Date(dropOffTime.getTime() - dropOffTime.getTimezoneOffset() * 60000)
+      const calculatedPickup = new Date(dropOffTime);
+      calculatedPickup.setHours(calculatedPickup.getHours() + 3);
+      
+      const localPickUpISO = new Date(calculatedPickup.getTime() - calculatedPickup.getTimezoneOffset() * 60000)
         .toISOString()
         .slice(0, 16);
+      
+      console.log('📤 Auto-calculated pickup (+4hrs):', localPickUpISO);
       updatedFormData.pickUpDate = localPickUpISO;
+      
+      console.log('📥 ========== DROP-OFF PROCESSING DONE ==========');
     }
 
     setFormData(updatedFormData);
@@ -138,9 +403,14 @@ const LuggageBookingForm = () => {
       }
     }
 
+    // Prevent form submission if timings are invalid
+    if (timingAlert && timingAlert.length > 0) {
+      errors.timing = "Please select valid station operating hours";
+    }
+
     setErrors(errors);
     setIsFormValid(Object.keys(errors).length === 0);
-  }, [formData]);
+  }, [formData, timingAlert]);
 
   // Handle successful payment
   const handlePaymentSuccess = async (paymentId) => {
@@ -265,7 +535,7 @@ const LuggageBookingForm = () => {
                             value={formData.phone}
                             onChange={handleChange}
                             className={styles.input}
-                            placeholder="+1 234 567 8900"
+                            placeholder="+61 4xx xxx xxx"
                           />
                           {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
                         </div>
@@ -372,6 +642,91 @@ const LuggageBookingForm = () => {
                         </div>
                       </div>
 
+                      {/* Small checking indicator so isCheckingTimings is used and lint is happy */}
+                      {isCheckingTimings && (
+                        <div className={styles.checkingTimings}>
+                          Checking station hours…
+                        </div>
+                      )}
+
+                      {/* Timing Alert */}
+                      {timingAlert && timingAlert.length > 0 && (
+                        <div className={styles.timingAlert}>
+                          <div className={styles.alertHeader}>
+                            <span className={styles.alertIcon}>⚠️</span>
+                            <span className={styles.alertTitle}>Station Timing Issue</span>
+                          </div>
+                          
+                          {timingAlert.map((alert, index) => (
+                            <div key={index} className={styles.alertItem}>
+                              <div className={styles.alertMessage}>
+                                <strong>{alert.type === 'dropOff' ? '📥 Drop-off' : '📤 Pick-up'}:</strong> {alert.message}
+                              </div>
+                              
+                              {alert.details.openTime && alert.details.closeTime && (
+                                <div className={styles.alertInfo}>
+                                  Station hours on {alert.details.dayName}: {alert.details.openTime} - {alert.details.closeTime}
+                                </div>
+                              )}
+                              
+                              {alert.details.suggestions && alert.details.suggestions.length > 0 && (
+                                <div className={styles.suggestions}>
+                                  <div className={styles.suggestionsTitle}>💡 Suggested alternatives:</div>
+
+                                  {(() => {
+                                    // compute minimum allowed pick-up (dropOff + 1 hour) if dropOff exists
+                                    const dropOffDateObj = formData.dropOffDate ? new Date(formData.dropOffDate) : null;
+                                    const minAllowedPickUpTs = dropOffDateObj ? dropOffDateObj.getTime() + 1 * 60 * 60 * 1000 : null;
+
+                                    // filter suggestions:
+                                    const filtered = alert.details.suggestions.filter((suggestion) => {
+                                      // if this is a pickUp alert, only keep suggestions >= dropOff + 1hr
+                                      if (alert.type === 'pickUp' && minAllowedPickUpTs) {
+                                        const sugTs = new Date(suggestion.dateTime).getTime();
+                                        return sugTs >= minAllowedPickUpTs;
+                                      }
+                                      // for dropOff (or if no dropOff chosen), keep all suggestions
+                                      return true;
+                                    });
+
+                                    // If none survive the filter, optionally show a fallback message
+                                    if (filtered.length === 0) {
+                                      return (
+                                        <div className={styles.noSuggestions}>
+                                          No suitable pick-up suggestions available that are at least 1 hour after your drop-off. Please choose a different drop-off time or manually select a pick-up time.
+                                        </div>
+                                      );
+                                    }
+
+                                    return filtered.map((suggestion, idx) => (
+                                      <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => {
+                                          console.log('🖱️ User clicked suggestion:', {
+                                            alertType: alert.type,
+                                            suggestionType: suggestion.type,
+                                            dateTime: suggestion.dateTime
+                                          });
+                                          applySuggestedTime(alert.type, suggestion.dateTime);
+                                        }}
+                                        className={styles.suggestionBtn}
+                                      >
+                                        <div className={styles.suggestionLabel}>{suggestion.label}</div>
+                                        <div className={styles.suggestionTime}>
+                                          {formatDateTime(suggestion.dateTime)}
+                                        </div>
+                                        <div className={styles.suggestionAction}>Use this time →</div>
+                                      </button>
+                                    ));
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
                           <label htmlFor="dropOffDate" className={styles.label}>
@@ -404,7 +759,7 @@ const LuggageBookingForm = () => {
                             className={styles.input}
                             min={
                               formData.dropOffDate
-                                ? new Date(new Date(formData.dropOffDate).getTime() + 4 * 60 * 60 * 1000)
+                                ? new Date(new Date(formData.dropOffDate).getTime() + 3 * 60 * 60 * 1000)
                                     .toISOString()
                                     .slice(0, 16)
                                 : new Date().toISOString().slice(0, 16)
@@ -460,7 +815,7 @@ const LuggageBookingForm = () => {
                           type="button"
                           onClick={() => setCurrentStep(3)}
                           className={styles.btnPrimary}
-                          disabled={!formData.dropOffDate || !formData.pickUpDate}
+                          disabled={!formData.dropOffDate || !formData.pickUpDate || (timingAlert && timingAlert.length > 0)}
                         >
                           Continue to Payment →
                         </button>
@@ -574,7 +929,6 @@ const LuggageBookingForm = () => {
               <div className={styles.priceCard}>
                 <h3 className={styles.priceTitle}>Booking Summary</h3>
                 
-                {/* Collapsible Content */}
                 <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
                   <div className={styles.priceBreakdown}>
                     <div className={styles.priceRow}>
@@ -611,7 +965,6 @@ const LuggageBookingForm = () => {
                   </div>
                 </div>
 
-                {/* Toggle Button with Total */}
                 <button
                   type="button"
                   onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
