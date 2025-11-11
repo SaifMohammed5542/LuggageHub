@@ -905,6 +905,337 @@
   }
 }
 
+
+
+
+
+/* Capacity Display Styles */
+.capacityCard {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.capacityCard.capacityFull {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: #dc2626;
+}
+
+[data-theme="dark"] .capacityCard {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+[data-theme="dark"] .capacityCard.capacityFull {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+}
+
+.capacityHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.capacityIcon {
+  font-size: 24px;
+}
+
+.capacityLabel {
+  font-weight: 600;
+  font-size: 16px;
+  flex: 1;
+}
+
+.capacityPercentage {
+  font-weight: 700;
+  font-size: 18px;
+  color: #3b82f6;
+}
+
+.capacityCard.capacityFull .capacityPercentage {
+  color: #dc2626;
+}
+
+.capacityBar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+[data-theme="dark"] .capacityBar {
+  background: #374151;
+}
+
+.capacityFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.capacityDescription {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+[data-theme="dark"] .capacityDescription {
+  color: #9ca3af;
+}
+
+.capacityError {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fee2e2;
+  border-left: 4px solid #dc2626;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .capacityError {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+/* Alternatives */
+.alternativesSection {
+  margin: 24px 0;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+}
+
+[data-theme="dark"] .alternativesSection {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+.alternativesTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.alternativesSubtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 16px 0;
+}
+
+.alternativesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.alternativeCard {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s;
+}
+
+.alternativeCard:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .alternativeCard {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .alternativeCard:hover {
+  border-color: #60a5fa;
+}
+
+.alternativeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.alternativeName {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.alternativeDistance {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .alternativeDistance {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+.alternativeLocation {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.alternativeCapacity {
+  margin-bottom: 12px;
+}
+
+.capacityMini {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.capacityMiniBar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .capacityMiniBar {
+  background: #374151;
+}
+
+.capacityMiniFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.capacityMiniText {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+[data-theme="dark"] .capacityMiniText {
+  color: #9ca3af;
+}
+
+.selectAlternativeBtn {
+  width: 100%;
+  padding: 10px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selectAlternativeBtn:hover {
+  background: #2563eb;
+  transform: scale(1.02);
+}
+
+[data-theme="dark"] .selectAlternativeBtn {
+  background: #2563eb;
+}
+
+[data-theme="dark"] .selectAlternativeBtn:hover {
+  background: #1d4ed8;
+}
+
+.checkingTimings {
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 14px;
+  margin: 12px 0;
+}
+
+[data-theme="dark"] .checkingTimings {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+
+/* Selected Station (Step 2) */
+.selectedStation {
+  margin: 16px 0 20px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .selectedStation {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+.selectedStationTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .selectedStationTitle {
+  color: #f1f5f9;
+}
+
+.selectedStationName {
+  font-size: 16px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .selectedStationName {
+  color: #f8fafc;
+}
+
+.selectedStationLocation {
+  color: #64748b;
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+[data-theme="dark"] .selectedStationLocation {
+  color: #94a3b8;
+}
+
+.selectedStationEmpty {
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+
+.capacityApiError {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+[data-theme="dark"] .capacityApiError {
+  background: #4c2f00;
+  border-color: #d97706;
+  color: #ffedd5;
+}
+
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .timingAlert {

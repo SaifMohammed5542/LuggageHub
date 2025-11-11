@@ -525,6 +525,89 @@
   font-weight: 800;
 }
 
+
+
+/* Capacity Controls */
+.capacityInputGroup {
+  width: 100%;
+}
+
+.capacityControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.capacityBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.capacityBtn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  transform: scale(1.05);
+}
+
+.capacityInput {
+  flex: 1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  padding: 8px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  max-width: 150px;
+}
+
+.capacityInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.capacityHint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+[data-theme="dark"] .capacityBtn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .capacityBtn:hover {
+  border-color: #60a5fa;
+  background: #1e3a8a;
+}
+
+[data-theme="dark"] .capacityInput {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .capacityInput:focus {
+  border-color: #60a5fa;
+}
+
+[data-theme="dark"] .capacityHint {
+  color: #9ca3af;
+}
+
+
+
+
 /* small responsive tweaks */
 @media (max-width: 420px) {
   .header { padding: 10px; gap: 8px; }

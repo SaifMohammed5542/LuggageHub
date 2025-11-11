@@ -3,10 +3,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../../components/LuggagePay.js";
-import { 
-  getNearestAvailableTime, 
-  formatDateTime, 
-  formatDateTimeLocal 
+import {
+  getNearestAvailableTime,
+  formatDateTime,
+  formatDateTimeLocal
 } from "@/utils/stationTimingValidator";
 
 const LuggageBookingForm = () => {
@@ -32,11 +32,18 @@ const LuggageBookingForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [hasSpecialInstructions, setHasSpecialInstructions] = useState(false);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
-  
+
   // Timing validation states
   const [timingAlert, setTimingAlert] = useState(null);
   const [isCheckingTimings, setIsCheckingTimings] = useState(false);
-  
+
+  // NEW: capacity states
+  const [capacityStatus, setCapacityStatus] = useState(null);
+  const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
+  const [capacityError, setCapacityError] = useState(null);
+  const [alternativeStations, setAlternativeStations] = useState([]);
+  const [showAlternatives, setShowAlternatives] = useState(false);
+
   const ratePerLuggagePerDay = 7.99;
 
   // ---- validateStationTimings (moved up so effects can call it) ----
@@ -64,7 +71,7 @@ const LuggageBookingForm = () => {
         isValid: dropOffValidation.isValid,
         reason: dropOffValidation.reason
       });
-      
+
       if (!dropOffValidation.isValid) {
         alerts.push({
           type: 'dropOff',
@@ -83,7 +90,7 @@ const LuggageBookingForm = () => {
         isValid: pickUpValidation.isValid,
         reason: pickUpValidation.reason
       });
-      
+
       if (!pickUpValidation.isValid) {
         alerts.push({
           type: 'pickUp',
@@ -96,7 +103,7 @@ const LuggageBookingForm = () => {
 
     console.log('🚨 Total alerts generated:', alerts.length);
     console.log('🔍 ========== VALIDATION END ==========');
-    
+
     setTimingAlert(alerts.length > 0 ? alerts : null);
     setIsCheckingTimings(false);
   }, [formData.dropOffDate, formData.pickUpDate, stationTimings]);
@@ -105,7 +112,7 @@ const LuggageBookingForm = () => {
   useEffect(() => {
     const root = document.documentElement;
     const currentTheme = root.getAttribute('data-theme');
-    
+
     if (!currentTheme) {
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -165,7 +172,7 @@ const LuggageBookingForm = () => {
         }
         const data = await response.json();
         console.log('✅ Station timings received:', data);
-        
+
         if (data.success && data.timings) {
           setStationTimings(data.timings);
         } else {
@@ -189,6 +196,127 @@ const LuggageBookingForm = () => {
     }
   }, [formData.stationId, stationTimings, validateStationTimings]);
 
+  // --------------------
+  // Capacity: check function
+  // --------------------
+  const checkStationCapacity = async () => {
+    if (!formData.stationId || !formData.dropOffDate || !formData.pickUpDate || !formData.luggageCount) {
+      return;
+    }
+
+    setIsCheckingCapacity(true);
+    setCapacityError(null);
+
+    try {
+      console.log('🔍 Checking station capacity...');
+
+      const response = await fetch('/api/station/capacity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stationId: formData.stationId,
+          dropOffDate: formData.dropOffDate,
+          pickUpDate: formData.pickUpDate,
+          luggageCount: formData.luggageCount
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data) {
+        setCapacityStatus(data);
+        console.log('📊 Capacity status:', data);
+
+        // If not available, fetch alternatives
+        if (!data.available) {
+          await fetchAlternativeStations();
+        } else {
+          setShowAlternatives(false);
+          setAlternativeStations([]);
+        }
+      } else {
+        console.warn('Capacity API returned non-ok or empty response', data);
+        setCapacityError("We couldn’t check station availability right now. Please try again in a moment.");
+      }
+    } catch (error) {
+      console.error('Capacity check failed:', error);
+      setCapacityError("We couldn’t check station availability right now. Please try again in a moment.");
+    } finally {
+      setIsCheckingCapacity(false);
+    }
+  };
+
+  const fetchAlternativeStations = async () => {
+    try {
+      console.log('🔍 Fetching alternative stations...');
+
+      // Get current station coordinates
+      const currentStation = stations.find(s => s._id === formData.stationId);
+      if (!currentStation?.coordinates) {
+        console.warn('No coordinates for current station');
+        return;
+      }
+
+      const coords = currentStation.coordinates.coordinates || currentStation.coordinates;
+      const [longitude, latitude] = coords;
+
+      const response = await fetch('/api/station/alternatives', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentStationId: formData.stationId,
+          latitude,
+          longitude,
+          dropOffDate: formData.dropOffDate,
+          pickUpDate: formData.pickUpDate,
+          luggageCount: formData.luggageCount
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.alternatives && data.alternatives.length > 0) {
+        setAlternativeStations(data.alternatives);
+        setShowAlternatives(true);
+        console.log('✅ Found alternatives:', data.alternatives.length);
+      } else {
+        setAlternativeStations([]);
+        setShowAlternatives(false);
+        console.log('❌ No alternatives found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch alternatives:', error);
+    }
+  };
+
+  // Debounced capacity check when relevant form fields change
+  useEffect(() => {
+    if (formData.stationId && formData.dropOffDate && formData.pickUpDate && formData.luggageCount) {
+      const debounceTimer = setTimeout(() => {
+        checkStationCapacity();
+      }, 500);
+
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [formData.stationId, formData.dropOffDate, formData.pickUpDate, formData.luggageCount]);
+
+  // Function to select an alternative station
+  const selectAlternativeStation = (alternativeStation) => {
+    console.log('🔄 Switching to alternative station:', alternativeStation.name);
+
+    setFormData(prev => ({
+      ...prev,
+      stationId: alternativeStation._id
+    }));
+
+    setShowAlternatives(false);
+    setAlternativeStations([]);
+    setCapacityStatus(null);
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Apply suggested time - improved handling:
   // - when applying a dropOff suggestion we set dropOff AND compute pickUp = dropOff + 4hrs
   // - we then validate that pickUp immediately and only show a pickUp alert if there truly are no valid pick-up options
@@ -196,7 +324,7 @@ const LuggageBookingForm = () => {
     console.log('🎯 ========== APPLYING SUGGESTION ==========');
     console.log('🎯 Type:', timeType);
     console.log('🎯 Suggested time:', suggestedDateTime);
-    
+
     const asDate = (d) => (d instanceof Date ? d : new Date(d));
 
     const getMinAllowedPickUp = (dropOffDt) => {
@@ -341,9 +469,9 @@ const LuggageBookingForm = () => {
   // Handle form field changes - WITH normal +4 hour logic
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     console.log('📝 Form field changed:', { name, value });
-    
+
     const updatedFormData = {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -352,7 +480,7 @@ const LuggageBookingForm = () => {
     // Auto-calculate pickup time when drop-off is selected
     if (name === "dropOffDate" && value) {
       console.log('📥 ========== DROP-OFF CHANGED ==========');
-      
+
       // Initialize drop-off if first time
       if (!formData.dropOffDate) {
         const now = new Date();
@@ -369,14 +497,14 @@ const LuggageBookingForm = () => {
       const dropOffTime = new Date(updatedFormData.dropOffDate || value);
       const calculatedPickup = new Date(dropOffTime);
       calculatedPickup.setHours(calculatedPickup.getHours() + 3);
-      
+
       const localPickUpISO = new Date(calculatedPickup.getTime() - calculatedPickup.getTimezoneOffset() * 60000)
         .toISOString()
         .slice(0, 16);
-      
+
       console.log('📤 Auto-calculated pickup (+4hrs):', localPickUpISO);
       updatedFormData.pickUpDate = localPickUpISO;
-      
+
       console.log('📥 ========== DROP-OFF PROCESSING DONE ==========');
     }
 
@@ -385,32 +513,37 @@ const LuggageBookingForm = () => {
 
   // Validate form
   useEffect(() => {
-    const errors = {};
-    if (!formData.fullName) errors.fullName = "Full Name is required";
-    if (!formData.email) errors.email = "Email is required";
-    if (!formData.phone) errors.phone = "Phone is required";
-    if (!formData.dropOffDate) errors.dropOffDate = "Drop-off Date is required";
-    if (!formData.pickUpDate) errors.pickUpDate = "Pick-up Date is required";
-    if (!formData.termsAccepted) errors.termsAccepted = "You must agree to the terms";
-    if (!formData.stationId) errors.stationId = "Please select a station";
+    const errorsObj = {};
+    if (!formData.fullName) errorsObj.fullName = "Full Name is required";
+    if (!formData.email) errorsObj.email = "Email is required";
+    if (!formData.phone) errorsObj.phone = "Phone is required";
+    if (!formData.dropOffDate) errorsObj.dropOffDate = "Drop-off Date is required";
+    if (!formData.pickUpDate) errorsObj.pickUpDate = "Pick-up Date is required";
+    if (!formData.termsAccepted) errorsObj.termsAccepted = "You must agree to the terms";
+    if (!formData.stationId) errorsObj.stationId = "Please select a station";
 
     if (formData.dropOffDate && formData.pickUpDate) {
       const dropOff = new Date(formData.dropOffDate);
       const pickUp = new Date(formData.pickUpDate);
       const timeDifferenceInHours = (pickUp - dropOff) / (1000 * 60 * 60);
       if (timeDifferenceInHours < 1) {
-        errors.pickUpDate = "Pick-up time must be at least 1 hour after drop-off time.";
+        errorsObj.pickUpDate = "Pick-up time must be at least 1 hour after drop-off time.";
       }
     }
 
     // Prevent form submission if timings are invalid
     if (timingAlert && timingAlert.length > 0) {
-      errors.timing = "Please select valid station operating hours";
+      errorsObj.timing = "Please select valid station operating hours";
     }
 
-    setErrors(errors);
-    setIsFormValid(Object.keys(errors).length === 0);
-  }, [formData, timingAlert]);
+    // Prevent form submission if capacity exceeded
+    if (capacityStatus && !capacityStatus.available) {
+      errorsObj.capacity = "Station is at capacity. Please select an alternative.";
+    }
+
+    setErrors(errorsObj);
+    setIsFormValid(Object.keys(errorsObj).length === 0);
+  }, [formData, timingAlert, capacityStatus]);
 
   // Handle successful payment
   const handlePaymentSuccess = async (paymentId) => {
@@ -442,6 +575,10 @@ const LuggageBookingForm = () => {
     { value: "Large", label: "Large", icon: "🧳", desc: "Standard suitcase" },
     { value: "Extra Large", label: "Extra Large", icon: "📦", desc: "Oversized luggage" },
   ];
+
+    // find the currently selected station (used in Step 2 & review)
+    const selectedStation = stations.find((s) => s._id === formData.stationId) || null;
+
 
   return (
     <>
@@ -485,7 +622,7 @@ const LuggageBookingForm = () => {
                   {currentStep === 1 && (
                     <div className={styles.stepContent}>
                       <h2 className={styles.sectionTitle}>Personal Information</h2>
-                      
+
                       <div className={styles.inputGroup}>
                         <label htmlFor="fullName" className={styles.label}>
                           <span className={styles.labelIcon}>👤</span>
@@ -579,7 +716,21 @@ const LuggageBookingForm = () => {
                     <div className={styles.stepContent}>
                       <h2 className={styles.sectionTitle}>Luggage & Schedule</h2>
 
-                      <div className={styles.inputGroup}>
+                      {/* Selected station summary (Step 2) */}
+<div className={styles.selectedStation}>
+  <strong className={styles.selectedStationTitle}>Selected Station</strong>
+  {selectedStation ? (
+    <div className={styles.selectedStationName}>
+      {selectedStation.name}
+      {selectedStation.location ? <span className={styles.selectedStationLocation}> — {selectedStation.location}</span> : null}
+    </div>
+  ) : (
+    <div className={styles.selectedStationEmpty}>No station selected. Go back to Details to pick one.</div>
+  )}
+</div>
+
+
+                    <div className={styles.inputGroup}>
                         <label className={styles.label}>
                           <span className={styles.labelIcon}>🧳</span>
                           Luggage Size
@@ -642,10 +793,100 @@ const LuggageBookingForm = () => {
                         </div>
                       </div>
 
-                      {/* Small checking indicator so isCheckingTimings is used and lint is happy */}
-                      {isCheckingTimings && (
+                      {/* Capacity API errors */}
+                      {capacityError && (
+                        <div className={styles.capacityApiError} role="alert" aria-live="polite">
+                            ⚠️ {capacityError}
+                        </div>
+                      )}
+
+                      {/* Capacity Status Display */}
+                      {formData.stationId && capacityStatus && (
+                        <div className={`${styles.capacityCard} ${!capacityStatus.available ? styles.capacityFull : ''}`}>
+                          <div className={styles.capacityHeader}>
+                            <span className={styles.capacityIcon}>{capacityStatus.status?.icon || '📊'}</span>
+                            <span className={styles.capacityLabel}>{capacityStatus.status?.label || (capacityStatus.available ? 'Available' : 'Full')}</span>
+                            <span className={styles.capacityPercentage}>{capacityStatus.capacity?.percentage ?? 0}%</span>
+                          </div>
+                          <div className={styles.capacityBar}>
+                            <div
+                              className={styles.capacityFill}
+                              style={{
+                                width: `${capacityStatus.capacity?.percentage ?? 0}%`,
+                                backgroundColor: capacityStatus.status?.color || (capacityStatus.capacity?.percentage < 90 ? '#16a34a' : '#f97316')
+                              }}
+                            />
+                          </div>
+                          <p className={styles.capacityDescription}>
+                            {capacityStatus.capacity?.current ?? 0} of {capacityStatus.capacity?.max ?? 0} bags booked for this time period
+                          </p>
+
+                          {!capacityStatus.available && (
+                            <div className={styles.capacityError}>
+                              <strong>⛔ Station at capacity!</strong> Unable to accept {formData.luggageCount} more bag(s).
+                              {showAlternatives && alternativeStations.length > 0 && (
+                                <span> Please select an alternative station below.</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Alternative Stations Display */}
+                      {showAlternatives && alternativeStations.length > 0 && (
+                        <div className={styles.alternativesSection}>
+                          <h3 className={styles.alternativesTitle}>
+                            📍 Alternative Stations Nearby
+                          </h3>
+                          <p className={styles.alternativesSubtitle}>
+                            These stations have available capacity for your selected dates:
+                          </p>
+
+                          <div className={styles.alternativesGrid}>
+                            {alternativeStations.map((alt) => (
+                              <div key={alt._id} className={styles.alternativeCard}>
+                                <div className={styles.alternativeHeader}>
+                                  <h4 className={styles.alternativeName}>{alt.name}</h4>
+                                  <span className={styles.alternativeDistance}>{alt.distance} km away</span>
+                                </div>
+                                <p className={styles.alternativeLocation}>{alt.location}</p>
+
+                                <div className={styles.alternativeCapacity}>
+                                  <div className={styles.capacityMini}>
+                                    <div className={styles.capacityMiniBar}>
+                                      <div
+                                        className={styles.capacityMiniFill}
+                                        style={{
+                                          width: `${alt.capacity.percentage}%`,
+                                          backgroundColor: alt.capacity.percentage < 60 ? '#16a34a' : '#f59e0b'
+                                        }}
+                                      />
+                                    </div>
+                                    <span className={styles.capacityMiniText}>
+                                      {alt.capacity.current}/{alt.capacity.max} bags ({alt.capacity.percentage}%)
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => selectAlternativeStation(alt)}
+                                  className={styles.selectAlternativeBtn}
+                                >
+                                  Select This Station →
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      
+
+                      {/* Small checking indicator so isCheckingTimings/isCheckingCapacity are used */}
+                      {(isCheckingTimings || isCheckingCapacity) && (
                         <div className={styles.checkingTimings}>
-                          Checking station hours…
+                          Checking station hours and capacity…
                         </div>
                       )}
 
@@ -656,19 +897,19 @@ const LuggageBookingForm = () => {
                             <span className={styles.alertIcon}>⚠️</span>
                             <span className={styles.alertTitle}>Station Timing Issue</span>
                           </div>
-                          
+
                           {timingAlert.map((alert, index) => (
                             <div key={index} className={styles.alertItem}>
                               <div className={styles.alertMessage}>
                                 <strong>{alert.type === 'dropOff' ? '📥 Drop-off' : '📤 Pick-up'}:</strong> {alert.message}
                               </div>
-                              
+
                               {alert.details.openTime && alert.details.closeTime && (
                                 <div className={styles.alertInfo}>
                                   Station hours on {alert.details.dayName}: {alert.details.openTime} - {alert.details.closeTime}
                                 </div>
                               )}
-                              
+
                               {alert.details.suggestions && alert.details.suggestions.length > 0 && (
                                 <div className={styles.suggestions}>
                                   <div className={styles.suggestionsTitle}>💡 Suggested alternatives:</div>
@@ -815,7 +1056,12 @@ const LuggageBookingForm = () => {
                           type="button"
                           onClick={() => setCurrentStep(3)}
                           className={styles.btnPrimary}
-                          disabled={!formData.dropOffDate || !formData.pickUpDate || (timingAlert && timingAlert.length > 0)}
+                          disabled={
+                            !formData.dropOffDate ||
+                            !formData.pickUpDate ||
+                            (timingAlert && timingAlert.length > 0) ||
+                            (capacityStatus && !capacityStatus.available)
+                          }
                         >
                           Continue to Payment →
                         </button>
@@ -928,7 +1174,7 @@ const LuggageBookingForm = () => {
             <div className={styles.sidebar}>
               <div className={styles.priceCard}>
                 <h3 className={styles.priceTitle}>Booking Summary</h3>
-                
+
                 <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
                   <div className={styles.priceBreakdown}>
                     <div className={styles.priceRow}>

@@ -34,6 +34,9 @@ export default function AdminDashboard() {
     payoutEmail: '' // now optional
   });
 
+  // NEW: capacity for create form
+  const [stationCapacity, setStationCapacity] = useState(10); // Default 10
+
   const defaultDayTiming = { open: '09:00', close: '18:00', closed: false };
   const [stationTimings, setStationTimings] = useState({
     monday: { ...defaultDayTiming },
@@ -100,6 +103,9 @@ export default function AdminDashboard() {
     sunday: { ...defaultDayTiming },
     is24Hours: false
   });
+
+  // NEW: capacity for edit form
+  const [editStationCapacity, setEditStationCapacity] = useState(10);
 
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -173,6 +179,9 @@ export default function AdminDashboard() {
 
       // images (assume array of URLs)
       setEditStationImages((selectedStation.images && selectedStation.images.join(', ')) || '');
+
+      // NEW: prefill editStationCapacity
+      setEditStationCapacity(selectedStation.capacity || 10);
     }
   }, [selectedStation, allBookings, allKeyHandovers]);
 
@@ -242,6 +251,11 @@ export default function AdminDashboard() {
           if (dt.open >= dt.close) return { ok: false, message: `${d.charAt(0).toUpperCase() + d.slice(1)}: open must be before close.` };
         }
       }
+    }
+
+    // capacity sanity check
+    if (!Number.isInteger(stationCapacity) || stationCapacity < 10 || stationCapacity > 100) {
+      return { ok: false, message: 'Capacity must be an integer between 10 and 100.' };
     }
 
     return { ok: true, message: 'OK' };
@@ -444,7 +458,7 @@ export default function AdminDashboard() {
             payoutEmail: stationBank.payoutEmail.trim() || undefined
           },
           timings: { ...stationTimings },
-          capacity: 0,
+          capacity: stationCapacity, // ADDED capacity
           description: ''
         })
       });
@@ -476,6 +490,7 @@ export default function AdminDashboard() {
           is24Hours: false
         });
         setShowStationForm(false);
+        setStationCapacity(10); // reset capacity after create
         fetchStations(token);
       } else {
         showToast(data.error || 'Error creating station', 'error');
@@ -649,6 +664,12 @@ export default function AdminDashboard() {
       }
     }
 
+    // capacity validation for edit
+    if (!Number.isInteger(editStationCapacity) || editStationCapacity < 10 || editStationCapacity > 100) {
+      showToast('Capacity must be an integer between 10 and 100.', 'error');
+      return;
+    }
+
     const imagesArr = editStationImages ? editStationImages.split(',').map(i => i.trim()).filter(Boolean) : [];
 
     const payload = {
@@ -665,7 +686,8 @@ export default function AdminDashboard() {
         accountType: editStationBank.accountType,
         payoutEmail: editStationBank.payoutEmail?.trim() || undefined
       },
-      timings: { ...editStationTimings }
+      timings: { ...editStationTimings },
+      capacity: editStationCapacity // ADDED capacity for edits
     };
 
     try {
@@ -818,6 +840,49 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
+                  {/* NEW: Capacity Settings (create form) */}
+                  <div className={styles.formSection}>
+                    <h4 className={styles.formSectionTitle}>📦 Capacity Settings</h4>
+                    <div className={styles.formGrid}>
+                      <div className={styles.capacityInputGroup}>
+                        <label htmlFor="stationCapacity" className={styles.label}>
+                          Maximum Luggage Capacity
+                        </label>
+                        <div className={styles.capacityControls}>
+                          <button
+                            type="button"
+                            onClick={() => setStationCapacity(prev => Math.max(10, prev - 10))}
+                            className={styles.capacityBtn}
+                          >
+                            −
+                          </button>
+                          <input
+                            type="number"
+                            id="stationCapacity"
+                            value={stationCapacity}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10) || 10;
+                              setStationCapacity(Math.min(100, Math.max(10, val)));
+                            }}
+                            min="10"
+                            max="100"
+                            className={styles.capacityInput}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setStationCapacity(prev => Math.min(100, prev + 10))}
+                            className={styles.capacityBtn}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <p className={styles.capacityHint}>
+                          Set maximum luggage capacity (10-100 bags). System will block bookings at 90% capacity.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className={styles.formSection}>
                     <h4 className={styles.formSectionTitle}>🏦 Bank / Payout Details</h4>
                     <div className={styles.formGrid}>
@@ -896,6 +961,7 @@ export default function AdminDashboard() {
                       <div className={styles.stationStats}>
                         <span className={styles.statBadge}>📦 {allBookings.filter(b => b.stationId?._id === station._id).length}</span>
                         <span className={styles.statBadge}>🔑 {allKeyHandovers.filter(k => k.stationId?._id === station._id).length}</span>
+                        <span className={styles.statBadge}>⚖️ {station.capacity ?? '—'}</span>
                       </div>
                     </div>
                   ))
@@ -1067,6 +1133,49 @@ export default function AdminDashboard() {
                       <input className={styles.input} value={editStation.latitude} onChange={(e) => setEditStation(s => ({ ...s, latitude: e.target.value }))} placeholder="Latitude (e.g., -33.86)" />
                       <input className={styles.input} value={editStation.longitude} onChange={(e) => setEditStation(s => ({ ...s, longitude: e.target.value }))} placeholder="Longitude (e.g., 151.20)" />
                       <input className={styles.input} value={editStationImages} onChange={(e) => setEditStationImages(e.target.value)} placeholder="Station images (optional) — comma separated URLs" />
+                    </div>
+                  </div>
+
+                  {/* NEW: Capacity Settings (edit form) */}
+                  <div className={styles.formSection}>
+                    <h4 className={styles.formSectionTitle}>📦 Capacity Settings</h4>
+                    <div className={styles.formGrid}>
+                      <div className={styles.capacityInputGroup}>
+                        <label htmlFor="editStationCapacity" className={styles.label}>
+                          Maximum Luggage Capacity
+                        </label>
+                        <div className={styles.capacityControls}>
+                          <button
+                            type="button"
+                            onClick={() => setEditStationCapacity(prev => Math.max(10, prev - 10))}
+                            className={styles.capacityBtn}
+                          >
+                            −
+                          </button>
+                          <input
+                            type="number"
+                            id="editStationCapacity"
+                            value={editStationCapacity}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10) || 10;
+                              setEditStationCapacity(Math.min(100, Math.max(10, val)));
+                            }}
+                            min="10"
+                            max="100"
+                            className={styles.capacityInput}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setEditStationCapacity(prev => Math.min(100, prev + 10))}
+                            className={styles.capacityBtn}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <p className={styles.capacityHint}>
+                          Current capacity: {editStationCapacity} bags. System blocks at 90% ({Math.floor(editStationCapacity * 0.9)} bags).
+                        </p>
+                      </div>
                     </div>
                   </div>
 
