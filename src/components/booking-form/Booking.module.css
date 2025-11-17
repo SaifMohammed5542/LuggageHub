@@ -1236,6 +1236,154 @@
 
 
 
+/* Date Error Styles */
+.inputError {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+}
+
+[data-theme="dark"] .inputError {
+  border-color: #dc2626 !important;
+  background-color: #7f1d1d !important;
+}
+
+.dateErrorBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left: 4px solid #dc2626;
+  border-radius: 8px;
+  margin-top: 8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+[data-theme="dark"] .dateErrorBox {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+  border-left-color: #f87171;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dateErrorIcon {
+  font-size: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.dateErrorText {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .dateErrorText {
+  color: #fca5a5;
+}
+
+
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 9999;
+}
+.toastVisible {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toastContent {
+  background: var(--surface);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.toastMessage { font-size: 14px; }
+.toastClose { background: transparent; border: none; cursor: pointer; font-size: 14px; }
+
+
+/* ---------- Compact mode (use compact={true}) ---------- */
+.compact {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+/* Card/padding reductions */
+.compact .formCard { padding: 1.25rem !important; border-radius: var(--radius) !important; }
+.compact .heroTitle { font-size: 1.75rem !important; }
+.compact .heroSubtitle { font-size: 1rem !important; }
+
+/* Stack inputs like mobile */
+.compact .inputRow { grid-template-columns: 1fr !important; gap: 1rem !important; }
+.compact .input, .compact .select { padding: 0.75rem 0.9rem !important; font-size: 0.97rem !important; }
+
+/* Size selection grid */
+.compact .sizeGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; }
+.compact .sizeCard { padding: 1rem !important; }
+.compact .sizeDesc {display: none;}
+/* Buttons */
+.compact .btnPrimary, .compact .btnSecondary {
+  width: 100% !important;
+  padding: 0.9rem 1rem !important;
+  font-size: 0.98rem !important;
+}
+
+/* Counter & progress */
+.compact .counterWrapper { padding: 0.75rem !important; gap: 1rem !important; }
+.compact .stepCircle { width: 42px !important; height: 42px !important; font-size: 1rem !important; }
+
+/* Reduce spacing for cards / alerts */
+.compact .priceCard, .compact .reviewCard { padding: 1rem !important; }
+.compact .timingAlert, .compact .capacityCard, .compact .alternativesSection {
+  margin: 12px 0 !important; padding: 10px !important;
+}
+
+/* Suggestions */
+.compact .suggestionBtn { padding: 10px !important; font-size: 0.95rem !important; }
+.compact .toggleButton { padding: 10px 12px !important; }
+.compact .toggleButton .totalValue { font-size: 1.25rem !important; }
+
+/* Ensure compact persists on large viewports */
+@media (min-width: 969px) {
+  .compact .inputRow { grid-template-columns: 1fr !important; }
+  .compact .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .timingAlert {

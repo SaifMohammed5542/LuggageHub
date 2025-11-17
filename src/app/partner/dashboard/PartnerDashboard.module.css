@@ -1,0 +1,230 @@
+/* PartnerDashboard.module.css
+   Added Back-to-months button styles and monthPanelHeader.
+   Mobile-first and consistent with Admin styles.
+*/
+
+
+/* Layout */
+.container {
+  width: 100%;
+  max-width: var(--page-max-wide);
+  margin: 0 auto;
+  padding: clamp(12px, 4vw, 24px);
+  display:flex;
+  flex-direction:column;
+  gap: var(--gap-lg);
+}
+
+.headerRow {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: var(--gap-sm);
+  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.03), transparent);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  flex-wrap: wrap;
+}
+
+.title { font-size: 1.05rem; font-weight:900; color:var(--color-fg); }
+.subtitle { color:var(--color-muted); font-weight:700; margin-top:4px; }
+
+.userActions { display:flex; gap:8px; align-items:center; }
+
+.logoutButton {
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight:800;
+  box-shadow: var(--cta-shadow);
+}
+
+.grid { display:grid; grid-template-columns: 1fr; gap: var(--gap-md); }
+@media (min-width: 900px) { .grid { grid-template-columns: 360px 1fr; align-items:start; } }
+
+/* Card basic */
+.card {
+  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent);
+  border: 1px solid var(--color-border);
+  padding:12px;
+  border-radius:12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.cardHeader { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;}
+.cardTitle { font-size:1rem; font-weight:900; color:var(--color-fg); }
+.cardMeta { color:var(--color-muted); font-weight:800; }
+
+/* Station info */
+.stationInfo { display:flex; flex-direction:column; gap:8px; color:var(--color-muted); font-weight:700; }
+
+/* Empty */
+.empty { padding:12px; color:var(--color-muted); font-weight:800; text-align:center; }
+
+/* Month grid & card */
+.monthGrid { display:grid; grid-template-columns: 1fr; gap:10px; }
+
+.monthCard { border-radius:12px; overflow:hidden; background:transparent; border:1px solid rgba(var(--color-primary-rgb), 0.04); }
+
+.monthCardHeader { display:block; }
+
+.monthCardBtn {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px;
+  background:transparent;
+  border:none;
+  text-align:left;
+  cursor:pointer;
+}
+
+.monthCardContent { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
+.monthCol { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.monthCardTitle { font-weight:900; font-size:0.98rem; color:var(--color-fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.monthCardSub { color:var(--color-muted); font-weight:700; font-size:0.86rem; }
+
+.monthMetaGroup { display:flex; align-items:center; gap:8px; }
+.monthCaret { font-size:18px; color:var(--color-muted); }
+
+.smallGhost {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight:800;
+  color:var(--color-fg);
+}
+
+.monthPill { background: rgba(var(--color-primary-rgb),0.06); padding:6px 10px; border-radius:999px; font-weight:800; font-size:0.82rem; border:1px solid rgba(var(--color-primary-rgb),0.06); }
+
+.monthPanel { padding:12px; border-top:1px dashed var(--color-border); background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.01), transparent); }
+
+/* NEW: monthPanelHeader with back button */
+.monthPanelHeader {
+  display:flex;
+  justify-content:flex-start;
+  padding-bottom:10px;
+}
+.backToMonthsBtn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  color: var(--color-primary);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Weeks & accordion */
+.weeksList { display:flex; flex-direction:column; gap:10px; }
+
+.weekSectionAccordion { border-radius:10px; overflow:hidden; border:1px solid var(--color-border); background:var(--color-panel); }
+.weekHeaderRow { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 8px; }
+.weekAccordionHeader {
+  flex:1;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-weight:900;
+  background:transparent;
+  border:none;
+}
+.weekMeta { display:flex; gap:8px; align-items:center; color:var(--color-muted); font-weight:700; }
+.weekActions { display:flex; gap:8px; padding-left:8px; }
+
+.weekAccordionBody { padding:10px; border-top:1px dashed var(--color-border); display:flex; flex-direction:column; gap:10px; }
+
+.bookingRow {
+  padding:10px;
+  border-radius:8px;
+  background:var(--color-panel);
+  border:1px solid var(--color-border);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.bookingHeaderRow { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.bookingName { font-weight:900; color:var(--color-fg); font-size:0.98rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.amount { font-weight:900; color:var(--color-primary); }
+
+.bookingMeta { color:var(--color-muted); font-weight:700; display:flex; flex-direction:column; gap:4px; font-size:0.92rem; }
+
+.bookingActions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+.smallButton {
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+.smallGhost {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+/* Handover row */
+.handoverRow { padding:10px; border-radius:8px; border:1px solid var(--color-border); background:var(--color-panel); display:flex; flex-direction:column; gap:8px; }
+.handoverHeader { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.handoverMeta { color:var(--color-muted); font-weight:700; display:flex; flex-direction:column; gap:4px; font-size:0.92rem; }
+
+.statusBadge { padding:6px 8px; border-radius:999px; font-weight:800; font-size:0.82rem; text-transform:capitalize; background: rgba(0,0,0,0.04); color:var(--color-fg); }
+.code { background: rgba(0,0,0,0.04); padding:4px 6px; border-radius:6px; font-family: var(--font-mono); font-size:0.9rem; }
+
+.loading { padding:12px; border-radius:10px; color:var(--color-fg); background:var(--color-panel); border:1px solid var(--color-border); font-weight:800; text-align:center; }
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6,8,15,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 9999;
+  padding: 20px;
+}
+.modal {
+  width: 100%;
+  max-width: 720px;
+  background: var(--color-panel);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  overflow: auto;
+  max-height: 90vh;
+}
+.modalHeader { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--color-border); }
+.modalBody { padding: 12px 16px; display:flex; flex-direction:column; gap:8px; color:var(--color-muted); font-weight:700; }
+.modalFooter { display:flex; gap:8px; justify-content:flex-end; padding:12px 16px; border-top:1px solid var(--color-border); }
+.modalClose { background: transparent; border: none; font-size: 18px; cursor: pointer; }
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+  .card { padding:12px; }
+  .monthCardBtn { padding:10px; }
+  .bookingRow { padding:10px; }
+  .bookingActions { justify-content:flex-end; }
+  .backToMonthsBtn { padding: 8px 10px; font-size: 14px; }
+}
+
+/* Desktop tweaks */
+@media (min-width: 1100px) {
+  .monthGrid { grid-template-columns: repeat(2, 1fr); }
+  .monthCardTitle { font-size:1.05rem; }
+}

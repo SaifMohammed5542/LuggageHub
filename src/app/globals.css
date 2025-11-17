@@ -93,6 +93,123 @@ body {
   margin-inline: auto;
 }
 
+:root {
+  /* marker sizes for InteractiveMap */
+  --marker-normal-width: 40px;
+  --marker-normal-height: 40px;
+  --marker-highlight-width: 50px;
+  --marker-highlight-height: 50px;
+
+  /* small spacing scale used by PartnerDashboard/others */
+  --gap-xs: 8px;
+  --gap-sm: 12px;
+  --gap-md: 16px;
+  --gap-lg: 20px;
+
+  /* base spacing scale tuned for mobile (admin dashboard) */
+  --g-xxs: 6px;
+  --g-xs: 8px;
+  --g-sm: 12px;
+  --g-md: 16px;
+  --g-lg: 20px;
+  --g-xl: 28px;
+}
+
+:focus { outline-offset: 3px; }
+
+
+/* Google Maps & global overrides moved from InteractiveMap.module.css */
+
+/* InfoWindow styles */
+.gm-style .gm-style-iw-c {
+  padding: 16px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+  max-width: 320px !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important;
+}
+
+.gm-style .gm-style-iw-t::after {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0) 51%,
+    rgba(255, 255, 255, 0) 100%
+  ) !important;
+  box-shadow: -2px 2px 2px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+/* InfoWindow close button */
+.gm-style-iw button {
+  top: 8px !important;
+  right: 8px !important;
+  width: 28px !important;
+  height: 28px !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease !important;
+}
+.gm-style-iw button:hover {
+  opacity: 1 !important;
+}
+
+/* Zoom / bundled controls */
+.gm-bundled-control {
+  margin: 10px !important;
+}
+.gm-bundled-control .gmnoprint button {
+  background: var(--panel-bg) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-soft) !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+.gm-bundled-control .gmnoprint button:hover {
+  background: var(--glass-bg) !important;
+}
+
+/* Smooth marker transitions */
+.gm-style img[role="button"] {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+  .gm-style img[role="button"] { min-height: 44px; min-width: 44px; }
+}
+
+/* Responsive InfoWindow sizing override */
+@media (max-width: 768px) {
+  .gm-style .gm-style-iw-c {
+    max-width: 280px !important;
+    padding: 12px !important;
+  }
+
+  .gm-bundled-control .gmnoprint button {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+/* Dark-theme glue (relies on :root[data-theme="dark"] being used) */
+:root[data-theme="dark"] .infoWindow {
+  color: var(--color-fg);
+}
+
+:root[data-theme="dark"] .gm-style .gm-style-iw-c {
+  background: var(--panel-bg) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+:root[data-theme="dark"] .gm-style .gm-style-iw-t::after {
+  background: linear-gradient(45deg, var(--panel-bg) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
+}
+
+
+
 /* ===== SELECTION & FOCUS ===== */
 ::selection { background: rgb(var(--color-primary-rgb)); color: #fff; }
 :where(a, button, input, textarea, select):focus-visible {
