@@ -1,0 +1,226 @@
+/* InteractiveMap.module.css
+   Uses theme tokens from theme.css / globals.css (var(--color-*) etc.)
+   NOTE: Global Google Maps overrides and :root variables have been moved
+   to your global stylesheet (e.g. src/app/globals.css). See comment below.
+*/
+
+/* Wrapper & container */
+.mapWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Loading state */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--panel-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--glass-border);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  margin-top: 16px;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Error state */
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--panel-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.errorContent {
+  text-align: center;
+  padding: 32px;
+}
+
+.errorTitle {
+  margin-top: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-fg);
+}
+
+.errorText {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* InfoWindow */
+.infoWindow {
+  min-width: 280px;
+  padding: 4px;
+}
+
+.infoHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.infoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.infoHeaderText {
+  flex: 1;
+}
+
+.infoTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.infoLocation {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: var(--color-fg);
+}
+
+/* Info details card inside InfoWindow */
+.infoDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: var(--panel-bg);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.infoDetailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-fg);
+}
+
+/* CTA inside InfoWindow */
+.infoButton {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: var(--cta-fg);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* Controls overlay (bottom-right) */
+.controlsOverlay {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 10;
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--panel-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.controlButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(var(--primary-rgb), 0.2);
+  background: var(--glass-bg);
+}
+
+.controlButton:active {
+  transform: translateY(0);
+}
+
+/* Keyframes */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pulsing effect for selected markers */
+@keyframes markerPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+/* --------------------------
+   NOTE: Global overrides for Google Maps, .gm-* selectors,
+   responsive .gm-* rules, and :root variables were REMOVED from this
+   module file and should be placed in your global stylesheet
+   (e.g. src/app/globals.css or src/styles/globals.css).
+   -------------------------- */
+
+/* Responsive (module-local rules remain local) */
+@media (max-width: 768px) {
+  /* Keep module-local layout changes here */
+  .infoWindow {
+    min-width: 240px;
+  }
+
+  .controlsOverlay {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .controlButton {
+    width: 44px;
+    height: 44px;
+  }
+}

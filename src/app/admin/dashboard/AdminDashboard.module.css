@@ -1,18 +1,18 @@
 /* AdminDashboard.module.css
-   Uses semantic tokens from theme.css / globals.css:
-   --color-bg, --color-fg, --color-muted, --color-primary, --color-primary-rgb,
-   --color-secondary, --color-panel, --color-border, --shadow-soft, --radius-md
+   Mobile-first improvements and touch-friendly tweaks
+   Keeps semantic tokens from theme.css / globals.css.
 */
+
 
 /* ---------- Layout / container ---------- */
 .container {
   width: 100%;
   margin: 0 auto;
-  padding: clamp(16px, 3.5vw, 28px);
+  padding: clamp(12px, 4vw, 20px);
   max-width: var(--page-max-wide);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--g-lg);
 }
 
 /* Header */
@@ -20,31 +20,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: var(--g-sm);
   background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.04), transparent);
   border: 1px solid var(--color-border);
-  padding: 14px;
-  border-radius: 14px;
+  padding: 10px;
+  border-radius: 12px;
   box-shadow: var(--shadow-soft);
   align-self: stretch;
+  flex-wrap: wrap;
 }
 
 .title {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--color-fg);
   letter-spacing: -0.01em;
+  margin-right: auto;
 }
 
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .userAvatar {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   background: var(--cta-grad);
   display: grid;
@@ -58,31 +60,33 @@
 .userName {
   color: var(--color-muted);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
-/* Tabs */
+/* Tabs: horizontal scroll for small screens */
 .tabContainer {
   display: flex;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+  overflow: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* Tab buttons */
 .tab {
   background: transparent;
   border: 1px solid transparent;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: 10px;
   font-weight: 600;
   color: var(--color-muted);
-  transition: all 180ms ease;
-  box-shadow: none;
-}
-
-.tab:hover {
-  color: var(--color-fg);
-  transform: translateY(-2px);
+  transition: all 160ms ease;
+  white-space: nowrap;
 }
 
 .tabActive {
@@ -93,300 +97,142 @@
 }
 
 /* Main content area */
-.content {
-  display: block;
-}
+.content { display: block; }
 
-/* ---------- Overview / stats ---------- */
+/* ---------- Small cards & stat grid (mobile) ---------- */
 .overviewGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 1000px) {
-  .overviewGrid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 520px) {
-  .overviewGrid { grid-template-columns: 1fr; }
+  grid-template-columns: 1fr 1fr;
+  gap: var(--g-sm);
 }
 
 .statCard {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  padding: 14px;
+  padding: 12px;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   box-shadow: var(--shadow-soft);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: transform 140ms ease, box-shadow 140ms ease;
 }
-
-.statCard:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(10,12,28,0.08); }
 
 .statIcon {
-  width: 54px;
-  height: 54px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(var(--color-primary-rgb),0.12), rgba(122,86,184,0.08));
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
 }
 
-.statValue {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--color-fg);
-}
+/* stat text sizes tuned for mobile */
+.statValue { font-size: 1rem; font-weight: 800; color: var(--color-fg); }
+.statLabel { color: var(--color-muted); font-size: 0.78rem; margin-top: 2px; }
 
-.statLabel {
-  color: var(--color-muted);
-  font-size: 0.85rem;
-  margin-top: 4px;
-}
-
-/* ---------- Sections & headers ---------- */
+/* ---------- Section headers ---------- */
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-fg);
-}
+.sectionTitle { font-size: 1rem; font-weight: 800; color: var(--color-fg); }
 
 .addButton {
   background: var(--cta-grad);
   color: var(--cta-fg);
   border: none;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: 10px;
   font-weight: 700;
-  box-shadow: var(--cta-shadow);
-  transition: transform 140ms ease;
 }
 
-.addButton:hover { transform: translateY(-3px); }
-
-/* ---------- Forms & cards ---------- */
+/* ---------- Form layout: single column on mobile ---------- */
 .formCard {
   background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent);
   border: 1px solid var(--color-border);
-  padding: 16px;
-  border-radius: 14px;
+  padding: 14px;
+  border-radius: 12px;
   box-shadow: var(--shadow-soft);
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
-.formTitle {
-  font-size: 1rem;
-  font-weight: 800;
-  margin-bottom: 10px;
-  color: var(--color-fg);
-}
-
-.formSection {
-  margin-bottom: 12px;
-}
-
-.formSectionTitle {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-fg);
-  margin-bottom: 8px;
-}
-
-/* flexible grid for form fields */
 .formGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
-@media (max-width: 760px) {
-  .formGrid { grid-template-columns: 1fr; }
-}
-
+/* Inputs scaled for touch */
 .input {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
   background: var(--color-panel);
   color: var(--color-fg);
-  font-weight: 600;
-  outline: none;
-  transition: box-shadow 120ms ease, border-color 120ms ease, transform 120ms ease;
-}
-
-.input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.08);
-  transform: translateY(-1px);
-}
-
-.fullWidth { grid-column: 1 / -1; }
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-muted);
   font-weight: 700;
+  font-size: 0.95rem;
 }
 
-.checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--color-primary);
-  border-radius: 6px;
-}
+/* Full width helpers */
+.fullWidth { width: 100%; }
 
-/* timings layout */
-.timingsContainer {
-  display: grid;
-  gap: 10px;
-}
+/* Timings compact on mobile */
+.timingsContainer { display: grid; gap: 10px; }
+.dayTiming { padding: 10px; border-radius: 10px; border: 1px dashed var(--color-border); background: rgba(var(--color-primary-rgb),0.02); }
 
-.dayTiming {
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px dashed var(--color-border);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: rgba(var(--color-primary-rgb), 0.02);
-}
-
-.dayHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dayName { text-transform: capitalize; color: var(--color-fg); font-weight: 800; }
-
-.applyAllButton {
-  font-size: 0.8rem;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--color-primary);
-  padding: 6px 8px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.timeInputs {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.timeGroup { display: flex; gap: 8px; align-items: center; }
-
-.timeLabel { font-weight: 700; color: var(--color-muted); font-size: 0.85rem; }
-
-.timeInput {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-panel);
-  font-weight: 700;
-}
+/* Time inputs stacking for narrow widths */
+.timeInputs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.timeGroup { display:flex; gap:8px; align-items:center; }
 
 /* Buttons */
-.submitButton,
-.updateButton {
+.submitButton, .updateButton {
   background: var(--cta-grad);
   color: var(--cta-fg);
   border: none;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 12px;
   font-weight: 800;
-  box-shadow: var(--cta-shadow);
-  cursor: pointer;
-  transition: transform 140ms ease;
 }
 
-.submitButton:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
+/* Delete button - full width on mobile */
+.deleteButton { padding: 10px 12px; border-radius: 12px; }
 
-.updateButton:hover,
-.submitButton:hover { transform: translateY(-4px); }
-
-.deleteButton,
-.smallDanger {
-  background: transparent;
-  color: var(--color-fg);
-  border: 1px solid rgba(220, 70, 70, 0.12);
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 800;
-  color: #b91c1c;
-}
-
-/* secondary small buttons */
-.smallButton {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  padding: 6px 8px;
-  border-radius: 8px;
-  font-weight: 700;
-  margin-left: 8px;
-}
-
-/* ---------- Stations grid / cards ---------- */
+/* ---------- Stations list (mobile friendly) ---------- */
 .stationsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
-@media (max-width: 1100px) { .stationsGrid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 620px) { .stationsGrid { grid-template-columns: 1fr; } }
+.stationSection {
+  margin: 16px 0 20px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.2));
+  border: 2px dashed var(--color-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .selectedStation {
+  background: #1e293b;
+  border-color: #475569;
+}
 
 .stationCard {
   padding: 12px;
   border-radius: 12px;
   background: linear-gradient(180deg, var(--color-panel), rgba(255,255,255,0.01));
   border: 1px solid var(--color-border);
-  cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
-.stationCard:hover { transform: translateY(-6px); box-shadow: 0 16px 36px rgba(12,18,40,0.06); }
-
-.stationName {
-  font-weight: 800;
-  color: var(--color-fg);
-  margin-bottom: 6px;
-}
-
-.stationLocation { color: var(--color-muted); font-size: 0.9rem; margin-bottom: 8px; }
-
-.stationStats { display: flex; gap: 8px; }
-
-.statBadge {
-  background: rgba(var(--color-primary-rgb), 0.06);
-  color: var(--color-fg);
-  padding: 6px 8px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 0.85rem;
-  border: 1px solid rgba(var(--color-primary-rgb), 0.06);
-}
+/* compact stats on station card */
+.stationStats { display:flex; gap:8px; flex-wrap:wrap; }
+.statBadge { padding:6px 8px; border-radius:999px; font-weight:800; font-size:0.8rem; }
 
 /* ---------- Station detail ---------- */
 .backButton {
@@ -394,225 +240,229 @@
   border: none;
   color: var(--color-primary);
   font-weight: 800;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   cursor: pointer;
 }
 
-.stationDetailHeader { margin-bottom: 12px; }
-
-.stationDetailTitle { font-size: 1.2rem; font-weight: 900; color: var(--color-fg); }
-.stationDetailLocation { color: var(--color-muted); font-weight: 700; }
-
-/* toggle view (Bookings / Keys) */
-.toggleContainer {
-  display: flex;
-  gap: 8px;
-  margin: 12px 0;
-}
-
+/* toggle buttons stacked horizontally scrollable */
+.toggleContainer { display:flex; gap:8px; overflow:auto; -webkit-overflow-scrolling: touch; }
 .toggleButton {
-  border-radius: 10px;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
   background: transparent;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.toggleActive {
-  background: var(--cta-grad);
-  color: var(--cta-fg);
-  box-shadow: var(--cta-shadow);
-}
-
-/* ---------- Monthly / list views ---------- */
-.monthlyContainer { display: flex; flex-direction: column; gap: 18px; }
-
-.monthSection {
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
   border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ---------- Months UI (mobile-first) ---------- */
+.monthGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Month card tuned for mobile */
+.monthCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+}
+
+.monthCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(10,12,28,0.1);
+  border-color: var(--color-primary);
+}
+
+.monthCardIcon { width:46px; height:46px; border-radius:10px; display:grid; place-items:center; font-size:1rem; flex-shrink:0; }
+
+.monthCardContent { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.monthCardTitle { font-weight:900; color:var(--color-primary); font-size:0.98rem; }
+.monthCardStats { display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; }
+.monthPill { background: rgba(var(--color-primary-rgb),0.06); padding:6px 8px; border-radius:999px; font-weight:800; font-size:0.82rem; }
+
+/* Expanded month panel becomes full-width block on mobile */
+.monthPanel {
+  margin-top: 10px;
   padding: 12px;
+  border-radius: 12px;
   background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent);
   border: 1px solid var(--color-border);
 }
 
-.monthHeader,
-.weekHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--color-muted);
-  font-weight: 800;
-  margin-bottom: 8px;
+/* Panel header sticky for easier navigation on long lists */
+.monthPanelHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+  position: sticky;
+  top: 56px;
+  background: linear-gradient(180deg, rgba(var(--color-bg),1), rgba(var(--color-bg),0));
+  z-index: 6;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
-.listContainer { display: grid; gap: 10px; }
+.monthKPIs { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 
-.listCard {
-  padding: 12px;
-  border-radius: 10px;
+/* week strip is horizontally scrollable with comfortable targets */
+.weekStrip { display:flex; gap:8px; overflow:auto; padding:8px 0; margin-bottom:8px; -webkit-overflow-scrolling: touch; }
+.weekBtn {
+  background: transparent;
   border: 1px solid var(--color-border);
-  background: var(--color-panel);
-  box-shadow: 0 8px 20px rgba(10,12,30,0.03);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
 }
 
-.listCardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+/* week button active style */
+.weekBtnActive { background: var(--cta-grad); color: var(--cta-fg); box-shadow: var(--cta-shadow); }
+
+/* Week accordion tuned for mobile */
+.weekSectionAccordion { border-radius:10px; overflow:hidden; margin-bottom:10px; border:1px solid var(--color-border); background:var(--color-panel); }
+.weekAccordionHeader {
+  display:flex; justify-content:space-between; align-items:center; padding:12px; cursor:pointer; font-weight:900; color:var(--color-fg);
+}
+.weekAccordionBody {
+  padding: 10px;
+  border-top:1px dashed var(--color-border);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-.amount {
-  font-weight: 900;
-  color: var(--color-primary);
+/* Booking rows collapse to stacked layout on phones */
+.bookingRow {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:10px;
+  border-radius:8px;
+  transition: background 140ms;
+}
+.bookingRow > .bookingMeta { font-size:0.9rem; color:var(--color-muted); }
+
+.bookingName { font-weight:800; color:var(--color-fg); font-size:0.98rem; }
+.bookingMeta { color:var(--color-muted); font-weight:700; }
+
+/* Right-side actions become full-width buttons on mobile */
+.bookingRowActions {
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  margin-top:6px;
+}
+.bookingRowActions .smallButton {
+  padding:8px 10px;
+  min-width: 88px;
 }
 
-.listCardBody p {
-  margin: 6px 0;
+/* badges */
+.badge { padding:6px 10px; border-radius:999px; font-weight:800; font-size:0.85rem; background: rgba(var(--color-primary-rgb),0.06); border:1px solid rgba(var(--color-primary-rgb),0.06); }
+
+/* small payable label used beside booking badge */
+.payableMini {
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.78rem;
+  background: rgba(var(--color-secondary-rgb, 122,86,184), 0.06);
+  border: 1px solid rgba(var(--color-secondary-rgb, 122,86,184), 0.08);
   color: var(--color-muted);
-  font-weight: 700;
-  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
-.code {
-  background: rgba(0,0,0,0.04);
-  padding: 4px 6px;
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.92rem;
-}
+/* ---------- List / monthly / week view reuse ---------- */
+.monthlyContainer { display:flex; flex-direction:column; gap:12px; }
+
+.monthSection { border-radius:10px; padding:10px; background:linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent); border:1px solid var(--color-border); }
+
+.monthHeader, .weekHeader { display:flex; justify-content:space-between; align-items:center; color:var(--color-muted); font-weight:800; margin-bottom:6px; }
+
+/* list cards compact for mobile */
+.listCard { padding:10px; border-radius:10px; border:1px solid var(--color-border); background:var(--color-panel); }
+
+/* small text adjustments */
+.listCardBody p { margin:6px 0; color:var(--color-muted); font-weight:700; font-size:0.92rem; }
+
+/* code badge smaller */
+.code { padding:4px 6px; border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; }
 
 /* status badge */
-.statusBadge {
-  display: inline-block;
-  padding: 6px 8px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 0.82rem;
-  text-transform: capitalize;
-  background: rgba(0,0,0,0.04);
-  color: var(--color-fg);
-}
+.statusBadge { padding:6px 8px; border-radius:999px; font-weight:900; font-size:0.8rem; }
 
 /* ---------- Partners list ---------- */
-/* reuse listCard, listContainer, listCardHeader, smallButton, smallDanger */
+/* reusing list styles; buttons stacked on mobile */
+.listContainer { display:grid; gap:10px; }
+
+/* partner list card actions: row -> column on mobile */
+.listCardHeader { display:flex; justify-content:space-between; gap:8px; align-items:center; flex-wrap:wrap; }
 
 /* ---------- Empty / loading / error states ---------- */
 .emptyState {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  padding: 22px;
-  border-radius: 12px;
-  border: 1px dashed var(--color-border);
-  background: transparent;
-  color: var(--color-muted);
-  flex-direction: column;
-  text-align: center;
+  display:flex; gap:12px; align-items:center; justify-content:center; padding:18px; border-radius:12px; border:1px dashed var(--color-border); color:var(--color-muted); flex-direction:column; text-align:center;
 }
+.emptyIcon { font-size:36px; }
+.emptyText { font-weight:800; color:var(--color-muted); }
 
-.emptyIcon { font-size: 36px; }
-.emptyText { font-weight: 800; color: var(--color-muted); }
+/* loading / error */
+.loading, .error { padding:12px; border-radius:10px; color:var(--color-fg); background:var(--color-panel); border:1px solid var(--color-border); font-weight:800; }
 
-.loading,
-.error {
-  padding: 12px;
-  border-radius: 10px;
-  color: var(--color-fg);
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  font-weight: 800;
-}
-
-
-
-/* Capacity Controls */
-.capacityInputGroup {
-  width: 100%;
-}
-
-.capacityControls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-}
-
+/* ---------- Capacity controls ---------- */
+.capacityInputGroup { width:100%; }
+.capacityControls { display:flex; gap:10px; align-items:center; margin-top:8px; }
 .capacityBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-  background: white;
-  font-size: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  width:44px; height:44px; border-radius:10px; font-size:20px; font-weight:700;
+}
+.capacityInput { flex:1; text-align:center; font-size:20px; padding:10px; border-radius:10px; }
+
+/* capacity hint */
+.capacityHint { margin-top:8px; font-size:12px; color:var(--color-muted); font-style:italic; }
+
+/* ---------- Focus & accessibility improvements ---------- */
+.monthCard:focus, .stationCard:focus, .weekBtn:focus, .weekAccordionHeader:focus { outline: 3px solid rgba(var(--color-primary-rgb), 0.14); outline-offset: 2px; }
+
+/* ---------- Tablet / desktop breakpoints (override mobile-first) ---------- */
+@media (min-width: 720px) {
+  .overviewGrid { grid-template-columns: repeat(2, 1fr); }
+  .stationsGrid { grid-template-columns: repeat(2, 1fr); }
+  .monthGrid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .container { padding: clamp(16px, 3.5vw, 28px); }
+  .title { font-size: 1.25rem; }
+  .monthPanelHeader { position: static; top: auto; padding: 0; background: transparent; }
+  .bookingRow { flex-direction: row; align-items: center; justify-content: space-between; }
+  .bookingRowActions { margin-top: 0; }
+  .bookingName { font-size: 1.05rem; }
+  .monthCardIcon { width:54px; height:54px; font-size:1.1rem; }
+  .capacityBtn { width:40px; height:40px; }
 }
 
-.capacityBtn:hover {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  transform: scale(1.05);
+/* Desktop wide layout */
+@media (min-width: 1100px) {
+  .overviewGrid { grid-template-columns: repeat(4, 1fr); }
+  .stationsGrid { grid-template-columns: repeat(3, 1fr); }
+  .monthGrid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .title { font-size: 1.4rem; }
 }
 
-.capacityInput {
-  flex: 1;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 600;
-  padding: 8px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  max-width: 150px;
-}
-
-.capacityInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
-
-.capacityHint {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #6b7280;
-  font-style: italic;
-}
-
-[data-theme="dark"] .capacityBtn {
-  background: #1f2937;
-  border-color: #374151;
-  color: #f3f4f6;
-}
-
-[data-theme="dark"] .capacityBtn:hover {
-  border-color: #60a5fa;
-  background: #1e3a8a;
-}
-
-[data-theme="dark"] .capacityInput {
-  background: #1f2937;
-  border-color: #374151;
-  color: #f3f4f6;
-}
-
-[data-theme="dark"] .capacityInput:focus {
-  border-color: #60a5fa;
-}
-
-[data-theme="dark"] .capacityHint {
-  color: #9ca3af;
-}
-
-
-
-
-/* small responsive tweaks */
-@media (max-width: 420px) {
-  .header { padding: 10px; gap: 8px; }
-  .title { font-size: 1.05rem; }
-  .userAvatar { width: 36px; height: 36px; font-size: 0.9rem; }
-  .statIcon { width: 46px; height: 46px; }
-  .stationCard { padding: 10px; }
+/* reduce visual noise on very small screens */
+@media (max-width: 360px) {
+  .input { padding: 10px 12px; font-size: 0.92rem; }
+  .monthCard { padding: 10px; gap: 10px; }
+  .monthCardTitle { font-size: 0.95rem; }
+  .monthPill { font-size: 0.78rem; padding: 5px 7px; }
 }

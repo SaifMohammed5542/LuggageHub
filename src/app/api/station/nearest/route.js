@@ -21,7 +21,7 @@ export async function POST(request) {
           spherical: true
         }
       },
-      { $limit: 3 }  // return the top 3 nearest, adjust as needed
+      { $limit: 5 }  // return the top 5 nearest, adjust as needed
     ]);
 
     console.log('Stations found:', stations);  // Log the search result
