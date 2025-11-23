@@ -1181,7 +1181,7 @@ export default function AdminDashboard() {
                                         onKeyDown={(e) => { if (e.key === 'Enter') toggleWeek(weekRange); }}
                                       >
                                         <div>{weekRange}</div>
-                                        <div style={{ color: "var(--color-muted)", fontWeight: 800 }}>
+                                        <div style={{ color: "var(--color-text-primary)", fontWeight: 800 }}>
                                           {weekData.bookings.length} • A${weekTotal.toFixed(2)} • Payable A${(weekTotal * PARTNER_SHARE).toFixed(2)}
                                         </div>
                                       </header>

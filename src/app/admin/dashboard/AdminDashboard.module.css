@@ -1,468 +1,1597 @@
-/* AdminDashboard.module.css
-   Mobile-first improvements and touch-friendly tweaks
-   Keeps semantic tokens from theme.css / globals.css.
-*/
+/* ==========================================
+   ADMIN DASHBOARD - DARK THEME ONLY
+   Modern, Sophisticated, Dark UI
+   ========================================== */
 
+/* ==========================================
+   BASE CONTAINER & LAYOUT
+   ========================================== */
 
-/* ---------- Layout / container ---------- */
 .container {
-  width: 100%;
-  margin: 0 auto;
-  padding: clamp(12px, 4vw, 20px);
-  max-width: var(--page-max-wide);
-  display: flex;
-  flex-direction: column;
-  gap: var(--g-lg);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0b1220 0%, #0f1724 100%);
+  padding: 1rem;
+  padding-bottom: 4rem;
+  color: #e6eef8;
 }
 
-/* Header */
+@media (min-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 2rem 3rem;
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 1.125rem;
+  color: #9fb4d6;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ==========================================
+   HEADER SECTION
+   ========================================== */
+
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--g-sm);
-  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.04), transparent);
-  border: 1px solid var(--color-border);
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: var(--shadow-soft);
-  align-self: stretch;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: slideDown 0.4s ease-out;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .title {
-  font-size: 1.05rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  color: var(--color-fg);
-  letter-spacing: -0.01em;
-  margin-right: auto;
+  color: #f8fbff;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2.25rem;
+  }
 }
 
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: #0f172a;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s ease;
+  border: 1px solid #1f2a44;
+}
+
+.userInfo:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  transform: translateY(-1px);
 }
 
 .userAvatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: var(--cta-grad);
-  display: grid;
-  place-items: center;
-  color: var(--cta-fg);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
-  box-shadow: var(--cta-shadow);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  box-shadow: 0 6px 16px rgba(52, 70, 166, 0.25);
 }
 
 .userName {
-  color: var(--color-muted);
   font-weight: 600;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
+  color: #dbe9ff;
+  font-size: 0.9375rem;
 }
 
-/* Tabs: horizontal scroll for small screens */
+/* ==========================================
+   TAB NAVIGATION
+   ========================================== */
+
 .tabContainer {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  overflow: auto;
-  padding-bottom: 6px;
-  -webkit-overflow-scrolling: touch;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #374760 transparent;
+  animation: fadeIn 0.5s ease-out;
 }
 
-/* Tab buttons */
-.tab {
+.tabContainer::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabContainer::-webkit-scrollbar-track {
   background: transparent;
-  border: 1px solid transparent;
-  padding: 8px 10px;
+}
+
+.tabContainer::-webkit-scrollbar-thumb {
+  background: #374760;
   border-radius: 10px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tab {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #9fb4d6;
   font-weight: 600;
-  color: var(--color-muted);
-  transition: all 160ms ease;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #1f2a44;
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 0;
+}
+
+.tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+.tab:active {
+  transform: translateY(0);
 }
 
 .tabActive {
-  background: var(--cta-grad);
-  color: var(--cta-fg);
-  border: 1px solid rgba(var(--color-primary-rgb), 0.08);
-  box-shadow: var(--cta-shadow);
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  box-shadow: 0 8px 30px rgba(52, 70, 166, 0.45);
 }
 
-/* Main content area */
-.content { display: block; }
+.tab > * {
+  position: relative;
+  z-index: 1;
+}
 
-/* ---------- Small cards & stat grid (mobile) ---------- */
+/* ==========================================
+   CONTENT AREA
+   ========================================== */
+
+.content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   OVERVIEW STATS GRID
+   ========================================== */
+
 .overviewGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--g-sm);
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .overviewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .overviewGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 .statCard {
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
   display: flex;
-  gap: 10px;
   align-items: center;
-  padding: 12px;
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: var(--shadow-soft);
-  transition: transform 140ms ease, box-shadow 140ms ease;
+  gap: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #1f2a44;
+  animation: scaleIn 0.4s ease-out backwards;
+}
+
+.statCard:nth-child(1) { animation-delay: 0.1s; }
+.statCard:nth-child(2) { animation-delay: 0.2s; }
+.statCard:nth-child(3) { animation-delay: 0.3s; }
+.statCard:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.8);
+  border-color: rgba(107, 74, 176, 0.25);
 }
 
 .statIcon {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 1.15rem;
+  font-size: 2rem;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+  color: #9fb4d6;
 }
 
-/* stat text sizes tuned for mobile */
-.statValue { font-size: 1rem; font-weight: 800; color: var(--color-fg); }
-.statLabel { color: var(--color-muted); font-size: 0.78rem; margin-top: 2px; }
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #f8fbff;
+  line-height: 1.2;
+}
 
-/* ---------- Section headers ---------- */
+@media (min-width: 768px) {
+  .statValue {
+    font-size: 2rem;
+  }
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #9fb4d6;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* ==========================================
+   SECTION HEADERS & ACTIONS
+   ========================================== */
+
 .sectionHeader {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.sectionTitle { font-size: 1rem; font-weight: 800; color: var(--color-fg); }
+@media (min-width: 640px) {
+  .sectionHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fbff;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .sectionTitle {
+    font-size: 1.75rem;
+  }
+}
+
+/* ==========================================
+   BUTTONS - PRIMARY, SECONDARY, SMALL
+   ========================================== */
+
+.addButton,
+.submitButton,
+.updateButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.addButton::before,
+.submitButton::before,
+.updateButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.addButton:active::before,
+.submitButton:active::before,
+.updateButton:active::before {
+  width: 300px;
+  height: 300px;
+}
 
 .addButton {
-  background: var(--cta-grad);
-  color: var(--cta-fg);
-  border: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-weight: 700;
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  box-shadow: 0 10px 30px rgba(52, 70, 166, 0.45);
 }
 
-/* ---------- Form layout: single column on mobile ---------- */
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(52, 70, 166, 0.6);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.submitButton,
+.updateButton {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white;
+  width: 100%;
+  box-shadow: 0 8px 28px rgba(4, 120, 87, 0.35);
+}
+
+@media (min-width: 640px) {
+  .submitButton,
+  .updateButton {
+    width: auto;
+  }
+}
+
+.submitButton:hover,
+.updateButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(4, 120, 87, 0.5);
+}
+
+.submitButton:disabled,
+.updateButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.deleteButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #b93a3a 0%, #7d1f1f 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+}
+
+.deleteButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(185, 58, 58, 0.55);
+}
+
+.smallButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(52, 70, 166, 0.35);
+}
+
+.smallButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(52, 70, 166, 0.5);
+}
+
+.smallDanger {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #b93a3a 0%, #7d1f1f 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(185, 58, 58, 0.35);
+  margin-left: 0.5rem;
+}
+
+.smallDanger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(185, 58, 58, 0.5);
+}
+
+.backButton {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #dbe9ff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid #1f2a44;
+  margin-bottom: 1rem;
+}
+
+.backButton:hover {
+  background: #0b1324;
+  transform: translateX(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .buttonGroup {
+    flex-direction: row;
+  }
+}
+
+/* ==========================================
+   FORM CARD & SECTIONS
+   ========================================== */
+
 .formCard {
-  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent);
-  border: 1px solid var(--color-border);
-  padding: 14px;
-  border-radius: 12px;
-  box-shadow: var(--shadow-soft);
-  margin-bottom: 14px;
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  margin-bottom: 1.5rem;
+  border: 1px solid #1f2a44;
+  animation: slideUp 0.4s ease-out;
+}
+
+@media (min-width: 768px) {
+  .formCard {
+    padding: 2rem;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.formTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fbff;
+  margin: 0 0 1.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .formTitle {
+    font-size: 1.5rem;
+  }
+}
+
+.formSection {
+  margin-bottom: 2rem;
+}
+
+.formSection:last-child {
+  margin-bottom: 0;
+}
+
+.formSectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f8fbff;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .formGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 1rem;
 }
 
-/* Inputs scaled for touch */
-.input {
-  padding: 12px 14px;
+@media (min-width: 768px) {
+  .formGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+/* ==========================================
+   FORM INPUTS
+   ========================================== */
+
+.input,
+.timeInput {
+  padding: 0.875rem 1rem;
+  border: 2px solid #1f2a44;
   border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-panel);
-  color: var(--color-fg);
+  font-size: 0.9375rem;
+  color: #e6eef8;
+  transition: all 0.2s ease;
+  background: #0b1220;
+  width: 100%;
+  outline: none;
+}
+
+.input:focus,
+.timeInput:focus {
+  border-color: #3446a6;
+  box-shadow: 0 6px 20px rgba(52, 70, 166, 0.18);
+}
+
+.input::placeholder {
+  color: #8fa6c9;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  color: #dbe9ff;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  color: #dbe9ff;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: #3446a6;
+}
+
+/* ==========================================
+   CAPACITY CONTROLS
+   ========================================== */
+
+.capacityInputGroup {
+  grid-column: 1 / -1;
+}
+
+.capacityControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.capacityBtn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid #3446a6;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #3446a6;
+  font-size: 1.25rem;
   font-weight: 700;
-  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Full width helpers */
-.fullWidth { width: 100%; }
+.capacityBtn:hover {
+  background: #3446a6;
+  color: white;
+  transform: scale(1.05);
+}
 
-/* Timings compact on mobile */
-.timingsContainer { display: grid; gap: 10px; }
-.dayTiming { padding: 10px; border-radius: 10px; border: 1px dashed var(--color-border); background: rgba(var(--color-primary-rgb),0.02); }
+.capacityBtn:active {
+  transform: scale(0.95);
+}
 
-/* Time inputs stacking for narrow widths */
-.timeInputs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.timeGroup { display:flex; gap:8px; align-items:center; }
+.capacityInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #1f2a44;
+  border-radius: 10px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+  color: #e6eef8;
+  outline: none;
+  transition: all 0.2s ease;
+  background: #0b1220;
+}
 
-/* Buttons */
-.submitButton, .updateButton {
-  background: var(--cta-grad);
-  color: var(--cta-fg);
-  border: none;
-  padding: 12px 14px;
+.capacityInput:focus {
+  border-color: #3446a6;
+  box-shadow: 0 6px 20px rgba(52, 70, 166, 0.18);
+}
+
+.capacityHint {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #9fb4d6;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   TIMINGS SECTION
+   ========================================== */
+
+.timingsContainer {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.dayTiming {
+  padding: 1rem;
+  background: #0b1220;
   border-radius: 12px;
-  font-weight: 800;
+  border: 1px solid #1f2a44;
+  transition: all 0.2s ease;
 }
 
-/* Delete button - full width on mobile */
-.deleteButton { padding: 10px 12px; border-radius: 12px; }
+.dayTiming:hover {
+  background: #0f172a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
 
-/* ---------- Stations list (mobile friendly) ---------- */
+.dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dayName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #f8fbff;
+  text-transform: capitalize;
+}
+
+.applyAllButton {
+  padding: 0.375rem 0.875rem;
+  border: 1px solid #3446a6;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #3446a6;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.applyAllButton:hover {
+  background: #3446a6;
+  color: white;
+}
+
+.timeInputs {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .timeInputs {
+    flex-wrap: nowrap;
+  }
+}
+
+.timeGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 140px;
+}
+
+.timeLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #9fb4d6;
+  white-space: nowrap;
+}
+
+/* ==========================================
+   STATIONS GRID
+   ========================================== */
+
 .stationsGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 1rem;
 }
 
-.stationSection {
-  margin: 16px 0 20px;
-  padding: 16px 20px;
-  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.2));
-  border: 2px dashed var(--color-border);
-  border-radius: 12px;
-  transition: all 0.3s ease;
+@media (min-width: 640px) {
+  .stationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-[data-theme="dark"] .selectedStation {
-  background: #1e293b;
-  border-color: #475569;
+@media (min-width: 1024px) {
+  .stationsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 .stationCard {
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, var(--color-panel), rgba(255,255,255,0.01));
-  border: 1px solid var(--color-border);
-}
-
-/* compact stats on station card */
-.stationStats { display:flex; gap:8px; flex-wrap:wrap; }
-.statBadge { padding:6px 8px; border-radius:999px; font-weight:800; font-size:0.8rem; }
-
-/* ---------- Station detail ---------- */
-.backButton {
-  background: transparent;
-  border: none;
-  color: var(--color-primary);
-  font-weight: 800;
-  margin-bottom: 8px;
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
   cursor: pointer;
-}
-
-/* toggle buttons stacked horizontally scrollable */
-.toggleContainer { display:flex; gap:8px; overflow:auto; -webkit-overflow-scrolling: touch; }
-.toggleButton {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* ---------- Months UI (mobile-first) ---------- */
-.monthGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-/* Month card tuned for mobile */
-.monthCard {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-soft);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  animation: fadeInScale 0.4s ease-out backwards;
 }
 
 .monthCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(10,12,28,0.1);
-  border-color: var(--color-primary);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.8);
+  border-color: #3446a6;
 }
 
-.monthCardIcon { width:46px; height:46px; border-radius:10px; display:grid; place-items:center; font-size:1rem; flex-shrink:0; }
-
-.monthCardContent { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
-.monthCardTitle { font-weight:900; color:var(--color-primary); font-size:0.98rem; }
-.monthCardStats { display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; }
-.monthPill { background: rgba(var(--color-primary-rgb),0.06); padding:6px 8px; border-radius:999px; font-weight:800; font-size:0.82rem; }
-
-/* Expanded month panel becomes full-width block on mobile */
-.monthPanel {
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent);
-  border: 1px solid var(--color-border);
+.monthCardIcon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+  color: #9fb4d6;
 }
 
-/* Panel header sticky for easier navigation on long lists */
-.monthPanelHeader {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  margin-bottom:10px;
-  position: sticky;
-  top: 56px;
-  background: linear-gradient(180deg, rgba(var(--color-bg),1), rgba(var(--color-bg),0));
-  z-index: 6;
-  padding-top: 6px;
-  padding-bottom: 6px;
+.monthCardContent {
+  flex: 1;
+  min-width: 0;
 }
 
-.monthKPIs { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-
-/* week strip is horizontally scrollable with comfortable targets */
-.weekStrip { display:flex; gap:8px; overflow:auto; padding:8px 0; margin-bottom:8px; -webkit-overflow-scrolling: touch; }
-.weekBtn {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-weight:800;
-  cursor:pointer;
-  white-space:nowrap;
+.monthCardTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f8fbff;
+  margin-bottom: 0.75rem;
 }
 
-/* week button active style */
-.weekBtnActive { background: var(--cta-grad); color: var(--cta-fg); box-shadow: var(--cta-shadow); }
-
-/* Week accordion tuned for mobile */
-.weekSectionAccordion { border-radius:10px; overflow:hidden; margin-bottom:10px; border:1px solid var(--color-border); background:var(--color-panel); }
-.weekAccordionHeader {
-  display:flex; justify-content:space-between; align-items:center; padding:12px; cursor:pointer; font-weight:900; color:var(--color-fg);
-}
-.weekAccordionBody {
-  padding: 10px;
-  border-top:1px dashed var(--color-border);
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.monthCardStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-/* Booking rows collapse to stacked layout on phones */
-.bookingRow {
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  padding:10px;
-  border-radius:8px;
-  transition: background 140ms;
-}
-.bookingRow > .bookingMeta { font-size:0.9rem; color:var(--color-muted); }
-
-.bookingName { font-weight:800; color:var(--color-fg); font-size:0.98rem; }
-.bookingMeta { color:var(--color-muted); font-weight:700; }
-
-/* Right-side actions become full-width buttons on mobile */
-.bookingRowActions {
-  display:flex;
-  gap:8px;
-  justify-content:flex-end;
-  margin-top:6px;
-}
-.bookingRowActions .smallButton {
-  padding:8px 10px;
-  min-width: 88px;
-}
-
-/* badges */
-.badge { padding:6px 10px; border-radius:999px; font-weight:800; font-size:0.85rem; background: rgba(var(--color-primary-rgb),0.06); border:1px solid rgba(var(--color-primary-rgb),0.06); }
-
-/* small payable label used beside booking badge */
-.payableMini {
-  padding: 6px 8px;
+.monthPill {
+  padding: 0.375rem 0.75rem;
+  background: linear-gradient(135deg, #2b3350 0%, #1b2036 100%);
   border-radius: 8px;
-  font-weight: 800;
-  font-size: 0.78rem;
-  background: rgba(var(--color-secondary-rgb, 122,86,184), 0.06);
-  border: 1px solid rgba(var(--color-secondary-rgb, 122,86,184), 0.08);
-  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #b7aaf0;
   white-space: nowrap;
 }
 
-/* ---------- List / monthly / week view reuse ---------- */
-.monthlyContainer { display:flex; flex-direction:column; gap:12px; }
+/* ==========================================
+   MONTH PANEL (EXPANDED VIEW)
+   ========================================== */
 
-.monthSection { border-radius:10px; padding:10px; background:linear-gradient(180deg, rgba(var(--color-primary-rgb),0.02), transparent); border:1px solid var(--color-border); }
+.monthPanel {
+  animation: expandIn 0.4s ease-out;
+}
 
-.monthHeader, .weekHeader { display:flex; justify-content:space-between; align-items:center; color:var(--color-muted); font-weight:800; margin-bottom:6px; }
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
-/* list cards compact for mobile */
-.listCard { padding:10px; border-radius:10px; border:1px solid var(--color-border); background:var(--color-panel); }
+.monthPanelHeader {
+  background: #0f172a;
+  padding: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-/* small text adjustments */
-.listCardBody p { margin:6px 0; color:var(--color-muted); font-weight:700; font-size:0.92rem; }
+@media (min-width: 768px) {
+  .monthPanelHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
 
-/* code badge smaller */
-.code { padding:4px 6px; border-radius:6px; font-family:var(--font-mono); font-size:0.85rem; }
+.monthKPIs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
 
-/* status badge */
-.statusBadge { padding:6px 8px; border-radius:999px; font-weight:900; font-size:0.8rem; }
+/* ==========================================
+   WEEK STRIP NAVIGATION
+   ========================================== */
 
-/* ---------- Partners list ---------- */
-/* reusing list styles; buttons stacked on mobile */
-.listContainer { display:grid; gap:10px; }
+.weekStrip {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 1rem;
+  background: #0f172a;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  margin-bottom: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #374760 transparent;
+}
 
-/* partner list card actions: row -> column on mobile */
-.listCardHeader { display:flex; justify-content:space-between; gap:8px; align-items:center; flex-wrap:wrap; }
+.weekStrip::-webkit-scrollbar {
+  height: 6px;
+}
 
-/* ---------- Empty / loading / error states ---------- */
+.weekStrip::-webkit-scrollbar-track {
+  background: #0b1220;
+  border-radius: 10px;
+}
+
+.weekStrip::-webkit-scrollbar-thumb {
+  background: #374760;
+  border-radius: 10px;
+}
+
+.weekStrip::-webkit-scrollbar-thumb:hover {
+  background: #263446;
+}
+
+.weekBtn {
+  padding: 0.625rem 1rem;
+  border: 2px solid #1f2a44;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #9fb4d6;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.weekBtn:hover {
+  background: #0b1324;
+  border-color: #3446a6;
+  color: #bcd5ff;
+}
+
+.weekBtnActive {
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  border-color: #3446a6;
+  box-shadow: 0 8px 28px rgba(52, 70, 166, 0.35);
+}
+
+/* ==========================================
+   WEEK ACCORDION SECTIONS
+   ========================================== */
+
+.weekSectionAccordion {
+  background: #0f172a;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.weekSectionAccordion:hover {
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.85);
+}
+
+.weekAccordionHeader {
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #0f172a 0%, #121827 100%);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  font-weight: 600;
+  color: #f8fbff;
+  flex-wrap: wrap;
+}
+
+.weekAccordionHeader:hover {
+  background: linear-gradient(135deg, #1b2036 0%, #2b3350 100%);
+  border-bottom-color: #3446a6;
+}
+
+.weekAccordionHeader[aria-expanded="true"] {
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+}
+
+.weekAccordionBody {
+  padding: 1rem;
+  transition: max-height 0.36s ease, padding 0.36s ease;
+}
+
+@media (min-width: 768px) {
+  .weekAccordionBody {
+    padding: 1.25rem;
+  }
+}
+
+/* ==========================================
+   BOOKING ROWS
+   ========================================== */
+
+.bookingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #0b1220;
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  flex-wrap: wrap;
+}
+
+.bookingRow:last-child {
+  margin-bottom: 0;
+}
+
+.bookingRow:hover {
+  background: #0f172a;
+  border-color: #3446a6;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
+  transform: translateX(4px);
+}
+
+.bookingName {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #f8fbff;
+  margin-bottom: 0.25rem;
+}
+
+.bookingMeta {
+  font-size: 0.8125rem;
+  color: #9fb4d6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.badge {
+  padding: 0.375rem 0.75rem;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(4, 120, 87, 0.28);
+}
+
+.payableMini {
+  padding: 0.375rem 0.75rem;
+  background: linear-gradient(135deg, #1b2036 0%, #2b3350 100%);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9fb4d6;
+  white-space: nowrap;
+}
+
+/* ==========================================
+   LIST CONTAINER & CARDS
+   ========================================== */
+
+.listContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .listContainer {
+    gap: 1.25rem;
+  }
+}
+
+.listCard {
+  background: #0f172a;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.listCard:hover {
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.85);
+  border-color: #3446a6;
+  transform: translateY(-2px);
+}
+
+.listCardHeader {
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #0b1220 0%, #121827 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: 2px solid #1f2a44;
+}
+
+.listCardHeader strong {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fbff;
+}
+
+.listCardBody {
+  padding: 1.25rem;
+}
+
+.listCardBody p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #9fb4d6;
+  line-height: 1.6;
+}
+
+.listCardBody p:last-child {
+  margin-bottom: 0;
+}
+
+.listCardBody strong {
+  font-weight: 600;
+  color: #f8fbff;
+  margin-right: 0.5rem;
+}
+
+.code {
+  padding: 0.25rem 0.5rem;
+  background: linear-gradient(135deg, #4b2f00 0%, #5e3f05 100%);
+  border-radius: 6px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffd9a6;
+  letter-spacing: 0.05em;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.625rem;
+  background: linear-gradient(135deg, #273554 0%, #344760 100%);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #dbe9ff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.amount {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #10b981;
+}
+
+/* ==========================================
+   MONTHLY CONTAINER (KEY HANDOVERS)
+   ========================================== */
+
+.monthlyContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.monthSection {
+  background: #0f172a;
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+}
+
+.monthHeader {
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.weekHeader {
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #0b1220 0%, #121827 100%);
+  border-top: 2px solid #1f2a44;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: #f8fbff;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* ==========================================
+   EMPTY STATES & ERRORS
+   ========================================== */
+
 .emptyState {
-  display:flex; gap:12px; align-items:center; justify-content:center; padding:18px; border-radius:12px; border:1px dashed var(--color-border); color:var(--color-muted); flex-direction:column; text-align:center;
-}
-.emptyIcon { font-size:36px; }
-.emptyText { font-weight:800; color:var(--color-muted); }
-
-/* loading / error */
-.loading, .error { padding:12px; border-radius:10px; color:var(--color-fg); background:var(--color-panel); border:1px solid var(--color-border); font-weight:800; }
-
-/* ---------- Capacity controls ---------- */
-.capacityInputGroup { width:100%; }
-.capacityControls { display:flex; gap:10px; align-items:center; margin-top:8px; }
-.capacityBtn {
-  width:44px; height:44px; border-radius:10px; font-size:20px; font-weight:700;
-}
-.capacityInput { flex:1; text-align:center; font-size:20px; padding:10px; border-radius:10px; }
-
-/* capacity hint */
-.capacityHint { margin-top:8px; font-size:12px; color:var(--color-muted); font-style:italic; }
-
-/* ---------- Focus & accessibility improvements ---------- */
-.monthCard:focus, .stationCard:focus, .weekBtn:focus, .weekAccordionHeader:focus { outline: 3px solid rgba(var(--color-primary-rgb), 0.14); outline-offset: 2px; }
-
-/* ---------- Tablet / desktop breakpoints (override mobile-first) ---------- */
-@media (min-width: 720px) {
-  .overviewGrid { grid-template-columns: repeat(2, 1fr); }
-  .stationsGrid { grid-template-columns: repeat(2, 1fr); }
-  .monthGrid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-  .container { padding: clamp(16px, 3.5vw, 28px); }
-  .title { font-size: 1.25rem; }
-  .monthPanelHeader { position: static; top: auto; padding: 0; background: transparent; }
-  .bookingRow { flex-direction: row; align-items: center; justify-content: space-between; }
-  .bookingRowActions { margin-top: 0; }
-  .bookingName { font-size: 1.05rem; }
-  .monthCardIcon { width:54px; height:54px; font-size:1.1rem; }
-  .capacityBtn { width:40px; height:40px; }
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #0f172a;
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
 }
 
-/* Desktop wide layout */
-@media (min-width: 1100px) {
-  .overviewGrid { grid-template-columns: repeat(4, 1fr); }
-  .stationsGrid { grid-template-columns: repeat(3, 1fr); }
-  .monthGrid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-  .title { font-size: 1.4rem; }
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+  animation: float 3s ease-in-out infinite;
+  color: #9fb4d6;
 }
 
-/* reduce visual noise on very small screens */
-@media (max-width: 360px) {
-  .input { padding: 10px 12px; font-size: 0.92rem; }
-  .monthCard { padding: 10px; gap: 10px; }
-  .monthCardTitle { font-size: 0.95rem; }
-  .monthPill { font-size: 0.78rem; padding: 5px 7px; }
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.emptyText {
+  font-size: 1rem;
+  color: #9fb4d6;
+  margin: 0;
+  font-weight: 500;
+}
+
+.error {
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #3b0f0f 0%, #4a1010 100%);
+  color: #ffd6d6;
+  border-radius: 12px;
+  border: 2px solid #6b1f1f;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin-bottom: 1rem;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* ==========================================
+   RESPONSIVE UTILITIES
+   ========================================== */
+
+@media (max-width: 639px) {
+  .monthPanelHeader > div:first-child {
+    width: 100%;
+  }
+  
+  .monthKPIs {
+    width: 100%;
+  }
+  
+  .bookingRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .bookingRow > div:last-child {
+    width: 100%;
+  }
+}
+
+
+/* ==========================================
+   SCROLL BEHAVIOR
+   ========================================== */
+
+.container :global(html) {
+  scroll-behavior: smooth;
+}
+
+/* ==========================================
+   FOCUS STATES (ACCESSIBILITY)
+   ========================================== */
+
+.container button:focus-visible,
+.container .tab:focus-visible,
+.container .toggleButton:focus-visible {
+  outline: 3px solid #6b4ab0;
+  outline-offset: 2px;
+}
+
+.container input:focus-visible,
+.container select:focus-visible,
+.container textarea:focus-visible {
+  outline: 3px solid #6b4ab0;
+  outline-offset: 2px;
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+  .container {
+    background: #0b1220;
+    padding: 0;
+    color: #e6eef8;
+  }
+  
+  .tabContainer,
+  .addButton,
+  .submitButton,
+  .deleteButton,
+  .updateButton,
+  .backButton {
+    display: none;
+  }
+  
+  .statCard,
+  .stationCard,
+  .monthCard,
+  .listCard {
+    box-shadow: none;
+    border: 1px solid #1f2a44;
+  }
+}
+
+/* ==========================================
+   ANIMATIONS - REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+   .container :global(*),
+  .container :global(*::before),
+  .container :global(*::after) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================
+   STATION CARD ANIMATIONS & STYLES
+   ========================================== */
+
+.stationCard:nth-child(1) { animation-delay: 0.05s; }
+.stationCard:nth-child(2) { animation-delay: 0.1s; }
+.stationCard:nth-child(3) { animation-delay: 0.15s; }
+.stationCard:nth-child(4) { animation-delay: 0.2s; }
+.stationCard:nth-child(5) { animation-delay: 0.25s; }
+.stationCard:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.stationCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.85);
+  border-color: #3446a6;
+}
+
+.stationCard:active {
+  transform: translateY(-2px);
+}
+
+.stationName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f8fbff;
+  margin: 0 0 0.5rem 0;
+}
+
+.stationLocation {
+  font-size: 0.875rem;
+  color: #9fb4d6;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.stationLocation::before {
+  content: '📍';
+  font-size: 0.875rem;
+}
+
+.stationStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.statBadge {
+  padding: 0.375rem 0.75rem;
+  background: linear-gradient(135deg, #1b2036 0%, #2b3350 100%);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #dbe9ff;
+  white-space: nowrap;
+}
+
+/* ==========================================
+   STATION DETAIL VIEW
+   ========================================== */
+
+.stationSection {
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  margin-bottom: 1.5rem;
+  animation: slideRight 0.4s ease-out;
+}
+
+@media (min-width: 768px) {
+  .stationSection {
+    padding: 2rem;
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.stationDetailHeader {
+  margin-bottom: 1.5rem;
+}
+
+.stationDetailTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #f8fbff;
+  margin: 0 0 0.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .stationDetailTitle {
+    font-size: 2.25rem;
+  }
+}
+
+.stationDetailLocation {
+  font-size: 1rem;
+  color: #9fb4d6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+/* ==========================================
+   TOGGLE VIEWS (BOOKINGS / KEYS)
+   ========================================== */
+
+.toggleContainer {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  background: #0f172a;
+  padding: 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  flex-wrap: wrap;
+}
+
+.toggleButton {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.75rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #9fb4d6;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.toggleButton:hover {
+  background: #0b1220;
+}
+
+.toggleActive {
+  background: linear-gradient(135deg, #3446a6 0%, #6b4ab0 100%);
+  color: white;
+  border-color: #3446a6;
+  box-shadow: 0 10px 36px rgba(52, 70, 166, 0.4);
+}
+
+/* ==========================================
+   MONTH GRID & CARDS
+   ========================================== */
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .monthGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .monthGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+.monthCard {
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  display: flex;
+  gap: 1rem;
+  animation: fadeInScale 0.4s;
+}
+.monthCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.85);
+  border-color: #3446a6;
 }
