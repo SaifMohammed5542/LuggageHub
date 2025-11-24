@@ -1,4 +1,4 @@
-//api/admin/key-handovers/route.js
+// app/api/admin/key-handovers/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '../../../../lib/dbConnect';
 import KeyHandover from '../../../../models/keyHandover';
@@ -13,26 +13,30 @@ export async function GET(req) {
     // 2) Check auth
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
-    console.log('🔑 [key-handovers] token:', token);
+    console.log('🔑 [key-handovers] token:', !!token ? 'present' : 'none');
+
+    if (!token) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
 
     const decoded = verifyJWT(token);
     console.log('🕵️‍♂️ [key-handovers] decoded:', decoded);
-    if (!decoded || decoded.role !== 'admin') {
-      console.warn('🚫 [key-handovers] Unauthorized access');
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+
+    if (decoded && decoded.expired) {
+      console.warn('🚫 [key-handovers] Token expired');
+      return NextResponse.json({ success: false, error: 'Token expired', expired: true }, { status: 401 });
     }
 
-    // 3) Fetch & populate - Change stationId to station
+    if (!decoded || decoded.role !== 'admin') {
+      console.warn('🚫 [key-handovers] Unauthorized access');
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // 3) Fetch & populate
     const handovers = await KeyHandover.find()
-      .populate('stationId', 'name location')  // Corrected path to 'station'
+      .populate('stationId', 'name location')
       .sort({ createdAt: -1 });
     console.log(`📦 [key-handovers] fetched ${handovers.length} records`);
-
-    // 4) Return
-    console.log(JSON.stringify(handovers, null, 2));
 
     return NextResponse.json({ success: true, handovers });
 
