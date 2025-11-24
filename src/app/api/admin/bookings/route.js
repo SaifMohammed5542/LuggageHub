@@ -1,3 +1,4 @@
+// app/api/admin/bookings/route.js
 import { NextResponse } from "next/server";
 import connectToDB from "../../../../lib/dbConnect";
 import Booking from "../../../../models/booking";
@@ -14,7 +15,12 @@ export async function GET(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = verifyJWT(token); // ✅ using helper
+    const decoded = verifyJWT(token);
+    // Handle explicit expired signal
+    if (decoded && decoded.expired) {
+      return NextResponse.json({ error: "Token expired", expired: true }, { status: 401 });
+    }
+
     if (!decoded || decoded.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
