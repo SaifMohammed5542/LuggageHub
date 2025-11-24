@@ -1,4 +1,4 @@
-// /app/api/admin/station/[id]/route.js
+// app/api/admin/station/[id]/route.js
 import dbConnect from '../../../../../lib/dbConnect';
 import Station from '../../../../../models/Station';
 import { verifyJWT } from '../../../../../lib/auth';
@@ -14,6 +14,9 @@ async function verifyAdmin(req) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = verifyJWT(token);
+    if (decoded && decoded.expired) {
+      return { error: 'Token expired', status: 401, expired: true };
+    }
     if (!decoded || decoded.role !== 'admin') {
       return { error: 'Forbidden: Admin access only', status: 403 };
     }
@@ -85,15 +88,6 @@ export async function DELETE(req, { params }) {
 
   try {
     const { id } = params;
-
-    // Optional: Check if station has bookings/handovers before deleting
-    // const Booking = (await import('../../../../../models/booking')).default;
-    // const hasBookings = await Booking.exists({ 'stationId': id });
-    // if (hasBookings) {
-    //   return NextResponse.json({ 
-    //     error: 'Cannot delete station with existing bookings' 
-    //   }, { status: 400 });
-    // }
 
     const deletedStation = await Station.findByIdAndDelete(id);
 
