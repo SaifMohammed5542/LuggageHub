@@ -1,3 +1,4 @@
+// ./src/app/admin/dashboard/page.js
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,9 @@ import styles from "./AdminDashboard.module.css";
  *   - Shows partner payable (40%) in month cards, expanded month KPIs, week headers and optionally per-booking.
  *   - Shows station-level payable when a station is selected.
  */
+
+// stable timing constant outside component so it's a stable reference for hooks
+const defaultDayTiming = { open: "09:00", close: "18:00", closed: false };
 
 export default function AdminDashboard() {
   const [userRole, setUserRole] = useState(null);
@@ -50,7 +54,6 @@ export default function AdminDashboard() {
 
   const [stationCapacity, setStationCapacity] = useState(10);
 
-  const defaultDayTiming = { open: "09:00", close: "18:00", closed: false };
   const [stationTimings, setStationTimings] = useState({
     monday: { ...defaultDayTiming },
     tuesday: { ...defaultDayTiming },
@@ -140,7 +143,6 @@ export default function AdminDashboard() {
     } else {
       router.push("/");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   // Reset months panel when station or tab changes
@@ -203,7 +205,8 @@ export default function AdminDashboard() {
       setEditStationImages((selectedStation.images && selectedStation.images.join(", ")) || "");
       setEditStationCapacity(selectedStation.capacity || 10);
     }
-  }, [selectedStation, allBookings, allKeyHandovers]);
+    // include defaultDayTiming here so eslint won't complain that it's referenced above when creating timing defaults
+  }, [selectedStation, allBookings, allKeyHandovers, defaultDayTiming]);
 
   /* -------------------------
      Helpers & Validation (kept mostly unchanged)
@@ -350,7 +353,42 @@ export default function AdminDashboard() {
   };
 
   /* ---------------------------
-     API calls
+     Safe response parser
+     --------------------------- */
+
+  // Safe response parser: returns { ok, status, json, text, headers }
+  async function safeParseResponse(res) {
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    let json = null;
+    let text = null;
+
+    if (ct.includes("application/json")) {
+      try {
+        // prefer json when the content-type is JSON
+        json = await res.json();
+      } catch (err) {
+        console.error("Failed to parse JSON response:", err);
+        // fallback to text
+        try {
+          text = await res.text();
+        } catch (tErr) {
+          console.error("Also failed to read text fallback:", tErr);
+        }
+      }
+    } else {
+      // not JSON — read as text (usually HTML error page)
+      try {
+        text = await res.text();
+      } catch (err) {
+        console.error("Failed to read text response:", err);
+      }
+    }
+
+    return { ok: res.ok, status: res.status, json, text, headers: res.headers };
+  }
+
+  /* ---------------------------
+     API calls (replaced to use safeParseResponse)
      --------------------------- */
 
   // Stations
@@ -359,8 +397,17 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/station", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      const data = await res.json();
-      if (res.ok) setStations(data.stations || []);
+
+      const parsed = await safeParseResponse(res);
+
+      if (!parsed.ok) {
+        console.error("fetchStations error:", parsed.status, parsed.json ?? parsed.text);
+        showToast(parsed.json?.error || `Failed to load stations (status ${parsed.status})`, "error");
+        return;
+      }
+
+      const data = parsed.json || {};
+      setStations(data.stations || []);
     } catch (err) {
       console.error("Failed to fetch stations:", err);
       showToast("Failed to load stations", "error");
@@ -374,8 +421,16 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/bookings", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to fetch bookings");
+
+      const parsed = await safeParseResponse(res);
+
+      if (!parsed.ok) {
+        console.error("fetchBookings error:", parsed.status, parsed.json ?? parsed.text);
+        const msg = parsed.json?.error || `Failed to fetch bookings (status ${parsed.status})`;
+        throw new Error(msg);
+      }
+
+      const data = parsed.json || { bookings: [] };
       const sortedBookings = [...(data.bookings || [])].sort((a, b) => new Date(b.dropOffDate) - new Date(a.dropOffDate));
       setAllBookings(sortedBookings);
     } catch (err) {
@@ -393,8 +448,15 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/key-handovers", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to fetch key handovers");
+
+      const parsed = await safeParseResponse(res);
+
+      if (!parsed.ok) {
+        console.error("fetchKeyHandovers error:", parsed.status, parsed.json ?? parsed.text);
+        throw new Error(parsed.json?.error || `Failed to fetch key handovers (status ${parsed.status})`);
+      }
+
+      const data = parsed.json || { handovers: [] };
       const sortedHandovers = [...(data.handovers || [])].sort((a, b) => new Date(b.handoverDate) - new Date(a.handoverDate));
       setAllKeyHandovers(sortedHandovers);
     } catch (err) {
@@ -411,13 +473,17 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/partner", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      const data = await res.json();
-      if (res.ok) {
-        setPartners(data.partners || []);
-      } else {
-        console.error("Failed to fetch partners:", data.error);
-        showToast("Failed to load partners", "error");
+
+      const parsed = await safeParseResponse(res);
+
+      if (!parsed.ok) {
+        console.error("fetchPartners error:", parsed.status, parsed.json ?? parsed.text);
+        showToast(parsed.json?.error || `Failed to load partners (status ${parsed.status})`, "error");
+        return;
       }
+
+      const data = parsed.json || {};
+      setPartners(data.partners || []);
     } catch (err) {
       console.error("Failed to fetch partners:", err);
       showToast("Failed to load partners", "error");
@@ -463,8 +529,8 @@ export default function AdminDashboard() {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      const parsed = await safeParseResponse(res);
+      if (parsed.ok) {
         showToast("Station created successfully!", "success");
         // reset
         setStationName("");
@@ -494,7 +560,8 @@ export default function AdminDashboard() {
         setStationCapacity(10);
         fetchStations(token);
       } else {
-        showToast(data.error || "Error creating station", "error");
+        const errMsg = parsed.json?.error || parsed.text || "Error creating station";
+        showToast(errMsg, "error");
       }
     } catch (err) {
       console.error("Create station error:", err);
@@ -526,8 +593,8 @@ export default function AdminDashboard() {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      const parsed = await safeParseResponse(res);
+      if (parsed.ok) {
         showToast("Partner created successfully!", "success");
         setPartnerInfo({
           username: "",
@@ -540,7 +607,8 @@ export default function AdminDashboard() {
         fetchPartners(token);
         fetchStations(token);
       } else {
-        showToast(data.error || "Error creating partner", "error");
+        const errMsg = parsed.json?.error || parsed.text || "Error creating partner";
+        showToast(errMsg, "error");
       }
     } catch (err) {
       console.error("Create partner error:", err);
@@ -590,8 +658,11 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update partner");
+      const parsed = await safeParseResponse(res);
+      if (!parsed.ok) {
+        const errMsg = parsed.json?.error || parsed.text || "Failed to update partner";
+        throw new Error(errMsg);
+      }
 
       showToast("Partner updated successfully!", "success");
       setEditingPartner(null);
@@ -614,8 +685,11 @@ export default function AdminDashboard() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete partner");
+      const parsed = await safeParseResponse(res);
+      if (!parsed.ok) {
+        const errMsg = parsed.json?.error || parsed.text || "Failed to delete partner";
+        throw new Error(errMsg);
+      }
 
       showToast("Partner deleted successfully!", "success");
       fetchPartners(token);
@@ -696,12 +770,17 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save station edits");
+      const parsed = await safeParseResponse(res);
+      if (!parsed.ok) {
+        const errMsg = parsed.json?.error || parsed.text || "Failed to save station edits";
+        throw new Error(errMsg);
+      }
 
-      const updated = data.station;
-      setStations((prev) => prev.map((s) => (s._id === updated._id ? updated : s)));
-      setSelectedStation(updated);
+      const updated = parsed.json?.station;
+      if (updated) {
+        setStations((prev) => prev.map((s) => (s._id === updated._id ? updated : s)));
+        setSelectedStation(updated);
+      }
       setShowStationEditForm(false);
       showToast("Station updated successfully!", "success");
       fetchStations(token);
@@ -722,8 +801,12 @@ export default function AdminDashboard() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete station");
+
+      const parsed = await safeParseResponse(res);
+      if (!parsed.ok) {
+        const errMsg = parsed.json?.error || parsed.text || "Failed to delete station";
+        throw new Error(errMsg);
+      }
 
       setStations((prev) => prev.filter((s) => s._id !== selectedStation._id));
       setSelectedStation(null);
@@ -732,6 +815,27 @@ export default function AdminDashboard() {
     } catch (e) {
       console.error(e);
       showToast(e.message || "Error deleting station", "error");
+    }
+  };
+
+  /* ---------------------------
+     Handle Refresh (new)
+     - runs all fetches in parallel and reports result via toasts
+     --------------------------- */
+  const handleRefresh = async () => {
+    if (!token) {
+      showToast("No auth token - please login", "error");
+      return;
+    }
+
+    showToast("Refreshing data...", "info", 2000);
+
+    try {
+      await Promise.all([fetchStations(token), fetchBookings(token), fetchKeyHandovers(token), fetchPartners(token)]);
+      showToast("Data refreshed", "success", 2000);
+    } catch (err) {
+      console.error("Refresh failed:", err);
+      showToast(err?.message || "Failed to refresh data", "error", 4000);
     }
   };
 
@@ -822,8 +926,17 @@ export default function AdminDashboard() {
         <div className={styles.header}>
           <h1 className={styles.title}>Admin Dashboard</h1>
           <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>A</div>
-            <span className={styles.userName}>Admin</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div className={styles.userAvatar}>A</div>
+              <span className={styles.userName}>Admin</span>
+            </div>
+
+            {/* Refresh button */}
+            <div style={{ marginLeft: 12 }}>
+              <button className={styles.smallButton} onClick={handleRefresh} title="Refresh data">
+                ⟳ Refresh
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1036,20 +1149,20 @@ export default function AdminDashboard() {
               <button className={styles.backButton} onClick={() => setSelectedStation(null)}>
                 ← Back to Stations
               </button>
-            <div className={styles.stationSection}>
-              <div className={styles.stationDetailHeader}>
-                <h2 className={styles.stationDetailTitle}>{selectedStation.name}</h2>
-                <p className={styles.stationDetailLocation}>{selectedStation.location}</p>
-              </div>
-
-              {/* NEW: Station-level KPIs showing revenue and payable to partner */}
-              <div style={{ display: "flex", gap: 12, marginTop: 8, marginBottom: 12, alignItems: "center", flexWrap: "wrap" }}>
-                <div className={styles.monthPill}>{filteredBookings.length} bookings</div>
-                <div className={styles.monthPill}>Station revenue A${stationTotal.toFixed(2)}</div>
-                <div className={styles.monthPill} style={{ background: "rgba(0,0,0,0.03)" }}>
-                  Owed to partner: A${stationPayable.toFixed(2)}
+              <div className={styles.stationSection}>
+                <div className={styles.stationDetailHeader}>
+                  <h2 className={styles.stationDetailTitle}>{selectedStation.name}</h2>
+                  <p className={styles.stationDetailLocation}>{selectedStation.location}</p>
                 </div>
-              </div>
+
+                {/* NEW: Station-level KPIs showing revenue and payable to partner */}
+                <div style={{ display: "flex", gap: 12, marginTop: 8, marginBottom: 12, alignItems: "center", flexWrap: "wrap" }}>
+                  <div className={styles.monthPill}>{filteredBookings.length} bookings</div>
+                  <div className={styles.monthPill}>Station revenue A${stationTotal.toFixed(2)}</div>
+                  <div className={styles.monthPill} style={{ background: "rgba(0,0,0,0.03)" }}>
+                    Owed to partner: A${stationPayable.toFixed(2)}
+                  </div>
+                </div>
               </div>
               {/* Bookings/Keys toggles & lists */}
               <div className={styles.toggleContainer}>
@@ -1500,7 +1613,7 @@ export default function AdminDashboard() {
                       <input className={styles.input} value={editingPartner.phone} onChange={(e) => setEditingPartner((p) => ({ ...p, phone: e.target.value }))} placeholder="Phone" />
                       <select className={`${styles.input} ${styles.fullWidth}`} value={editingPartner.assignedStation} onChange={(e) => setEditingPartner((p) => ({ ...p, assignedStation: e.target.value }))}>
                         <option value="">Select Station</option>
-                        {stations.map((st) => <option key={st._id} value={st._id}>{st.name}</option>)}
+                        {stations.map((st) => <option key={st._id} value={st._1}>{st.name}</option>)}
                       </select>
                     </div>
                   </div>
@@ -1536,8 +1649,7 @@ export default function AdminDashboard() {
                     </div>
                   ))
                 )}
-
-</div>
+              </div>
             </div>
           )}
         </div>
