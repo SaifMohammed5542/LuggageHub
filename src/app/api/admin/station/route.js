@@ -14,6 +14,9 @@ async function verifyAdmin(req) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = verifyJWT(token);
+    if (decoded && decoded.expired) {
+      return { error: 'Token expired', status: 401, expired: true };
+    }
     if (!decoded || decoded.role !== 'admin') {
       return { error: 'Forbidden: Admin access only', status: 403 };
     }
