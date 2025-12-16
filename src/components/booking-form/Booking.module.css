@@ -1247,6 +1247,18 @@
   background-color: #7f1d1d !important;
 }
 
+
+
+.autoCorrectInfo {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #e4e8ee; /* neutral grey */
+  font-style: italic;
+}
+
+
+
+
 .dateErrorBox {
   display: flex;
   align-items: center;

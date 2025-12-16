@@ -1,6 +1,6 @@
 /* globals.css
    - Reset, typography, layout helpers, accessibility
-   - Maps semantic tokens to values provided by theme.css
+   - Dark theme ONLY (light theme permanently removed)
 */
 
 /* ===== RESET & BASE ===== */
@@ -12,30 +12,33 @@ input, button, textarea, select { font: inherit; }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; }
 
-/* ===== FONT VARIABLES (set by layout.tsx via next/font or loaded fonts) ===== */
+/* ===== FONT VARIABLES ===== */
 :root {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
 }
 
-/* ===== THEME TOKEN MAPPING (semantic tokens -> theme.css tokens) =====
-   theme.css defines --bg/--text/etc. We map to nicer semantic names
-   so component modules should use --color-* variables.
+/* ===== GLOBAL DARK MODE LOCK ===== */
+:root {
+  color-scheme: dark;
+}
+
+/* ===== THEME TOKEN MAPPING =====
+   Maps semantic tokens to theme.css variables (dark only)
 */
 :root {
-  /* semantic colors (used in components) */
-  --color-bg: var(--bg, #ffffff);
-  --color-fg: var(--text, #0b1221);
-  --color-muted: var(--text-muted, rgba(11,18,33,0.72));
+  --color-bg: var(--bg);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
 
-  --color-primary: var(--primary, #4c67f0);
-  --color-primary-rgb: var(--primary-rgb, 76,103,240);
-  --color-secondary: var(--secondary, #7a56b8);
+  --color-primary: var(--primary);
+  --color-primary-rgb: var(--primary-rgb);
+  --color-secondary: var(--secondary);
 
-  --color-panel: var(--panel-bg, #ffffff);
-  --color-border: var(--panel-border, #e7eaf3);
+  --color-panel: var(--panel-bg);
+  --color-border: var(--panel-border);
 
-  --shadow-soft: var(--soft-shadow, 0 10px 30px rgba(16,24,40,0.08));
+  --shadow-soft: var(--soft-shadow);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -45,21 +48,9 @@ button { cursor: pointer; }
   --page-max-wide: 1525px;
   --page-gutter: clamp(18px, 4vw, 36px);
 
-  /* Backwards compat */
+  /* Backwards compatibility */
   --background: var(--color-bg);
   --foreground: var(--color-fg);
-
-  /* sensible color-scheme */
-  color-scheme: light;
-}
-
-/* If user set data-theme="dark" on <html>, let the theme file override colors.
-   but keep color-scheme mapping for browsers */
-:root[data-theme="dark"] { color-scheme: dark; }
-
-/* respect system preference initially if no explicit theme set (reduces flash) */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) { color-scheme: dark; }
 }
 
 /* ===== APP BASE ===== */
@@ -80,33 +71,29 @@ body {
 }
 
 /* ===== CONTAINERS ===== */
-/* Full-bleed page section with safe gutters */
 .container {
   width: 100%;
   margin: 0;
   padding-inline: var(--page-gutter);
 }
 
-/* Use .container.is-max when you want centered fixed width */
 .container.is-max {
   max-width: var(--page-max);
   margin-inline: auto;
 }
 
+/* ===== SHARED SCALES & TOKENS ===== */
 :root {
-  /* marker sizes for InteractiveMap */
   --marker-normal-width: 40px;
   --marker-normal-height: 40px;
   --marker-highlight-width: 50px;
   --marker-highlight-height: 50px;
 
-  /* small spacing scale used by PartnerDashboard/others */
   --gap-xs: 8px;
   --gap-sm: 12px;
   --gap-md: 16px;
   --gap-lg: 20px;
 
-  /* base spacing scale tuned for mobile (admin dashboard) */
   --g-xxs: 6px;
   --g-xs: 8px;
   --g-sm: 12px;
@@ -117,14 +104,15 @@ body {
 
 :focus { outline-offset: 3px; }
 
+/* ===== GOOGLE MAPS OVERRIDES ===== */
 
-/* Google Maps & global overrides moved from InteractiveMap.module.css */
-
-/* InfoWindow styles */
+/* InfoWindow */
 .gm-style .gm-style-iw-c {
   padding: 16px !important;
   border-radius: 16px !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+  background: var(--panel-bg) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35) !important;
   max-width: 320px !important;
 }
 
@@ -135,11 +123,11 @@ body {
 .gm-style .gm-style-iw-t::after {
   background: linear-gradient(
     45deg,
-    rgba(255, 255, 255, 1) 50%,
-    rgba(255, 255, 255, 0) 51%,
-    rgba(255, 255, 255, 0) 100%
+    var(--panel-bg) 50%,
+    rgba(255,255,255,0) 51%,
+    rgba(255,255,255,0) 100%
   ) !important;
-  box-shadow: -2px 2px 2px 0 rgba(0, 0, 0, 0.1) !important;
+  box-shadow: -2px 2px 2px rgba(0,0,0,0.25) !important;
 }
 
 /* InfoWindow close button */
@@ -155,7 +143,7 @@ body {
   opacity: 1 !important;
 }
 
-/* Zoom / bundled controls */
+/* Zoom controls */
 .gm-bundled-control {
   margin: 10px !important;
 }
@@ -176,12 +164,15 @@ body {
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-/* Touch device improvements */
+/* Touch improvements */
 @media (hover: none) and (pointer: coarse) {
-  .gm-style img[role="button"] { min-height: 44px; min-width: 44px; }
+  .gm-style img[role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
-/* Responsive InfoWindow sizing override */
+/* Responsive InfoWindow */
 @media (max-width: 768px) {
   .gm-style .gm-style-iw-c {
     max-width: 280px !important;
@@ -194,35 +185,23 @@ body {
   }
 }
 
-/* Dark-theme glue (relies on :root[data-theme="dark"] being used) */
-:root[data-theme="dark"] .infoWindow {
-  color: var(--color-fg);
-}
-
-:root[data-theme="dark"] .gm-style .gm-style-iw-c {
-  background: var(--panel-bg) !important;
-  border: 1px solid var(--color-border) !important;
-}
-
-:root[data-theme="dark"] .gm-style .gm-style-iw-t::after {
-  background: linear-gradient(45deg, var(--panel-bg) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
-}
-
-
-
 /* ===== SELECTION & FOCUS ===== */
-::selection { background: rgb(var(--color-primary-rgb)); color: #fff; }
+::selection {
+  background: rgb(var(--color-primary-rgb));
+  color: #fff;
+}
+
 :where(a, button, input, textarea, select):focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-/* ===== SUBTLE SCROLLBARS ===== */
+/* ===== SCROLLBARS ===== */
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,.15);
+  background: rgba(255,255,255,.18);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
@@ -243,4 +222,3 @@ body {
   body { background: #fff; color: #000; }
   nav, .hamburger, .scrollTop { display: none !important; }
 }
-/* ===== THEME VARIABLES ===== */
