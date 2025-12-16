@@ -67,6 +67,14 @@ const LuggageBookingForm = ({ prefilledStation = undefined, mode = "direct", onB
   const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
   const [alternativeStations, setAlternativeStations] = useState([]);
   const [showAlternatives, setShowAlternatives] = useState(false);
+
+
+  // UI-only info messages for auto-corrected past times
+const [autoCorrectDropInfo, setAutoCorrectDropInfo] = useState("");
+const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
+
+
+
   const [dateErrors, setDateErrors] = useState({
     dropOff: null,
     pickUp: null
@@ -475,32 +483,59 @@ const LuggageBookingForm = ({ prefilledStation = undefined, mode = "direct", onB
     if (name === "dropOffDate" && value) {
       const now = getCurrentDateTime();
       const selectedDropOff = new Date(value);
+if (selectedDropOff < now) {
+  const correctedDropOff = new Date(now);
+  correctedDropOff.setMinutes(correctedDropOff.getMinutes() + 10);
 
-      if (selectedDropOff < now) {
-        const correctedDropOff = new Date(now);
-        correctedDropOff.setMinutes(correctedDropOff.getMinutes() + 10);
+  if (stationTimings && !stationTimings.is24Hours) {
+    const correctedValidation = getNearestAvailableTime(
+      correctedDropOff.toISOString(),
+      stationTimings
+    );
 
-        if (stationTimings && !stationTimings.is24Hours) {
-          const correctedValidation = getNearestAvailableTime(correctedDropOff.toISOString(), stationTimings);
-          if (!correctedValidation.isValid && correctedValidation.suggestions && correctedValidation.suggestions.length > 0) {
-            const nearestValid = correctedValidation.suggestions[0].dateTime;
-            const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
-            updatedFormData.dropOffDate = formattedCorrected;
-            setDateErrors(prev => ({ ...prev, dropOff: null }));
-          } else {
-            const formattedCorrected = formatDateTimeLocal(correctedDropOff);
-            updatedFormData.dropOffDate = formattedCorrected;
-            setDateErrors(prev => ({ ...prev, dropOff: null }));
-          }
-        } else {
-          const formattedCorrected = formatDateTimeLocal(correctedDropOff);
-          updatedFormData.dropOffDate = formattedCorrected;
-          setDateErrors(prev => ({ ...prev, dropOff: null }));
-        }
-      } else {
-        updatedFormData.dropOffDate = value;
-        setDateErrors(prev => ({ ...prev, dropOff: null }));
-      }
+    if (
+      !correctedValidation.isValid &&
+      correctedValidation.suggestions &&
+      correctedValidation.suggestions.length > 0
+    ) {
+      const nearestValid = correctedValidation.suggestions[0].dateTime;
+      const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
+      updatedFormData.dropOffDate = formattedCorrected;
+      setDateErrors(prev => ({ ...prev, dropOff: null }));
+
+      // ✅ STEP 2 — ADD THIS (UI only)
+      setAutoCorrectDropInfo(
+        "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+      );
+
+    } else {
+      const formattedCorrected = formatDateTimeLocal(correctedDropOff);
+      updatedFormData.dropOffDate = formattedCorrected;
+      setDateErrors(prev => ({ ...prev, dropOff: null }));
+
+      // ✅ STEP 2 — ADD THIS (UI only)
+      setAutoCorrectDropInfo(
+        "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+      );
+    }
+  } else {
+    const formattedCorrected = formatDateTimeLocal(correctedDropOff);
+    updatedFormData.dropOffDate = formattedCorrected;
+    setDateErrors(prev => ({ ...prev, dropOff: null }));
+
+    // ✅ STEP 2 — ADD THIS (UI only)
+    setAutoCorrectDropInfo(
+      "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+    );
+  }
+} else {
+  updatedFormData.dropOffDate = value;
+  setDateErrors(prev => ({ ...prev, dropOff: null }));
+
+  // ✅ CLEAR message when user picks a valid future time
+  setAutoCorrectDropInfo("");
+}
+
 
       const dropOffTime = new Date(updatedFormData.dropOffDate);
       const calculatedPickup = new Date(dropOffTime);
@@ -517,49 +552,59 @@ const LuggageBookingForm = ({ prefilledStation = undefined, mode = "direct", onB
       return;
     }
 
-    if (name === "pickUpDate" && value) {
-      const selectedPickUp = new Date(value);
-      const now = getCurrentDateTime();
+if (name === "pickUpDate" && value) {
+  const selectedPickUp = new Date(value);
+  const now = getCurrentDateTime();
 
-      if (selectedPickUp < now) {
-        const correctedPickup = new Date(now);
-        correctedPickup.setMinutes(correctedPickup.getMinutes() + 70);
-        const formattedCorrected = formatDateTimeLocal(correctedPickup);
-        updatedFormData.pickUpDate = formattedCorrected;
-        setDateErrors(prev => ({ ...prev, pickUp: null }));
-        setFormData(updatedFormData);
-        return;
-      }
+  if (selectedPickUp < now) {
+    const correctedPickup = new Date(now);
+    correctedPickup.setMinutes(correctedPickup.getMinutes() + 70);
+    const formattedCorrected = formatDateTimeLocal(correctedPickup);
+    updatedFormData.pickUpDate = formattedCorrected;
+    setDateErrors(prev => ({ ...prev, pickUp: null }));
 
-      if (updatedFormData.dropOffDate) {
-        const dropOffTime = new Date(updatedFormData.dropOffDate);
-        const minPickupTime = new Date(dropOffTime);
-        minPickupTime.setHours(minPickupTime.getHours() + 1);
-
-        if (selectedPickUp <= dropOffTime) {
-          const correctedPickup = new Date(dropOffTime);
-          correctedPickup.setHours(correctedPickup.getHours() + 3);
-          const formattedCorrected = formatDateTimeLocal(correctedPickup);
-          updatedFormData.pickUpDate = formattedCorrected;
-          setDateErrors(prev => ({ ...prev, pickUp: null }));
-          setFormData(updatedFormData);
-          return;
-        }
-
-        if (selectedPickUp < minPickupTime) {
-          const formattedCorrected = formatDateTimeLocal(minPickupTime);
-          updatedFormData.pickUpDate = formattedCorrected;
-          setDateErrors(prev => ({ ...prev, pickUp: null }));
-          setFormData(updatedFormData);
-          return;
-        }
-      }
-
-      updatedFormData.pickUpDate = value;
-      setDateErrors(prev => ({ ...prev, pickUp: null }));
-    }
+    // ✅ STEP 3 — ADD THIS (UI only)
+    setAutoCorrectPickInfo(
+      "Your selected pick-up time was in the past, so we adjusted it to the nearest valid time."
+    );
 
     setFormData(updatedFormData);
+    return;
+  }
+
+  if (updatedFormData.dropOffDate) {
+    const dropOffTime = new Date(updatedFormData.dropOffDate);
+    const minPickupTime = new Date(dropOffTime);
+    minPickupTime.setHours(minPickupTime.getHours() + 1);
+
+    if (selectedPickUp <= dropOffTime) {
+      const correctedPickup = new Date(dropOffTime);
+      correctedPickup.setHours(correctedPickup.getHours() + 3);
+      const formattedCorrected = formatDateTimeLocal(correctedPickup);
+      updatedFormData.pickUpDate = formattedCorrected;
+      setDateErrors(prev => ({ ...prev, pickUp: null }));
+
+      setFormData(updatedFormData);
+      return;
+    }
+
+    if (selectedPickUp < minPickupTime) {
+      const formattedCorrected = formatDateTimeLocal(minPickupTime);
+      updatedFormData.pickUpDate = formattedCorrected;
+      setDateErrors(prev => ({ ...prev, pickUp: null }));
+
+      setFormData(updatedFormData);
+      return;
+    }
+  }
+
+  // ✅ valid pick-up → clear UI note
+  updatedFormData.pickUpDate = value;
+  setDateErrors(prev => ({ ...prev, pickUp: null }));
+  setAutoCorrectPickInfo("");
+}
+
+setFormData(updatedFormData);
   };
 
   useEffect(() => {
@@ -1013,61 +1058,76 @@ const LuggageBookingForm = ({ prefilledStation = undefined, mode = "direct", onB
 
                       <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
-                          <label htmlFor="dropOffDate" className={styles.label}>
-                            <span className={styles.labelIcon}>📥</span>
-                            Drop-off Time
-                          </label>
-                          <input
-                            type="datetime-local"
-                            id="dropOffDate"
-                            name="dropOffDate"
-                            value={formData.dropOffDate}
-                            onChange={handleChange}
-                            className={`${styles.input} ${dateErrors.dropOff || errors.dropOffDate ? styles.inputError : ''}`}
-                            min={getMinDateTime()}
-                          />
-                          {dateErrors.dropOff && (
-                            <div className={styles.dateErrorBox}>
-                              <span className={styles.dateErrorIcon}>⚠️</span>
-                              <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
-                            </div>
-                          )}
-                          {errors.dropOffDate && !dateErrors.dropOff && (
-                            <span className={styles.errorText}>{errors.dropOffDate}</span>
-                          )}
-                        </div>
+  <label htmlFor="dropOffDate" className={styles.label}>
+    <span className={styles.labelIcon}>📥</span>
+    Drop-off Time
+  </label>
+  <input
+    type="datetime-local"
+    id="dropOffDate"
+    name="dropOffDate"
+    value={formData.dropOffDate}
+    onChange={handleChange}
+    className={`${styles.input} ${dateErrors.dropOff || errors.dropOffDate ? styles.inputError : ''}`}
+    min={getMinDateTime()}
+  />
+  {dateErrors.dropOff && (
+    <div className={styles.dateErrorBox}>
+      <span className={styles.dateErrorIcon}>⚠️</span>
+      <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
+    </div>
+  )}
+  {errors.dropOffDate && !dateErrors.dropOff && (
+    <span className={styles.errorText}>{errors.dropOffDate}</span>
+  )}
+
+  {/* ✅ STEP 4 — ADD THIS RIGHT HERE */}
+  {autoCorrectDropInfo && (
+    <div className={styles.autoCorrectInfo}>
+      ℹ️ {autoCorrectDropInfo}
+    </div>
+  )}
+</div>
+
 
                         <div className={styles.inputGroup}>
-                          <label htmlFor="pickUpDate" className={styles.label}>
-                            <span className={styles.labelIcon}>📤</span>
-                            Pick-up Time
-                          </label>
-                          <input
-                            type="datetime-local"
-                            id="pickUpDate"
-                            name="pickUpDate"
-                            value={formData.pickUpDate}
-                            onChange={handleChange}
-                            className={`${styles.input} ${dateErrors.pickUp || errors.pickUpDate ? styles.inputError : ''}`}
-                            min={
-                              formData.dropOffDate
-                                ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
-                                    .toISOString()
-                                    .slice(0, 16)
-                                : getMinDateTime()
-                            }
-                          />
-                          {dateErrors.pickUp && (
-                            <div className={styles.dateErrorBox}>
-                              <span className={styles.dateErrorIcon}>⚠️</span>
-                              <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
-                            </div>
-                          )}
-                          {errors.pickUpDate && !dateErrors.pickUp && (
-                            <span className={styles.errorText}>{errors.pickUpDate}</span>
-                          )}
-                        </div>
-                      </div>
+  <label htmlFor="pickUpDate" className={styles.label}>
+    <span className={styles.labelIcon}>📤</span>
+    Pick-up Time
+  </label>
+  <input
+    type="datetime-local"
+    id="pickUpDate"
+    name="pickUpDate"
+    value={formData.pickUpDate}
+    onChange={handleChange}
+    className={`${styles.input} ${dateErrors.pickUp || errors.pickUpDate ? styles.inputError : ''}`}
+    min={
+      formData.dropOffDate
+        ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 16)
+        : getMinDateTime()
+    }
+  />
+  {dateErrors.pickUp && (
+    <div className={styles.dateErrorBox}>
+      <span className={styles.dateErrorIcon}>⚠️</span>
+      <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
+    </div>
+  )}
+  {errors.pickUpDate && !dateErrors.pickUp && (
+    <span className={styles.errorText}>{errors.pickUpDate}</span>
+  )}
+
+  {/* ✅ STEP 4 — ADD THIS RIGHT HERE */}
+  {autoCorrectPickInfo && (
+    <div className={styles.autoCorrectInfo}>
+      ℹ️ {autoCorrectPickInfo}
+    </div>
+  )}
+</div>
+</div>
 
                       <div className={styles.checkboxGroup}>
                         <label className={styles.checkboxLabel}>
