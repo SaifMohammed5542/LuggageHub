@@ -1,57 +1,14 @@
 /* theme.css
-   Pure design tokens: colors, gradients, shadows, blobs
-   Keep this file dependency-free and easy to tweak for brand changes.
+   Dark theme ONLY — light theme permanently removed
 */
 
-/* ----- Light theme (default) ----- */
+/* ----- DARK THEME (DEFAULT & ONLY) ----- */
 :root {
-  --bg: #ffffff;
-  --bg-grad-start: #ffffff;
-  --bg-grad-end: #f6f7fb;
-
-   --header-logo: url('/NewLogo2.png');
-
-  --text: #0b1221;
-  --text-muted: rgba(11, 18, 33, 0.72);
-
-  --primary: #4c67f0;
-  --primary-rgb: 76, 103, 240;
-  --secondary: #7a56b8;
-  --secondary-rgb: 122, 86, 184;
-
-  --glass-bg: rgba(var(--primary-rgb), 0.06);
-  --glass-border: rgba(var(--primary-rgb), 0.20);
-  --panel-bg: #ffffff;
-  --panel-border: #e7eaf3;
-  --soft-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
-
-  --cta-grad: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  --cta-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.25);
-  --cta-hover-shadow: 0 15px 40px rgba(var(--primary-rgb), 0.35);
-  --cta-fg: #ffffff;
-
-  --pattern-line: rgba(var(--primary-rgb), 0.06);
-  --blob1: rgba(var(--primary-rgb), 0.18);
-  --blob2: rgba(var(--secondary-rgb), 0.18);
-
-  --outline: var(--primary);
-  --icon-on-primary: #ffffff;
-
-  /* legacy bridge */
-  --background: var(--bg);
-  --foreground: var(--text);
-}
-
-/* ----- Dark theme overrides ----- */
-:root[data-theme="dark"] {
-
   --bg: #0a0a0a;
   --bg-grad-start: #0a0a0a;
   --bg-grad-end: #001e44be;
 
-
- --header-logo: url('/NewLogo.png');
-
+  --header-logo: url('/NewLogo.png');
 
   --text: #ffffff;
   --text-muted: rgba(255,255,255,0.8);
@@ -79,13 +36,10 @@
   --outline: var(--primary);
   --icon-on-primary: #ffffff;
 
+  /* legacy bridge */
   --background: var(--bg);
   --foreground: var(--text);
 
-
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  /* ...all other variables... */
-
-
+  /* browser hint */
+  color-scheme: dark;
 }
