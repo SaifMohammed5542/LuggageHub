@@ -905,7 +905,10 @@ export default function AdminDashboard() {
   // quick booking modal (placeholder) — replace with your real modal
   const openBookingModal = (booking) => {
     // Implement your own modal if needed — for now quick inspect
-    const text = `Booking: ${booking.fullName}\nEmail: ${booking.email}\nPhone: ${booking.phone}\nDrop-off: ${booking.dropOffDate}\nPick-up: ${booking.pickUpDate}\nLuggage: ${booking.luggageCount}\nPayment: ${booking.paymentId}`;
+    const text = `Booking: ${booking.fullName}\nEmail: ${booking.email}\nPhone: ${booking.phone}\nDrop-off: ${booking.dropOffDate}\nPick-up: ${booking.pickUpDate}\nSmall: ${booking.smallBagCount ?? 0}
+Large: ${booking.largeBagCount ?? 0}
+Total: ${booking.luggageCount}
+\nPayment: ${booking.paymentId}`;
     alert(text);
   };
 
@@ -1322,7 +1325,8 @@ export default function AdminDashboard() {
                                                     </div>
                                                   )}
                                                   <div className={styles.bookingMeta}>
-                                                    {booking.luggageCount} bags • {new Date(booking.dropOffDate).toLocaleDateString()} →{" "}
+                                                    {booking.smallBagCount ?? 0} small • {booking.largeBagCount ?? 0} large
+ • {new Date(booking.dropOffDate).toLocaleDateString()} →{" "}
                                                     {new Date(booking.pickUpDate).toLocaleDateString()}
                                                   </div>
                                                 </div>

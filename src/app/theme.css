@@ -42,4 +42,9 @@
 
   /* browser hint */
   color-scheme: dark;
+
+
+     /* brand palette */
+  --palette-blue: #1561aa;
+
 }

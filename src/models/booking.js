@@ -4,7 +4,19 @@ import mongoose from 'mongoose';
 const bookingSchema = new mongoose.Schema({
   dropOffDate: Date,
   pickUpDate: Date,
-  luggageCount: Number,
+  smallBagCount: {
+  type: Number,
+  default: 0,
+},
+largeBagCount: {
+  type: Number,
+  default: 0,
+},
+luggageCount: {
+  type: Number,
+  default: 0, // derived (small + large)
+},
+
   stationId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Station',

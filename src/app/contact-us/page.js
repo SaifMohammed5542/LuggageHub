@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import styles from "@/styles/policy.module.css";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const ContactUs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("Sending...");
+    setStatus("loading");
 
     try {
       const res = await fetch("/api/contact", {
@@ -28,71 +29,101 @@ const ContactUs = () => {
       });
 
       if (res.ok) {
-        setStatus("✅ Message sent successfully!");
+        setStatus("success");
         setFormData({ name: "", email: "", message: "" });
       } else {
-        setStatus("❌ Failed to send. Try again.");
+        setStatus("error");
       }
     } catch (error) {
-      console.error("Contact form error:", error); // 👈 ESLint fix & useful logging
-      setStatus("❌ Error sending message.");
+      console.error("Contact form error:", error);
+      setStatus("error");
     }
   };
 
   return (
     <>
       <Header />
-      <div style={{ padding: '2rem', color: 'black' }}>
-        <h1 style={{ color: '#235789' }}>Contact Us</h1>
-        <p>Have a question or need help? Reach out to us below.</p>
+      
+      <div className={styles.policyWrapper}>
+        <div className={styles.policyPanel}>
+          <h1>Contact Us</h1>
+          <p>Have a question or need help? Reach out to us below.</p>
 
-        <form onSubmit={handleSubmit} style={{ maxWidth: '500px', marginTop: '1rem' }}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Name:</label><br />
-            <input 
-              type="text" 
-              name="name" 
-              value={formData.name} 
-              onChange={handleChange} 
-              required
-              placeholder="Your Name" 
-              style={{ width: '100%', padding: '0.5rem' }} 
-            />
-          </div>
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Email:</label><br />
-            <input 
-              type="email" 
-              name="email" 
-              value={formData.email} 
-              onChange={handleChange} 
-              required
-              placeholder="Your Email" 
-              style={{ width: '100%', padding: '0.5rem' }} 
-            />
-          </div>
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Message:</label><br />
-            <textarea 
-              name="message" 
-              value={formData.message} 
-              onChange={handleChange} 
-              required
-              placeholder="Your Message" 
-              rows="5" 
-              style={{ width: '100%', padding: '0.5rem' }} 
-            />
-          </div>
-          <button 
-            type="submit" 
-            style={{ background: '#235789', color: 'white', padding: '0.7rem 1.5rem', border: 'none', cursor: 'pointer' }}
-          >
-            Send Message
-          </button>
-        </form>
+          <form className={styles.contactForm} onSubmit={handleSubmit}>
+            <div className={styles.formGroup}>
+              <label htmlFor="name">Name</label>
+              <input 
+                type="text" 
+                id="name"
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange} 
+                required
+                placeholder="Your Name" 
+              />
+            </div>
 
-        {status && <p style={{ marginTop: '1rem', color: 'green' }}>{status}</p>}
+            <div className={styles.formGroup}>
+              <label htmlFor="email">Email</label>
+              <input 
+                type="email" 
+                id="email"
+                name="email" 
+                value={formData.email} 
+                onChange={handleChange} 
+                required
+                placeholder="your.email@example.com" 
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="message">Message</label>
+              <textarea 
+                id="message"
+                name="message" 
+                value={formData.message} 
+                onChange={handleChange} 
+                required
+                placeholder="How can we help you?" 
+                rows="5"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className={styles.submitButton}
+              disabled={status === "loading"}
+            >
+              {status === "loading" ? "Sending..." : "Send Message"}
+            </button>
+          </form>
+
+          {status === "success" && (
+            <div className={`${styles.statusMessage} ${styles.success}`}>
+              ✅ Message sent successfully! We'll get back to you soon.
+            </div>
+          )}
+
+          {status === "error" && (
+            <div className={`${styles.statusMessage} ${styles.error}`}>
+              ❌ Failed to send message. Please try again or email us directly.
+            </div>
+          )}
+
+          <div className={styles.contactInfo}>
+            <p>
+              <strong>Email:{" "}</strong>
+              <a
+                href="mailto:support@luggageterminal.com"
+                className={styles["mailto"]}
+              >
+                support@luggageterminal.com
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
+
       <Footer />
     </>
   );
