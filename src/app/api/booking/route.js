@@ -91,17 +91,21 @@ export async function POST(request) {
     await dbConnect();
 
     const {
-      fullName,
-      email,
-      phone,
-      dropOffDate,
-      pickUpDate,
-      luggageCount,
-      specialInstructions,
-      paymentId,
-      stationId,
-      userId,
-    } = await request.json();
+  fullName,
+  email,
+  phone,
+  dropOffDate,
+  pickUpDate,
+  smallBagCount = 0,
+  largeBagCount = 0,
+  specialInstructions,
+  paymentId,
+  stationId,
+  userId,
+} = await request.json();
+
+const luggageCount = Number(smallBagCount) + Number(largeBagCount);
+
 
     console.log("📦 New booking request:", {
       stationId,
@@ -169,19 +173,22 @@ export async function POST(request) {
     // ✅ END CAPACITY CHECK
 
     // ✅ Save the booking
-    const newBooking = new Booking({
-      fullName,
-      email,
-      phone,
-      dropOffDate,
-      pickUpDate,
-      luggageCount,
-      specialInstructions,
-      paymentId,
-      stationId,
-      userId,
-      status: "confirmed",
-    });
+const newBooking = new Booking({
+  fullName,
+  email,
+  phone,
+  dropOffDate,
+  pickUpDate,
+  smallBagCount,
+  largeBagCount,
+  luggageCount,
+  specialInstructions,
+  paymentId,
+  stationId,
+  userId,
+  status: "confirmed",
+});
+
 
     await newBooking.save();
     console.log("💾 Booking saved:", newBooking._id);
@@ -241,7 +248,9 @@ export async function POST(request) {
 📱 Phone: ${phone}
 📅 Drop-off Date: ${dropOffDate}
 📦 Pick-up Date: ${pickUpDate}
-🎒 Luggage Count: ${luggageCount}
+🎒 Small Bags: ${smallBagCount}
+🧳 Medium / Large Bags: ${largeBagCount}
+📦 Total Bags: ${luggageCount}
 📝 Special Instructions: ${specialInstructions}
 💳 Payment ID: ${paymentId}
 📍 Drop-off location: ${stationName}
@@ -249,20 +258,26 @@ export async function POST(request) {
     };
 
     // ✅ Email to user
-    const userMailOptions = {
-      from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
-      to: email,
-      subject: "✅ Your Luggage Storage Booking Confirmation",
-      html: `
-        <p>Dear ${fullName},</p>
-        <p>🙏 Thank you for booking with us! Here are your booking details:</p>
-        <p>📅 <strong>Drop-off:</strong> ${dropOffDate}</p>
-        <p>📦 <strong>Pick-up:</strong> ${pickUpDate}</p>
-        <p>🎒 <strong>Luggage Count:</strong> ${luggageCount}</p>
-        <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
-        <p>📍 <strong>Drop-off location:</strong> ${stationName}</p>
-      `,
-    };
+const userMailOptions = {
+  from: `"Luggage Terminal" <no-reply@luggageterminal.com>`,
+  to: email,
+  subject: "✅ Your Luggage Storage Booking Confirmation",
+  html: `
+    <p>Dear ${fullName},</p>
+    <p>🙏 Thank you for booking with us! Here are your booking details:</p>
+
+    <p>📅 <strong>Drop-off:</strong> ${dropOffDate}</p>
+    <p>📦 <strong>Pick-up:</strong> ${pickUpDate}</p>
+
+    <p>🎒 <strong>Small Bags:</strong> ${smallBagCount}</p>
+    <p>🧳 <strong>Medium / Large Bags:</strong> ${largeBagCount}</p>
+    <p>📦 <strong>Total Bags:</strong> ${luggageCount}</p>
+
+    <p>💳 <strong>Payment ID:</strong> ${paymentId}</p>
+    <p>📍 <strong>Drop-off location:</strong> ${stationName}</p>
+  `,
+};
+
 
     // ✅ Notify partners
     if (station?.partners?.length) {

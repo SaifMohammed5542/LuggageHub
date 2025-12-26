@@ -133,48 +133,27 @@ const Footer = () => {
             </a>
 
              <a
-              className={styles["social-btn"]}
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Luggage Terminal on Facebook"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.09 5.66 21.2 10.44 22v-7.03H8.07v-2.9h2.37V9.4c0-2.35 1.4-3.64 3.54-3.64 1.02 0 2.09.18 2.09.18v2.3h-1.18c-1.16 0-1.52.72-1.52 1.46v1.75h2.59l-.41 2.9h-2.18V22C18.34 21.2 22 17.09 22 12.07z"
-                  fill="currentColor"
-                />
-              </svg>
-              <span className={styles["social-text"]}>Facebook</span>
-            </a>
+  className={styles["social-btn"]}
+  href="https://www.linkedin.com/company/luggage-terminal"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Luggage Terminal on LinkedIn"
+>
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M4.98 3.5A2.48 2.48 0 1 0 5 8.46a2.48 2.48 0 0 0-.02-4.96zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.74 0-2 1.35-2 2.75V21h-4V9z"
+      fill="currentColor"
+    />
+  </svg>
+  <span className={styles["social-text"]}>LinkedIn</span>
+</a>
 
-            <a
-              className={styles["social-btn"]}
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Luggage Terminal on Twitter"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M22 5.92c-.63.28-1.3.47-2 .56.72-.43 1.27-1.1 1.53-1.9-.67.4-1.42.7-2.21.86C18.6 4.6 17.6 4 16.46 4c-1.54 0-2.8 1.24-2.8 2.77 0 .22.02.44.07.64C10.8 7.31 8.1 6 6.25 4.04c-.25.43-.4.92-.4 1.45 0 .96.5 1.8 1.26 2.3-.47-.02-.9-.15-1.28-.36v.04c0 1.33.95 2.45 2.2 2.7-.23.07-.47.11-.72.11-.18 0-.36-.02-.53-.05.36 1.12 1.4 1.93 2.63 1.95-0.96.75-2.18 1.2-3.5 1.2H6c1.9 1.22 4.15 1.92 6.57 1.92 7.9 0 12.22-6.66 12.22-12.44v-.57C21.11 7.3 21.62 6.66 22 5.92z"
-                  fill="currentColor"
-                />
-              </svg>
-              <span className={styles["social-text"]}>Twitter</span>
-            </a>
 
 
           </div>
@@ -182,8 +161,7 @@ const Footer = () => {
           {/* small legal / small print on mobile under socials */}
           <div className={styles["small-note"]}>
             <p>
-              Partnered stations across Australia. Operates in AUD. Proprietor:
-              Luggage Terminal.
+              Partnered stations across Australia.
             </p>
           </div>
         </div>

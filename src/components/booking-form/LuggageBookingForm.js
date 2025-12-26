@@ -23,6 +23,24 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+// ✅ Email validation
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALLOWED_EMAIL_DOMAINS = [
+  "gmail.com",
+  "hotmail.com",
+  "outlook.com",
+  "yahoo.com"
+];
+
+// ✅ Country codes (Australia default)
+const COUNTRY_CODES = [
+  { code: "+61", label: "AUS (+61)" },
+  { code: "+91", label: "IN (+91)" },
+  { code: "+1", label: "USA (+1)" },
+  { code: "+44", label: "UK (+44)" },
+];
+
+
 const getStationLatLng = (station) => {
   if (!station) return null;
   const coords = station.coordinates?.coordinates || station.coordinates;
@@ -39,18 +57,22 @@ const getStationLatLng = (station) => {
 };
 
 const LuggageBookingForm = ({ prefilledStation = undefined, mode = "direct", onBookingComplete = undefined, showHeader = true, compact = false }) => {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "+61 ",
-    dropOffDate: "",
-    pickUpDate: "",
-    luggageCount: 1,
-    luggageSize: "Small",
-    specialInstructions: "",
-    termsAccepted: false,
-    stationId: "",
-  });
+const [formData, setFormData] = useState({
+  fullName: "",
+  email: "",
+  phoneCode: "+61",     // ✅ NEW
+  phoneNumber: "",     // ✅ NEW
+  phone: "+61 ",       // ✅ BACKEND STILL USES THIS
+  dropOffDate: "",
+  pickUpDate: "",
+  smallBagCount: 0,
+  largeBagCount: 0,
+  specialInstructions: "",
+  termsAccepted: false,
+  stationId: "",
+});
+
+
 
   const [stations, setStations] = useState([]);
   const [stationTimings, setStationTimings] = useState(null);
@@ -81,7 +103,18 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   });
   const [selectedStationMeta, setSelectedStationMeta] = useState(null);
 
-  const ratePerLuggagePerDay = 7.99;
+  // const ratePerLuggagePerDay = 7.99;
+
+
+  const LUGGAGE_PRICING = {
+  small: 3.99,
+  medium_large: 8.49,
+};
+
+// 🔢 Total luggage count (must be above all functions that use it)
+const totalBags =
+  formData.smallBagCount + formData.largeBagCount;
+
 
   const getCurrentDateTime = () => {
     const now = new Date();
@@ -258,7 +291,7 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   }, [formData.stationId, stationTimings, validateStationTimings]);
 
   const checkStationCapacity = async () => {
-    if (!formData.stationId || !formData.dropOffDate || !formData.pickUpDate || !formData.luggageCount) {
+    if (!formData.stationId || !formData.dropOffDate || !formData.pickUpDate || !totalBags) {
       return;
     }
     setIsCheckingCapacity(true);
@@ -270,7 +303,7 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
           stationId: formData.stationId,
           dropOffDate: formData.dropOffDate,
           pickUpDate: formData.pickUpDate,
-          luggageCount: formData.luggageCount
+          luggageCount: totalBags
         })
       });
       const data = await response.json();
@@ -305,7 +338,7 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
           longitude,
           dropOffDate: formData.dropOffDate,
           pickUpDate: formData.pickUpDate,
-          luggageCount: formData.luggageCount
+          luggageCount: totalBags
         })
       });
       const data = await response.json();
@@ -322,13 +355,13 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   };
 
   useEffect(() => {
-    if (formData.stationId && formData.dropOffDate && formData.pickUpDate && formData.luggageCount) {
+    if (formData.stationId && formData.dropOffDate && formData.pickUpDate && totalBags) {
       const debounceTimer = setTimeout(() => {
         checkStationCapacity();
       }, 500);
       return () => clearTimeout(debounceTimer);
     }
-  }, [formData.stationId, formData.dropOffDate, formData.pickUpDate, formData.luggageCount]);
+  }, [formData.stationId, formData.dropOffDate, formData.pickUpDate, totalBags]);
 
   const selectAlternativeStation = (alternativeStation) => {
     setFormData(prev => ({
@@ -439,11 +472,26 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   };
 
   const numberOfDays = calculateNumberOfDays();
-  const totalAmount = formData.luggageCount * numberOfDays * ratePerLuggagePerDay;
+
+  const totalAmount =
+  numberOfDays *
+  (
+    formData.smallBagCount * LUGGAGE_PRICING.small +
+    formData.largeBagCount * LUGGAGE_PRICING.medium_large
+  );
+
 
   const isStep2Valid = () => {
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.stationId) return false;
+    if (
+  !formData.fullName ||
+  !formData.email ||
+  !!errors.email ||          // ✅ ADD THIS
+  !formData.phoneNumber ||
+  !formData.stationId
+) return false;
+
     if (!formData.dropOffDate || !formData.pickUpDate) return false;
+    if (totalBags === 0) return false;
     if (dateErrors.dropOff || dateErrors.pickUp) return false;
     if (timingAlert && timingAlert.length > 0) return false;
     if (capacityStatus && !capacityStatus.available) return false;
@@ -451,9 +499,14 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   };
 
   const getStep2InvalidReason = () => {
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.stationId) {
+    if (!formData.fullName || !formData.email || !formData.phoneNumber || !formData.stationId) {
       return "Please complete your personal details and choose a station.";
     }
+    if (totalBags === 0) {
+  return "Please select at least one bag.";
+}
+
+
     if (!formData.dropOffDate || !formData.pickUpDate) {
       return "Please set both Drop-off and Pick-up times.";
     }
@@ -479,6 +532,48 @@ const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     };
+
+// ✅ EMAIL VALIDATION
+if (name === "email") {
+  const domain = value.split("@")[1];
+  let emailError = "";
+
+  if (!EMAIL_REGEX.test(value)) {
+    emailError = "Please enter a valid email address";
+  } else if (domain && !ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    emailError = "Please use Gmail, Outlook, Yahoo or Hotmail";
+  }
+
+  setErrors(prev => ({ ...prev, email: emailError }));
+  setFormData(prev => ({ ...prev, email: value }));
+  return;
+}
+
+
+// ✅ PHONE NUMBER (NUMBERS ONLY)
+if (name === "phoneNumber") {
+  const onlyNumbers = value.replace(/\D/g, "");
+  setFormData(prev => ({
+    ...prev,
+    phoneNumber: onlyNumbers,
+    phone: `${prev.phoneCode} ${onlyNumbers}`,
+  }));
+  return;
+}
+
+
+
+// ✅ COUNTRY CODE CHANGE
+if (name === "phoneCode") {
+  setFormData(prev => ({
+    ...prev,
+    phoneCode: value,
+    phone: `${value} ${prev.phoneNumber}`,
+  }));
+  return;
+}
+
+
 
     if (name === "dropOffDate" && value) {
       const now = getCurrentDateTime();
@@ -610,8 +705,16 @@ setFormData(updatedFormData);
   useEffect(() => {
     const errorsObj = {};
     if (!formData.fullName) errorsObj.fullName = "Full Name is required";
-    if (!formData.email) errorsObj.email = "Email is required";
-    if (!formData.phone) errorsObj.phone = "Phone is required";
+    if (!formData.email) {errorsObj.email = "Email is required";} else{
+      const domain = formData.email.split("@")[1];
+      if (!EMAIL_REGEX.test(formData.email)) {
+    errorsObj.email = "❗Please enter a valid email address";
+  } else if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    errorsObj.email = "Please use Gmail, Outlook, Yahoo or Hotmail";
+  }
+}
+
+    if (!formData.phoneNumber) errorsObj.phone = "Phone is required";
     if (!formData.dropOffDate) errorsObj.dropOffDate = "Drop-off Date is required";
     if (!formData.pickUpDate) errorsObj.pickUpDate = "Pick-up Date is required";
     if (!formData.termsAccepted) errorsObj.termsAccepted = "You must agree to the terms";
@@ -655,7 +758,12 @@ setFormData(updatedFormData);
       const response = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, paymentId }),
+        body: JSON.stringify({
+  ...formData,
+  luggageCount: totalBags,
+  paymentId,
+}),
+
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -685,6 +793,16 @@ setFormData(updatedFormData);
   //   { value: "Large", label: "Large", icon: "🧳", desc: "Standard suitcase" },
   //   { value: "Extra Large", label: "Extra Large", icon: "📦", desc: "Oversized luggage" },
   // ];
+
+const shouldShowPriceCard =
+  currentStep === 2 &&
+  (
+    totalBags > 0 ||
+    formData.dropOffDate ||
+    formData.pickUpDate
+  );
+
+
 
   return (
     <>
@@ -750,16 +868,19 @@ setFormData(updatedFormData);
                             Email Address
                           </label>
                           <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            disabled={isUserLoggedIn}
-                            className={styles.input}
-                            placeholder="john@example.com"
-                          />
-                          {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+  type="email"
+  id="email"
+  name="email"
+  value={formData.email}
+  onChange={handleChange}
+  disabled={isUserLoggedIn}
+  className={styles.input}
+  placeholder="john@gmail.com"
+/>
+{errors.email && (
+  <span className={styles.errorText}>{errors.email}</span>
+)}
+
                         </div>
 
                         <div className={styles.inputGroup}>
@@ -767,16 +888,35 @@ setFormData(updatedFormData);
                             <span className={styles.labelIcon}>📞</span>
                             Phone Number
                           </label>
-                          <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            className={styles.input}
-                            placeholder="+61 4xx xxx xxx"
-                          />
-                          {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+<div style={{ display: "flex", gap: "8px" }}>
+  <select
+    name="phoneCode"
+    value={formData.phoneCode}
+    onChange={handleChange}
+    className={styles.select}
+    style={{ maxWidth: "140px" }}
+  >
+    {COUNTRY_CODES.map(c => (
+      <option key={c.code} value={c.code}>
+        {c.label}
+      </option>
+    ))}
+  </select>
+
+  <input
+    type="tel"
+    name="phoneNumber"
+    value={formData.phoneNumber}
+    onChange={handleChange}
+    className={styles.input}
+    placeholder="412345678"
+  />
+</div>
+
+{errors.phone && (
+  <span className={styles.errorText}>{errors.phone}</span>
+)}
+
                         </div>
                       </div>
 
@@ -828,9 +968,20 @@ setFormData(updatedFormData);
 
                       <button
                         type="button"
-                        onClick={() => setCurrentStep(2)}
+                        onClick={() => 
+                        {
+                        if (errors.email) return;  
+                        setCurrentStep(2);}}
                         className={styles.btnPrimary}
-                        disabled={!formData.fullName || !formData.email || !formData.phone || !formData.stationId}
+                       disabled={
+  !formData.fullName ||
+  !formData.email ||
+  !!errors.email ||        // 🔴 THIS WAS MISSING
+  !formData.phoneNumber ||
+  !formData.stationId
+}
+
+
                       >
                         Continue to Luggage Details →
                       </button>
@@ -840,6 +991,100 @@ setFormData(updatedFormData);
                   {currentStep === 2 && (
                     <div className={styles.stepContent}>
                       <h2 className={styles.sectionTitle}>Luggage & Schedule</h2>
+
+                      <div className={styles.inputGroup}>
+  <label className={styles.label}>
+    <span className={styles.labelIcon}>🧳</span>
+    Luggage Size & Quantity
+  </label>
+
+  <div className={styles.sizeGrid}>
+    {/* SMALL BAGS */}
+    <div className={styles.sizeCard}>
+      <img src="/images/small-bags.png" width={70} height={70} alt="Small bags" />
+      <div className={styles.sizeName}>Small Bags</div>
+      <div className={styles.sizeDesc}>Laptop bag, Backpack</div>
+      <div className={styles.sizeDesc}>A${LUGGAGE_PRICING.small}/day</div>
+
+      <div className={styles.counterGroup}>
+      <div className={styles.counterWrapper}>
+        <button
+          type="button"
+          className={styles.counterBtn}
+          onClick={() =>
+            setFormData(prev => ({
+              ...prev,
+              smallBagCount: Math.max(0, prev.smallBagCount - 1),
+            }))
+          }
+        >
+          −
+        </button>
+
+        <span className={styles.counterValue}>
+          {formData.smallBagCount}
+        </span>
+
+        <button
+          type="button"
+          className={styles.counterBtn}
+          onClick={() =>
+            setFormData(prev => ({
+              ...prev,
+              smallBagCount: prev.smallBagCount + 1,
+            }))
+          }
+        >
+          +
+        </button>
+      </div>
+    </div>
+    </div>
+
+    {/* MEDIUM & LARGE BAGS */}
+    <div className={styles.sizeCard}>
+      <img src="/images/big-bags.png" width={70} height={70} alt="Large bags" />
+      <div className={styles.sizeName}>Medium & Large Bags</div>
+      <div className={styles.sizeDesc}>Hand carry, Suitcase</div>
+      <div className={styles.sizeDesc}>A${LUGGAGE_PRICING.medium_large}/day</div>
+
+      <div className={styles.counterGroup}>
+      <div className={styles.counterWrapper}>
+        <button
+          type="button"
+          className={styles.counterBtn}
+          onClick={() =>
+            setFormData(prev => ({
+              ...prev,
+              largeBagCount: Math.max(0, prev.largeBagCount - 1),
+            }))
+          }
+        >
+          −
+        </button>
+
+        <span className={styles.counterValue}>
+          {formData.largeBagCount}
+        </span>
+
+        <button
+          type="button"
+          className={styles.counterBtn}
+          onClick={() =>
+            setFormData(prev => ({
+              ...prev,
+              largeBagCount: prev.largeBagCount + 1,
+            }))
+          }
+        >
+          +
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
 
                       {formData.stationId && capacityStatus && (
                         <div className={`${styles.capacityCard} ${!capacityStatus.available ? styles.capacityFull : ''}`}>
@@ -863,7 +1108,7 @@ setFormData(updatedFormData);
 
                           {!capacityStatus.available && (
                             <div className={styles.capacityError}>
-                              <strong>⛔ Station at capacity!</strong> Unable to accept {formData.luggageCount} more bag(s).
+                              <strong>⛔ Station at capacity!</strong> Unable to accept {totalBags} more bag(s).
                               {showAlternatives && alternativeStations.length > 0 && (
                                 <span> Please select an alternative station below.</span>
                               )}
@@ -949,39 +1194,6 @@ setFormData(updatedFormData);
                         </div>
                       </div> */}
 
-                      <div className={styles.inputGroup}>
-                        <label htmlFor="luggageCount" className={styles.label}>
-                          <span className={styles.labelIcon}>🎒</span>
-                          Number of Bags
-                        </label>
-                        <div className={styles.counterWrapper}>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                luggageCount: Math.max(1, prev.luggageCount - 1),
-                              }))
-                            }
-                            className={styles.counterBtn}
-                          >
-                            −
-                          </button>
-                          <span className={styles.counterValue}>{formData.luggageCount}</span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                luggageCount: Math.min(10, prev.luggageCount + 1),
-                              }))
-                            }
-                            className={styles.counterBtn}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
 
                       {(isCheckingTimings || isCheckingCapacity) && (
                         <div className={styles.checkingTimings}>
@@ -1166,6 +1378,7 @@ setFormData(updatedFormData);
                       {!isStep2Valid() && (
                         <div className={styles.warningBox} style={{ marginBottom: 12 }}>
                           {getStep2InvalidReason()}
+
                         </div>
                       )}
 
@@ -1218,14 +1431,27 @@ setFormData(updatedFormData);
 
                         <div className={styles.reviewSection}>
                           <h3 className={styles.reviewTitle}>Luggage Information</h3>
-                          <div className={styles.reviewItem}>
-                            <span className={styles.reviewLabel}>Size:</span>
-                            <span className={styles.reviewValue}>{formData.luggageSize}</span>
-                          </div>
-                          <div className={styles.reviewItem}>
-                            <span className={styles.reviewLabel}>Quantity:</span>
-                            <span className={styles.reviewValue}>{formData.luggageCount} bag(s)</span>
-                          </div>
+                         <div className={styles.reviewItem}>
+  <span className={styles.reviewLabel}>Small Bags:</span>
+  <span className={styles.reviewValue}>
+    {formData.smallBagCount}
+  </span>
+</div>
+
+<div className={styles.reviewItem}>
+  <span className={styles.reviewLabel}>Medium & Large Bags:</span>
+  <span className={styles.reviewValue}>
+    {formData.largeBagCount}
+  </span>
+</div>
+
+<div className={styles.reviewItem}>
+  <span className={styles.reviewLabel}>Total Bags:</span>
+  <span className={styles.reviewValue}>
+    {totalBags}
+  </span>
+</div>
+
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Drop-off:</span>
                             <span className={styles.reviewValue}>
@@ -1290,70 +1516,79 @@ setFormData(updatedFormData);
             </div>
 
             <div className={styles.sidebar}>
-              <div className={styles.priceCard}>
-                <h3 className={styles.priceTitle}>Booking Summary</h3>
+  {shouldShowPriceCard && (
+    <div className={styles.priceCard}>
+      <h3 className={styles.priceTitle}>Booking Summary</h3>
 
-                <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
-                  <div className={styles.priceBreakdown}>
-                    <div className={styles.priceRow}>
-                      <span className={styles.priceLabel}>Rate per bag/day</span>
-                      <span className={styles.priceValue}>A${ratePerLuggagePerDay.toFixed(2)}</span>
-                    </div>
-                    <div className={styles.priceRow}>
-                      <span className={styles.priceLabel}>Number of bags</span>
-                      <span className={styles.priceValue}>×{formData.luggageCount}</span>
-                    </div>
-                    <div className={styles.priceRow}>
-                      <span className={styles.priceLabel}>Storage duration</span>
-                      <span className={styles.priceValue}>{numberOfDays} day(s)</span>
-                    </div>
-                  </div>
+      <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
+        <div className={styles.priceBreakdown}>
+          <div className={styles.priceRow}>
+            <span className={styles.priceLabel}>Small bags</span>
+            <span className={styles.priceValue}>
+              {formData.smallBagCount} × A${LUGGAGE_PRICING.small}
+            </span>
+          </div>
 
-                  <div className={styles.priceFeatures}>
-                    <div className={styles.featureItem}>
-                      <span className={styles.featureIcon}>✓</span>
-                      <span>24/7 Security</span>
-                    </div>
-                    <div className={styles.featureItem}>
-                      <span className={styles.featureIcon}>✓</span>
-                      <span>Insurance Included</span>
-                    </div>
-                    <div className={styles.featureItem}>
-                      <span className={styles.featureIcon}>✓</span>
-                      <span>Easy Access</span>
-                    </div>
-                    <div className={styles.featureItem}>
-                      <span className={styles.featureIcon}>✓</span>
-                      <span>Flexible Scheduling</span>
-                    </div>
-                  </div>
-                </div>
+          <div className={styles.priceRow}>
+            <span className={styles.priceLabel}>Medium & Large bags</span>
+            <span className={styles.priceValue}>
+              {formData.largeBagCount} × A${LUGGAGE_PRICING.medium_large}
+            </span>
+          </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-                  className={styles.toggleButton}
-                >
-                  <div className={styles.toggleButtonContent}>
-                    <span className={styles.totalLabel}>Total Amount</span>
-                    <span className={styles.totalValue}>A${totalAmount.toFixed(2)}</span>
-                  </div>
-                  <div className={styles.toggleAction}>
-                    {isSummaryExpanded ? (
-                      <>
-                        <span className={styles.toggleText}>View Less</span>
-                        <span className={styles.toggleIcon}>▼</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.toggleText}>View Details</span>
-                        <span className={styles.toggleIcon}>▲</span>
-                      </>
-                    )}
-                  </div>
-                </button>
-              </div>
-            </div>
+          <div className={styles.priceRow}>
+            <span className={styles.priceLabel}>Storage duration</span>
+            <span className={styles.priceValue}>{numberOfDays} day(s)</span>
+          </div>
+        </div>
+
+        <div className={styles.priceFeatures}>
+          <div className={styles.featureItem}>
+            <span className={styles.featureIcon}>✓</span>
+            <span>24/7 Security</span>
+          </div>
+          <div className={styles.featureItem}>
+            <span className={styles.featureIcon}>✓</span>
+            <span>Insurance Included</span>
+          </div>
+          <div className={styles.featureItem}>
+            <span className={styles.featureIcon}>✓</span>
+            <span>Easy Access</span>
+          </div>
+          <div className={styles.featureItem}>
+            <span className={styles.featureIcon}>✓</span>
+            <span>Flexible Scheduling</span>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+        className={styles.toggleButton}
+      >
+        <div className={styles.toggleButtonContent}>
+          <span className={styles.totalLabel}>Total Amount</span>
+          <span className={styles.totalValue}>A${totalAmount.toFixed(2)}</span>
+        </div>
+        <div className={styles.toggleAction}>
+          {isSummaryExpanded ? (
+            <>
+              <span className={styles.toggleText}>View Less</span>
+              <span className={styles.toggleIcon}>▼</span>
+            </>
+          ) : (
+            <>
+              <span className={styles.toggleText}>View Details</span>
+              <span className={styles.toggleIcon}>▲</span>
+            </>
+          )}
+        </div>
+      </button>
+    </div>
+  )}
+</div>
+
           </div>
         </div>
       </div>
