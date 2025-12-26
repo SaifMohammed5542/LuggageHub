@@ -205,75 +205,38 @@
   opacity: 0.6; /* <-- add this line only */
 }
 
-/* Size Selection Grid */
-.sizeGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.sizeCard {
-  position: relative;
-  padding: 1.5rem 1rem;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg-light);
-  text-align: center;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sizeCard:hover {
-  border-color: var(--color-primary-light);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
-}
-
-.sizeCard.selected {
-  border-color: var(--color-primary);
-  background: var(--glass-bg);
-  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
-}
-
-.radioInput {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.sizeIcon {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.sizeName {
-  font-weight: 600;
-  color: var(--color-text);
-  font-size: 0.95rem;
-}
-
-.sizeDesc {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
 
 /* Counter */
 .counterWrapper {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1rem;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.875rem 1rem;
   background: var(--color-bg-light);
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
-  width: fit-content;
+  width: 100%;              /* ✅ FIX */
+  max-width: 100%;          /* ✅ FIX */
+  box-sizing: border-box;   /* ✅ FIX */
 }
+
+
+.counterGroup {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;          /* ✅ KEY */
+}
+
+@media (max-width: 640px) {
+  .counterGroup {
+    flex-direction: column; /* ✅ STACK ON MOBILE */
+    gap: 0.75rem;
+  }
+}
+
+
+
 
 .counterBtn {
   width: 40px;
@@ -1358,10 +1321,7 @@
 .compact .inputRow { grid-template-columns: 1fr !important; gap: 1rem !important; }
 .compact .input, .compact .select { padding: 0.75rem 0.9rem !important; font-size: 0.97rem !important; }
 
-/* Size selection grid */
-.compact .sizeGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; }
-.compact .sizeCard { padding: 1rem !important; }
-.compact .sizeDesc {display: none;}
+
 /* Buttons */
 .compact .btnPrimary, .compact .btnSecondary {
   width: 100% !important;
@@ -1515,18 +1475,7 @@
     padding: 2rem 1.75rem;
   }
 
-  .sizeGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .sizeCard {
-    padding: 1.25rem 0.875rem;
-  }
-
-  .sizeIcon {
-    font-size: 2rem;
-  }
+  
 
   .progressBar {
     margin-bottom: 2.5rem;
@@ -1611,10 +1560,7 @@
     margin: 0 -0.5rem;
   }
 
-  .sizeGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.875rem;
-  }
+  
 
   .reviewCard {
     padding: 1.25rem;
@@ -1741,31 +1687,7 @@
     font-size: 0.95rem;
   }
 
-  .sizeGrid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .sizeCard {
-    padding: 1.25rem 1rem;
-    flex-direction: row;
-    justify-content: flex-start;
-    text-align: left;
-  }
-
-  .sizeIcon {
-    font-size: 2.25rem;
-    margin-bottom: 0;
-    margin-right: 0.75rem;
-  }
-
-  .sizeName {
-    font-size: 1rem;
-  }
-
-  .sizeDesc {
-    font-size: 0.8rem;
-  }
+  
 
   .counterWrapper {
     gap: 2rem;
@@ -1914,13 +1836,9 @@
     font-size: 1.25rem;
   }
 
-  .sizeCard {
-    padding: 1rem 0.875rem;
-  }
+  
 
-  .sizeIcon {
-    font-size: 2rem;
-  }
+  
 
   .counterBtn {
     width: 45px;
@@ -1977,22 +1895,7 @@
     padding: 1.5rem 1.25rem;
   }
 
-  .sizeGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-  }
-
-  .sizeCard {
-    padding: 1rem 0.75rem;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .sizeIcon {
-    font-size: 2rem;
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-  }
+  
 }
 
 /* Desktop - Keep original behavior */
@@ -2026,9 +1929,7 @@
     min-height: 44px; /* Apple's recommended touch target size */
   }
 
-  .sizeCard {
-    min-height: 80px;
-  }
+  
 
   .checkbox {
     min-width: 24px;
@@ -2041,9 +1942,7 @@
   }
 
   /* Remove hover effects on touch devices */
-  .sizeCard:hover {
-    transform: none;
-  }
+ 
 
   .btnPrimary:hover:not(:disabled) {
     transform: none;
@@ -2058,9 +1957,7 @@
   }
 
   /* Add active states instead */
-  .sizeCard:active {
-    transform: scale(0.98);
-  }
+ 
 
   .btnPrimary:active,
   .btnSecondary:active {
@@ -2074,4 +1971,120 @@
   .toggleButton:active {
     transform: scale(0.98);
   }
+}
+
+
+
+/* ================================
+   LUGGAGE SIZE GRID (STEP 2)
+================================ */
+
+.sizeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Individual luggage card */
+.sizeCard {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.02)
+  );
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: var(--transition);
+}
+
+/* Hover effect (desktop only) */
+.sizeCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.18);
+  transform: translateY(-2px);
+}
+
+/* Bag image */
+.sizeCard img {
+  margin: 0 auto 0.25rem;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+}
+
+/* Title */
+.sizeName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Description */
+.sizeDesc {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* Price emphasis */
+.sizeDesc:last-of-type {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Counter area */
+.sizeCard .counterGroup {
+  margin-top: auto;
+}
+
+/* Make counter fill card width */
+.sizeCard .counterWrapper {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+/* Tablets & below */
+@media (max-width: 768px) {
+  .sizeGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .sizeCard {
+    padding: 1.25rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 640px) {
+  .sizeCard {
+    padding: 1.1rem;
+    border-radius: var(--radius);
+  }
+
+  .sizeName {
+    font-size: 1rem;
+  }
+
+  .sizeDesc {
+    font-size: 0.8rem;
+  }
+}
+
+/* Compact mode support */
+.compact .sizeGrid {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.compact .sizeCard {
+  padding: 1rem;
 }

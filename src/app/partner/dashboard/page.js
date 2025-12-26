@@ -353,7 +353,10 @@ export default function PartnerDashboard() {
                                     <div className={styles.bookingMeta}>
                                       <div><strong>Email:</strong> {b.email}</div>
                                       <div><strong>Phone:</strong> {b.phone}</div>
-                                      <div><strong>Luggage:</strong> {b.luggageCount}</div>
+                                      <div><strong>Small:</strong> {b.smallBagCount ?? 0} |
+<strong>Large:</strong> {b.largeBagCount ?? 0} |
+<strong>Total:</strong> {b.luggageCount}
+</div>
                                       <div><strong>Drop-off:</strong> {new Date(b.dropOffDate).toLocaleString()}</div>
                                       <div><strong>Pick-up:</strong> {new Date(b.pickUpDate).toLocaleString()}</div>
                                     </div>
