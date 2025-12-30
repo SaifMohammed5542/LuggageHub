@@ -17,9 +17,9 @@ export default function Trustpilot() {
   }, []);
 
   return (
-    <section className={styles.trustSection}>
-      <div className={styles.wrapper}>
-        <h3 className={styles.heading}>What Our Customers Say</h3>
+    // <section className={styles.trustSection}>
+    //   <div className={styles.wrapper}>
+    //     <h3 className={styles.heading}>What Our Customers Say</h3>
 
         <div
           className={`trustpilot-widget ${styles.widget}`}
@@ -35,10 +35,10 @@ export default function Trustpilot() {
             rel="noopener noreferrer"
             className={styles.trustBtn}
           >
-            ⭐ Review us on Truustpilot
+            ⭐ Review us on Trustpilot
           </a>
         </div>
-      </div>
-    </section>
+      // </div>
+    // </section>
   );
 }

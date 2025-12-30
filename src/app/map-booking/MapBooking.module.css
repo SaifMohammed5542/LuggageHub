@@ -1,12 +1,9 @@
-/* MapBooking.module.css
-   Uses theme tokens from theme.css / globals.css (var(--color-*) etc.)
-*/
+/* MapBooking.module.css - ENHANCED VERSION */
 
-/* Page Layout */
+/* ========== PAGE LAYOUT ========== */
 .pageWrapper {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
-  /* padding-top: 80px; */
 }
 
 .container {
@@ -16,7 +13,71 @@
   position: relative;
 }
 
-/* Search Bar */
+/* ========== LOADING & ERROR STATES ========== */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loadingContainer p,
+.errorContainer p {
+  margin-top: 16px;
+  font-size: 1rem;
+  color: var(--color-muted);
+}
+
+.errorContainer h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-fg);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.errorIcon {
+  width: 64px;
+  height: 64px;
+  color: var(--color-error, #ef4444);
+}
+
+.retryButton {
+  margin-top: 24px;
+  padding: 12px 32px;
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--cta-shadow);
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cta-hover-shadow);
+}
+
+/* ========== SEARCH BAR ========== */
 .searchContainer {
   position: relative;
   max-width: 720px;
@@ -38,23 +99,23 @@
   display: flex;
   align-items: center;
   background: var(--panel-bg);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 12px 14px;
-  /* box-shadow: var(--shadow-soft); */
   backdrop-filter: blur(20px);
   gap: 8px;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .searchBox:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+  box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.2);
+  transform: translateY(-1px);
 }
 
 .searchIcon {
   color: var(--color-muted);
-  margin-right: 8px;
   flex-shrink: 0;
 }
 
@@ -62,15 +123,16 @@
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--color-fg);
   outline: none;
   padding: 6px 0;
+  font-weight: 500;
 }
 
 .searchInput::placeholder {
   color: var(--color-muted);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .nearMeBtn {
@@ -79,15 +141,22 @@
   justify-content: center;
   border: none;
   background: transparent;
-  padding: 6px;
-  margin-right: 2px;
+  padding: 8px;
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-muted);
+}
+
+.nearMeBtn:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--color-primary);
 }
 
 .nearMeBtnActive {
-  background: linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
-  border: 1px solid rgba(102,126,234,0.2);
+  background: rgba(var(--primary-rgb), 0.15);
+  color: var(--color-primary);
+  border: 1px solid rgba(var(--primary-rgb), 0.3);
 }
 
 .clearBtn {
@@ -98,51 +167,63 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  flex-shrink: 0;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
-/* Suggestions Dropdown */
+.clearBtn:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--color-primary);
+}
+
+/* ========== SUGGESTIONS DROPDOWN ========== */
 .suggestions {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
-  margin-top: 8px;
   background: var(--panel-bg);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
-  max-height: 320px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  max-height: 400px;
   overflow-y: auto;
   padding: 6px;
   z-index: 120;
-  animation: slideDown 0.2s ease-out;
+  backdrop-filter: blur(20px);
+  animation: slideDown 0.25s ease-out;
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .suggestionItem {
   display: flex;
   align-items: center;
-  padding: 12px;
-  gap: 10px;
+  padding: 14px 12px;
+  gap: 12px;
   cursor: pointer;
   border-radius: 10px;
   transition: all 0.2s ease;
 }
 
+.suggestionItem:hover,
 .suggestionItemActive {
-  background: var(--glass-bg);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  background: rgba(var(--primary-rgb), 0.08);
+  transform: translateX(4px);
 }
 
 .suggestionIcon {
   color: var(--color-primary);
-  margin-right: 8px;
   flex-shrink: 0;
 }
 
@@ -153,7 +234,7 @@
 
 .suggestionName {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-fg);
   margin-bottom: 2px;
   white-space: nowrap;
@@ -167,19 +248,23 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .distanceBadge {
-  margin-left: 8px;
-  font-size: 12px;
-  padding: 2px 6px;
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 8px;
   border-radius: 999px;
-  background: rgba(102,126,234,0.08);
+  background: rgba(var(--primary-rgb), 0.12);
   color: var(--color-primary);
   font-weight: 600;
+  flex-shrink: 0;
 }
 
-/* Content Grid */
+/* ========== CONTENT GRID ========== */
 .contentGrid {
   display: grid;
   grid-template-columns: 1fr 420px;
@@ -189,10 +274,11 @@
 
 .mapSection {
   height: calc(100vh - 220px);
-  min-height: 520px;
+  min-height: 500px;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 2px solid var(--color-border);
 }
 
 .mapSectionMobile {
@@ -204,6 +290,7 @@
   height: auto;
   border-radius: 0;
   z-index: 1;
+  border: none;
 }
 
 .formSidebar {
@@ -211,9 +298,28 @@
   top: 100px;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Placeholder State */
+/* Custom scrollbar for sidebar */
+.formSidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.formSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.formSidebar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.formSidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* ========== PLACEHOLDER STATE ========== */
 .placeholder {
   display: flex;
   flex-direction: column;
@@ -228,6 +334,11 @@
   animation: fadeIn 0.3s ease;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .placeholderTitle {
   font-size: 24px;
   font-weight: 700;
@@ -237,20 +348,45 @@
 }
 
 .placeholderText {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-muted);
-  max-width: 300px;
+  max-width: 320px;
   line-height: 1.6;
+  margin-bottom: 24px;
 }
 
-/* Overlay & Drawer */
+.placeholderStats {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.placeholderStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.placeholderStat strong {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.placeholderStat span {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+/* ========== MOBILE DRAWER ========== */
 .overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   z-index: 998;
   backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.25s ease;
 }
 
 .mobileDrawer {
@@ -258,47 +394,53 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgb(18, 18, 59);
+  background: red;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
   z-index: 999;
-  transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s ease;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobileDrawerMinimized {
-  height: 98px;
+  height: 100px;
 }
 
 .mobileDrawerExpanded {
-  height: 92vh;
-  max-height: 92vh;
+  height: 90vh;
+  max-height: 90vh;
 }
 
 .drawerHeader {
-  padding: 12px 16px 16px;
+  padding: 8px 10px 10px;
   cursor: pointer;
   user-select: none;
   position: relative;
   border-bottom: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .drawerHandle {
   width: 56px;
-  height: 6px;
+  height: 5px;
   background: var(--color-border);
   border-radius: 999px;
   margin: 0 auto 8px;
+  transition: all 0.2s ease;
+}
+
+.drawerHeader:hover .drawerHandle {
+  background: var(--color-primary);
+  width: 72px;
 }
 
 .drawerHeaderContent {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .drawerStationInfo {
@@ -311,7 +453,7 @@
 
 .drawerStationName {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--color-fg);
   white-space: nowrap;
   overflow: hidden;
@@ -329,16 +471,17 @@
 .drawerToggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--glass-bg);
+  gap: 2px;
+  padding: 4px 10px;
+  background: rgba(var(--primary-rgb), 0.1);
   border-radius: var(--radius-md);
   flex-shrink: 0;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 
 .drawerToggleText {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-primary);
 }
 
@@ -349,84 +492,219 @@
 
 .closeDrawerBtn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: transparent;
-  border: none;
+  top: 10px;
+  right: 10px;
+  background: rgba(var(--primary-rgb), 0.1);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
   padding: 8px;
-  border-radius: 50%;
+  border-radius: 8px;
   color: var(--color-muted);
   display: flex;
   align-items: center;
   cursor: pointer;
   z-index: 10;
+  transition: all 0.2s ease;
+  display: none;
 }
 
-/* Hover style for close button */
 .closeDrawerBtn:hover {
-  background: var(--glass-bg);
+  background: rgba(var(--primary-rgb), 0.15);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
-/* Drawer content */
 .drawerContent {
-  padding: 12px;
+  padding: 16px 12px;
   overflow-y: auto;
-  height: calc(92vh - 116px);
+  height: calc(90vh - 120px);
   -webkit-overflow-scrolling: touch;
 }
 
-/* Smooth scrollbar for drawer */
-.drawerContent::-webkit-scrollbar { width: 8px; }
-.drawerContent::-webkit-scrollbar-track { background: transparent; }
-.drawerContent::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
-.drawerContent::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+/* Custom scrollbar for drawer */
+.drawerContent::-webkit-scrollbar {
+  width: 6px;
+}
 
-/* Keyframes & small helpers */
-@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.drawerContent::-webkit-scrollbar-track {
+  background: transparent;
+}
 
+.drawerContent::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
 
-/* Responsive Design */
+.drawerContent::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablets and below */
 @media (max-width: 968px) {
-  /* .pageWrapper { padding-top: 70px; } */
-  .container { padding: 0; margin: 0; max-width: 100%; }
-  .contentGrid { grid-template-columns: 1fr; gap: 0; }
-  .mapSection { position: fixed; top: 150px; left: 0; right: 0; bottom: 0; height: auto; border-radius: 0; z-index: 1; }
-  .formSidebar { display: none; }
-  .searchContainer { position: fixed; left: 12px; right: 12px; margin: 0; z-index: 500; }
-  .searchBox { padding: 10px 14px; }
-  .searchInput { font-size: 14px; }
-  .suggestions { max-height: 250px; }
-  .suggestionItem { padding: 12px 14px; }
-  .mobileDrawer { border-top-left-radius: 20px; border-top-right-radius: 20px; }
-  .drawerHeader { padding: 8px 16px 12px; }
-  .drawerContent { padding: 12px; }
+  .container {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .mapSection {
+    position: fixed;
+    top: 150px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    border-radius: 0;
+    z-index: 1;
+    border: none;
+  }
+
+  .formSidebar {
+    display: none;
+  }
+
+  .searchContainerMobile {
+    top: 80px;
+  }
+
+  .searchBox {
+    padding: 10px 12px;
+  }
+
+  .searchInput {
+    font-size: 14px;
+  }
+
+  .suggestions {
+    max-height: 300px;
+  }
+
+  .suggestionItem {
+    padding: 12px 10px;
+  }
 }
 
 @media (max-width: 640px) {
-  /* .pageWrapper { padding-top: 70px; } */
-  .searchContainer { left: 8px; right: 8px; }
-  .searchBox { padding: 9px 12px; }
-  .mapSection { top: 140px; }
-  .placeholder { padding: 32px 16px; min-height: 300px; }
-  .placeholderTitle { font-size: 20px; }
-  .placeholderText { font-size: 13px; }
-  .drawerHeaderContent { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .drawerToggle { align-self: stretch; justify-content: center; }
-  .mobileDrawer { max-height: 95vh; }
-  .drawerContent { max-height: calc(95vh - 100px); padding: 12px 10px; }
+  .searchContainer {
+    left: 8px;
+    right: 8px;
+  }
+
+  .searchBox {
+    padding: 9px 10px;
+  }
+
+  .mapSection {
+    top: 140px;
+  }
+
+  .placeholder {
+    padding: 32px 16px;
+    min-height: 300px;
+  }
+
+  .placeholderTitle {
+    font-size: 20px;
+  }
+
+  .placeholderText {
+    font-size: 14px;
+  }
+
+  .placeholderStats {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mobileDrawerExpanded {
+    height: 92vh;
+    max-height: 92vh;
+  }
+
+  .drawerContent {
+    height: calc(92vh - 110px);
+    padding: 12px 10px;
+  }
+
+  .locationPrompt {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .locationPromptActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .enableLocationBtn,
+  .dismissBtn {
+    width: 100%;
+    padding: 10px 16px;
+  }
 }
 
 @media (max-width: 380px) {
-  .searchBox { padding: 8px 10px; }
-  .searchInput { font-size: 13px; }
-  .suggestionName { font-size: 14px; }
-  .suggestionLocation { font-size: 12px; }
+  .searchBox {
+    padding: 8px 10px;
+  }
+
+  .searchInput {
+    font-size: 13px;
+  }
+
+  .suggestionName {
+    font-size: 14px;
+  }
+
+  .suggestionLocation {
+    font-size: 12px;
+  }
+
+  .drawerStationName {
+    font-size: 14px;
+  }
+
+  .drawerStationLocation {
+    font-size: 12px;
+  }
 }
 
 /* Touch device improvements */
 @media (hover: none) and (pointer: coarse) {
-  .suggestionItem { min-height: 60px; }
-  .closeDrawerBtn { min-width: 44px; min-height: 44px; }
+  .suggestionItem {
+    min-height: 56px;
+  }
+
+  .closeDrawerBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .nearMeBtn,
+  .clearBtn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* Desktop - Large screens */
+@media (min-width: 1400px) {
+  .contentGrid {
+    grid-template-columns: 1fr 480px;
+    gap: 32px;
+  }
+
+  .mapSection {
+    height: calc(100vh - 200px);
+  }
 }
 
 /* Dark theme specific adjustments */
@@ -434,24 +712,74 @@
   background: rgba(var(--primary-rgb), 0.05);
   border-color: rgba(var(--primary-rgb), 0.2);
 }
+
 :root[data-theme="dark"] .suggestions {
-  background: var(--panel-bg);
+  background: rgba(var(--primary-rgb), 0.05);
   border-color: rgba(var(--primary-rgb), 0.2);
 }
-:root[data-theme="dark"] .suggestionItem:hover {
-  background: rgba(var(--primary-rgb), 0.1);
+
+:root[data-theme="dark"] .suggestionItem:hover,
+:root[data-theme="dark"] .suggestionItemActive {
+  background: rgba(var(--primary-rgb), 0.12);
 }
+
 :root[data-theme="dark"] .overlay {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
 }
 
-/* Tablet landscape */
-@media (min-width: 641px) and (max-width: 968px) and (orientation: landscape) {
-  .mapSection { height: calc(100vh - 140px); }
+:root[data-theme="dark"] .mobileDrawer {
+  background: #001529;
+  border-top: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 
-/* Print */
+.drawerStationDistance {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1563aa;
+  margin-top: 2px;
+}
+
+
+.stationDistance {
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1563aa;
+  background: rgba(21, 99, 170, 0.1);
+  padding: 6px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+/* Print styles */
 @media print {
-  .searchContainer, .mobileDrawer, .overlay { display: none !important; }
-  .mapSection { height: auto; min-height: 400px; }
+  .searchContainer,
+  .mobileDrawer,
+  .overlay,
+  .formSidebar {
+    display: none !important;
+  }
+
+  .mapSection {
+    height: auto;
+    min-height: 600px;
+    position: static;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+.searchBox,
+  .suggestionItem,
+  .mobileDrawer,
+  .overlay,
+  .drawerToggleIcon {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

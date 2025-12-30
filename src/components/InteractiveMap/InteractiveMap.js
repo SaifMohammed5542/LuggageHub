@@ -49,7 +49,7 @@ const mapStyleLight = [
   { featureType: "water", elementType: "geometry.fill", stylers: [{ color: "#c9d9e8" }] },
 ];
 
-export default function InteractiveMap({ onStationSelect, prefilledStation, zoomTo, theme = "dark" }) {
+export default function InteractiveMap({ onStationSelect, prefilledStation, zoomTo, theme = "dark", stations: propStations }) {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,
@@ -60,35 +60,53 @@ export default function InteractiveMap({ onStationSelect, prefilledStation, zoom
   const [stations, setStations] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [hoveredMarker, setHoveredMarker] = useState(null);
-const [showUserRadius] = useState(true);
+  const [showUserRadius] = useState(true);
+  const [mapCenter, setMapCenter] = useState(null);
   const mapRef = useRef(null);
 
+  // Fetch user location (but don't use it for initial map center)
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         const { latitude, longitude } = pos.coords;
         setUserLocation({ lat: latitude, lng: longitude });
-
-        const res = await fetch("/api/station/list");
-        const data = await res.json();
-        setStations(data.stations || []);
       },
-      async () => {
-        // fallback to default location (Melbourne CBD)
-        setUserLocation({ lat: -37.8136, lng: 144.9631 });
-        const res = await fetch("/api/station/list");
-        const data = await res.json();
-        setStations(data.stations || []);
+      () => {
+        // Don't set userLocation if permission denied
+        console.log("Location permission denied or unavailable");
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     );
   }, []);
 
+  // Fetch stations if not provided via props
+  useEffect(() => {
+    if (propStations && propStations.length > 0) {
+      setStations(propStations);
+    } else {
+      fetch("/api/station/list")
+        .then((res) => res.json())
+        .then((data) => setStations(data.stations || []))
+        .catch((err) => console.error("Failed to fetch stations:", err));
+    }
+  }, [propStations]);
+
+  // CRITICAL: Set initial map center based on zoomTo or default
+  useEffect(() => {
+    if (zoomTo) {
+      setMapCenter(zoomTo);
+    } else if (!mapCenter) {
+      // Default to Melbourne CBD if no zoomTo and no center set
+      setMapCenter({ lat: -37.8136, lng: 144.9631 });
+    }
+  }, [zoomTo]);
+
+  // Handle zoom changes when zoomTo prop updates
   useEffect(() => {
     if (isLoaded && zoomTo && mapRef.current) {
       try {
         mapRef.current.panTo(zoomTo);
-        mapRef.current.setZoom(16);
+        mapRef.current.setZoom(14);
       } catch (e) {
         console.warn("panTo/setZoom failed:", e);
       }
@@ -113,7 +131,7 @@ const [showUserRadius] = useState(true);
     );
   }
 
-  if (!isLoaded) {
+  if (!isLoaded || !mapCenter) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
@@ -136,7 +154,6 @@ const [showUserRadius] = useState(true);
     return (R * c).toFixed(1);
   };
 
-  // Marker SVG generator
   const createCustomMarkerIcon = (isSelected, isHovered) => {
     const size = isSelected ? 50 : isHovered ? 44 : 40;
     const color = isSelected ? "#667eea" : isHovered ? "#764ba2" : "#4c67f0";
@@ -186,8 +203,8 @@ const [showUserRadius] = useState(true);
   return (
     <div className={styles.mapWrapper}>
       <GoogleMap
-        zoom={userLocation ? 14 : 12}
-        center={userLocation || { lat: -37.8136, lng: 144.9631 }}
+        zoom={14}
+        center={mapCenter}
         mapContainerClassName={styles.mapContainer}
         onLoad={(map) => (mapRef.current = map)}
         options={{
@@ -203,7 +220,7 @@ const [showUserRadius] = useState(true);
           fullscreenControl: false,
         }}
       >
-        {/* User location marker with radius */}
+        {/* User location marker with radius (only if location permission granted) */}
         {userLocation && (
           <>
             {showUserRadius && (
@@ -266,6 +283,7 @@ const [showUserRadius] = useState(true);
           }}
           className={styles.controlButton}
           title="Center on my location"
+          disabled={!userLocation}
         >
           <Navigation2 size={20} />
         </button>

@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import styles from "./HowItWorks.module.css";
+import Link from "next/link";
 
 function HowItWorks({ howItWorksRef }) {
   return (
@@ -82,9 +83,12 @@ function HowItWorks({ howItWorksRef }) {
         </div>
 
         <div className={styles["cta-section"]}>
-          <p className={styles["cta-text"]}>Ready to explore hands-free?</p>
-          <button className={styles["cta-button"]}>Get Started Now</button>
-        </div>
+  <p className={styles["cta-text"]}>Ready to explore hands-free?</p>
+
+  <Link href="/booking-form" className={styles["cta-button"]}>
+    Get Started Now
+  </Link>
+</div>
       </div>
     </section>
   );

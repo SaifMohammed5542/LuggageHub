@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./Testimonials.module.css";
+import Trustpilot from "../Trustpilot";
 
 const testimonialsData = [
   {
@@ -46,8 +47,10 @@ const Testimonials = () => {
               <strong>{testimonial.name}</strong>, {testimonial.location}
             </div>
           </div>
+
         ))}
       </div>
+      <Trustpilot />
     </section>
   );
 };

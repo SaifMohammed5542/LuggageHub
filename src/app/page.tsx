@@ -10,7 +10,7 @@ import Testimonials from '@/components/Testimonials';
 import OurTopServices from '@/components/OurTopServices';
 import Queries from '@/components/Queries';
 import Footer from '@/components/Footer';
-import Trustpilot from '@/components/Trustpilot';
+// import Trustpilot from '@/components/Trustpilot';
 import Rotatingtext from '@/components/Rotator';
 // import BannerTwo from '../components/BannerTwo.js';
 // import Locations from '../components/Locations.js';
@@ -133,8 +133,8 @@ useEffect(() => {
       {/* <Locations /> */}
       <Testimonials />
       <br />
-      <Trustpilot />
-      <br />
+      {/* <Trustpilot />
+      <br /> */}
       <OurTopServices servicesRef={servicesRef} />
       <br />
       <Queries />
