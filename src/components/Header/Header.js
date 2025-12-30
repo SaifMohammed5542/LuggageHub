@@ -1,3 +1,4 @@
+// components/Header.js - IMPROVED VERSION
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -79,6 +80,12 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
     router.push(`/#${hashName}`);
   };
 
+  // ✅ IMPROVED: Active link checker
+  const isActive = (path) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
+
   return (
     <>
       {/* Overlay for mobile menu */}
@@ -99,7 +106,7 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
             <span className={`${styles.bar} ${isMenuOpen ? styles.open : ""}`} />
           </button>
 
-          {/* Logo — Dark Only */}
+          {/* Logo */}
           <div className={styles.logo}>
             <Link href="/" onClick={closeMenu}>
               <Image
@@ -116,14 +123,22 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
           <div className={`${styles.menu} ${isMenuOpen ? styles.open : ""}`}>
             <ul>
               <li>
-                <Link href="/" onClick={closeMenu}>
+                <Link 
+                  href="/" 
+                  onClick={closeMenu}
+                  className={isActive("/") ? styles.active : ""}
+                >
                   Home
                 </Link>
               </li>
 
               <li>
-                <Link href="/blog" onClick={closeMenu}>
-                  Blogs
+                <Link 
+                  href="/map-booking" 
+                  onClick={closeMenu}
+                  className={isActive("/map-booking") ? styles.active : ""}
+                >
+                  Find Storage
                 </Link>
               </li>
 
@@ -134,6 +149,7 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                     e.preventDefault();
                     goToSection("how-it-works", scrollTohowItWorks);
                   }}
+                  className={pathname === "/" && window.location.hash === "#how-it-works" ? styles.active : ""}
                 >
                   How it Works
                 </a>
@@ -146,14 +162,49 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                     e.preventDefault();
                     goToSection("services", scrollToServices);
                   }}
+                  className={pathname === "/" && window.location.hash === "#services" ? styles.active : ""}
                 >
                   Services
                 </a>
               </li>
 
+              <li>
+                <Link 
+                  href="/key-handover" 
+                  onClick={closeMenu}
+                  className={isActive("/key-handover") ? styles.active : ""}
+                >
+                  Key Handover
+                </Link>
+              </li>
+
+              <li className={styles.bookNowLink}>
+                <Link 
+                  href="/booking-form" 
+                  onClick={closeMenu}
+                  className={isActive("/booking-form") ? styles.active : ""}
+                >
+                  Book Now
+                </Link>
+              </li>
+
+              <li>
+                <Link 
+                  href="/blog" 
+                  onClick={closeMenu}
+                  className={isActive("/blog") ? styles.active : ""}
+                >
+                  Blog
+                </Link>
+              </li>
+
               {userRole === "admin" && (
                 <li>
-                  <Link href="/admin/dashboard" onClick={closeMenu}>
+                  <Link 
+                    href="/admin/dashboard" 
+                    onClick={closeMenu}
+                    className={isActive("/admin/dashboard") ? styles.active : ""}
+                  >
                     Dashboard
                   </Link>
                 </li>
@@ -161,31 +212,30 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
 
               {userRole === "partner" && (
                 <li>
-                  <Link href="/partner/dashboard" onClick={closeMenu}>
+                  <Link 
+                    href="/partner/dashboard" 
+                    onClick={closeMenu}
+                    className={isActive("/partner/dashboard") ? styles.active : ""}
+                  >
                     Dashboard
                   </Link>
                 </li>
               )}
             </ul>
 
-            {/* Auth section (no theme toggle anymore) */}
+            {/* Auth section */}
             <div className={styles.menuExtras}>
               {username ? (
                 <>
                   <div className={styles.userInfo}>
-                    <span className={styles.username}>
-                      Welcome, {username}
-                    </span>
+                    <span className={styles.username}>Welcome, {username}</span>
                   </div>
-                  <button
-                    className={styles.logoutBtn}
-                    onClick={handleLogout}
-                  >
+                  <button className={styles.logoutBtn} onClick={handleLogout}>
                     Logout
                   </button>
                 </>
               ) : (
-                <Link href="/auth/login" className={styles.loginBtn}>
+                <Link href="/auth/login" className={styles.loginBtn} onClick={closeMenu}>
                   Login
                 </Link>
               )}

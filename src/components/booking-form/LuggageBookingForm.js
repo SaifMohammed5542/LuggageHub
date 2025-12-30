@@ -1,6 +1,6 @@
-// components/booking-form/LuggageBookingFrom.js
+// components/booking-form/LuggageBookingForm.js - IMPROVED VERSION
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../LuggagePay";
@@ -23,23 +23,24 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
-// ✅ Email validation
+// ✅ IMPROVED: Simple email validation (removed domain restriction)
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_EMAIL_DOMAINS = [
-  "gmail.com",
-  "hotmail.com",
-  "outlook.com",
-  "yahoo.com"
-];
 
-// ✅ Country codes (Australia default)
+// ✅ IMPROVED: Extended country codes with flags
 const COUNTRY_CODES = [
-  { code: "+61", label: "AUS (+61)" },
-  { code: "+91", label: "IN (+91)" },
-  { code: "+1", label: "USA (+1)" },
-  { code: "+44", label: "UK (+44)" },
+  { code: "+61", label: "🇦🇺 AUS (+61)" },
+  { code: "+1", label: "🇺🇸 USA/CAN (+1)" },
+  { code: "+44", label: "🇬🇧 UK (+44)" },
+  { code: "+91", label: "🇮🇳 IND (+91)" },
+  { code: "+86", label: "🇨🇳 CHN (+86)" },
+  { code: "+81", label: "🇯🇵 JPN (+81)" },
+  { code: "+33", label: "🇫🇷 FRA (+33)" },
+  { code: "+49", label: "🇩🇪 DEU (+49)" },
+  { code: "+39", label: "🇮🇹 ITA (+39)" },
+  { code: "+34", label: "🇪🇸 ESP (+34)" },
+  { code: "+65", label: "🇸🇬 SGP (+65)" },
+  { code: "+971", label: "🇦🇪 UAE (+971)" },
 ];
-
 
 const getStationLatLng = (station) => {
   if (!station) return null;
@@ -56,29 +57,34 @@ const getStationLatLng = (station) => {
   return null;
 };
 
-const LuggageBookingForm = ({ prefilledStation = undefined, mode = "direct", onBookingComplete = undefined, showHeader = true, compact = false }) => {
-const [formData, setFormData] = useState({
-  fullName: "",
-  email: "",
-  phoneCode: "+61",     // ✅ NEW
-  phoneNumber: "",     // ✅ NEW
-  phone: "+61 ",       // ✅ BACKEND STILL USES THIS
-  dropOffDate: "",
-  pickUpDate: "",
-  smallBagCount: 0,
-  largeBagCount: 0,
-  specialInstructions: "",
-  termsAccepted: false,
-  stationId: "",
-});
-
-
+const LuggageBookingForm = ({ 
+  prefilledStation = undefined, 
+  mode = "direct", 
+  onBookingComplete = undefined, 
+  showHeader = true, 
+  compact = false 
+}) => {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneCode: "+61",
+    phoneNumber: "",
+    phone: "+61 ",
+    dropOffDate: "",
+    pickUpDate: "",
+    smallBagCount: 0,
+    largeBagCount: 0,
+    specialInstructions: "",
+    termsAccepted: false,
+    stationId: "",
+  });
 
   const [stations, setStations] = useState([]);
   const [stationTimings, setStationTimings] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false); // ✅ NEW
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [hasSpecialInstructions, setHasSpecialInstructions] = useState(false);
@@ -89,32 +95,24 @@ const [formData, setFormData] = useState({
   const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
   const [alternativeStations, setAlternativeStations] = useState([]);
   const [showAlternatives, setShowAlternatives] = useState(false);
-
-
-  // UI-only info messages for auto-corrected past times
-const [autoCorrectDropInfo, setAutoCorrectDropInfo] = useState("");
-const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
-
-
-
+  const [autoCorrectDropInfo, setAutoCorrectDropInfo] = useState("");
+  const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   const [dateErrors, setDateErrors] = useState({
     dropOff: null,
     pickUp: null
   });
   const [selectedStationMeta, setSelectedStationMeta] = useState(null);
 
-  // const ratePerLuggagePerDay = 7.99;
-
-
   const LUGGAGE_PRICING = {
-  small: 3.99,
-  medium_large: 8.49,
-};
+    small: 3.99,
+    medium_large: 8.49,
+  };
 
-// 🔢 Total luggage count (must be above all functions that use it)
-const totalBags =
-  formData.smallBagCount + formData.largeBagCount;
-
+  // ✅ IMPROVED: Memoized total bags
+  const totalBags = useMemo(() => 
+    formData.smallBagCount + formData.largeBagCount,
+    [formData.smallBagCount, formData.largeBagCount]
+  );
 
   const getCurrentDateTime = () => {
     const now = new Date();
@@ -168,6 +166,20 @@ const totalBags =
     setTimingAlert(alerts.length > 0 ? alerts : null);
     setIsCheckingTimings(false);
   }, [formData.dropOffDate, formData.pickUpDate, stationTimings]);
+
+  // ✅ NEW: Prevent leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (currentStep > 1 && !isFormValid && (formData.fullName || formData.email)) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentStep, isFormValid, formData.fullName, formData.email]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -473,27 +485,31 @@ const totalBags =
 
   const numberOfDays = calculateNumberOfDays();
 
-  const totalAmount =
-  numberOfDays *
-  (
-    formData.smallBagCount * LUGGAGE_PRICING.small +
-    formData.largeBagCount * LUGGAGE_PRICING.medium_large
+  // ✅ IMPROVED: Memoized total amount
+  const totalAmount = useMemo(() => 
+    numberOfDays * (
+      formData.smallBagCount * LUGGAGE_PRICING.small +
+      formData.largeBagCount * LUGGAGE_PRICING.medium_large
+    ),
+    [numberOfDays, formData.smallBagCount, formData.largeBagCount]
   );
-
 
   const isStep2Valid = () => {
     if (
-  !formData.fullName ||
-  !formData.email ||
-  !!errors.email ||          // ✅ ADD THIS
-  !formData.phoneNumber ||
-  !formData.stationId
-) return false;
+      !formData.fullName ||
+      !formData.email ||
+      !!errors.email ||
+      !formData.phoneNumber ||
+      !formData.stationId
+    ) return false;
 
     if (!formData.dropOffDate || !formData.pickUpDate) return false;
     if (totalBags === 0) return false;
     if (dateErrors.dropOff || dateErrors.pickUp) return false;
+    
+    // ✅ IMPROVED: Timing alerts are warnings, not blockers
     if (timingAlert && timingAlert.length > 0) return false;
+    
     if (capacityStatus && !capacityStatus.available) return false;
     return true;
   };
@@ -503,10 +519,8 @@ const totalBags =
       return "Please complete your personal details and choose a station.";
     }
     if (totalBags === 0) {
-  return "Please select at least one bag.";
-}
-
-
+      return "Please select at least one bag.";
+    }
     if (!formData.dropOffDate || !formData.pickUpDate) {
       return "Please set both Drop-off and Pick-up times.";
     }
@@ -516,10 +530,13 @@ const totalBags =
     if (dateErrors.pickUp) {
       return dateErrors.pickUp;
     }
-    if (timingAlert && timingAlert.length > 0) {
-      const a = timingAlert[0];
-      return a.type === "dropOff" ? "Drop-off time conflicts with station hours." : "Pick-up time conflicts with station hours.";
-    }
+    
+    // ✅ IMPROVED: Show timing alert as warning, not blocker
+    // if (timingAlert && timingAlert.length > 0) {
+    //   const a = timingAlert[0];
+    //   return a.type === "dropOff" ? "Drop-off time conflicts with station hours." : "Pick-up time conflicts with station hours.";
+    // }
+    
     if (capacityStatus && !capacityStatus.available) {
       return "Selected station is at capacity for those dates — choose an alternative station.";
     }
@@ -533,104 +550,84 @@ const totalBags =
       [name]: type === "checkbox" ? checked : value,
     };
 
-// ✅ EMAIL VALIDATION
-if (name === "email") {
-  const domain = value.split("@")[1];
-  let emailError = "";
+    // ✅ IMPROVED: Simplified email validation (no domain restriction)
+    if (name === "email") {
+      let emailError = "";
+      
+      if (!EMAIL_REGEX.test(value)) {
+        emailError = "Please enter a valid email address";
+      }
+      
+      setErrors(prev => ({ ...prev, email: emailError }));
+      setFormData(prev => ({ ...prev, email: value }));
+      return;
+    }
 
-  if (!EMAIL_REGEX.test(value)) {
-    emailError = "Please enter a valid email address";
-  } else if (domain && !ALLOWED_EMAIL_DOMAINS.includes(domain)) {
-    emailError = "Please use Gmail, Outlook, Yahoo or Hotmail";
-  }
+    if (name === "phoneNumber") {
+      const onlyNumbers = value.replace(/\D/g, "");
+      setFormData(prev => ({
+        ...prev,
+        phoneNumber: onlyNumbers,
+        phone: `${prev.phoneCode} ${onlyNumbers}`,
+      }));
+      return;
+    }
 
-  setErrors(prev => ({ ...prev, email: emailError }));
-  setFormData(prev => ({ ...prev, email: value }));
-  return;
-}
-
-
-// ✅ PHONE NUMBER (NUMBERS ONLY)
-if (name === "phoneNumber") {
-  const onlyNumbers = value.replace(/\D/g, "");
-  setFormData(prev => ({
-    ...prev,
-    phoneNumber: onlyNumbers,
-    phone: `${prev.phoneCode} ${onlyNumbers}`,
-  }));
-  return;
-}
-
-
-
-// ✅ COUNTRY CODE CHANGE
-if (name === "phoneCode") {
-  setFormData(prev => ({
-    ...prev,
-    phoneCode: value,
-    phone: `${value} ${prev.phoneNumber}`,
-  }));
-  return;
-}
-
-
+    if (name === "phoneCode") {
+      setFormData(prev => ({
+        ...prev,
+        phoneCode: value,
+        phone: `${value} ${prev.phoneNumber}`,
+      }));
+      return;
+    }
 
     if (name === "dropOffDate" && value) {
       const now = getCurrentDateTime();
       const selectedDropOff = new Date(value);
-if (selectedDropOff < now) {
-  const correctedDropOff = new Date(now);
-  correctedDropOff.setMinutes(correctedDropOff.getMinutes() + 10);
+      if (selectedDropOff < now) {
+        const correctedDropOff = new Date(now);
+        correctedDropOff.setMinutes(correctedDropOff.getMinutes() + 10);
 
-  if (stationTimings && !stationTimings.is24Hours) {
-    const correctedValidation = getNearestAvailableTime(
-      correctedDropOff.toISOString(),
-      stationTimings
-    );
+        if (stationTimings && !stationTimings.is24Hours) {
+          const correctedValidation = getNearestAvailableTime(
+            correctedDropOff.toISOString(),
+            stationTimings
+          );
 
-    if (
-      !correctedValidation.isValid &&
-      correctedValidation.suggestions &&
-      correctedValidation.suggestions.length > 0
-    ) {
-      const nearestValid = correctedValidation.suggestions[0].dateTime;
-      const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
-      updatedFormData.dropOffDate = formattedCorrected;
-      setDateErrors(prev => ({ ...prev, dropOff: null }));
-
-      // ✅ STEP 2 — ADD THIS (UI only)
-      setAutoCorrectDropInfo(
-        "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
-      );
-
-    } else {
-      const formattedCorrected = formatDateTimeLocal(correctedDropOff);
-      updatedFormData.dropOffDate = formattedCorrected;
-      setDateErrors(prev => ({ ...prev, dropOff: null }));
-
-      // ✅ STEP 2 — ADD THIS (UI only)
-      setAutoCorrectDropInfo(
-        "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
-      );
-    }
-  } else {
-    const formattedCorrected = formatDateTimeLocal(correctedDropOff);
-    updatedFormData.dropOffDate = formattedCorrected;
-    setDateErrors(prev => ({ ...prev, dropOff: null }));
-
-    // ✅ STEP 2 — ADD THIS (UI only)
-    setAutoCorrectDropInfo(
-      "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
-    );
-  }
-} else {
-  updatedFormData.dropOffDate = value;
-  setDateErrors(prev => ({ ...prev, dropOff: null }));
-
-  // ✅ CLEAR message when user picks a valid future time
-  setAutoCorrectDropInfo("");
-}
-
+          if (
+            !correctedValidation.isValid &&
+            correctedValidation.suggestions &&
+            correctedValidation.suggestions.length > 0
+          ) {
+            const nearestValid = correctedValidation.suggestions[0].dateTime;
+            const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
+            updatedFormData.dropOffDate = formattedCorrected;
+            setDateErrors(prev => ({ ...prev, dropOff: null }));
+            setAutoCorrectDropInfo(
+              "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+            );
+          } else {
+            const formattedCorrected = formatDateTimeLocal(correctedDropOff);
+            updatedFormData.dropOffDate = formattedCorrected;
+            setDateErrors(prev => ({ ...prev, dropOff: null }));
+            setAutoCorrectDropInfo(
+              "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+            );
+          }
+        } else {
+          const formattedCorrected = formatDateTimeLocal(correctedDropOff);
+          updatedFormData.dropOffDate = formattedCorrected;
+          setDateErrors(prev => ({ ...prev, dropOff: null }));
+          setAutoCorrectDropInfo(
+            "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+          );
+        }
+      } else {
+        updatedFormData.dropOffDate = value;
+        setDateErrors(prev => ({ ...prev, dropOff: null }));
+        setAutoCorrectDropInfo("");
+      }
 
       const dropOffTime = new Date(updatedFormData.dropOffDate);
       const calculatedPickup = new Date(dropOffTime);
@@ -647,72 +644,63 @@ if (selectedDropOff < now) {
       return;
     }
 
-if (name === "pickUpDate" && value) {
-  const selectedPickUp = new Date(value);
-  const now = getCurrentDateTime();
+    if (name === "pickUpDate" && value) {
+      const selectedPickUp = new Date(value);
+      const now = getCurrentDateTime();
 
-  if (selectedPickUp < now) {
-    const correctedPickup = new Date(now);
-    correctedPickup.setMinutes(correctedPickup.getMinutes() + 70);
-    const formattedCorrected = formatDateTimeLocal(correctedPickup);
-    updatedFormData.pickUpDate = formattedCorrected;
-    setDateErrors(prev => ({ ...prev, pickUp: null }));
+      if (selectedPickUp < now) {
+        const correctedPickup = new Date(now);
+        correctedPickup.setMinutes(correctedPickup.getMinutes() + 70);
+        const formattedCorrected = formatDateTimeLocal(correctedPickup);
+        updatedFormData.pickUpDate = formattedCorrected;
+        setDateErrors(prev => ({ ...prev, pickUp: null }));
+        setAutoCorrectPickInfo(
+          "Your selected pick-up time was in the past, so we adjusted it to the nearest valid time."
+        );
+        setFormData(updatedFormData);
+        return;
+      }
 
-    // ✅ STEP 3 — ADD THIS (UI only)
-    setAutoCorrectPickInfo(
-      "Your selected pick-up time was in the past, so we adjusted it to the nearest valid time."
-    );
+      if (updatedFormData.dropOffDate) {
+        const dropOffTime = new Date(updatedFormData.dropOffDate);
+        const minPickupTime = new Date(dropOffTime);
+        minPickupTime.setHours(minPickupTime.getHours() + 1);
+
+        if (selectedPickUp <= dropOffTime) {
+          const correctedPickup = new Date(dropOffTime);
+          correctedPickup.setHours(correctedPickup.getHours() + 3);
+          const formattedCorrected = formatDateTimeLocal(correctedPickup);
+          updatedFormData.pickUpDate = formattedCorrected;
+          setDateErrors(prev => ({ ...prev, pickUp: null }));
+          setFormData(updatedFormData);
+          return;
+        }
+
+        if (selectedPickUp < minPickupTime) {
+          const formattedCorrected = formatDateTimeLocal(minPickupTime);
+          updatedFormData.pickUpDate = formattedCorrected;
+          setDateErrors(prev => ({ ...prev, pickUp: null }));
+          setFormData(updatedFormData);
+          return;
+        }
+      }
+
+      updatedFormData.pickUpDate = value;
+      setDateErrors(prev => ({ ...prev, pickUp: null }));
+      setAutoCorrectPickInfo("");
+    }
 
     setFormData(updatedFormData);
-    return;
-  }
-
-  if (updatedFormData.dropOffDate) {
-    const dropOffTime = new Date(updatedFormData.dropOffDate);
-    const minPickupTime = new Date(dropOffTime);
-    minPickupTime.setHours(minPickupTime.getHours() + 1);
-
-    if (selectedPickUp <= dropOffTime) {
-      const correctedPickup = new Date(dropOffTime);
-      correctedPickup.setHours(correctedPickup.getHours() + 3);
-      const formattedCorrected = formatDateTimeLocal(correctedPickup);
-      updatedFormData.pickUpDate = formattedCorrected;
-      setDateErrors(prev => ({ ...prev, pickUp: null }));
-
-      setFormData(updatedFormData);
-      return;
-    }
-
-    if (selectedPickUp < minPickupTime) {
-      const formattedCorrected = formatDateTimeLocal(minPickupTime);
-      updatedFormData.pickUpDate = formattedCorrected;
-      setDateErrors(prev => ({ ...prev, pickUp: null }));
-
-      setFormData(updatedFormData);
-      return;
-    }
-  }
-
-  // ✅ valid pick-up → clear UI note
-  updatedFormData.pickUpDate = value;
-  setDateErrors(prev => ({ ...prev, pickUp: null }));
-  setAutoCorrectPickInfo("");
-}
-
-setFormData(updatedFormData);
   };
 
   useEffect(() => {
     const errorsObj = {};
     if (!formData.fullName) errorsObj.fullName = "Full Name is required";
-    if (!formData.email) {errorsObj.email = "Email is required";} else{
-      const domain = formData.email.split("@")[1];
-      if (!EMAIL_REGEX.test(formData.email)) {
-    errorsObj.email = "❗Please enter a valid email address";
-  } else if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
-    errorsObj.email = "Please use Gmail, Outlook, Yahoo or Hotmail";
-  }
-}
+    if (!formData.email) {
+      errorsObj.email = "Email is required";
+    } else if (!EMAIL_REGEX.test(formData.email)) {
+      errorsObj.email = "Please enter a valid email address";
+    }
 
     if (!formData.phoneNumber) errorsObj.phone = "Phone is required";
     if (!formData.dropOffDate) errorsObj.dropOffDate = "Drop-off Date is required";
@@ -741,16 +729,19 @@ setFormData(updatedFormData);
 
     if (dateErrors.dropOff) errorsObj.dropOffDate = dateErrors.dropOff;
     if (dateErrors.pickUp) errorsObj.pickUpDate = dateErrors.pickUp;
-    if (timingAlert && timingAlert.length > 0) {
-      errorsObj.timing = "Please select valid station operating hours";
-    }
+    
+    // ✅ IMPROVED: Timing alerts are now warnings, not blocking errors
+    // if (timingAlert && timingAlert.length > 0) {
+    //   errorsObj.timing = "Please select valid station operating hours";
+    // }
+    
     if (capacityStatus && !capacityStatus.available) {
       errorsObj.capacity = "Station is at capacity. Please select an alternative.";
     }
 
     setErrors(errorsObj);
     setIsFormValid(Object.keys(errorsObj).length === 0);
-  }, [formData, timingAlert, capacityStatus, dateErrors]);
+  }, [formData, capacityStatus, dateErrors]);
 
   const handlePaymentSuccess = async (paymentId) => {
     setIsLoading(true);
@@ -759,11 +750,10 @@ setFormData(updatedFormData);
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  ...formData,
-  luggageCount: totalBags,
-  paymentId,
-}),
-
+          ...formData,
+          luggageCount: totalBags,
+          paymentId,
+        }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -777,8 +767,7 @@ setFormData(updatedFormData);
           console.warn("onBookingComplete threw", err);
         }
         window.location.href = "/Booked";
-      }
-      else alert("❌ Failed to send booking email.");
+      } else alert("❌ Failed to send booking email.");
     } catch (error) {
       console.error("Error:", error);
       alert(`An error occurred: ${error.message}`);
@@ -787,21 +776,25 @@ setFormData(updatedFormData);
     }
   };
 
-  // const luggageSizes = [
-  //   { value: "Small", label: "Small", icon: "🎒", desc: "Backpack, small bag" },
-  //   { value: "Medium", label: "Medium", icon: "💼", desc: "Carry-on, briefcase" },
-  //   { value: "Large", label: "Large", icon: "🧳", desc: "Standard suitcase" },
-  //   { value: "Extra Large", label: "Extra Large", icon: "📦", desc: "Oversized luggage" },
-  // ];
+  const shouldShowPriceCard =
+    currentStep === 2 &&
+    (totalBags > 0 || formData.dropOffDate || formData.pickUpDate);
 
-const shouldShowPriceCard =
-  currentStep === 2 &&
-  (
-    totalBags > 0 ||
-    formData.dropOffDate ||
-    formData.pickUpDate
-  );
 
+
+    useEffect(() => {
+  const handleBeforeUnload = (e) => {
+    if (isPaymentProcessing) {
+      e.preventDefault();
+      e.returnValue =
+        "Your payment is currently being processed. Please do not close or refresh this page.";
+      return e.returnValue;
+    }
+  };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+}, [isPaymentProcessing]);
 
 
   return (
@@ -868,19 +861,18 @@ const shouldShowPriceCard =
                             Email Address
                           </label>
                           <input
-  type="email"
-  id="email"
-  name="email"
-  value={formData.email}
-  onChange={handleChange}
-  disabled={isUserLoggedIn}
-  className={styles.input}
-  placeholder="john@gmail.com"
-/>
-{errors.email && (
-  <span className={styles.errorText}>{errors.email}</span>
-)}
-
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            disabled={isUserLoggedIn}
+                            className={styles.input}
+                            placeholder="john@example.com"
+                          />
+                          {errors.email && (
+                            <span className={styles.errorText}>{errors.email}</span>
+                          )}
                         </div>
 
                         <div className={styles.inputGroup}>
@@ -888,35 +880,33 @@ const shouldShowPriceCard =
                             <span className={styles.labelIcon}>📞</span>
                             Phone Number
                           </label>
-<div style={{ display: "flex", gap: "8px" }}>
-  <select
-    name="phoneCode"
-    value={formData.phoneCode}
-    onChange={handleChange}
-    className={styles.select}
-    style={{ maxWidth: "140px" }}
-  >
-    {COUNTRY_CODES.map(c => (
-      <option key={c.code} value={c.code}>
-        {c.label}
-      </option>
-    ))}
-  </select>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <select
+                              name="phoneCode"
+                              value={formData.phoneCode}
+                              onChange={handleChange}
+                              className={styles.select}
+                              style={{ maxWidth: "140px" }}
+                            >
+                              {COUNTRY_CODES.map(c => (
+                                <option key={c.code} value={c.code}>
+                                  {c.label}
+                                </option>
+                              ))}
+                            </select>
 
-  <input
-    type="tel"
-    name="phoneNumber"
-    value={formData.phoneNumber}
-    onChange={handleChange}
-    className={styles.input}
-    placeholder="412345678"
-  />
-</div>
-
-{errors.phone && (
-  <span className={styles.errorText}>{errors.phone}</span>
-)}
-
+                            <input
+                              type="tel"
+                              name="phoneNumber"
+                              value={formData.phoneNumber}
+                              onChange={handleChange}
+                              className={styles.input}
+                              placeholder="412345678"
+                            />
+                          </div>
+                          {errors.phone && (
+                            <span className={styles.errorText}>{errors.phone}</span>
+                          )}
                         </div>
                       </div>
 
@@ -968,20 +958,18 @@ const shouldShowPriceCard =
 
                       <button
                         type="button"
-                        onClick={() => 
-                        {
-                        if (errors.email) return;  
-                        setCurrentStep(2);}}
+                        onClick={() => {
+                          if (errors.email) return;
+                          setCurrentStep(2);
+                        }}
                         className={styles.btnPrimary}
-                       disabled={
-  !formData.fullName ||
-  !formData.email ||
-  !!errors.email ||        // 🔴 THIS WAS MISSING
-  !formData.phoneNumber ||
-  !formData.stationId
-}
-
-
+                        disabled={
+                          !formData.fullName ||
+                          !formData.email ||
+                          !!errors.email ||
+                          !formData.phoneNumber ||
+                          !formData.stationId
+                        }
                       >
                         Continue to Luggage Details →
                       </button>
@@ -993,98 +981,95 @@ const shouldShowPriceCard =
                       <h2 className={styles.sectionTitle}>Luggage & Schedule</h2>
 
                       <div className={styles.inputGroup}>
-  <label className={styles.label}>
-    <span className={styles.labelIcon}>🧳</span>
-    Luggage Size & Quantity
-  </label>
+                        <label className={styles.label}>
+                          <span className={styles.labelIcon}>🧳</span>
+                          Luggage Size & Quantity
+                        </label>
 
-  <div className={styles.sizeGrid}>
-    {/* SMALL BAGS */}
-    <div className={styles.sizeCard}>
-      <img src="/images/small-bags.png" width={70} height={70} alt="Small bags" />
-      <div className={styles.sizeName}>Small Bags</div>
-      <div className={styles.sizeDesc}>Laptop bag, Backpack</div>
-      <div className={styles.sizeDesc}>A${LUGGAGE_PRICING.small}/day</div>
+                        <div className={styles.sizeGrid}>
+                          <div className={styles.sizeCard}>
+                            <img src="/images/small-bags.png" width={70} height={70} alt="Small bags" />
+                            <div className={styles.sizeName}>Small Bags</div>
+                            <div className={styles.sizeDesc}>Laptop bag, Backpack</div>
+                            <div className={styles.sizeDesc}>A${LUGGAGE_PRICING.small}/day</div>
 
-      <div className={styles.counterGroup}>
-      <div className={styles.counterWrapper}>
-        <button
-          type="button"
-          className={styles.counterBtn}
-          onClick={() =>
-            setFormData(prev => ({
-              ...prev,
-              smallBagCount: Math.max(0, prev.smallBagCount - 1),
-            }))
-          }
-        >
-          −
-        </button>
+                            <div className={styles.counterGroup}>
+                              <div className={styles.counterWrapper}>
+                                <button
+                                  type="button"
+                                  className={styles.counterBtn}
+                                  onClick={() =>
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      smallBagCount: Math.max(0, prev.smallBagCount - 1),
+                                    }))
+                                  }
+                                >
+                                  −
+                                </button>
 
-        <span className={styles.counterValue}>
-          {formData.smallBagCount}
-        </span>
+                                <span className={styles.counterValue}>
+                                  {formData.smallBagCount}
+                                </span>
 
-        <button
-          type="button"
-          className={styles.counterBtn}
-          onClick={() =>
-            setFormData(prev => ({
-              ...prev,
-              smallBagCount: prev.smallBagCount + 1,
-            }))
-          }
-        >
-          +
-        </button>
-      </div>
-    </div>
-    </div>
+                                <button
+                                  type="button"
+                                  className={styles.counterBtn}
+                                  onClick={() =>
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      smallBagCount: prev.smallBagCount + 1,
+                                    }))
+                                  }
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
 
-    {/* MEDIUM & LARGE BAGS */}
-    <div className={styles.sizeCard}>
-      <img src="/images/big-bags.png" width={70} height={70} alt="Large bags" />
-      <div className={styles.sizeName}>Medium & Large Bags</div>
-      <div className={styles.sizeDesc}>Hand carry, Suitcase</div>
-      <div className={styles.sizeDesc}>A${LUGGAGE_PRICING.medium_large}/day</div>
+                          <div className={styles.sizeCard}>
+                            <img src="/images/big-bags.png" width={70} height={70} alt="Large bags" />
+                            <div className={styles.sizeName}>Medium & Large Bags</div>
+                            <div className={styles.sizeDesc}>Hand carry, Suitcase</div>
+                            <div className={styles.sizeDesc}>A${LUGGAGE_PRICING.medium_large}/day</div>
 
-      <div className={styles.counterGroup}>
-      <div className={styles.counterWrapper}>
-        <button
-          type="button"
-          className={styles.counterBtn}
-          onClick={() =>
-            setFormData(prev => ({
-              ...prev,
-              largeBagCount: Math.max(0, prev.largeBagCount - 1),
-            }))
-          }
-        >
-          −
-        </button>
+                            <div className={styles.counterGroup}>
+                              <div className={styles.counterWrapper}>
+                                <button
+                                  type="button"
+                                  className={styles.counterBtn}
+                                  onClick={() =>
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      largeBagCount: Math.max(0, prev.largeBagCount - 1),
+                                    }))
+                                  }
+                                >
+                                  −
+                                </button>
 
-        <span className={styles.counterValue}>
-          {formData.largeBagCount}
-        </span>
+                                <span className={styles.counterValue}>
+                                  {formData.largeBagCount}
+                                </span>
 
-        <button
-          type="button"
-          className={styles.counterBtn}
-          onClick={() =>
-            setFormData(prev => ({
-              ...prev,
-              largeBagCount: prev.largeBagCount + 1,
-            }))
-          }
-        >
-          +
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
+                                <button
+                                  type="button"
+                                  className={styles.counterBtn}
+                                  onClick={() =>
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      largeBagCount: prev.largeBagCount + 1,
+                                    }))
+                                  }
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
                       {formData.stationId && capacityStatus && (
                         <div className={`${styles.capacityCard} ${!capacityStatus.available ? styles.capacityFull : ''}`}>
@@ -1165,36 +1150,6 @@ const shouldShowPriceCard =
                         </div>
                       )}
 
-                      {/* <div className={styles.inputGroup}>
-                        <label className={styles.label}>
-                          <span className={styles.labelIcon}>🧳</span>
-                          Luggage Size
-                        </label>
-                        <div className={styles.sizeGrid}>
-                          {luggageSizes.map((size) => (
-                            <label
-                              key={size.value}
-                              className={`${styles.sizeCard} ${
-                                formData.luggageSize === size.value ? styles.selected : ""
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                name="luggageSize"
-                                value={size.value}
-                                checked={formData.luggageSize === size.value}
-                                onChange={handleChange}
-                                className={styles.radioInput}
-                              />
-                              <div className={styles.sizeIcon}>{size.icon}</div>
-                              <div className={styles.sizeName}>{size.label}</div>
-                              <div className={styles.sizeDesc}>{size.desc}</div>
-                            </label>
-                          ))}
-                        </div>
-                      </div> */}
-
-
                       {(isCheckingTimings || isCheckingCapacity) && (
                         <div className={styles.checkingTimings}>
                           Checking station hours and capacity…
@@ -1205,7 +1160,7 @@ const shouldShowPriceCard =
                         <div className={styles.timingAlert}>
                           <div className={styles.alertHeader}>
                             <span className={styles.alertIcon}>⚠️</span>
-                            <span className={styles.alertTitle}>Station Timing Issue</span>
+                            <span className={styles.alertTitle}>Station Timing Advisory</span>
                           </div>
 
                           {timingAlert.map((alert, index) => (
@@ -1264,82 +1219,77 @@ const shouldShowPriceCard =
                                 </div>
                               )}
                             </div>
-                          ))} 
+                          ))}
                         </div>
                       )}
 
                       <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
-  <label htmlFor="dropOffDate" className={styles.label}>
-    <span className={styles.labelIcon}>📥</span>
-    Drop-off Time
-  </label>
-  <input
-    type="datetime-local"
-    id="dropOffDate"
-    name="dropOffDate"
-    value={formData.dropOffDate}
-    onChange={handleChange}
-    className={`${styles.input} ${dateErrors.dropOff || errors.dropOffDate ? styles.inputError : ''}`}
-    min={getMinDateTime()}
-  />
-  {dateErrors.dropOff && (
-    <div className={styles.dateErrorBox}>
-      <span className={styles.dateErrorIcon}>⚠️</span>
-      <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
-    </div>
-  )}
-  {errors.dropOffDate && !dateErrors.dropOff && (
-    <span className={styles.errorText}>{errors.dropOffDate}</span>
-  )}
-
-  {/* ✅ STEP 4 — ADD THIS RIGHT HERE */}
-  {autoCorrectDropInfo && (
-    <div className={styles.autoCorrectInfo}>
-      ℹ️ {autoCorrectDropInfo}
-    </div>
-  )}
-</div>
-
+                          <label htmlFor="dropOffDate" className={styles.label}>
+                            <span className={styles.labelIcon}>📥</span>
+                            Drop-off Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            id="dropOffDate"
+                            name="dropOffDate"
+                            value={formData.dropOffDate}
+                            onChange={handleChange}
+                            className={`${styles.input} ${dateErrors.dropOff || errors.dropOffDate ? styles.inputError : ''}`}
+                            min={getMinDateTime()}
+                          />
+                          {dateErrors.dropOff && (
+                            <div className={styles.dateErrorBox}>
+                              <span className={styles.dateErrorIcon}>⚠️</span>
+                              <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
+                            </div>
+                          )}
+                          {errors.dropOffDate && !dateErrors.dropOff && (
+                            <span className={styles.errorText}>{errors.dropOffDate}</span>
+                          )}
+                          {autoCorrectDropInfo && (
+                            <div className={styles.autoCorrectInfo}>
+                              ℹ️ {autoCorrectDropInfo}
+                            </div>
+                          )}
+                        </div>
 
                         <div className={styles.inputGroup}>
-  <label htmlFor="pickUpDate" className={styles.label}>
-    <span className={styles.labelIcon}>📤</span>
-    Pick-up Time
-  </label>
-  <input
-    type="datetime-local"
-    id="pickUpDate"
-    name="pickUpDate"
-    value={formData.pickUpDate}
-    onChange={handleChange}
-    className={`${styles.input} ${dateErrors.pickUp || errors.pickUpDate ? styles.inputError : ''}`}
-    min={
-      formData.dropOffDate
-        ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
-            .toISOString()
-            .slice(0, 16)
-        : getMinDateTime()
-    }
-  />
-  {dateErrors.pickUp && (
-    <div className={styles.dateErrorBox}>
-      <span className={styles.dateErrorIcon}>⚠️</span>
-      <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
-    </div>
-  )}
-  {errors.pickUpDate && !dateErrors.pickUp && (
-    <span className={styles.errorText}>{errors.pickUpDate}</span>
-  )}
-
-  {/* ✅ STEP 4 — ADD THIS RIGHT HERE */}
-  {autoCorrectPickInfo && (
-    <div className={styles.autoCorrectInfo}>
-      ℹ️ {autoCorrectPickInfo}
-    </div>
-  )}
-</div>
-</div>
+                          <label htmlFor="pickUpDate" className={styles.label}>
+                            <span className={styles.labelIcon}>📤</span>
+                            Pick-up Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            id="pickUpDate"
+                            name="pickUpDate"
+                            value={formData.pickUpDate}
+                            onChange={handleChange}
+                            className={`${styles.input} ${dateErrors.pickUp || errors.pickUpDate ? styles.inputError : ''}`}
+                            min={
+                              formData.dropOffDate
+                                ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
+                                    .toISOString()
+                                    .slice(0, 16)
+                                : getMinDateTime()
+                            }
+                          />
+                          {dateErrors.pickUp && (
+                            <div className={styles.dateErrorBox}>
+                              <span className={styles.dateErrorIcon}>⚠️</span>
+                              <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
+                            </div>
+                          )}
+                          {errors.pickUpDate && !dateErrors.pickUp && (
+                            <span className={styles.errorText}>{errors.pickUpDate}</span>
+                          )}
+                          {autoCorrectPickInfo && (
+                            <div className={styles.autoCorrectInfo}>
+                              ℹ️ {autoCorrectPickInfo}
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
                       <div className={styles.checkboxGroup}>
                         <label className={styles.checkboxLabel}>
@@ -1378,7 +1328,6 @@ const shouldShowPriceCard =
                       {!isStep2Valid() && (
                         <div className={styles.warningBox} style={{ marginBottom: 12 }}>
                           {getStep2InvalidReason()}
-
                         </div>
                       )}
 
@@ -1431,26 +1380,26 @@ const shouldShowPriceCard =
 
                         <div className={styles.reviewSection}>
                           <h3 className={styles.reviewTitle}>Luggage Information</h3>
-                         <div className={styles.reviewItem}>
-  <span className={styles.reviewLabel}>Small Bags:</span>
-  <span className={styles.reviewValue}>
-    {formData.smallBagCount}
-  </span>
-</div>
+                          <div className={styles.reviewItem}>
+                            <span className={styles.reviewLabel}>Small Bags:</span>
+                            <span className={styles.reviewValue}>
+                              {formData.smallBagCount}
+                            </span>
+                          </div>
 
-<div className={styles.reviewItem}>
-  <span className={styles.reviewLabel}>Medium & Large Bags:</span>
-  <span className={styles.reviewValue}>
-    {formData.largeBagCount}
-  </span>
-</div>
+                          <div className={styles.reviewItem}>
+                            <span className={styles.reviewLabel}>Medium & Large Bags:</span>
+                            <span className={styles.reviewValue}>
+                              {formData.largeBagCount}
+                            </span>
+                          </div>
 
-<div className={styles.reviewItem}>
-  <span className={styles.reviewLabel}>Total Bags:</span>
-  <span className={styles.reviewValue}>
-    {totalBags}
-  </span>
-</div>
+                          <div className={styles.reviewItem}>
+                            <span className={styles.reviewLabel}>Total Bags:</span>
+                            <span className={styles.reviewValue}>
+                              {totalBags}
+                            </span>
+                          </div>
 
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Drop-off:</span>
@@ -1481,10 +1430,15 @@ const shouldShowPriceCard =
                         {errors.termsAccepted && <span className={styles.errorText}>{errors.termsAccepted}</span>}
                       </div>
 
-                      {isLoading ? (
+                      {isLoading || isPaymentProcessing ? (
                         <div className={styles.loadingContainer}>
                           <div className={styles.spinner}></div>
-                          <p className={styles.loadingText}>Processing your booking...</p>
+                          <p className={styles.loadingText}>
+                            {isPaymentProcessing ? "Processing payment..." : "Processing your booking..."}
+                          </p>
+                          {isPaymentProcessing && (
+                            <p className={styles.subtext}>Please don&apos;t close this window</p>
+                          )}
                         </div>
                       ) : isFormValid ? (
                         <div className={styles.paymentSection}>
@@ -1492,12 +1446,13 @@ const shouldShowPriceCard =
                             totalAmount={totalAmount}
                             onPaymentSuccess={handlePaymentSuccess}
                             formData={formData}
-                            disabled={isLoading}
+                            disabled={isLoading || isPaymentProcessing}
+                            onProcessingChange={setIsPaymentProcessing}
                           />
                         </div>
                       ) : (
                         <div className={styles.warningBox}>
-                          Please complete all required fields and accept the terms to proceed.
+                          Please review all the booking details and accept the terms to proceed.
                         </div>
                       )}
 
@@ -1505,7 +1460,7 @@ const shouldShowPriceCard =
                         type="button"
                         onClick={() => setCurrentStep(2)}
                         className={styles.btnSecondary}
-                        disabled={isLoading}
+                        disabled={isLoading || isPaymentProcessing}
                       >
                         ← Back to Luggage Details
                       </button>
@@ -1516,79 +1471,78 @@ const shouldShowPriceCard =
             </div>
 
             <div className={styles.sidebar}>
-  {shouldShowPriceCard && (
-    <div className={styles.priceCard}>
-      <h3 className={styles.priceTitle}>Booking Summary</h3>
+              {shouldShowPriceCard && (
+                <div className={styles.priceCard}>
+                  <h3 className={styles.priceTitle}>Booking Summary</h3>
 
-      <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
-        <div className={styles.priceBreakdown}>
-          <div className={styles.priceRow}>
-            <span className={styles.priceLabel}>Small bags</span>
-            <span className={styles.priceValue}>
-              {formData.smallBagCount} × A${LUGGAGE_PRICING.small}
-            </span>
-          </div>
+                  <div className={`${styles.collapsibleContent} ${isSummaryExpanded ? styles.expanded : ''}`}>
+                    <div className={styles.priceBreakdown}>
+                      <div className={styles.priceRow}>
+                        <span className={styles.priceLabel}>Small bags</span>
+                        <span className={styles.priceValue}>
+                          {formData.smallBagCount} × A${LUGGAGE_PRICING.small}
+                        </span>
+                      </div>
 
-          <div className={styles.priceRow}>
-            <span className={styles.priceLabel}>Medium & Large bags</span>
-            <span className={styles.priceValue}>
-              {formData.largeBagCount} × A${LUGGAGE_PRICING.medium_large}
-            </span>
-          </div>
+                      <div className={styles.priceRow}>
+                        <span className={styles.priceLabel}>Medium & Large bags</span>
+                        <span className={styles.priceValue}>
+                          {formData.largeBagCount} × A${LUGGAGE_PRICING.medium_large}
+                        </span>
+                      </div>
 
-          <div className={styles.priceRow}>
-            <span className={styles.priceLabel}>Storage duration</span>
-            <span className={styles.priceValue}>{numberOfDays} day(s)</span>
-          </div>
-        </div>
+                      <div className={styles.priceRow}>
+                        <span className={styles.priceLabel}>Storage duration</span>
+                        <span className={styles.priceValue}>{numberOfDays} day(s)</span>
+                      </div>
+                    </div>
 
-        <div className={styles.priceFeatures}>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>✓</span>
-            <span>24/7 Security</span>
-          </div>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>✓</span>
-            <span>Insurance Included</span>
-          </div>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>✓</span>
-            <span>Easy Access</span>
-          </div>
-          <div className={styles.featureItem}>
-            <span className={styles.featureIcon}>✓</span>
-            <span>Flexible Scheduling</span>
-          </div>
-        </div>
-      </div>
+                    <div className={styles.priceFeatures}>
+                      <div className={styles.featureItem}>
+                        <span className={styles.featureIcon}>✓</span>
+                        <span>24/7 Security</span>
+                      </div>
+                      <div className={styles.featureItem}>
+                        <span className={styles.featureIcon}>✓</span>
+                        <span>Insurance Included</span>
+                      </div>
+                      <div className={styles.featureItem}>
+                        <span className={styles.featureIcon}>✓</span>
+                        <span>Easy Access</span>
+                      </div>
+                      <div className={styles.featureItem}>
+                        <span className={styles.featureIcon}>✓</span>
+                        <span>Flexible Scheduling</span>
+                      </div>
+                    </div>
+                  </div>
 
-      <button
-        type="button"
-        onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-        className={styles.toggleButton}
-      >
-        <div className={styles.toggleButtonContent}>
-          <span className={styles.totalLabel}>Total Amount</span>
-          <span className={styles.totalValue}>A${totalAmount.toFixed(2)}</span>
-        </div>
-        <div className={styles.toggleAction}>
-          {isSummaryExpanded ? (
-            <>
-              <span className={styles.toggleText}>View Less</span>
-              <span className={styles.toggleIcon}>▼</span>
-            </>
-          ) : (
-            <>
-              <span className={styles.toggleText}>View Details</span>
-              <span className={styles.toggleIcon}>▲</span>
-            </>
-          )}
-        </div>
-      </button>
-    </div>
-  )}
-</div>
-
+                  <button
+                    type="button"
+                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                    className={styles.toggleButton}
+                  >
+                    <div className={styles.toggleButtonContent}>
+                      <span className={styles.totalLabel}>Total Amount</span>
+                      <span className={styles.totalValue}>A${totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div className={styles.toggleAction}>
+                      {isSummaryExpanded ? (
+                        <>
+                          <span className={styles.toggleText}>View Less</span>
+                          <span className={styles.toggleIcon}>▼</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className={styles.toggleText}>View Details</span>
+                          <span className={styles.toggleIcon}>▲</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

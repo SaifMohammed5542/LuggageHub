@@ -1,55 +1,56 @@
-// app/map-booking/page.js
+// app/map-booking/page.js - IMPROVED VERSION
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, Suspense} from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import InteractiveMap from "@/components/InteractiveMap";
-// IMPORTANT: use your direct booking component (the one you pasted earlier)
 import LuggageBookingForm from "../../components/booking-form/LuggageBookingForm.js";
-import { Search, X, MapPin, Navigation, ChevronDown } from "lucide-react";
+import { Search, X, MapPin, Navigation, ChevronUp, Loader as LoaderIcon, AlertCircle } from "lucide-react";
 import styles from "./MapBooking.module.css";
 
-/*
-  Mobile-first improvements made in this file:
-  - Bigger, touch-friendly search and suggestion items
-  - Keyboard navigation for search suggestions (Arrow keys + Enter)
-  - "Near me" quick filter button that sorts suggestions by distance
-  - When selecting via search on mobile the drawer now opens expanded to make booking faster
-  - Improved focus management & aria attributes for accessibility
-  - Close/cleanup behavior ensures body scrolling is restored
-  - Slight UI polish: clearer min/max drawer states, explicit "Book Now" CTA on minimized header
-*/
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  if ([lat1, lon1, lat2, lon2].some((v) => v == null || isNaN(v))) return Infinity;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
-export default function MapBookingPage() {
+function MapBookingContent() {
+  const searchParams = useSearchParams();
+  
   const [selectedStation, setSelectedStation] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [allStations, setAllStations] = useState([]);
+  const [filteredStations, setFilteredStations] = useState([]);
   const [zoomTo, setZoomTo] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDrawer, setShowMobileDrawer] = useState(false);
   const [drawerExpanded, setDrawerExpanded] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [isLoadingStations, setIsLoadingStations] = useState(true);
+  const [error, setError] = useState(null);
   const [nearMeMode, setNearMeMode] = useState(false);
-  const userLocRef = useRef(null);
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [locationPromptMessage, setLocationPromptMessage] = useState("");
+  
   const suggestionsRef = useRef(null);
+  const hasProcessedParams = useRef(false);
 
-  // Load stations and watch resize
+  const urlSearch = searchParams?.get("search");
+  const urlStationId = searchParams?.get("stationId");
+  const urlLat = searchParams?.get("lat");
+  const urlLng = searchParams?.get("lng");
+  const urlNearby = searchParams?.get("nearby") === "true";
+
   useEffect(() => {
-    let mounted = true;
-    const loadStations = async () => {
-      try {
-        const res = await fetch("/api/station/list");
-        const data = await res.json();
-        if (!mounted) return;
-        setAllStations(data.stations || []);
-      } catch (error) {
-        console.error("Failed to load stations:", error);
-      }
-    };
-    loadStations();
-
-    const handleResize = () => {
+    const checkMobile = () => {
       const mobile = window.innerWidth <= 968;
       setIsMobile(mobile);
       if (!mobile) {
@@ -58,149 +59,239 @@ export default function MapBookingPage() {
         document.body.style.overflow = "";
       }
     };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
     return () => {
-      mounted = false;
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", checkMobile);
+      document.body.style.overflow = "";
     };
   }, []);
 
-  // Keep body scrolling locked when drawer expanded on mobile
   useEffect(() => {
     if (isMobile && showMobileDrawer && drawerExpanded) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isMobile, showMobileDrawer, drawerExpanded]);
 
-  // Utility: compute distance (Haversine)
-  const distanceKm = (lat1, lon1, lat2, lon2) => {
-    if ([lat1, lon1, lat2, lon2].some((v) => v == null)) return Infinity;
-    const toRad = (d) => (d * Math.PI) / 180;
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+  useEffect(() => {
+    let mounted = true;
+    const fetchStations = async () => {
+      setIsLoadingStations(true);
+      setError(null);
+      try {
+        const response = await fetch("/api/station/list");
+        if (!response.ok) throw new Error(`Failed to fetch stations: ${response.status}`);
+        const data = await response.json();
+        if (!mounted) return;
+        if (data.stations && Array.isArray(data.stations)) {
+          setAllStations(data.stations);
+          setFilteredStations(data.stations);
+        } else {
+          throw new Error("Invalid stations data");
+        }
+      } catch (err) {
+        if (mounted) setError(err.message || "Failed to load stations");
+      } finally {
+        if (mounted) setIsLoadingStations(false);
+      }
+    };
+    fetchStations();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const checkAndPromptLocation = async () => {
+    if (!navigator.geolocation || !navigator.permissions) return;
+    try {
+      const result = await navigator.permissions.query({ name: "geolocation" });
+      if (result.state === "prompt" || result.state === "denied") {
+        setShowLocationPrompt(true);
+        if (result.state === "denied") {
+          setLocationPromptMessage("Enable location access in your browser settings to see distances.");
+        } else {
+          setLocationPromptMessage("Allow location access to see distances to storage stations.");
+        }
+      }
+    } catch (error) {
+      console.error("Error checking location permission:", error);
+    }
   };
 
-  // When InteractiveMap reports user's location, store it here for sorting
-  const handleUserLocationUpdate = (loc) => {
-    userLocRef.current = loc; // { lat, lng }
-  };
+  // ✅ IMPROVED: Memoized sorting function
+  const sortStationsByDistance = useCallback((stations, userLoc) => {
+    if (!userLoc || !userLoc.lat || !userLoc.lng) return stations;
+    return [...stations]
+      .map((station) => {
+        const coords = station.coordinates?.coordinates;
+        if (!coords || coords.length < 2) return { ...station, distance: Infinity };
+        const [lng, lat] = coords;
+        const distance = calculateDistance(userLoc.lat, userLoc.lng, lat, lng);
+        return { ...station, distance };
+      })
+      .sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+  }, []);
 
-  // Search change with improved UX
-  const handleSearchChange = (e) => {
-    const input = e.target.value;
-    setSearchTerm(input);
-    setHighlightedIndex(-1);
+  useEffect(() => {
+    if (hasProcessedParams.current || isLoadingStations || allStations.length === 0) return;
+    hasProcessedParams.current = true;
 
-    if (!input.trim()) {
-      setSuggestions([]);
+    // Handle station ID
+    if (urlStationId) {
+      const station = allStations.find((s) => s._id === urlStationId);
+      if (station) {
+        const coords = station.coordinates?.coordinates;
+        if (coords && coords.length >= 2) {
+          const [lng, lat] = coords;
+          setSelectedStation({ ...station, lat, lng });
+          setZoomTo({ lat, lng });
+          setSearchTerm(station.name || "");
+          if (isMobile) {
+            setShowMobileDrawer(true);
+            setDrawerExpanded(true);
+          }
+        }
+      }
       return;
     }
 
-    // basic fuzzy match on name / location
-    const matches = allStations
-      .map((s) => {
-        const raw = s.coordinates?.coordinates || [];
-        const lat = raw?.[1];
-        const lng = raw?.[0];
-        const dist =
-          userLocRef.current && lat != null && lng != null
-            ? distanceKm(
-                userLocRef.current.lat,
-                userLocRef.current.lng,
-                lat,
-                lng
-              )
-            : null;
-        return { station: s, dist };
-      })
-      .filter(({ station }) =>
-        station.name?.toLowerCase().includes(input.toLowerCase()) ||
-        station.location?.toLowerCase().includes(input.toLowerCase())
+    // ✅ CRITICAL FIX: Handle nearby mode - ONLY show location prompt here
+    if (urlNearby && urlLat && urlLng) {
+      const lat = parseFloat(urlLat);
+      const lng = parseFloat(urlLng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const userLoc = { lat, lng };
+        setUserLocation(userLoc);
+        setZoomTo(userLoc);
+        setNearMeMode(true);
+        const sorted = sortStationsByDistance(allStations, userLoc);
+        setFilteredStations(sorted);
+        setSearchTerm("Nearest locations");
+        checkAndPromptLocation(); // ✅ ONLY show prompt for "Use My Location"
+      }
+      return;
+    }
+
+    // ✅ CRITICAL FIX: Handle area search - NO location prompt, ZOOM TO SEARCHED AREA
+    if (urlSearch) {
+      const query = urlSearch.toLowerCase().trim();
+      setSearchTerm(urlSearch);
+
+      // If coordinates provided, zoom there (NOT to user location)
+      if (urlLat && urlLng) {
+        const lat = parseFloat(urlLat);
+        const lng = parseFloat(urlLng);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          // ✅ CRITICAL: Set zoom coordinates but DON'T set userLocation
+          setZoomTo({ lat, lng }); // Zoom to searched area
+          
+          // Filter and sort stations by distance from SEARCHED location (not user location)
+          const searchedLocation = { lat, lng };
+          const sorted = sortStationsByDistance(allStations, searchedLocation);
+          setFilteredStations(sorted);
+          // ✅ DO NOT call checkAndPromptLocation() here
+          return;
+        }
+      }
+
+      // Regular search without coordinates
+      const matches = allStations.filter(
+        (station) =>
+          station.name?.toLowerCase().includes(query) ||
+          station.location?.toLowerCase().includes(query)
       );
+      setFilteredStations(matches);
 
-    // If nearMeMode, sort by distance; otherwise keep relevance and limit to 6
-    matches.sort((a, b) => {
-      if (nearMeMode && a.dist != null && b.dist != null) return a.dist - b.dist;
-      return (a.station.name?.length || 0) - (b.station.name?.length || 0);
-    });
+      if (matches.length > 0) {
+        const firstStation = matches[0];
+        const coords = firstStation.coordinates?.coordinates;
+        if (coords && coords.length >= 2) {
+          const [lng, lat] = coords;
+          setZoomTo({ lat, lng });
+        }
+      }
+    }
+  }, [allStations, isLoadingStations, urlStationId, urlSearch, urlLat, urlLng, urlNearby, isMobile, sortStationsByDistance]);
 
-    setSuggestions(matches.slice(0, 6).map((m) => ({ ...m.station, _distanceKm: m.dist })));
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setHighlightedIndex(-1);
+    if (!value.trim()) {
+      setSuggestions([]);
+      setFilteredStations(allStations);
+      return;
+    }
+    const query = value.toLowerCase();
+    let matches = allStations
+      .map((station) => {
+        const coords = station.coordinates?.coordinates;
+        let distance = null;
+        if (userLocation && coords && coords.length >= 2) {
+          const [lng, lat] = coords;
+          distance = calculateDistance(userLocation.lat, userLocation.lng, lat, lng);
+        }
+        return { ...station, distance };
+      })
+      .filter(
+        (station) =>
+          station.name?.toLowerCase().includes(query) ||
+          station.location?.toLowerCase().includes(query)
+      );
+    if (nearMeMode && userLocation) {
+      matches.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+    }
+    setSuggestions(matches.slice(0, 6));
+    setFilteredStations(matches);
   };
 
-  // Keyboard nav for suggestions
   const handleSearchKeyDown = (e) => {
     if (!suggestions.length) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlightedIndex((i) => Math.min(suggestions.length - 1, i + 1));
-      scrollSuggestionIntoView(highlightedIndex + 1);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlightedIndex((i) => Math.max(-1, i - 1));
-      scrollSuggestionIntoView(highlightedIndex - 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
       const idx = highlightedIndex >= 0 ? highlightedIndex : 0;
-      handleSelectSuggestion(suggestions[idx]);
+      if (suggestions[idx]) handleSelectSuggestion(suggestions[idx]);
     } else if (e.key === "Escape") {
       setSuggestions([]);
       setHighlightedIndex(-1);
     }
   };
 
-  const scrollSuggestionIntoView = (index) => {
-    try {
-      const container = suggestionsRef.current;
-      const item = container?.querySelectorAll("[data-suggestion-item]")?.[index];
-      if (item && container) item.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    } catch {
-      // intentionally ignore scroll errors
-    }
-  };
-
   const handleSelectSuggestion = (station) => {
     if (!station) return;
-    const raw = station.coordinates?.coordinates;
-    if (!raw || raw.length < 2) return;
-
-    const lat = raw[1];
-    const lng = raw[0];
-
+    const coords = station.coordinates?.coordinates;
+    if (!coords || coords.length < 2) return;
+    const [lng, lat] = coords;
     setZoomTo({ lat, lng });
     setSelectedStation({ ...station, lat, lng });
-    setSearchTerm(station.name);
+    setSearchTerm(station.name || "");
     setSuggestions([]);
-
+    setHighlightedIndex(-1);
     if (isMobile) {
       setShowMobileDrawer(true);
-      setDrawerExpanded(true); // expand on explicit selection to enable booking
+      setDrawerExpanded(true);
     }
   };
 
   const handleStationSelect = (station) => {
     const lat = station.lat ?? station.coordinates?.coordinates?.[1];
     const lng = station.lng ?? station.coordinates?.coordinates?.[0];
-
     if (!lat || !lng) return;
-
     setSelectedStation({ ...station, lat, lng });
     setZoomTo({ lat, lng });
-
     if (isMobile) {
       setShowMobileDrawer(true);
-      // when tapping a pin, keep minimized to allow quick peek — user can expand
       setDrawerExpanded(false);
     }
   };
@@ -218,69 +309,146 @@ export default function MapBookingPage() {
     setShowMobileDrawer(false);
     setDrawerExpanded(false);
     setSelectedStation(null);
-    setSearchTerm("");
-    setSuggestions([]);
     document.body.style.overflow = "";
   };
 
-  // Quick near-me toggle: sorts suggestions by distance when searching
   const toggleNearMe = () => {
-    setNearMeMode((v) => !v);
-    if (searchTerm) {
-      setTimeout(() => handleSearchChange({ target: { value: searchTerm } }), 0);
+    setNearMeMode((prev) => !prev);
+    if (userLocation && searchTerm) {
+      const sorted = sortStationsByDistance(filteredStations, userLocation);
+      setFilteredStations(sorted);
+      setSuggestions(sorted.slice(0, 6));
     }
   };
 
-  // Callback after booking completes — used to clear selection and close drawer (mobile)
   const handleBookingComplete = () => {
-    // optionally clear map selection & close drawer
     setSelectedStation(null);
     setShowMobileDrawer(false);
     setDrawerExpanded(false);
-    // you can also add any tracking / success toast here
+    document.body.style.overflow = "";
   };
+
+  const handleEnableLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+        setShowLocationPrompt(false);
+        const sorted = [...filteredStations].sort((a, b) => {
+          const coords = a.coordinates?.coordinates;
+          if (!coords) return 1;
+          const distA = calculateDistance(latitude, longitude, coords[1], coords[0]);
+          const coordsB = b.coordinates?.coordinates;
+          if (!coordsB) return -1;
+          const distB = calculateDistance(latitude, longitude, coordsB[1], coordsB[0]);
+          return distA - distB;
+        });
+        setFilteredStations(sorted);
+      },
+      (error) => {
+        let errorMessage = "";
+        if (error.code === 1) {
+          errorMessage = "Location access denied. Please enable it in browser settings.";
+        } else if (error.code === 2) {
+          errorMessage = "Location unavailable. Please try again.";
+        } else if (error.code === 3) {
+          errorMessage = "Location request timed out.";
+        } else {
+          errorMessage = "Unable to get location.";
+        }
+        setLocationPromptMessage(errorMessage);
+        setTimeout(() => setLocationPromptMessage(""), 5000);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 15000,
+        maximumAge: 300000,
+      }
+    );
+  };
+
+  if (isLoadingStations) {
+    return (
+      <div className={styles.pageWrapper}>
+        <Header />
+        <div className={styles.loadingContainer}>
+          <LoaderIcon className={styles.spinner} />
+          <p>Loading storage locations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.pageWrapper}>
+        <Header />
+        <div className={styles.errorContainer}>
+          <AlertCircle className={styles.errorIcon} />
+          <h2>Unable to Load Stations</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className={styles.retryButton}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.pageWrapper}>
       <Header />
-
       <div className={styles.container}>
-        {/* Search Bar - Fixed on mobile */}
-        <div className={`${styles.searchContainer} ${isMobile ? styles.searchContainerMobile : ""}`}>
-          <div className={styles.searchBox} role="search" aria-label="Search stations">
-            <Search size={20} className={styles.searchIcon} aria-hidden />
+        {showLocationPrompt && (
+          <div className={styles.locationPrompt}>
+            <div className={styles.locationPromptContent}>
+              <MapPin className={styles.locationPromptIcon} />
+              <span>{locationPromptMessage}</span>
+            </div>
+            <div className={styles.locationPromptActions}>
+              <button onClick={handleEnableLocation} className={styles.enableLocationBtn}>
+                Enable Location
+              </button>
+              <button onClick={() => setShowLocationPrompt(false)} className={styles.dismissBtn}>
+                Not Now
+              </button>
+            </div>
+          </div>
+        )}
 
+        <div className={`${styles.searchContainer} ${isMobile ? styles.searchContainerMobile : ""}`}>
+          <div className={styles.searchBox}>
+            <Search size={20} className={styles.searchIcon} />
             <input
               type="text"
-              inputMode="search"
               placeholder="Search for a station or location"
               value={searchTerm}
               onChange={handleSearchChange}
               onKeyDown={handleSearchKeyDown}
               className={styles.searchInput}
-              aria-autocomplete="list"
-              aria-controls="station-suggestions"
-              aria-activedescendant={highlightedIndex >= 0 ? `sug-${highlightedIndex}` : undefined}
             />
-
-            {/* Near-me quick toggle: show only when we have user location available */}
-            <button
-              onClick={toggleNearMe}
-              title={nearMeMode ? "Near me: ON" : "Near me: OFF"}
-              aria-pressed={nearMeMode}
-              className={`${styles.nearMeBtn} ${nearMeMode ? styles.nearMeBtnActive : ""}`}
-            >
-              <Navigation size={16} />
-            </button>
-
+            {userLocation && (
+              <button
+                onClick={toggleNearMe}
+                className={`${styles.nearMeBtn} ${nearMeMode ? styles.nearMeBtnActive : ""}`}
+                title="Sort by nearest"
+              >
+                <Navigation size={16} />
+              </button>
+            )}
             {searchTerm && (
               <button
                 onClick={() => {
                   setSearchTerm("");
                   setSuggestions([]);
+                  setFilteredStations(allStations);
                 }}
                 className={styles.clearBtn}
-                aria-label="Clear search"
+                title="Clear search"
               >
                 <X size={18} />
               </button>
@@ -288,31 +456,26 @@ export default function MapBookingPage() {
           </div>
 
           {suggestions.length > 0 && (
-            <div
-              id="station-suggestions"
-              ref={suggestionsRef}
-              className={styles.suggestions}
-              role="listbox"
-              aria-label="Station suggestions"
-            >
+            <div ref={suggestionsRef} className={styles.suggestions}>
               {suggestions.map((station, idx) => (
                 <div
                   key={station._id}
-                  role="option"
-                  id={`sug-${idx}`}
                   data-suggestion-item
-                  aria-selected={highlightedIndex === idx}
                   onClick={() => handleSelectSuggestion(station)}
                   onMouseEnter={() => setHighlightedIndex(idx)}
-                  className={`${styles.suggestionItem} ${highlightedIndex === idx ? styles.suggestionItemActive : ""}`}
+                  className={`${styles.suggestionItem} ${
+                    highlightedIndex === idx ? styles.suggestionItemActive : ""
+                  }`}
                 >
-                  <MapPin size={18} className={styles.suggestionIcon} aria-hidden />
+                  <MapPin size={18} className={styles.suggestionIcon} />
                   <div className={styles.suggestionText}>
                     <div className={styles.suggestionName}>{station.name}</div>
                     <div className={styles.suggestionLocation}>
                       {station.location}
-                      {station._distanceKm != null && userLocRef.current && (
-                        <span className={styles.distanceBadge}>{`${station._distanceKm.toFixed(1)} km`}</span>
+                      {station.distance != null && userLocation && (
+                        <span className={styles.distanceBadge}>
+                          {station.distance.toFixed(1)} km
+                        </span>
                       )}
                     </div>
                   </div>
@@ -322,24 +485,20 @@ export default function MapBookingPage() {
           )}
         </div>
 
-        {/* Main Content Grid */}
         <div className={styles.contentGrid}>
-          {/* Map Section */}
           <div className={`${styles.mapSection} ${isMobile ? styles.mapSectionMobile : ""}`}>
             <InteractiveMap
-              onStationSelect={(s) => handleStationSelect(s)}
+              onStationSelect={handleStationSelect}
               prefilledStation={selectedStation}
               zoomTo={zoomTo}
               theme="dark"
-              onUserLocation={(loc) => handleUserLocationUpdate(loc)}
+              stations={filteredStations}
             />
           </div>
 
-          {/* Desktop Form Sidebar */}
           {!isMobile && (
             <div className={styles.formSidebar}>
               {selectedStation ? (
-                // pass the selectedStation to the booking form as `prefilledStation` and mode="map"
                 <LuggageBookingForm
                   prefilledStation={selectedStation}
                   mode="map"
@@ -354,22 +513,35 @@ export default function MapBookingPage() {
                   <p className={styles.placeholderText}>
                     Click on a pin on the map or search for a station to start your booking
                   </p>
+                  <div className={styles.placeholderStats}>
+                    <div className={styles.placeholderStat}>
+                      <strong>{allStations.length}</strong>
+                      <span>Total Locations</span>
+                    </div>
+                    {filteredStations.length < allStations.length && (
+                      <div className={styles.placeholderStat}>
+                        <strong>{filteredStations.length}</strong>
+                        <span>Matching Results</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Mobile Bottom Drawer - Improved */}
         {isMobile && showMobileDrawer && selectedStation && (
           <>
-            {/* Overlay - only when expanded */}
-            {drawerExpanded && <div className={styles.overlay} onClick={() => setDrawerExpanded(false)} />}
-
-            {/* Drawer */}
-            <div className={`${styles.mobileDrawer} ${drawerExpanded ? styles.mobileDrawerExpanded : styles.mobileDrawerMinimized}`}>
-              {/* Drawer Header - Always Visible */}
-              <div className={styles.drawerHeader} onClick={toggleDrawer} role="button" aria-label="Toggle booking drawer">
+            {drawerExpanded && (
+              <div className={styles.overlay} onClick={() => setDrawerExpanded(false)} />
+            )}
+            <div
+              className={`${styles.mobileDrawer} ${
+                drawerExpanded ? styles.mobileDrawerExpanded : styles.mobileDrawerMinimized
+              }`}
+            >
+              <div className={styles.drawerHeader} onClick={toggleDrawer}>
                 <div className={styles.drawerHandle} />
                 <div className={styles.drawerHeaderContent}>
                   <div className={styles.drawerStationInfo}>
@@ -379,32 +551,28 @@ export default function MapBookingPage() {
                       <div className={styles.drawerStationLocation}>{selectedStation.location}</div>
                     </div>
                   </div>
-
                   <div className={styles.drawerToggle}>
-                    <span className={styles.drawerToggleText}>{drawerExpanded ? "Minimize" : "Book Now"}</span>
-                    <ChevronDown
+                    <span className={styles.drawerToggleText}>
+                      {drawerExpanded ? "Minimize" : "Book Now"}
+                    </span>
+                    <ChevronUp
                       size={20}
                       className={styles.drawerToggleIcon}
-                      style={{
-                        transform: drawerExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                      }}
+                      style={{ transform: drawerExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
                     />
                   </div>
                 </div>
-
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     closeDrawer();
                   }}
                   className={styles.closeDrawerBtn}
-                  aria-label="Close booking drawer"
+                  title="Close"
                 >
                   <X size={20} />
                 </button>
               </div>
-
-              {/* Drawer Content - Scrollable */}
               {drawerExpanded && (
                 <div className={styles.drawerContent}>
                   <LuggageBookingForm
@@ -421,5 +589,23 @@ export default function MapBookingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MapBookingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.pageWrapper}>
+          <Header />
+          <div className={styles.loadingContainer}>
+            <LoaderIcon className={styles.spinner} />
+            <p>Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <MapBookingContent />
+    </Suspense>
   );
 }

@@ -27,7 +27,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
         fontSize: "0.95rem",
         color: "#333",
         marginBottom: "10px",
-        background: "#f8f9fa",
+        background: "#0080ffff",
         padding: "10px 12px",
         borderLeft: "4px solid #0070ba", // PayPal blue accent
         borderRadius: "6px",
@@ -44,9 +44,11 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
         "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
         currency: "AUD",
         locale: "en_AU",
+        components: "buttons",
       }}
     >
       <PayPalButtons
+        fundingSource="card"
         createOrder={(data, actions) => {
           return actions.order.create({
             purchase_units: [
@@ -104,7 +106,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
         }}
         style={{
           layout: "vertical",
-          color: "blue",
+          color: "black",
           shape: "rect",
           label: "checkout",
           tagline: false,

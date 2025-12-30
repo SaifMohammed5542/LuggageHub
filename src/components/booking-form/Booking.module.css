@@ -618,13 +618,17 @@
 
 .warningBox {
   background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--color-warning);
-  border-radius: var(--radius);
+  border: 2px solid var(--color-primary);
+  border-radius: 10px;
   padding: 1rem 1.25rem;
   color: var(--color-warning);
   font-size: 0.9rem;
   text-align: center;
   margin: 1.5rem 0;
+}
+.warningBox::before {
+  content: "✅";
+  margin-right: 0.5rem;
 }
 
 .paymentSection {
@@ -1787,7 +1791,7 @@
   }
 
   .formSection {
-    padding-bottom: 140px;
+    padding-bottom: 100px;
   }
 
   .toggleButton {
@@ -1862,7 +1866,7 @@
   }
 
   .formSection {
-    padding-bottom: 130px;
+    padding-bottom: 60px;
   }
 }
 
@@ -2088,3 +2092,12 @@
 .compact .sizeCard {
   padding: 1rem;
 }
+
+/* 🔒 Prevent mobile zoom on input focus */
+@media (max-width: 768px) {
+  .input,
+  .select {
+    font-size: 16px !important;
+  }
+}
+
