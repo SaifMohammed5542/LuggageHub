@@ -90,6 +90,7 @@ const countryRef = useRef(null);
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false); // ✅ NEW
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [hasSpecialInstructions, setHasSpecialInstructions] = useState(false);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
   const [timingAlert, setTimingAlert] = useState(null);
@@ -1461,18 +1462,31 @@ useEffect(() => {
                       </div>
 
                       <div className={styles.checkboxGroup}>
-                        <label className={styles.checkboxLabel}>
-                          <input
-                            type="checkbox"
-                            name="termsAccepted"
-                            checked={formData.termsAccepted}
-                            onChange={handleChange}
-                            className={styles.checkbox}
-                          />
-                          <span>I agree to the terms and conditions</span>
-                        </label>
-                        {errors.termsAccepted && <span className={styles.errorText}>{errors.termsAccepted}</span>}
-                      </div>
+  <label className={styles.checkboxLabel}>
+    <input
+      type="checkbox"
+      name="termsAccepted"
+      checked={formData.termsAccepted}
+      onChange={handleChange}
+      className={styles.checkbox}
+    />
+    <span>
+      I agree to the{" "}
+      <button
+        type="button"
+        onClick={() => setShowTermsModal(true)}
+        className={styles.legalBtn}
+      >
+        Terms & Conditions
+      </button>
+    </span>
+  </label>
+
+  {errors.termsAccepted && (
+    <span className={styles.errorText}>{errors.termsAccepted}</span>
+  )}
+</div>
+
 
                       {isLoading || isPaymentProcessing ? (
                         <div className={styles.loadingContainer}>
@@ -1590,6 +1604,57 @@ useEffect(() => {
           </div>
         </div>
       </div>
+     {showTermsModal && (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modalBox} role="dialog" aria-modal="true">
+      <button
+        className={styles.modalClose}
+        aria-label="Close terms modal"
+        onClick={() => setShowTermsModal(false)}
+      >
+        ✕
+      </button>
+
+      <h2 className={styles.modalTitle}>Before You Continue</h2>
+
+      <div className={styles.modalContent}>
+        <p>
+          By proceeding with this booking, you agree to Luggage Terminal’s
+          <strong> Terms & Conditions</strong> and acknowledge our
+          <strong> Privacy Policy</strong>.
+        </p>
+
+        <p>
+          Please ensure your luggage does not contain prohibited items such as
+          valuables, electronics, passports, or hazardous materials. Refunds and
+          cancellations are subject to our cancellation policy.
+        </p>
+
+        <div className={styles.modalActions}>
+          <a
+            href="/terms-&-conditions"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.legalBtnSecondary}
+          >
+            Terms & Conditions
+          </a>
+
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.legalBtnSecondary}
+          >
+            Privacy Policy
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </>
   );
 };

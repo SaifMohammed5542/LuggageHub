@@ -11,6 +11,7 @@ import {
   Shield,
   TrendingUp,
   AlertCircle,
+  BoxIcon,
 } from "lucide-react";
 import styles from "./Banner.module.css";
 import Image from "next/image";
@@ -24,7 +25,8 @@ export default function Banner() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  
+  const [bookingType, setBookingType] = useState("luggage"); 
+// "luggage" | "key"
   const autocompleteService = useRef(null);
   const geocoderService = useRef(null);
   const sessionToken = useRef(null);
@@ -371,6 +373,46 @@ export default function Banner() {
                     {isLoadingLocation ? "Getting your location..." : "Use My Location - Find Nearest"}
                   </span>
                 </button>
+                {/* Booking Type Toggle */}
+
+<div className={styles.or}>
+  <p>OR</p>
+</div>
+
+{/* Wrapper for toggle + button */}
+<div className={styles.bookingWrapper}>
+  {/* Booking Type Toggle */}
+  <div className={styles.bookingToggle}>
+    <button
+      type="button"
+      className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
+      onClick={() => setBookingType("luggage")}
+    >
+      🧳 Luggage
+    </button>
+
+    <button
+      type="button"
+      className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
+      onClick={() => setBookingType("key")}
+    >
+      🔑 Key
+    </button>
+  </div>
+
+  {/* Direct Booking Button */}
+  <button
+    onClick={() =>
+      router.push(
+        bookingType === "key" ? "/key-handover" : "/booking-form"
+      )
+    }
+    className={styles.directBookingCTA}
+  >
+    <BoxIcon className={styles.locationIcon} />
+    {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
+  </button>
+</div>
 
                 {locationError && (
                   <div className={styles.locationError}>
