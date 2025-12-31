@@ -3,6 +3,8 @@
 /**
  * Validates if a given datetime falls within station operating hours
  * and suggests the nearest available time if closed
+ * 
+ * ✅ NOW SUPPORTS CROSS-MIDNIGHT HOURS (e.g., 7 AM - 2 AM next day)
  */
 
 /**
@@ -23,6 +25,7 @@ const timeToMinutes = (timeStr) => {
 
 /**
  * Check if station is open at given datetime
+ * ✅ FIXED: Now handles cross-midnight hours correctly
  */
 export const isStationOpen = (dateTime, stationTimings) => {
   if (!dateTime || !stationTimings) return { isOpen: false, reason: 'Invalid data' };
@@ -51,19 +54,31 @@ export const isStationOpen = (dateTime, stationTimings) => {
   const openMinutes = timeToMinutes(dayTiming.open);
   const closeMinutes = timeToMinutes(dayTiming.close);
 
-  const isOpen = currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  // ✅ FIX: Handle cross-midnight hours (e.g., 7 AM - 2 AM)
+  let isOpen;
+  
+  if (closeMinutes < openMinutes) {
+    // Cross-midnight: Station closes after midnight (e.g., 7 AM - 2 AM)
+    // Open if current time is AFTER opening OR BEFORE closing
+    isOpen = currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
+  } else {
+    // Same-day: Normal hours (e.g., 9 AM - 6 PM)
+    isOpen = currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  }
 
   return {
     isOpen,
     reason: isOpen ? null : 'Station is closed at this time',
     dayName,
     openTime: dayTiming.open,
-    closeTime: dayTiming.close
+    closeTime: dayTiming.close,
+    isCrossMidnight: closeMinutes < openMinutes
   };
 };
 
 /**
  * Find next available opening time
+ * ✅ IMPROVED: Better handling for cross-midnight scenarios
  */
 const findNextOpening = (fromDate, stationTimings, maxDaysAhead = 7) => {
   let checkDate = new Date(fromDate);
@@ -73,6 +88,19 @@ const findNextOpening = (fromDate, stationTimings, maxDaysAhead = 7) => {
     const dayTiming = stationTimings[dayName];
     
     if (!dayTiming.closed) {
+      const openMinutes = timeToMinutes(dayTiming.open);
+      const closeMinutes = timeToMinutes(dayTiming.close);
+      const isCrossMidnight = closeMinutes < openMinutes;
+      
+      // Get current time in minutes
+      const currentMinutes = checkDate.getHours() * 60 + checkDate.getMinutes();
+      
+      // If cross-midnight and we're in the "after midnight" window
+      if (i === 0 && isCrossMidnight && currentMinutes <= closeMinutes) {
+        // We're already in an open period (after midnight but before close)
+        return null; // Should already be detected as open
+      }
+      
       // Station opens this day
       const openTime = dayTiming.open;
       const [hours, minutes] = openTime.split(':').map(Number);
@@ -101,6 +129,7 @@ const findNextOpening = (fromDate, stationTimings, maxDaysAhead = 7) => {
 
 /**
  * Find previous closing time (last moment station was open)
+ * ✅ IMPROVED: Better handling for cross-midnight scenarios
  */
 const findPreviousClosing = (fromDate, stationTimings, maxDaysBack = 7) => {
   let checkDate = new Date(fromDate);

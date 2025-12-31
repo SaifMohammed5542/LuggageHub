@@ -255,9 +255,8 @@ export default function AdminDashboard() {
         const dt = stationTimings[d];
         if (!dt) return { ok: false, message: `Timing for ${d} is missing.` };
         if (!dt.closed) {
-          if (!dt.open || !dt.close) return { ok: false, message: `Open and close times required for ${d}.` };
-          if (dt.open >= dt.close) return { ok: false, message: `${d.charAt(0).toUpperCase() + d.slice(1)}: open must be before close.` };
-        }
+  if (!dt.open || !dt.close) return { ok: false, message: `Open and close times required for ${d}.` };
+}
       }
     }
 
@@ -723,15 +722,11 @@ export default function AdminDashboard() {
           return;
         }
         if (!dt.closed) {
-          if (!dt.open || !dt.close) {
-            showToast(`Open and close times required for ${d}.`, "error");
-            return;
-          }
-          if (dt.open >= dt.close) {
-            showToast(`${d.charAt(0).toUpperCase() + d.slice(1)}: open must be before close.`, "error");
-            return;
-          }
-        }
+  if (!dt.open || !dt.close) {
+    showToast(`Open and close times required for ${d}.`, "error");
+    return;
+  }
+}
       }
     }
 
