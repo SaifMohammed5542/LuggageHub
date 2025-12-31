@@ -808,6 +808,33 @@
   letter-spacing: 0.5px;
 }
 
+
+
+
+.countryDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  z-index: 1000;
+  font-size: 16px !important
+}
+
+.countryOption {
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.countryOption:hover {
+  background: rgba(var(--primary-rgb), 0.12);
+}
+
+
 [data-theme="dark"] .suggestionLabel {
   color: #48bb78;
 }
