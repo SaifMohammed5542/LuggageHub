@@ -1375,6 +1375,103 @@
 .compact .toggleButton { padding: 10px 12px !important; }
 .compact .toggleButton .totalValue { font-size: 1.25rem !important; }
 
+
+
+
+/* ===== Terms Modal ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalBox {
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+}
+
+.modalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--primary);
+}
+
+.modalTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.modalContent p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.legalBtnSecondary {
+  flex: 1;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: var(--primary);
+}
+
+.legalBtn {
+  flex: 1;
+  text-align: center;
+  padding: 6px 8px;
+  border:none;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+  color: #4a63ff;
+}
+
+.legalBtn:hover {
+  opacity: 0.9;
+}
+
+.legalBtnSecondary {
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+}
+
+.legalBtnSecondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+
 /* Ensure compact persists on large viewports */
 @media (min-width: 969px) {
   .compact .inputRow { grid-template-columns: 1fr !important; }

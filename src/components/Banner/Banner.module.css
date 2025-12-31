@@ -514,7 +514,255 @@
     gap: 10px;
   }
 
+.or{
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 12px 0;
+}
+/* 
+.directBookingCTA {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  border-top-left-radius: 0;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+ */
 
+
+/* ---- Booking Toggle ---- */
+/* Add this to your Banner.module.css */
+
+/* Wrapper for toggle + button */
+
+/* Wrapper for toggle + button */
+.bookingWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Mini Booking Type Toggle - Attached to Top Left Corner */
+.bookingToggle {
+  display: inline-flex;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid var(--glass-border);
+  border-bottom: none;
+  border-radius: 6px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 2px;
+  backdrop-filter: blur(8px);
+  width: fit-content;
+  position: absolute;
+  top: -25px;
+  z-index: 10;
+}
+
+.toggleOption {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: var(--glass-bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.toggleOption:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.toggleOption.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.35);
+}
+
+/* Direct Booking CTA Button */
+.directBookingCTA {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  border-top-left-radius: 0;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  margin-top: 16px;
+}
+
+.directBookingCTA:hover {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
+}
+
+.locationIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive Styles - Maintain exact same look */
+@media (max-width: 768px) {
+  .bookingToggle {
+    top: -25px;
+    gap: 2px;
+    padding: 2px;
+    border: 2px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 6px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .toggleOption {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    gap: 3px;
+    border-radius: 4px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--glass-bg);
+  }
+
+  .directBookingCTA {
+    padding: 14px 24px;
+    font-size: 0.95rem;
+    margin-top: 16px;
+    border-radius: var(--radius-md);
+    border-top-left-radius: 0;
+    border: 2px solid var(--glass-border);
+  }
+}
+
+@media (max-width: 488px) {
+  .bookingToggle {
+    top: -25px;
+    gap: 2px;
+    padding: 2px;
+    border: 2px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 6px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .toggleOption {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    gap: 3px;
+    border-radius: 4px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--glass-bg);
+  }
+
+  .directBookingCTA {
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    margin-top: 16px;
+    border-radius: var(--radius-md);
+    border-top-left-radius: 0;
+    border: 2px solid var(--glass-border);
+  }
+}
+
+@media (max-width: 375px) {
+  .bookingToggle {
+    top: -25px;
+    gap: 2px;
+    padding: 2px;
+    border: 2px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 6px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .toggleOption {
+    padding: 4px 7px;
+    font-size: 0.75rem;
+    gap: 3px;
+    border-radius: 4px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--glass-bg);
+  }
+
+  .directBookingCTA {
+    padding: 11px 16px;
+    font-size: 0.8rem;
+    margin-top: 16px;
+    border-radius: var(--radius-md);
+    border-top-left-radius: 0;
+    border: 2px solid var(--glass-border);
+  }
+}
+
+@media (max-width: 320px) {
+  .bookingToggle {
+    top: -25px;
+    gap: 2px;
+    padding: 2px;
+    border: 2px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 5px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .toggleOption {
+    padding: 3px 6px;
+    font-size: 0.7rem;
+    gap: 2px;
+    border-radius: 3px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--glass-bg);
+  }
+
+  .directBookingCTA {
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    margin-top: 16px;
+    border-radius: var(--radius-md);
+    border-top-left-radius: 0;
+    border: 2px solid var(--glass-border);
+  }
+}
 /* ---------- RESPONSIVE ---------- */
 
 /* Hide image on larger screens (above tablet) */

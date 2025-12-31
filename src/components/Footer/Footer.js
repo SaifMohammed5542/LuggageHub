@@ -43,29 +43,29 @@ const Footer = () => {
         <div className={styles["footer-section"]}>
           <h3>Quick Links</h3>
           <ul className={styles["footer-links"]}>
+                        <li>
+              <Link href="/terms-of-service" className={styles.link}>
+                Terms & Conditions
+              </Link>
+            </li>
+                        <li>
+              <Link href="/privacy-policy" className={styles.link}>
+                Privacy Policy
+              </Link>
+            </li>
+                        <li>
+              <Link href="/cancellation-policy" className={styles.link}>
+                Cancellation Policy
+              </Link>
+            </li>
             <li>
               <Link href="/contact-us" className={styles.link}>
                 Contact Us
               </Link>
             </li>
             <li>
-              <Link href="/privacy-policy" className={styles.link}>
-                Privacy Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/cancellation-policy" className={styles.link}>
-                Cancellation Policy
-              </Link>
-            </li>
-            <li>
               <Link href="/shipping-policy" className={styles.link}>
                 Shipping Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/terms-of-service" className={styles.link}>
-                Terms of Service
               </Link>
             </li>
             <li>
