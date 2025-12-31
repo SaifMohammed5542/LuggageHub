@@ -1,6 +1,6 @@
 // components/booking-form/LuggageBookingForm.js - IMPROVED VERSION
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../LuggagePay";
@@ -78,6 +78,9 @@ const LuggageBookingForm = ({
     termsAccepted: false,
     stationId: "",
   });
+  const [countrySearch, setCountrySearch] = useState("");
+const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+const countryRef = useRef(null);
 
   const [stations, setStations] = useState([]);
   const [stationTimings, setStationTimings] = useState(null);
@@ -123,6 +126,24 @@ const LuggageBookingForm = ({
     now.setMilliseconds(0);
     return now;
   };
+
+// 🔍 Country search filtering
+const filteredCountryCodes = COUNTRY_CODES.filter(c =>
+  c.label.toLowerCase().includes(countrySearch.toLowerCase()) ||
+  c.code.includes(countrySearch)
+);
+
+// ❌ Close country dropdown on outside click
+useEffect(() => {
+  const handler = (e) => {
+    if (countryRef.current && !countryRef.current.contains(e.target)) {
+      setShowCountryDropdown(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handler);
+  return () => document.removeEventListener("mousedown", handler);
+}, []);
 
   const getMinDateTime = () => {
     const now = getCurrentDateTime();
@@ -881,19 +902,42 @@ const LuggageBookingForm = ({
                             Phone Number
                           </label>
                           <div style={{ display: "flex", gap: "8px" }}>
-                            <select
-                              name="phoneCode"
-                              value={formData.phoneCode}
-                              onChange={handleChange}
-                              className={styles.select}
-                              style={{ maxWidth: "140px" }}
-                            >
-                              {COUNTRY_CODES.map(c => (
-                                <option key={c.code} value={c.code}>
-                                  {c.label}
-                                </option>
-                              ))}
-                            </select>
+<div ref={countryRef} style={{ position: "relative", maxWidth: "180px" }}>
+  <input
+    type="text"
+    className={styles.input}
+    placeholder="Search country"
+    value={countrySearch || formData.phoneCode}
+    onFocus={() => setShowCountryDropdown(true)}
+    onChange={(e) => {
+      setCountrySearch(e.target.value);
+      setShowCountryDropdown(true);
+    }}
+  />
+
+  {showCountryDropdown && (
+    <div className={styles.countryDropdown}>
+      {filteredCountryCodes.map(c => (
+        <div
+          key={c.code}
+          className={styles.countryOption}
+          onClick={() => {
+            setFormData(prev => ({
+              ...prev,
+              phoneCode: c.code,
+              phone: `${c.code} ${prev.phoneNumber}`,
+            }));
+            setCountrySearch("");
+            setShowCountryDropdown(false);
+          }}
+        >
+          {c.label}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
 
                             <input
                               type="tel"
