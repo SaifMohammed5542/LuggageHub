@@ -27,7 +27,7 @@ const PayPalPayment = ({ totalAmount, onPaymentSuccess, formData }) => {
         fontSize: "0.95rem",
         color: "#333",
         marginBottom: "10px",
-        background: "#0080ffff",
+        background: "#ffffffff",
         padding: "10px 12px",
         borderLeft: "4px solid #0070ba", // PayPal blue accent
         borderRadius: "6px",

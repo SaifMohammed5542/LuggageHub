@@ -434,7 +434,7 @@ export default function Banner() {
                 <div className={styles.statItem}>
                   <MapPin className={styles.statIcon} />
                   <div className={styles.statText}>
-                    <div className={styles.statValue}>50+</div>
+                    <div className={styles.statValue}>5+</div>
                     <div className={styles.statLabel}>Locations</div>
                   </div>
                 </div>

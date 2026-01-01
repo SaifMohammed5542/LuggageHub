@@ -518,7 +518,8 @@
   text-align: center;
   font-size: 0.9rem;
   color: var(--text-muted);
-  margin: 12px 0;
+  margin: 12px 10px;
+  margin-bottom: 2.5rem;
 }
 /* 
 .directBookingCTA {
