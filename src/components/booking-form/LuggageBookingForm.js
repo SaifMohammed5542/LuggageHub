@@ -765,38 +765,42 @@ useEffect(() => {
     setIsFormValid(Object.keys(errorsObj).length === 0);
   }, [formData, capacityStatus, dateErrors]);
 
-  const handlePaymentSuccess = async (paymentId) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/booking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          luggageCount: totalBags,
-          paymentId,
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to send booking details.");
-      }
-      const data = await response.json();
-      if (data.success) {
-        try {
-          if (onBookingComplete) onBookingComplete(data);
-        } catch (err) {
-          console.warn("onBookingComplete threw", err);
-        }
-        window.location.href = "/Booked";
-      } else alert("❌ Failed to send booking email.");
-    } catch (error) {
-      console.error("Error:", error);
-      alert(`An error occurred: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+// Replace your handlePaymentSuccess function (around line 1000-1025)
+// with this updated version:
+
+const handlePaymentSuccess = async (paymentId) => {
+  setIsLoading(true);
+  try {
+    const response = await fetch("/api/booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        luggageCount: totalBags,
+        paymentId,
+        totalAmount, // ✅ ADD THIS LINE - sends total amount to backend
+      }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to send booking details.");
     }
-  };
+    const data = await response.json();
+    if (data.success) {
+      try {
+        if (onBookingComplete) onBookingComplete(data);
+      } catch (err) {
+        console.warn("onBookingComplete threw", err);
+      }
+      window.location.href = "/Booked";
+    } else alert("❌ Failed to send booking email.");
+  } catch (error) {
+    console.error("Error:", error);
+    alert(`An error occurred: ${error.message}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const shouldShowPriceCard =
     currentStep === 2 &&
@@ -1492,7 +1496,7 @@ useEffect(() => {
                         <div className={styles.loadingContainer}>
                           <div className={styles.spinner}></div>
                           <p className={styles.loadingText}>
-                            {isPaymentProcessing ? "Processing payment..." : "Processing your booking..."}
+                            {isPaymentProcessing ? "Processing payment..." : "Processing your booking, Please do not close the window..."}
                           </p>
                           {isPaymentProcessing && (
                             <p className={styles.subtext}>Please don&apos;t close this window</p>
