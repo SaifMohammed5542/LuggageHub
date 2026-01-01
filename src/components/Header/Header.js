@@ -1,10 +1,20 @@
-// components/Header.js - IMPROVED VERSION
+// components/Header.js - IMPROVED VERSION WITH ICONS
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./Header.module.css";
+import { 
+  Home, 
+  MapPin, 
+  HelpCircle, 
+  Package, 
+  // Key, 
+  // Calendar, 
+  BookOpen, 
+  LayoutDashboard 
+} from "lucide-react";
 
 export default function Header({ scrollToServices, scrollTohowItWorks }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -128,7 +138,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   onClick={closeMenu}
                   className={isActive("/") ? styles.active : ""}
                 >
-                  Home
+                  <Home size={20} />
+                  <span>Home</span>
                 </Link>
               </li>
 
@@ -138,7 +149,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   onClick={closeMenu}
                   className={isActive("/map-booking") ? styles.active : ""}
                 >
-                  Find Storage
+                  <MapPin size={20} />
+                  <span>Find Storage</span>
                 </Link>
               </li>
 
@@ -151,7 +163,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   }}
                   className={pathname === "/" && window.location.hash === "#how-it-works" ? styles.active : ""}
                 >
-                  How it Works
+                  <HelpCircle size={20} />
+                  <span>How it Works</span>
                 </a>
               </li>
 
@@ -164,29 +177,32 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   }}
                   className={pathname === "/" && window.location.hash === "#services" ? styles.active : ""}
                 >
-                  Services
+                  <Package size={20} />
+                  <span>Services</span>
                 </a>
               </li>
 
-              <li>
+              {/* <li>
                 <Link 
                   href="/key-handover" 
                   onClick={closeMenu}
                   className={isActive("/key-handover") ? styles.active : ""}
                 >
-                  Key Handover
+                  <Key size={20} />
+                  <span>Key Handover</span>
                 </Link>
-              </li>
+              </li> */}
 
-              <li className={styles.bookNowLink}>
+              {/* <li className={styles.bookNowLink}>
                 <Link 
                   href="/booking-form" 
                   onClick={closeMenu}
                   className={isActive("/booking-form") ? styles.active : ""}
                 >
-                  Book Now
+                  <Calendar size={20} />
+                  <span>Book Now</span>
                 </Link>
-              </li>
+              </li> */}
 
               <li>
                 <Link 
@@ -194,7 +210,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   onClick={closeMenu}
                   className={isActive("/blog") ? styles.active : ""}
                 >
-                  Blog
+                  <BookOpen size={20} />
+                  <span>Blog</span>
                 </Link>
               </li>
 
@@ -205,7 +222,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                     onClick={closeMenu}
                     className={isActive("/admin/dashboard") ? styles.active : ""}
                   >
-                    Dashboard
+                    <LayoutDashboard size={20} />
+                    <span>Dashboard</span>
                   </Link>
                 </li>
               )}
@@ -217,7 +235,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                     onClick={closeMenu}
                     className={isActive("/partner/dashboard") ? styles.active : ""}
                   >
-                    Dashboard
+                    <LayoutDashboard size={20} />
+                    <span>Dashboard</span>
                   </Link>
                 </li>
               )}
