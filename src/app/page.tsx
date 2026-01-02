@@ -22,7 +22,8 @@ import Rotatingtext from '@/components/Rotator';
 // import MapButton from "../components/MapButton"
 import Loader from '../components/Loader'; // ✅ Import your Loader
 // import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
-import WhatsAppFloating from "../components/WhatsAppFloating" // WhatsApp Floating Button;
+import WhatsAppFloating from "../components/WhatsAppFloating"; // WhatsApp Floating Button;
+import BecomePartnerButton from '@/components/BecomePartnerButton/become-partner';
 
 
 function App() {
@@ -138,6 +139,8 @@ useEffect(() => {
       <OurTopServices servicesRef={servicesRef} />
       <br />
       <Queries />
+      <br />
+      <BecomePartnerButton />
       <br />
       <Footer />
     </>

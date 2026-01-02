@@ -215,6 +215,17 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                 </Link>
               </li>
 
+              <li>
+                <Link 
+                  href="/become-a-partner" 
+                  onClick={closeMenu}
+                  className={isActive("/become-a-partner") ? styles.active : ""}
+                >
+                  <BookOpen size={20} />
+                  <span>Become a Partner</span>
+                </Link>
+              </li>
+
               {userRole === "admin" && (
                 <li>
                   <Link 
