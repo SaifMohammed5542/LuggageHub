@@ -3,7 +3,7 @@ import styles from "./BecomePartnerButton.module.css";
 export default function BecomePartnerButton() {
   return (
     <div className={styles.container}>
-      <a href="/become-partner" className={styles.button}>
+      <a href="/become-a-partner" className={styles.button}>
         <svg 
           width="20" 
           height="20" 
