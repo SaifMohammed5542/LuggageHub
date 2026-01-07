@@ -961,10 +961,10 @@ const handlePaymentSuccess = async (paymentId) => {
                 </div>
                 
                 <div className={styles.priceFeatures}>
-                  <div className={styles.featureItem}>
+                  {/* <div className={styles.featureItem}>
                     <div className={styles.featureIcon}>✓</div>
                     <span>A$10K Insurance included</span>
-                  </div>
+                  </div> */}
                   <div className={styles.featureItem}>
                     <div className={styles.featureIcon}>✓</div>
                     <span>6-digit PIN security</span>
