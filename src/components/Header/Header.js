@@ -11,7 +11,8 @@ import {
   HelpCircle, 
   Package, 
   // Key, 
-  // Calendar, 
+  // Calendar,
+  Handshake, 
   BookOpen, 
   LayoutDashboard 
 } from "lucide-react";
@@ -221,7 +222,7 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   onClick={closeMenu}
                   className={isActive("/become-a-partner") ? styles.active : ""}
                 >
-                  <BookOpen size={20} />
+                  <Handshake size={20} />
                   <span>Become a Partner</span>
                 </Link>
               </li>

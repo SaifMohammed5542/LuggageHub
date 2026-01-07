@@ -470,7 +470,7 @@ export default function Banner() {
                 <div className={styles.featureGrid}>
                   <div className={styles.feature}>
                     <div className={styles.featureIcon}>🔐</div>
-                    <p>A$10K Insurance</p>
+                    <p>A$2000 Coverage</p>
                   </div>
                   <div className={styles.feature}>
                     <div className={styles.featureIcon}>✓</div>
