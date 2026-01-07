@@ -1566,7 +1566,7 @@ const handlePaymentSuccess = async (paymentId) => {
                       </div>
                       <div className={styles.featureItem}>
                         <span className={styles.featureIcon}>✓</span>
-                        <span>Insurance Included</span>
+                        <span>A$2000 Coverage</span>
                       </div>
                       <div className={styles.featureItem}>
                         <span className={styles.featureIcon}>✓</span>
