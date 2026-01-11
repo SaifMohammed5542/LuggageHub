@@ -1,9 +1,11 @@
+/* ===== PERFORMANCE OPTIMIZED BOOKING FORM CSS ===== */
+
 /* Page Wrapper */
 .pageWrapper {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   padding: 2rem 1rem;
-  transition: background 0.3s ease;
+  /* ✅ PERFORMANCE FIX: Removed transition on background */
 }
 
 .container {
@@ -32,6 +34,9 @@
   background-clip: text;
   margin-bottom: 1rem;
   line-height: 1.2;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .heroSubtitle {
@@ -57,9 +62,14 @@
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
   padding: 2.5rem;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* ✅ Simplified shadow */
   border: 1px solid var(--color-border);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  /* ✅ PERFORMANCE FIX: Only transition specific properties */
+  transition: border-color 0.3s ease;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Progress Bar */
@@ -92,21 +102,25 @@
   font-weight: 700;
   font-size: 1.125rem;
   color: var(--color-text-muted);
-  transition: var(--transition);
+  /* ✅ PERFORMANCE FIX: Specific transitions only */
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .step.active .stepCircle {
   background: var(--cta-grad);
   border-color: var(--color-primary);
   color: white;
-  box-shadow: var(--cta-shadow);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); /* ✅ Simplified shadow */
 }
 
 .stepLabel {
   font-size: 0.875rem;
   color: var(--color-text-muted);
   font-weight: 500;
-  transition: var(--transition);
+  transition: color 0.3s ease, font-weight 0.3s ease; /* ✅ Specific transitions */
 }
 
 .step.active .stepLabel {
@@ -126,17 +140,26 @@
 
 /* Form Content */
 .stepContent {
-  animation: fadeSlideIn 0.4s ease-out;
+  /* ✅ PERFORMANCE FIX: Removed automatic animation - will be controlled by key prop */
+  opacity: 1;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+/* ✅ NEW: Controlled animation via data attribute */
+.stepContent[data-animating="true"] {
+  animation: fadeSlideIn 0.3s ease-out;
 }
 
 @keyframes fadeSlideIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 
@@ -147,6 +170,32 @@
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid var(--color-border);
+}
+
+.loadingTimings {
+  padding: 12px;
+  background-color: var(--info-bg, #e3f2fd);
+  border-left: 3px solid var(--info-color, #2196f3);
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-primary, #333);
+}
+
+.timingError {
+  padding: 12px;
+  background-color: var(--warning-bg, #fff3cd);
+  border-left: 3px solid var(--warning-color, #ffc107);
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timingError .errorIcon {
+  font-size: 18px;
 }
 
 /* Input Groups */
@@ -184,8 +233,12 @@
   background: var(--color-bg-light);
   color: var(--color-text);
   font-size: 1rem;
-  transition: var(--transition);
+  /* ✅ PERFORMANCE FIX: Specific transitions only */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: border-color;
+  transform: translateZ(0);
 }
 
 .input:focus,
@@ -202,9 +255,8 @@
 
 .input::placeholder {
   color: var(--color-text-muted);
-  opacity: 0.6; /* <-- add this line only */
+  opacity: 0.6;
 }
-
 
 /* Counter */
 .counterWrapper {
@@ -216,27 +268,23 @@
   background: var(--color-bg-light);
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
-  width: 100%;              /* ✅ FIX */
-  max-width: 100%;          /* ✅ FIX */
-  box-sizing: border-box;   /* ✅ FIX */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-
 
 .counterGroup {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;          /* ✅ KEY */
+  flex-wrap: wrap;
 }
 
 @media (max-width: 640px) {
   .counterGroup {
-    flex-direction: column; /* ✅ STACK ON MOBILE */
+    flex-direction: column;
     gap: 0.75rem;
   }
 }
-
-
-
 
 .counterBtn {
   width: 40px;
@@ -248,20 +296,25 @@
   font-size: 1.5rem;
   font-weight: 700;
   cursor: pointer;
-  transition: var(--transition);
+  /* ✅ PERFORMANCE FIX: Specific transitions only */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--cta-shadow);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); /* ✅ Simplified shadow */
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .counterBtn:hover {
-  box-shadow: var(--cta-hover-shadow);
-  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  transform: scale(1.1) translateZ(0);
 }
 
 .counterBtn:active {
-  transform: scale(0.95);
+  transform: scale(0.95) translateZ(0);
 }
 
 .counterValue {
@@ -301,24 +354,29 @@
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: var(--transition);
+  /* ✅ PERFORMANCE FIX: Specific transitions only */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   border: none;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .btnPrimary {
   background: var(--cta-grad);
   color: var(--cta-fg);
-  box-shadow: var(--cta-shadow);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); /* ✅ Simplified shadow */
 }
 
 .btnPrimary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--cta-hover-shadow);
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
 .btnPrimary:disabled {
@@ -335,7 +393,7 @@
 
 .btnSecondary:hover:not(:disabled) {
   border-color: var(--color-primary);
-  background: var(--glass-bg);
+  background: rgba(99, 102, 241, 0.05); /* ✅ Simplified background */
 }
 
 .buttonRow {
@@ -403,8 +461,11 @@
   background: var(--color-bg);
   border-radius: var(--radius-lg);
   padding: 2rem;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* ✅ Simplified shadow */
   border: 1px solid var(--color-border);
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .priceTitle {
@@ -443,7 +504,6 @@
   margin: 1rem 0;
 }
 
-/* Hide original priceTotal when using toggle button */
 .priceTotal {
   display: none;
 }
@@ -461,6 +521,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  /* ✅ PERFORMANCE FIX */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .priceFeatures {
@@ -492,7 +555,7 @@
   flex-shrink: 0;
 }
 
-/* Toggle Button for Summary - Combined with Total */
+/* Toggle Button */
 .toggleButton {
   width: 100%;
   padding: 1.25rem;
@@ -502,15 +565,20 @@
   border-radius: var(--radius);
   color: var(--color-text);
   cursor: pointer;
-  transition: var(--transition);
+  /* ✅ PERFORMANCE FIX: Specific transitions */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* ✅ PERFORMANCE FIX: GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .toggleButton:hover {
   background: rgba(var(--primary-rgb), 0.12);
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
@@ -552,7 +620,7 @@
 
 .toggleIcon {
   font-size: 0.875rem;
-  transition: var(--transition);
+  transition: transform 0.2s ease; /* ✅ Specific transition */
   color: var(--color-primary);
 }
 
@@ -560,7 +628,8 @@
 .collapsibleContent {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ✅ PERFORMANCE FIX: Use transform instead of max-height for better performance */
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .collapsibleContent.expanded {
@@ -595,6 +664,8 @@
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  /* ✅ PERFORMANCE FIX */
+  will-change: transform;
 }
 
 @keyframes spin {
@@ -626,6 +697,7 @@
   text-align: center;
   margin: 1.5rem 0;
 }
+
 .warningBox::before {
   content: "✅";
   margin-right: 0.5rem;
@@ -635,9 +707,7 @@
   margin: 2rem 0;
 }
 
-/* Add these styles to your Booking.module.css file */
-
-/* Timing Alert Container */
+/* Timing Alerts */
 .timingAlert {
   background: linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%);
   border: 2px solid #ffc107;
@@ -654,7 +724,6 @@
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
 }
 
-/* Success variant for auto-adjusted times */
 .timingAlert.success {
   background: linear-gradient(135deg, #d4edda 0%, #e8f5e9 100%);
   border-color: #28a745;
@@ -668,11 +737,11 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-10px) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 
@@ -773,11 +842,14 @@
   border: 2px solid #28a745;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  /* ✅ PERFORMANCE FIX */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 [data-theme="dark"] .suggestionBtn {
@@ -786,7 +858,7 @@
 }
 
 .suggestionBtn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: 0 6px 16px rgba(40, 167, 69, 0.25);
   border-color: #218838;
 }
@@ -797,7 +869,7 @@
 }
 
 .suggestionBtn:active {
-  transform: translateY(0);
+  transform: translateY(0) translateZ(0);
 }
 
 .suggestionLabel {
@@ -807,9 +879,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
-
-
 
 .countryDropdown {
   position: absolute;
@@ -822,18 +891,20 @@
   border: 1px solid var(--glass-border);
   border-radius: 8px;
   z-index: 1000;
-  font-size: 16px !important
+  font-size: 16px !important;
+  /* ✅ PERFORMANCE FIX: Smooth scrolling */
+  -webkit-overflow-scrolling: touch;
 }
 
 .countryOption {
-  padding: 2px 4px;
+  padding: 12px 16px;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .countryOption:hover {
   background: rgba(var(--primary-rgb), 0.12);
 }
-
 
 [data-theme="dark"] .suggestionLabel {
   color: #48bb78;
@@ -866,7 +937,6 @@
   margin-bottom: 0;
 }
 
-/* Loading state for timing check */
 .checkingTimings {
   display: flex;
   align-items: center;
@@ -890,20 +960,7 @@
   animation: spin 2s linear infinite;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
-
-
-
-/* Capacity Display Styles */
+/* Capacity Cards */
 .capacityCard {
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 2px solid #3b82f6;
@@ -967,6 +1024,8 @@
 .capacityFill {
   height: 100%;
   transition: width 0.3s ease;
+  /* ✅ PERFORMANCE FIX */
+  will-change: width;
 }
 
 .capacityDescription {
@@ -1031,12 +1090,15 @@
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 16px;
-  transition: all 0.3s;
+  /* ✅ PERFORMANCE FIX */
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .alternativeCard:hover {
   border-color: #3b82f6;
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
   box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
 }
 
@@ -1106,6 +1168,8 @@
 .capacityMiniFill {
   height: 100%;
   transition: width 0.3s ease;
+  /* ✅ PERFORMANCE FIX */
+  will-change: width;
 }
 
 .capacityMiniText {
@@ -1126,12 +1190,15 @@
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  /* ✅ PERFORMANCE FIX */
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .selectAlternativeBtn:hover {
   background: #2563eb;
-  transform: scale(1.02);
+  transform: scale(1.02) translateZ(0);
 }
 
 [data-theme="dark"] .selectAlternativeBtn {
@@ -1142,22 +1209,7 @@
   background: #1d4ed8;
 }
 
-.checkingTimings {
-  padding: 12px;
-  background: #f0f9ff;
-  border-radius: 8px;
-  color: #1e40af;
-  font-size: 14px;
-  margin: 12px 0;
-}
-
-[data-theme="dark"] .checkingTimings {
-  background: #1e3a8a;
-  color: #93c5fd;
-}
-
-
-/* Selected Station (Step 2) */
+/* Selected Station */
 .selectedStation {
   margin: 16px 0 20px;
   padding: 16px 20px;
@@ -1209,8 +1261,6 @@
   font-weight: 500;
 }
 
-
-
 .capacityApiError {
   margin: 12px 0;
   padding: 10px 12px;
@@ -1228,9 +1278,7 @@
   color: #ffedd5;
 }
 
-
-
-/* Date Error Styles */
+/* Date Errors */
 .inputError {
   border-color: #dc2626 !important;
   background-color: #fef2f2 !important;
@@ -1241,17 +1289,12 @@
   background-color: #7f1d1d !important;
 }
 
-
-
 .autoCorrectInfo {
   margin-top: 6px;
   font-size: 0.85rem;
-  color: #e4e8ee; /* neutral grey */
+  color: #6b7280;
   font-style: italic;
 }
-
-
-
 
 .dateErrorBox {
   display: flex;
@@ -1273,26 +1316,17 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-10px) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 
 .dateErrorIcon {
   font-size: 20px;
   animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
 }
 
 .dateErrorText {
@@ -1307,35 +1341,47 @@
   color: #fca5a5;
 }
 
-
+/* Toast */
 .toast {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  transform: translateY(12px);
+  transform: translateY(12px) translateZ(0);
   opacity: 0;
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition: opacity 0.16s ease, transform 0.16s ease;
   z-index: 9999;
+  /* ✅ PERFORMANCE FIX */
+  will-change: transform, opacity;
 }
+
 .toastVisible {
-  transform: translateY(0);
+  transform: translateY(0) translateZ(0);
   opacity: 1;
 }
+
 .toastContent {
   background: var(--surface);
   color: var(--text);
   padding: 12px 14px;
   border-radius: 10px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-  display:flex;
-  gap:12px;
-  align-items:center;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
-.toastMessage { font-size: 14px; }
-.toastClose { background: transparent; border: none; cursor: pointer; font-size: 14px; }
 
+.toastMessage {
+  font-size: 14px;
+}
 
-/* ---------- Compact mode (use compact={true}) ---------- */
+.toastClose {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Compact Mode */
 .compact {
   max-width: 720px;
   margin: 0 auto;
@@ -1343,42 +1389,74 @@
   box-sizing: border-box;
 }
 
-/* Card/padding reductions */
-.compact .formCard { padding: 1.25rem !important; border-radius: var(--radius) !important; }
-.compact .heroTitle { font-size: 1.75rem !important; }
-.compact .heroSubtitle { font-size: 1rem !important; }
+.compact .formCard {
+  padding: 1.25rem !important;
+  border-radius: var(--radius) !important;
+}
 
-/* Stack inputs like mobile */
-.compact .inputRow { grid-template-columns: 1fr !important; gap: 1rem !important; }
-.compact .input, .compact .select { padding: 0.75rem 0.9rem !important; font-size: 0.97rem !important; }
+.compact .heroTitle {
+  font-size: 1.75rem !important;
+}
 
+.compact .heroSubtitle {
+  font-size: 1rem !important;
+}
 
-/* Buttons */
-.compact .btnPrimary, .compact .btnSecondary {
+.compact .inputRow {
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+}
+
+.compact .input,
+.compact .select {
+  padding: 0.75rem 0.9rem !important;
+  font-size: 0.97rem !important;
+}
+
+.compact .btnPrimary,
+.compact .btnSecondary {
   width: 100% !important;
   padding: 0.9rem 1rem !important;
   font-size: 0.98rem !important;
 }
 
-/* Counter & progress */
-.compact .counterWrapper { padding: 0.75rem !important; gap: 1rem !important; }
-.compact .stepCircle { width: 42px !important; height: 42px !important; font-size: 1rem !important; }
-
-/* Reduce spacing for cards / alerts */
-.compact .priceCard, .compact .reviewCard { padding: 1rem !important; }
-.compact .timingAlert, .compact .capacityCard, .compact .alternativesSection {
-  margin: 12px 0 !important; padding: 10px !important;
+.compact .counterWrapper {
+  padding: 0.75rem !important;
+  gap: 1rem !important;
 }
 
-/* Suggestions */
-.compact .suggestionBtn { padding: 10px !important; font-size: 0.95rem !important; }
-.compact .toggleButton { padding: 10px 12px !important; }
-.compact .toggleButton .totalValue { font-size: 1.25rem !important; }
+.compact .stepCircle {
+  width: 42px !important;
+  height: 42px !important;
+  font-size: 1rem !important;
+}
 
+.compact .priceCard,
+.compact .reviewCard {
+  padding: 1rem !important;
+}
 
+.compact .timingAlert,
+.compact .capacityCard,
+.compact .alternativesSection {
+  margin: 12px 0 !important;
+  padding: 10px !important;
+}
 
+.compact .suggestionBtn {
+  padding: 10px !important;
+  font-size: 0.95rem !important;
+}
 
-/* ===== Terms Modal ===== */
+.compact .toggleButton {
+  padding: 10px 12px !important;
+}
+
+.compact .toggleButton .totalValue {
+  font-size: 1.25rem !important;
+}
+
+/* Terms Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -1449,7 +1527,7 @@
   flex: 1;
   text-align: center;
   padding: 6px 8px;
-  border:none;
+  border: none;
   background: none;
   font-size: 0.9rem;
   font-weight: 500;
@@ -1471,78 +1549,100 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* Luggage Size Grid */
+.sizeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
 
-/* Ensure compact persists on large viewports */
+.sizeCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* ✅ PERFORMANCE FIX */
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.sizeCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.18);
+  transform: translateY(-2px) translateZ(0);
+}
+
+.sizeCard img {
+  margin: 0 auto 0.25rem;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+}
+
+.sizeName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sizeDesc {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.sizeDesc:last-of-type {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sizeCard .counterGroup {
+  margin-top: auto;
+}
+
+.sizeCard .counterWrapper {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
 @media (min-width: 969px) {
-  .compact .inputRow { grid-template-columns: 1fr !important; }
+  .compact .inputRow {
+    grid-template-columns: 1fr !important;
+  }
   .compact .contentGrid {
     grid-template-columns: 1fr;
     gap: 0;
   }
 }
 
-
-
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .timingAlert {
-    padding: 16px;
-  }
-
-  .alertHeader {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .alertIcon {
-    font-size: 20px;
-  }
-
-  .alertTitle {
-    font-size: 14px;
-  }
-
-  .suggestionBtn {
-    padding: 10px 12px;
-  }
-
-  .suggestionTime {
-    font-size: 14px;
-  }
-}
-
-
-/* Responsive Design */
-
-/* Large Tablets & Small Desktops */
 @media (max-width: 1200px) {
   .contentGrid {
     grid-template-columns: 1fr 350px;
     gap: 1.5rem;
   }
-
   .formCard {
     padding: 2rem;
   }
-
   .heroTitle {
     font-size: 2.5rem;
   }
 }
 
-/* Tablets */
 @media (max-width: 968px) {
   .pageWrapper {
     padding: 1.5rem 1rem;
   }
-
   .contentGrid {
     grid-template-columns: 1fr;
     gap: 0;
   }
-
-  /* Fixed Bottom Bar for Mobile/Tablet */
   .sidebar {
     position: fixed;
     bottom: 0;
@@ -1554,674 +1654,456 @@
     background: var(--color-bg-card);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
   }
-
   .priceCard {
     margin-bottom: 0;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     border-bottom: none;
     padding: 1.5rem;
   }
-
   .priceTitle {
     display: none;
   }
-
   .toggleButton {
     margin-top: 0;
   }
-
-  /* Collapsible content expands UPWARD on mobile */
   .collapsibleContent {
     display: flex;
     flex-direction: column-reverse;
   }
-
   .collapsibleContent.expanded {
     max-height: 400px;
     overflow-y: auto;
+    /* ✅ PERFORMANCE FIX */
+    -webkit-overflow-scrolling: touch;
   }
-
-  /* Add padding to main content to prevent overlap with fixed bottom bar */
   .formSection {
     padding-bottom: 160px;
   }
-
   .heroTitle {
     font-size: 2.25rem;
   }
-
   .heroSubtitle {
     font-size: 1.125rem;
   }
-
   .hero {
     margin-bottom: 2rem;
     padding: 1.5rem 0;
   }
-
   .formCard {
     padding: 2rem 1.75rem;
   }
-
-  
-
   .progressBar {
     margin-bottom: 2.5rem;
   }
-
   .stepCircle {
     width: 45px;
     height: 45px;
     font-size: 1rem;
   }
-
   .stepLabel {
     font-size: 0.8rem;
   }
 }
 
-/* Small Tablets & Large Phones */
 @media (max-width: 768px) {
   .pageWrapper {
     padding: 1rem;
   }
-
   .hero {
     margin-bottom: 1.5rem;
     padding: 1rem 0;
   }
-
   .heroTitle {
     font-size: 2rem;
   }
-
   .heroSubtitle {
     font-size: 1rem;
   }
-
   .formCard {
     padding: 1.75rem 1.5rem;
     border-radius: var(--radius);
   }
-
   .priceCard {
     padding: 1.25rem 1rem;
     border-radius: var(--radius) var(--radius) 0 0;
   }
-
   .sectionTitle {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
   }
-
   .inputRow {
     grid-template-columns: 1fr;
     gap: 1.25rem;
     margin-bottom: 1.25rem;
   }
-
   .inputGroup {
     margin-bottom: 1.25rem;
   }
-
   .buttonRow {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-
   .btnPrimary,
   .btnSecondary {
     padding: 0.875rem 1.75rem;
     font-size: 0.95rem;
   }
-
   .progressBar {
     margin-bottom: 2rem;
   }
-
   .stepCircle {
     width: 42px;
     height: 42px;
   }
-
   .stepLine {
     margin: 0 -0.5rem;
   }
-
-  
-
   .reviewCard {
     padding: 1.25rem;
   }
-
   .reviewItem {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.375rem;
     padding: 0.625rem 0;
   }
-
   .reviewValue {
     text-align: left;
     font-size: 0.95rem;
   }
-
   .priceRow {
     padding: 0.75rem 0;
     font-size: 0.9rem;
   }
-
   .counterWrapper {
     width: 100%;
     justify-content: center;
     padding: 0.875rem;
   }
-
   .counterBtn {
     width: 45px;
     height: 45px;
   }
-
   .formSection {
     padding-bottom: 150px;
   }
-
   .toggleButton {
     padding: 1rem;
   }
-
   .toggleButton .totalValue {
     font-size: 1.5rem;
   }
-
   .toggleText {
     font-size: 0.75rem;
   }
+  .sizeGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .sizeCard {
+    padding: 1.25rem;
+  }
 }
 
-/* Mobile Phones */
 @media (max-width: 640px) {
   .pageWrapper {
     padding: 0.75rem 0.5rem;
   }
-
   .container {
     max-width: 100%;
   }
-
   .hero {
     margin-bottom: 1.25rem;
     padding: 0.75rem 0;
   }
-
   .heroTitle {
     font-size: 1.75rem;
     line-height: 1.3;
   }
-
   .heroSubtitle {
     font-size: 0.95rem;
   }
-
   .formCard {
     padding: 1.5rem 1rem;
     border-radius: 10px;
   }
-
   .priceCard {
     padding: 1rem 0.875rem;
     border-radius: 10px 10px 0 0;
   }
-
   .sectionTitle {
     font-size: 1.375rem;
     margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
   }
-
   .progressBar {
     margin-bottom: 1.75rem;
     padding: 0 0.25rem;
   }
-
   .stepCircle {
     width: 38px;
     height: 38px;
     font-size: 0.95rem;
   }
-
   .stepLabel {
     font-size: 0.7rem;
     text-align: center;
   }
-
   .stepLine {
     margin: 0 -0.25rem;
     top: -18px;
   }
-
   .label {
     font-size: 0.9rem;
     margin-bottom: 0.625rem;
   }
-
   .labelIcon {
     font-size: 1rem;
   }
-
   .input,
   .select {
     padding: 0.75rem 0.875rem;
     font-size: 0.95rem;
   }
-
-  
-
   .counterWrapper {
     gap: 2rem;
   }
-
   .counterBtn {
     width: 50px;
     height: 50px;
     font-size: 1.75rem;
   }
-
   .counterValue {
     font-size: 1.75rem;
     min-width: 60px;
   }
-
   .checkboxLabel {
     font-size: 0.9rem;
     gap: 0.625rem;
   }
-
   .checkbox {
     width: 18px;
     height: 18px;
   }
-
   .btnPrimary,
   .btnSecondary {
     padding: 1rem 1.5rem;
     font-size: 0.95rem;
     border-radius: 10px;
   }
-
   .reviewCard {
     padding: 1rem;
     border-radius: 10px;
   }
-
   .reviewTitle {
     font-size: 1rem;
     margin-bottom: 0.875rem;
   }
-
   .reviewItem {
     padding: 0.5rem 0;
   }
-
   .reviewLabel {
     font-size: 0.85rem;
   }
-
   .reviewValue {
     font-size: 0.9rem;
     margin-top: 0.25rem;
   }
-
   .priceRow {
     padding: 0.625rem 0;
     font-size: 0.875rem;
   }
-
   .featureItem {
     padding: 0.5rem 0;
     font-size: 0.85rem;
     gap: 0.625rem;
   }
-
   .featureIcon {
     width: 22px;
     height: 22px;
     font-size: 0.7rem;
   }
-
   .warningBox {
     padding: 0.875rem 1rem;
     font-size: 0.85rem;
     border-radius: 10px;
   }
-
   .loadingContainer {
     padding: 2rem 0;
   }
-
   .spinner {
     width: 45px;
     height: 45px;
     border-width: 3px;
   }
-
   .loadingText {
     font-size: 0.9rem;
   }
-
   .errorText {
     font-size: 0.8rem;
     margin-top: 0.375rem;
   }
-
   .formSection {
     padding-bottom: 100px;
   }
-
   .toggleButton {
     padding: 0.875rem 1rem;
   }
-
   .toggleButton .totalLabel {
     font-size: 0.8rem;
   }
-
   .toggleButton .totalValue {
     font-size: 1.375rem;
   }
-
   .collapsibleContent.expanded {
     max-height: 350px;
   }
+  .sizeCard {
+    padding: 1.1rem;
+    border-radius: var(--radius);
+  }
+  .sizeName {
+    font-size: 1rem;
+  }
+  .sizeDesc {
+    font-size: 0.8rem;
+  }
+  .compact .sizeGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .compact .sizeCard {
+    padding: 1rem;
+  }
 }
 
-/* Extra Small Phones */
 @media (max-width: 380px) {
   .heroTitle {
     font-size: 1.5rem;
   }
-
   .heroSubtitle {
     font-size: 0.875rem;
   }
-
   .formCard,
   .priceCard {
     padding: 1.25rem 0.875rem;
   }
-
   .stepCircle {
     width: 35px;
     height: 35px;
     font-size: 0.875rem;
   }
-
   .stepLabel {
     font-size: 0.65rem;
   }
-
   .sectionTitle {
     font-size: 1.25rem;
   }
-
-  
-
-  
-
   .counterBtn {
     width: 45px;
     height: 45px;
     font-size: 1.5rem;
   }
-
   .counterValue {
     font-size: 1.5rem;
     min-width: 50px;
   }
-
   .btnPrimary,
   .btnSecondary {
     padding: 0.875rem 1.25rem;
     font-size: 0.9rem;
   }
-
   .toggleButton .totalValue {
     font-size: 1.25rem;
   }
-
   .formSection {
     padding-bottom: 60px;
   }
 }
 
-/* Landscape Mobile Phones */
 @media (max-width: 968px) and (orientation: landscape) {
   .pageWrapper {
     padding: 1rem;
   }
-
   .hero {
     margin-bottom: 1rem;
     padding: 0.75rem 0;
   }
-
   .heroTitle {
     font-size: 1.75rem;
   }
-
   .progressBar {
     margin-bottom: 1.5rem;
   }
-
   .stepCircle {
     width: 40px;
     height: 40px;
   }
-
   .formCard,
   .priceCard {
     padding: 1.5rem 1.25rem;
   }
-
-  
 }
 
-/* Desktop - Keep original behavior */
 @media (min-width: 969px) {
   .sidebar {
     position: sticky;
     top: 2rem;
   }
-
   .toggleButton .totalLabel {
     font-size: 1rem;
   }
-
   .toggleAction {
     flex-direction: row;
     gap: 0.5rem;
   }
-
   .toggleText {
     font-size: 0.85rem;
   }
 }
 
-/* Touch-friendly enhancements for all mobile devices */
+/* Touch-friendly enhancements */
 @media (hover: none) and (pointer: coarse) {
   .input,
   .select,
   .btnPrimary,
   .btnSecondary,
   .counterBtn {
-    min-height: 44px; /* Apple's recommended touch target size */
+    min-height: 44px;
   }
-
-  
-
   .checkbox {
     min-width: 24px;
     min-height: 24px;
   }
-
-  /* Larger tap targets */
   .checkboxLabel {
     padding: 0.5rem 0;
   }
-
-  /* Remove hover effects on touch devices */
- 
-
+  /* Remove hover, add active states */
   .btnPrimary:hover:not(:disabled) {
     transform: none;
   }
-
   .counterBtn:hover {
     transform: none;
   }
-
   .toggleButton:hover {
     transform: none;
   }
-
-  /* Add active states instead */
- 
-
   .btnPrimary:active,
   .btnSecondary:active {
-    transform: scale(0.98);
+    transform: scale(0.98) translateZ(0);
   }
-
   .counterBtn:active {
-    transform: scale(0.92);
+    transform: scale(0.92) translateZ(0);
   }
-
   .toggleButton:active {
-    transform: scale(0.98);
+    transform: scale(0.98) translateZ(0);
   }
 }
 
-
-
-/* ================================
-   LUGGAGE SIZE GRID (STEP 2)
-================================ */
-
-.sizeGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-/* Individual luggage card */
-.sizeCard {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.04),
-    rgba(255, 255, 255, 0.02)
-  );
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  transition: var(--transition);
-}
-
-/* Hover effect (desktop only) */
-.sizeCard:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.18);
-  transform: translateY(-2px);
-}
-
-/* Bag image */
-.sizeCard img {
-  margin: 0 auto 0.25rem;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
-}
-
-/* Title */
-.sizeName {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-/* Description */
-.sizeDesc {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  line-height: 1.4;
-}
-
-/* Price emphasis */
-.sizeDesc:last-of-type {
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* Counter area */
-.sizeCard .counterGroup {
-  margin-top: auto;
-}
-
-/* Make counter fill card width */
-.sizeCard .counterWrapper {
-  width: 100%;
-  justify-content: center;
-}
-
-/* ================================
-   RESPONSIVE
-================================ */
-
-/* Tablets & below */
+/* Prevent mobile zoom on input focus */
 @media (max-width: 768px) {
-  .sizeGrid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  .sizeCard {
-    padding: 1.25rem;
-  }
-}
-
-/* Small phones */
-@media (max-width: 640px) {
-  .sizeCard {
-    padding: 1.1rem;
-    border-radius: var(--radius);
-  }
-
-  .sizeName {
-    font-size: 1rem;
-  }
-
-  .sizeDesc {
-    font-size: 0.8rem;
-  }
-}
-
-/* Compact mode support */
-.compact .sizeGrid {
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.compact .sizeCard {
-  padding: 1rem;
-}
-
-/* 🔒 Prevent mobile zoom on input focus */
-@media (max-width: 768px) {
-  .input,
+  .input, 
   .select {
     font-size: 16px !important;
   }
 }
-

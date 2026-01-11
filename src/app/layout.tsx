@@ -4,6 +4,7 @@ import "./globals.css";
 import "./theme.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import GoogleMapsWrapper from "@/components/GoogleMapsWrapper"; // ✅ Import wrapper
 
 // Fonts (next/font sets CSS variables we reference in body)
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -68,8 +69,6 @@ const themeInitScript = `
 })();
 `;
 
-
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -80,16 +79,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       {/* body applies font CSS variables provided by next/font */}
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <main className="min-h-dvh">{children}</main>
+        {/* ✅ Wrap everything with Google Maps loader */}
+        <GoogleMapsWrapper>
+          <main className="min-h-dvh">{children}</main>
 
-        {/* Global toast container (client component). OK to keep here.) */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            success: { style: { background: "#4caf50", color: "#fff" } },
-            error: { style: { background: "#f44336", color: "#fff" } },
-          }}
-        />
+          {/* Global toast container (client component). OK to keep here.) */}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              success: { style: { background: "#4caf50", color: "#fff" } },
+              error: { style: { background: "#f44336", color: "#fff" } },
+            }}
+          />
+        </GoogleMapsWrapper>
       </body>
     </html>
   );

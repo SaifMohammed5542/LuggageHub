@@ -1,0 +1,440 @@
+/* components/DateTimePicker/VisualDateTimePicker.module.css */
+
+.container {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.labelIcon {
+  font-size: 1.125rem;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  backdrop-filter: blur(10px);
+}
+
+.input:hover {
+  border-color: var(--primary);
+  background: var(--glass-bg);
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+  background: var(--glass-bg);
+}
+
+.inputValue {
+  flex: 1;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.inputIcon {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+}
+
+
+/* Add to VisualDateTimePicker.module.css */
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--input-disabled-bg, #f5f5f5);
+  color: var(--text-disabled, #999);
+}
+
+
+/* ✅ FIXED: Dropdown with scrollable calendar */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #0a0a0a;
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.4);
+  z-index: 1000;
+  animation: slideDown 0.15s ease-out;
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  backdrop-filter: blur(20px);
+  width: 100%;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Calendar View - ✅ FIXED: Now scrollable */
+.calendarView {
+  padding: 0.75rem;
+  min-height: fit-content;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  position: sticky;
+  top: 0;
+  background: #0a0a0a;
+  z-index: 10;
+  padding-bottom: 0.5rem;
+}
+
+.navBtn {
+  background: var(--panel-bg);
+  border: 1.5px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  backdrop-filter: blur(10px);
+}
+
+.navBtn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--glass-bg);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.monthYear {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.375rem;
+  position: sticky;
+  top: 36px;
+  background: #0a0a0a;
+  z-index: 9;
+  padding-bottom: 0.375rem;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.25rem 0;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+  border: 1.5px solid var(--panel-border);
+  border-radius: 6px;
+  background: var(--panel-bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 32px;
+  backdrop-filter: blur(10px);
+}
+
+.calendarDayActive:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--glass-bg);
+  transform: scale(1.05);
+}
+
+.calendarDay:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.calendarDay.today {
+  border-color: var(--primary);
+  font-weight: 700;
+  background: var(--glass-bg);
+}
+
+.calendarDay.selected {
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  font-weight: 700;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Time View */
+.timeView {
+  padding: 0.75rem;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.timeHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1.5px solid var(--panel-border);
+  position: sticky;
+  top: 0;
+  background: #0a0a0a;
+  z-index: 10;
+}
+
+.backBtn {
+  background: var(--panel-bg);
+  border: 1.5px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+  backdrop-filter: blur(10px);
+}
+
+.backBtn:hover {
+  border-color: var(--primary);
+  background: var(--glass-bg);
+}
+
+.selectedDateDisplay {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.timeSlots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.375rem;
+}
+
+.timeSlot {
+  padding: 0.5rem 0.25rem;
+  border: 1.5px solid var(--panel-border);
+  border-radius: 6px;
+  background: var(--panel-bg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 32px;
+  backdrop-filter: blur(10px);
+}
+
+.timeSlot:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--glass-bg);
+  transform: translateY(-1px);
+}
+
+.timeSlot:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.timeSlotSelected {
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3);
+}
+
+.timeSlotDisabled {
+  position: relative;
+}
+
+.closedBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.5rem;
+  padding: 1px 3px;
+  background: #ef4444;
+  color: white;
+  border-radius: 3px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Custom scrollbar */
+.dropdown::-webkit-scrollbar,
+.timeView::-webkit-scrollbar {
+  width: 5px;
+}
+
+.dropdown::-webkit-scrollbar-track,
+.timeView::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+}
+
+.dropdown::-webkit-scrollbar-thumb,
+.timeView::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.dropdown::-webkit-scrollbar-thumb:hover,
+.timeView::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+  .dropdown {
+    max-height: 320px;
+  }
+
+  .timeSlots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .timeView {
+    max-height: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dropdown {
+    max-height: 300px;
+  }
+
+  .timeSlots {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+  }
+
+  .calendarGrid {
+    gap: 0.2rem;
+  }
+
+  .calendarDay {
+    font-size: 0.75rem;
+    min-height: 30px;
+  }
+
+  .timeSlot {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.75rem;
+    min-height: 30px;
+  }
+
+  .timeView {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeSlots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dropdown {
+    max-height: 280px;
+  }
+
+  .calendarDay {
+    font-size: 0.7rem;
+    min-height: 28px;
+  }
+
+  .weekday {
+    font-size: 0.6rem;
+  }
+
+  .timeSlot {
+    font-size: 0.7rem;
+  }
+
+  .timeView {
+    max-height: 280px;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+  .calendarDay,
+  .timeSlot {
+    min-height: 36px;
+  }
+
+  .calendarDayActive:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .timeSlot:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+}
+
+/* Dark theme specific */
+:root[data-theme="dark"] .dropdown {
+  background: #0a0a0a;
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.5);
+}

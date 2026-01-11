@@ -1,14 +1,11 @@
-// components/booking-form/LuggageBookingForm.js - IMPROVED VERSION
+// components/booking-form/LuggageBookingForm.js - COMPLETE FIXED VERSION
 "use client";
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../LuggagePay";
-import {
-  getNearestAvailableTime,
-  formatDateTime,
-  formatDateTimeLocal
-} from "@/utils/stationTimingValidator";
+import VisualDateTimePicker from "../DateTimePicker/VisualDateTimePicker";
+import { formatDateTimeLocal, getNearestAvailableTime } from "@/utils/stationTimingValidator";
 
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const toRad = (deg) => (deg * Math.PI) / 180;
@@ -23,10 +20,8 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
-// ✅ IMPROVED: Simple email validation (removed domain restriction)
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// ✅ IMPROVED: Extended country codes with flags
 const COUNTRY_CODES = [
   { code: "+61", label: "🇦🇺 AUS (+61)" },
   { code: "+1", label: "🇺🇸 USA/CAN (+1)" },
@@ -65,36 +60,37 @@ const LuggageBookingForm = ({
   compact = false 
 }) => {
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phoneCode: "+61",
-    phoneNumber: "",
-    phone: "+61 ",
+    stationId: "",
     dropOffDate: "",
     pickUpDate: "",
     smallBagCount: 0,
     largeBagCount: 0,
     specialInstructions: "",
+    fullName: "",
+    email: "",
+    phoneCode: "+61",
+    phoneNumber: "",
+    phone: "+61 ",
     termsAccepted: false,
-    stationId: "",
   });
-  const [countrySearch, setCountrySearch] = useState("");
-const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-const countryRef = useRef(null);
 
-  const [stations, setStations] = useState([]);
-  const [stationTimings, setStationTimings] = useState(null);
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const countryRef = useRef(null);
+
+const [stations, setStations] = useState([]);
+const [stationTimings, setStationTimings] = useState(null);
+const [isLoadingTimings, setIsLoadingTimings] = useState(false);
+const [timingsFetchError, setTimingsFetchError] = useState(null);
+const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false); // ✅ NEW
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [hasSpecialInstructions, setHasSpecialInstructions] = useState(false);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
-  const [timingAlert, setTimingAlert] = useState(null);
-  const [isCheckingTimings, setIsCheckingTimings] = useState(false);
   const [capacityStatus, setCapacityStatus] = useState(null);
   const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
   const [alternativeStations, setAlternativeStations] = useState([]);
@@ -112,7 +108,6 @@ const countryRef = useRef(null);
     medium_large: 8.49,
   };
 
-  // ✅ IMPROVED: Memoized total bags
   const totalBags = useMemo(() => 
     formData.smallBagCount + formData.largeBagCount,
     [formData.smallBagCount, formData.largeBagCount]
@@ -128,68 +123,27 @@ const countryRef = useRef(null);
     return now;
   };
 
-// 🔍 Country search filtering
-const filteredCountryCodes = COUNTRY_CODES.filter(c =>
-  c.label.toLowerCase().includes(countrySearch.toLowerCase()) ||
-  c.code.includes(countrySearch)
-);
+  const filteredCountryCodes = COUNTRY_CODES.filter(c =>
+    c.label.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    c.code.includes(countrySearch)
+  );
 
-// ❌ Close country dropdown on outside click
-useEffect(() => {
-  const handler = (e) => {
-    if (countryRef.current && !countryRef.current.contains(e.target)) {
-      setShowCountryDropdown(false);
-    }
-  };
+  useEffect(() => {
+    const handler = (e) => {
+      if (countryRef.current && !countryRef.current.contains(e.target)) {
+        setShowCountryDropdown(false);
+      }
+    };
 
-  document.addEventListener("mousedown", handler);
-  return () => document.removeEventListener("mousedown", handler);
-}, []);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const getMinDateTime = () => {
     const now = getCurrentDateTime();
     return now.toISOString().slice(0, 16);
   };
 
-  const validateStationTimings = useCallback(() => {
-    if (!stationTimings) {
-      console.log('⏭️ Skipping validation - no timings available');
-      return;
-    }
-
-    console.log('🔍 ========== VALIDATION START ==========');
-    setIsCheckingTimings(true);
-    let alerts = [];
-
-    if (formData.dropOffDate) {
-      const dropOffValidation = getNearestAvailableTime(formData.dropOffDate, stationTimings);
-      if (!dropOffValidation.isValid) {
-        alerts.push({
-          type: 'dropOff',
-          message: `Drop-off time falls when station is closed`,
-          details: dropOffValidation,
-          selectedTime: formData.dropOffDate
-        });
-      }
-    }
-
-    if (formData.pickUpDate) {
-      const pickUpValidation = getNearestAvailableTime(formData.pickUpDate, stationTimings);
-      if (!pickUpValidation.isValid) {
-        alerts.push({
-          type: 'pickUp',
-          message: `Pick-up time falls when station is closed`,
-          details: pickUpValidation,
-          selectedTime: formData.pickUpDate
-        });
-      }
-    }
-
-    setTimingAlert(alerts.length > 0 ? alerts : null);
-    setIsCheckingTimings(false);
-  }, [formData.dropOffDate, formData.pickUpDate, stationTimings]);
-
-  // ✅ NEW: Prevent leaving page with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (currentStep > 1 && !isFormValid && (formData.fullName || formData.email)) {
@@ -292,74 +246,46 @@ useEffect(() => {
     fetchStations();
   }, []);
 
-  useEffect(() => {
-    const fetchStationTimings = async () => {
-      if (!formData.stationId) {
-        setStationTimings(null);
-        return;
-      }
-      try {
-        const response = await fetch(`/api/station/${formData.stationId}/timings`);
-        if (!response.ok) {
-          setStationTimings({ is24Hours: true });
-          return;
-        }
-        const data = await response.json();
-        if (data.success && data.timings) {
-          setStationTimings(data.timings);
-        } else {
-          setStationTimings({ is24Hours: true });
-        }
-      } catch (error) {
-        console.error("❌ Failed to fetch station timings:", error);
-        setStationTimings({ is24Hours: true });
-      }
-    };
-    fetchStationTimings();
-  }, [formData.stationId]);
-
-  useEffect(() => {
-    if (formData.stationId && stationTimings && (formData.dropOffDate || formData.pickUpDate)) {
-      validateStationTimings();
-    }
-  }, [formData.stationId, stationTimings, validateStationTimings]);
-
-  const checkStationCapacity = async () => {
-    if (!formData.stationId || !formData.dropOffDate || !formData.pickUpDate || !totalBags) {
+useEffect(() => {
+  const fetchStationTimings = async () => {
+    if (!formData.stationId) {
+      setStationTimings(null);
+      setIsLoadingTimings(false);
+      setTimingsFetchError(null);
       return;
     }
-    setIsCheckingCapacity(true);
+    
+    setIsLoadingTimings(true);
+    setTimingsFetchError(null);
+    
     try {
-      const response = await fetch('/api/station/capacity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          stationId: formData.stationId,
-          dropOffDate: formData.dropOffDate,
-          pickUpDate: formData.pickUpDate,
-          luggageCount: totalBags
-        })
-      });
+      const response = await fetch(`/api/station/${formData.stationId}/timings`);
+      if (!response.ok) {
+        setStationTimings({ is24Hours: true });
+        setIsLoadingTimings(false);
+        return;
+      }
       const data = await response.json();
-      if (response.ok && data) {
-        setCapacityStatus(data);
-        if (!data.available) {
-          await fetchAlternativeStations();
-        } else {
-          setShowAlternatives(false);
-          setAlternativeStations([]);
-        }
+      if (data.success && data.timings) {
+        setStationTimings(data.timings);
+      } else {
+        setStationTimings({ is24Hours: true });
       }
     } catch (error) {
-      console.error('Capacity check failed:', error);
+      console.error("❌ Failed to fetch station timings:", error);
+      setStationTimings({ is24Hours: true });
+      setTimingsFetchError("Unable to load station hours");
     } finally {
-      setIsCheckingCapacity(false);
+      setIsLoadingTimings(false);
     }
   };
+  fetchStationTimings();
+}, [formData.stationId]);
 
-  const fetchAlternativeStations = async () => {
-    try {
-      const currentStation = stations.find(s => s._id === formData.stationId);
+
+  const fetchAlternativeStations = useCallback(async () => {
+  try {
+    const currentStation = stations.find(s => s._id === formData.stationId);
       if (!currentStation?.coordinates) return;
       const coords = currentStation.coordinates.coordinates || currentStation.coordinates;
       const [longitude, latitude] = coords;
@@ -386,16 +312,52 @@ useEffect(() => {
     } catch (error) {
       console.error('Failed to fetch alternatives:', error);
     }
-  };
+  }, [stations, formData.stationId, formData.dropOffDate, formData.pickUpDate, totalBags]);
+
+
+ const checkStationCapacity = useCallback(async () => {
+  if (!formData.stationId || !formData.dropOffDate || !formData.pickUpDate || !totalBags) {
+    return;
+ }
+  setIsCheckingCapacity(true);
+    try {
+      const response = await fetch('/api/station/capacity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stationId: formData.stationId,
+          dropOffDate: formData.dropOffDate,
+          pickUpDate: formData.pickUpDate,
+          luggageCount: totalBags
+        })
+      });
+      const data = await response.json();
+      if (response.ok && data) {
+        setCapacityStatus(data);
+        if (!data.available) {
+          await fetchAlternativeStations();
+        } else {
+          setShowAlternatives(false);
+          setAlternativeStations([]);
+        }
+      }
+    } catch (error) {
+      console.error('Capacity check failed:', error);
+} finally {
+      setIsCheckingCapacity(false);
+    }
+  }, [formData.stationId, formData.dropOffDate, formData.pickUpDate, totalBags, fetchAlternativeStations]);
+
+
 
   useEffect(() => {
-    if (formData.stationId && formData.dropOffDate && formData.pickUpDate && totalBags) {
-      const debounceTimer = setTimeout(() => {
-        checkStationCapacity();
-      }, 500);
-      return () => clearTimeout(debounceTimer);
-    }
-  }, [formData.stationId, formData.dropOffDate, formData.pickUpDate, totalBags]);
+  if (formData.stationId && formData.dropOffDate && formData.pickUpDate && totalBags) {
+    const debounceTimer = setTimeout(() => {
+      checkStationCapacity();
+    }, 500);
+    return () => clearTimeout(debounceTimer);
+  }
+}, [formData.stationId, formData.dropOffDate, formData.pickUpDate, totalBags, checkStationCapacity]);
 
   const selectAlternativeStation = (alternativeStation) => {
     setFormData(prev => ({
@@ -408,95 +370,6 @@ useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const applySuggestedTime = (timeType, suggestedDateTime) => {
-    const asDate = (d) => (d instanceof Date ? d : new Date(d));
-    const getMinAllowedPickUp = (dropOffDt) => {
-      return dropOffDt ? new Date(dropOffDt.getTime() + 1 * 60 * 60 * 1000) : null;
-    };
-
-    if (timeType === 'pickUp') {
-      let chosen = asDate(suggestedDateTime);
-      const dropOffDateObj = formData.dropOffDate ? new Date(formData.dropOffDate) : null;
-      const minAllowedPickUp = getMinAllowedPickUp(dropOffDateObj);
-      if (minAllowedPickUp && chosen.getTime() < minAllowedPickUp.getTime()) {
-        chosen = minAllowedPickUp;
-      }
-      const formattedPickUp = formatDateTimeLocal(chosen);
-      setFormData(prev => ({ ...prev, pickUpDate: formattedPickUp }));
-      if (stationTimings) {
-        const pickUpValidation = getNearestAvailableTime(formattedPickUp, stationTimings);
-        if (pickUpValidation.isValid) setTimingAlert(null);
-        else setTimingAlert([{
-          type: 'pickUp',
-          message: 'Pick-up time falls when station is closed',
-          details: pickUpValidation,
-          selectedTime: formattedPickUp
-        }]);
-      } else {
-        setTimingAlert(null);
-      }
-      return;
-    }
-
-    if (timeType === 'dropOff') {
-      const dropOffDateObj = asDate(suggestedDateTime);
-      const formattedDropOff = formatDateTimeLocal(dropOffDateObj);
-      const calculatedPickup = new Date(dropOffDateObj.getTime() + 3 * 60 * 60 * 1000);
-      const minAllowedPickUp = getMinAllowedPickUp(dropOffDateObj);
-      if (minAllowedPickUp && calculatedPickup.getTime() < minAllowedPickUp.getTime()) {
-        calculatedPickup.setTime(minAllowedPickUp.getTime());
-      }
-      let finalPickUpDateObj = calculatedPickup;
-      let finalTimingAlert = null;
-      if (stationTimings) {
-        const pickUpValidation = getNearestAvailableTime(calculatedPickup.toISOString(), stationTimings);
-        if (pickUpValidation.isValid) {
-          finalPickUpDateObj = calculatedPickup;
-          finalTimingAlert = null;
-        } else {
-          const allSuggestions = pickUpValidation.suggestions || [];
-          const dropMinTs = minAllowedPickUp ? minAllowedPickUp.getTime() : null;
-          const suitable = allSuggestions.find((s) => {
-            const sTs = new Date(s.dateTime).getTime();
-            return dropMinTs ? sTs >= dropMinTs : true;
-          });
-          if (suitable) {
-            finalPickUpDateObj = new Date(suitable.dateTime);
-            finalTimingAlert = null;
-          } else if (allSuggestions.length > 0) {
-            const earliest = new Date(allSuggestions[0].dateTime);
-            if (dropMinTs && earliest.getTime() < dropMinTs) {
-              finalPickUpDateObj = minAllowedPickUp || earliest;
-            } else {
-              finalPickUpDateObj = earliest;
-            }
-            finalTimingAlert = {
-              type: 'pickUp',
-              message: 'Pick-up time adjusted based on station hours',
-              details: pickUpValidation,
-              selectedTime: finalPickUpDateObj.toISOString(),
-            };
-          } else {
-            finalPickUpDateObj = minAllowedPickUp || calculatedPickup;
-            finalTimingAlert = {
-              type: 'pickUp',
-              message: 'No pick-up slots found; please choose a different drop-off or pick-up time',
-              details: pickUpValidation,
-              selectedTime: finalPickUpDateObj.toISOString(),
-            };
-          }
-        }
-      } else {
-        finalPickUpDateObj = calculatedPickup;
-        finalTimingAlert = null;
-      }
-      const formattedPickUp = formatDateTimeLocal(finalPickUpDateObj);
-      setFormData(prev => ({ ...prev, dropOffDate: formattedDropOff, pickUpDate: formattedPickUp }));
-      setTimingAlert(finalTimingAlert ? [finalTimingAlert] : null);
-      return;
-    }
-  };
-
   const calculateNumberOfDays = () => {
     if (!formData.dropOffDate || !formData.pickUpDate) return 1;
     const dropOff = new Date(formData.dropOffDate);
@@ -507,7 +380,6 @@ useEffect(() => {
 
   const numberOfDays = calculateNumberOfDays();
 
-  // ✅ IMPROVED: Memoized total amount
   const totalAmount = useMemo(() => 
     numberOfDays * (
       formData.smallBagCount * LUGGAGE_PRICING.small +
@@ -516,49 +388,29 @@ useEffect(() => {
     [numberOfDays, formData.smallBagCount, formData.largeBagCount]
   );
 
-  const isStep2Valid = () => {
-    if (
-      !formData.fullName ||
-      !formData.email ||
-      !!errors.email ||
-      !formData.phoneNumber ||
-      !formData.stationId
-    ) return false;
+  const isStep1Valid = () => {
+    return formData.stationId && formData.dropOffDate && formData.pickUpDate && 
+           !dateErrors.dropOff && !dateErrors.pickUp;
+  };
 
-    if (!formData.dropOffDate || !formData.pickUpDate) return false;
-    if (totalBags === 0) return false;
-    if (dateErrors.dropOff || dateErrors.pickUp) return false;
-    
-    // ✅ IMPROVED: Timing alerts are warnings, not blockers
-    if (timingAlert && timingAlert.length > 0) return false;
-    
-    if (capacityStatus && !capacityStatus.available) return false;
-    return true;
+  const isStep2Valid = () => {
+    return totalBags > 0 && !(capacityStatus && !capacityStatus.available);
+  };
+
+  const isStep3Valid = () => {
+    return formData.fullName && formData.email && !errors.email && formData.phoneNumber;
+  };
+
+  const getStep1InvalidReason = () => {
+    if (!formData.stationId) return "Please select a storage station.";
+    if (!formData.dropOffDate || !formData.pickUpDate) return "Please set both Drop-off and Pick-up times.";
+    if (dateErrors.dropOff) return dateErrors.dropOff;
+    if (dateErrors.pickUp) return dateErrors.pickUp;
+    return "Please complete required fields.";
   };
 
   const getStep2InvalidReason = () => {
-    if (!formData.fullName || !formData.email || !formData.phoneNumber || !formData.stationId) {
-      return "Please complete your personal details and choose a station.";
-    }
-    if (totalBags === 0) {
-      return "Please select at least one bag.";
-    }
-    if (!formData.dropOffDate || !formData.pickUpDate) {
-      return "Please set both Drop-off and Pick-up times.";
-    }
-    if (dateErrors.dropOff) {
-      return dateErrors.dropOff;
-    }
-    if (dateErrors.pickUp) {
-      return dateErrors.pickUp;
-    }
-    
-    // ✅ IMPROVED: Show timing alert as warning, not blocker
-    // if (timingAlert && timingAlert.length > 0) {
-    //   const a = timingAlert[0];
-    //   return a.type === "dropOff" ? "Drop-off time conflicts with station hours." : "Pick-up time conflicts with station hours.";
-    // }
-    
+    if (totalBags === 0) return "Please select at least one bag.";
     if (capacityStatus && !capacityStatus.available) {
       return "Selected station is at capacity for those dates — choose an alternative station.";
     }
@@ -572,14 +424,11 @@ useEffect(() => {
       [name]: type === "checkbox" ? checked : value,
     };
 
-    // ✅ IMPROVED: Simplified email validation (no domain restriction)
     if (name === "email") {
       let emailError = "";
-      
       if (!EMAIL_REGEX.test(value)) {
         emailError = "Please enter a valid email address";
       }
-      
       setErrors(prev => ({ ...prev, email: emailError }));
       setFormData(prev => ({ ...prev, email: value }));
       return;
@@ -607,29 +456,30 @@ useEffect(() => {
     if (name === "dropOffDate" && value) {
       const now = getCurrentDateTime();
       const selectedDropOff = new Date(value);
+      
       if (selectedDropOff < now) {
+        // ✅ FIX: Past time detected - need to auto-correct with station hours validation
         const correctedDropOff = new Date(now);
         correctedDropOff.setMinutes(correctedDropOff.getMinutes() + 10);
-
+        
+        // Check if corrected time falls within station hours
         if (stationTimings && !stationTimings.is24Hours) {
-          const correctedValidation = getNearestAvailableTime(
+          const validation = getNearestAvailableTime(
             correctedDropOff.toISOString(),
             stationTimings
           );
-
-          if (
-            !correctedValidation.isValid &&
-            correctedValidation.suggestions &&
-            correctedValidation.suggestions.length > 0
-          ) {
-            const nearestValid = correctedValidation.suggestions[0].dateTime;
+          
+          if (!validation.isValid && validation.suggestions && validation.suggestions.length > 0) {
+            // Use the nearest available time from station hours
+            const nearestValid = validation.suggestions[0].dateTime;
             const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
             updatedFormData.dropOffDate = formattedCorrected;
             setDateErrors(prev => ({ ...prev, dropOff: null }));
             setAutoCorrectDropInfo(
-              "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
+              "Your selected drop-off time was in the past and outside station hours, so we adjusted it to the nearest available time."
             );
           } else {
+            // Corrected time is valid
             const formattedCorrected = formatDateTimeLocal(correctedDropOff);
             updatedFormData.dropOffDate = formattedCorrected;
             setDateErrors(prev => ({ ...prev, dropOff: null }));
@@ -638,6 +488,7 @@ useEffect(() => {
             );
           }
         } else {
+          // 24-hour station or no timing data
           const formattedCorrected = formatDateTimeLocal(correctedDropOff);
           updatedFormData.dropOffDate = formattedCorrected;
           setDateErrors(prev => ({ ...prev, dropOff: null }));
@@ -671,8 +522,32 @@ useEffect(() => {
       const now = getCurrentDateTime();
 
       if (selectedPickUp < now) {
+        // ✅ FIX: Past time detected - need to auto-correct with station hours validation
         const correctedPickup = new Date(now);
         correctedPickup.setMinutes(correctedPickup.getMinutes() + 70);
+        
+        // Check if corrected time falls within station hours
+        if (stationTimings && !stationTimings.is24Hours) {
+          const validation = getNearestAvailableTime(
+            correctedPickup.toISOString(),
+            stationTimings
+          );
+          
+          if (!validation.isValid && validation.suggestions && validation.suggestions.length > 0) {
+            // Use the nearest available time from station hours
+            const nearestValid = validation.suggestions[0].dateTime;
+            const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
+            updatedFormData.pickUpDate = formattedCorrected;
+            setDateErrors(prev => ({ ...prev, pickUp: null }));
+            setAutoCorrectPickInfo(
+              "Your selected pick-up time was in the past and outside station hours, so we adjusted it to the nearest available time."
+            );
+            setFormData(updatedFormData);
+            return;
+          }
+        }
+        
+        // If we get here, use the standard correction
         const formattedCorrected = formatDateTimeLocal(correctedPickup);
         updatedFormData.pickUpDate = formattedCorrected;
         setDateErrors(prev => ({ ...prev, pickUp: null }));
@@ -717,6 +592,7 @@ useEffect(() => {
 
   useEffect(() => {
     const errorsObj = {};
+    
     if (!formData.fullName) errorsObj.fullName = "Full Name is required";
     if (!formData.email) {
       errorsObj.email = "Email is required";
@@ -752,11 +628,6 @@ useEffect(() => {
     if (dateErrors.dropOff) errorsObj.dropOffDate = dateErrors.dropOff;
     if (dateErrors.pickUp) errorsObj.pickUpDate = dateErrors.pickUp;
     
-    // ✅ IMPROVED: Timing alerts are now warnings, not blocking errors
-    // if (timingAlert && timingAlert.length > 0) {
-    //   errorsObj.timing = "Please select valid station operating hours";
-    // }
-    
     if (capacityStatus && !capacityStatus.available) {
       errorsObj.capacity = "Station is at capacity. Please select an alternative.";
     }
@@ -765,63 +636,57 @@ useEffect(() => {
     setIsFormValid(Object.keys(errorsObj).length === 0);
   }, [formData, capacityStatus, dateErrors]);
 
-// Replace your handlePaymentSuccess function (around line 1000-1025)
-// with this updated version:
-
-const handlePaymentSuccess = async (paymentId) => {
-  setIsLoading(true);
-  try {
-    const response = await fetch("/api/booking", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData,
-        luggageCount: totalBags,
-        paymentId,
-        totalAmount, // ✅ ADD THIS LINE - sends total amount to backend
-      }),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to send booking details.");
-    }
-    const data = await response.json();
-    if (data.success) {
-      try {
-        if (onBookingComplete) onBookingComplete(data);
-      } catch (err) {
-        console.warn("onBookingComplete threw", err);
+  const handlePaymentSuccess = async (paymentId) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          luggageCount: totalBags,
+          paymentId,
+          totalAmount,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to send booking details.");
       }
-      window.location.href = "/Booked";
-    } else alert("❌ Failed to send booking email.");
-  } catch (error) {
-    console.error("Error:", error);
-    alert(`An error occurred: ${error.message}`);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  const shouldShowPriceCard =
-    currentStep === 2 &&
-    (totalBags > 0 || formData.dropOffDate || formData.pickUpDate);
-
-
-
-    useEffect(() => {
-  const handleBeforeUnload = (e) => {
-    if (isPaymentProcessing) {
-      e.preventDefault();
-      e.returnValue =
-        "Your payment is currently being processed. Please do not close or refresh this page.";
-      return e.returnValue;
+      const data = await response.json();
+      if (data.success) {
+        try {
+          if (onBookingComplete) onBookingComplete(data);
+        } catch (err) {
+          console.warn("onBookingComplete threw", err);
+        }
+        window.location.href = "/Booked";
+      } else alert("❌ Failed to send booking email.");
+    } catch (error) {
+      console.error("Error:", error);
+      alert(`An error occurred: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  window.addEventListener("beforeunload", handleBeforeUnload);
-  return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-}, [isPaymentProcessing]);
+  const shouldShowPriceCard =
+    currentStep >= 2 &&
+    (totalBags > 0 || formData.dropOffDate || formData.pickUpDate);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isPaymentProcessing) {
+        e.preventDefault();
+        e.returnValue =
+          "Your payment is currently being processed. Please do not close or refresh this page.";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isPaymentProcessing]);
 
   return (
     <>
@@ -843,7 +708,7 @@ const handlePaymentSuccess = async (paymentId) => {
                 <div className={styles.progressBar}>
                   <div className={`${styles.step} ${currentStep >= 1 ? styles.active : ""}`}>
                     <div className={styles.stepCircle}>1</div>
-                    <span className={styles.stepLabel}>Details</span>
+                    <span className={styles.stepLabel}>Station & Schedule</span>
                   </div>
                   <div className={styles.stepLine}></div>
                   <div className={`${styles.step} ${currentStep >= 2 ? styles.active : ""}`}>
@@ -853,6 +718,11 @@ const handlePaymentSuccess = async (paymentId) => {
                   <div className={styles.stepLine}></div>
                   <div className={`${styles.step} ${currentStep >= 3 ? styles.active : ""}`}>
                     <div className={styles.stepCircle}>3</div>
+                    <span className={styles.stepLabel}>Personal Info</span>
+                  </div>
+                  <div className={styles.stepLine}></div>
+                  <div className={`${styles.step} ${currentStep >= 4 ? styles.active : ""}`}>
+                    <div className={styles.stepCircle}>4</div>
                     <span className={styles.stepLabel}>Payment</span>
                   </div>
                 </div>
@@ -860,109 +730,12 @@ const handlePaymentSuccess = async (paymentId) => {
                 <form onSubmit={(e) => e.preventDefault()}>
                   {currentStep === 1 && (
                     <div className={styles.stepContent}>
-                      <h2 className={styles.sectionTitle}>Personal Information</h2>
-
-                      <div className={styles.inputGroup}>
-                        <label htmlFor="fullName" className={styles.label}>
-                          <span className={styles.labelIcon}>👤</span>
-                          Full Name
-                        </label>
-                        <input
-                          type="text"
-                          id="fullName"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                          disabled={isUserLoggedIn}
-                          className={styles.input}
-                          placeholder="John Doe"
-                        />
-                        {errors.fullName && <span className={styles.errorText}>{errors.fullName}</span>}
-                      </div>
-
-                      <div className={styles.inputRow}>
-                        <div className={styles.inputGroup}>
-                          <label htmlFor="email" className={styles.label}>
-                            <span className={styles.labelIcon}>✉️</span>
-                            Email Address
-                          </label>
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            disabled={isUserLoggedIn}
-                            className={styles.input}
-                            placeholder="john@example.com"
-                          />
-                          {errors.email && (
-                            <span className={styles.errorText}>{errors.email}</span>
-                          )}
-                        </div>
-
-                        <div className={styles.inputGroup}>
-                          <label htmlFor="phone" className={styles.label}>
-                            <span className={styles.labelIcon}>📞</span>
-                            Phone Number
-                          </label>
-                          <div style={{ display: "flex", gap: "8px" }}>
-<div ref={countryRef} style={{ position: "relative", maxWidth: "180px" }}>
-  <input
-    type="text"
-    className={styles.input}
-    placeholder="Search country"
-    value={countrySearch || formData.phoneCode}
-    onFocus={() => setShowCountryDropdown(true)}
-    onChange={(e) => {
-      setCountrySearch(e.target.value);
-      setShowCountryDropdown(true);
-    }}
-  />
-
-  {showCountryDropdown && (
-    <div className={styles.countryDropdown}>
-      {filteredCountryCodes.map(c => (
-        <div
-          key={c.code}
-          className={styles.countryOption}
-          onClick={() => {
-            setFormData(prev => ({
-              ...prev,
-              phoneCode: c.code,
-              phone: `${c.code} ${prev.phoneNumber}`,
-            }));
-            setCountrySearch("");
-            setShowCountryDropdown(false);
-          }}
-        >
-          {c.label}
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
-
-                            <input
-                              type="tel"
-                              name="phoneNumber"
-                              value={formData.phoneNumber}
-                              onChange={handleChange}
-                              className={styles.input}
-                              placeholder="412345678"
-                            />
-                          </div>
-                          {errors.phone && (
-                            <span className={styles.errorText}>{errors.phone}</span>
-                          )}
-                        </div>
-                      </div>
+                      <h2 className={styles.sectionTitle}>Where & When?</h2>
 
                       <div className={styles.inputGroup}>
                         <label htmlFor="stationId" className={styles.label}>
                           <span className={styles.labelIcon}>📍</span>
-                          Storage drop point
+                          Storage Station
                         </label>
 
                         {mode !== "map" && (
@@ -1003,31 +776,119 @@ const handlePaymentSuccess = async (paymentId) => {
                         )}
 
                         {errors.stationId && <span className={styles.errorText}>{errors.stationId}</span>}
+</div>
+
+{isLoadingTimings && (
+  <div className={styles.loadingTimings}>
+    <span>⏳ Loading station hours...</span>
+  </div>
+)}
+
+{timingsFetchError && (
+  <div className={styles.timingError}>
+    <span className={styles.errorIcon}>⚠️</span>
+    <span>{timingsFetchError}. Times shown may not reflect actual station hours.</span>
+  </div>
+)}
+
+{isCheckingCapacity && (
+                        <div className={styles.checkingTimings}>
+                          Checking station capacity…
+                        </div>
+                      )}
+
+                      <div className={styles.inputRow}>
+                        <div className={styles.inputGroup}>
+                          <VisualDateTimePicker
+                            value={formData.dropOffDate}
+                            onChange={handleChange}
+                            minDate={getMinDateTime()}
+                            label="Drop-off Time"
+                            icon="📥"
+                            stationTimings={stationTimings}
+                            type="dropOffDate"
+                            disabled={!formData.stationId}
+                          />
+                          {!formData.stationId && (
+                            <div className={styles.autoCorrectInfo}>
+                              ℹ️ Please select a station first to choose drop-off time
+                            </div>
+                          )}
+                          {dateErrors.dropOff && (
+                            <div className={styles.dateErrorBox}>
+                              <span className={styles.dateErrorIcon}>⚠️</span>
+                              <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
+                            </div>
+                          )}
+                          {errors.dropOffDate && !dateErrors.dropOff && (
+                            <span className={styles.errorText}>{errors.dropOffDate}</span>
+                          )}
+                          {autoCorrectDropInfo && (
+                            <div className={styles.autoCorrectInfo}>
+                              ℹ️ {autoCorrectDropInfo}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                          <VisualDateTimePicker
+                            value={formData.pickUpDate}
+                            onChange={handleChange}
+                            minDate={
+                              formData.dropOffDate
+                                ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
+                                    .toISOString()
+                                    .slice(0, 16)
+                                : getMinDateTime()
+                            }
+                            label="Pick-up Time"
+                            icon="📤"
+                            stationTimings={stationTimings}
+                            type="pickUpDate"
+                            disabled={!formData.stationId}
+                          />
+                          {!formData.stationId && (
+                            <div className={styles.autoCorrectInfo}>
+                              ℹ️ Please select a station first to choose pick-up time
+                            </div>
+                          )}
+                          {dateErrors.pickUp && (
+                            <div className={styles.dateErrorBox}>
+                              <span className={styles.dateErrorIcon}>⚠️</span>
+                              <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
+                            </div>
+                          )}
+                          {errors.pickUpDate && !dateErrors.pickUp && (
+                            <span className={styles.errorText}>{errors.pickUpDate}</span>
+                          )}
+                          {autoCorrectPickInfo && (
+                            <div className={styles.autoCorrectInfo}>
+                              ℹ️ {autoCorrectPickInfo}
+                            </div>
+                          )}
+                        </div>
                       </div>
+
+                      {!isStep1Valid() && (
+                        <div className={styles.warningBox} style={{ marginBottom: 12 }}>
+                          {getStep1InvalidReason()}
+                        </div>
+                      )}
 
                       <button
                         type="button"
-                        onClick={() => {
-                          if (errors.email) return;
-                          setCurrentStep(2);
-                        }}
+                        onClick={() => isStep1Valid() && setCurrentStep(2)}
                         className={styles.btnPrimary}
-                        disabled={
-                          !formData.fullName ||
-                          !formData.email ||
-                          !!errors.email ||
-                          !formData.phoneNumber ||
-                          !formData.stationId
-                        }
+                        disabled={!isStep1Valid()}
                       >
-                        Continue to Luggage Details →
+                        Continue to Luggage →
                       </button>
                     </div>
                   )}
 
                   {currentStep === 2 && (
                     <div className={styles.stepContent}>
-                      <h2 className={styles.sectionTitle}>Luggage & Schedule</h2>
+                      <h2 className={styles.sectionTitle}>Luggage Details</h2>
 
                       <div className={styles.inputGroup}>
                         <label className={styles.label}>
@@ -1056,11 +917,9 @@ const handlePaymentSuccess = async (paymentId) => {
                                 >
                                   −
                                 </button>
-
                                 <span className={styles.counterValue}>
                                   {formData.smallBagCount}
                                 </span>
-
                                 <button
                                   type="button"
                                   className={styles.counterBtn}
@@ -1097,11 +956,9 @@ const handlePaymentSuccess = async (paymentId) => {
                                 >
                                   −
                                 </button>
-
                                 <span className={styles.counterValue}>
                                   {formData.largeBagCount}
                                 </span>
-
                                 <button
                                   type="button"
                                   className={styles.counterBtn}
@@ -1153,9 +1010,7 @@ const handlePaymentSuccess = async (paymentId) => {
 
                       {showAlternatives && alternativeStations.length > 0 && (
                         <div className={styles.alternativesSection}>
-                          <h3 className={styles.alternativesTitle}>
-                            📍 Alternative Stations Nearby
-                          </h3>
+                          <h3 className={styles.alternativesTitle}>📍 Alternative Stations Nearby</h3>
                           <p className={styles.alternativesSubtitle}>
                             These stations have available capacity for your selected dates:
                           </p>
@@ -1198,147 +1053,6 @@ const handlePaymentSuccess = async (paymentId) => {
                           </div>
                         </div>
                       )}
-
-                      {(isCheckingTimings || isCheckingCapacity) && (
-                        <div className={styles.checkingTimings}>
-                          Checking station hours and capacity…
-                        </div>
-                      )}
-
-                      {timingAlert && timingAlert.length > 0 && (
-                        <div className={styles.timingAlert}>
-                          <div className={styles.alertHeader}>
-                            <span className={styles.alertIcon}>⚠️</span>
-                            <span className={styles.alertTitle}>Station Timing Advisory</span>
-                          </div>
-
-                          {timingAlert.map((alert, index) => (
-                            <div key={index} className={styles.alertItem}>
-                              <div className={styles.alertMessage}>
-                                <strong>{alert.type === 'dropOff' ? '📥 Drop-off' : '📤 Pick-up'}:</strong> {alert.message}
-                              </div>
-
-                              {alert.details.openTime && alert.details.closeTime && (
-                                <div className={styles.alertInfo}>
-                                  Station hours on {alert.details.dayName}: {alert.details.openTime} - {alert.details.closeTime}
-                                </div>
-                              )}
-
-                              {alert.details.suggestions && alert.details.suggestions.length > 0 && (
-                                <div className={styles.suggestions}>
-                                  <div className={styles.suggestionsTitle}>💡 Suggested alternatives:</div>
-
-                                  {(() => {
-                                    const dropOffDateObj = formData.dropOffDate ? new Date(formData.dropOffDate) : null;
-                                    const minAllowedPickUpTs = dropOffDateObj ? dropOffDateObj.getTime() + 1 * 60 * 60 * 1000 : null;
-
-                                    const filtered = alert.details.suggestions.filter((suggestion) => {
-                                      if (alert.type === 'pickUp' && minAllowedPickUpTs) {
-                                        const sugTs = new Date(suggestion.dateTime).getTime();
-                                        return sugTs >= minAllowedPickUpTs;
-                                      }
-                                      return true;
-                                    });
-
-                                    if (filtered.length === 0) {
-                                      return (
-                                        <div className={styles.noSuggestions}>
-                                          No suitable pick-up suggestions available that are at least 1 hour after your drop-off. Please choose a different drop-off time or manually select a pick-up time.
-                                        </div>
-                                      );
-                                    }
-
-                                    return filtered.map((suggestion, idx) => (
-                                      <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => {
-                                          applySuggestedTime(alert.type, suggestion.dateTime);
-                                        }}
-                                        className={styles.suggestionBtn}
-                                      >
-                                        <div className={styles.suggestionLabel}>{suggestion.label}</div>
-                                        <div className={styles.suggestionTime}>
-                                          {formatDateTime(suggestion.dateTime)}
-                                        </div>
-                                        <div className={styles.suggestionAction}>Use this time →</div>
-                                      </button>
-                                    ));
-                                  })()}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className={styles.inputRow}>
-                        <div className={styles.inputGroup}>
-                          <label htmlFor="dropOffDate" className={styles.label}>
-                            <span className={styles.labelIcon}>📥</span>
-                            Drop-off Time
-                          </label>
-                          <input
-                            type="datetime-local"
-                            id="dropOffDate"
-                            name="dropOffDate"
-                            value={formData.dropOffDate}
-                            onChange={handleChange}
-                            className={`${styles.input} ${dateErrors.dropOff || errors.dropOffDate ? styles.inputError : ''}`}
-                            min={getMinDateTime()}
-                          />
-                          {dateErrors.dropOff && (
-                            <div className={styles.dateErrorBox}>
-                              <span className={styles.dateErrorIcon}>⚠️</span>
-                              <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
-                            </div>
-                          )}
-                          {errors.dropOffDate && !dateErrors.dropOff && (
-                            <span className={styles.errorText}>{errors.dropOffDate}</span>
-                          )}
-                          {autoCorrectDropInfo && (
-                            <div className={styles.autoCorrectInfo}>
-                              ℹ️ {autoCorrectDropInfo}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className={styles.inputGroup}>
-                          <label htmlFor="pickUpDate" className={styles.label}>
-                            <span className={styles.labelIcon}>📤</span>
-                            Pick-up Time
-                          </label>
-                          <input
-                            type="datetime-local"
-                            id="pickUpDate"
-                            name="pickUpDate"
-                            value={formData.pickUpDate}
-                            onChange={handleChange}
-                            className={`${styles.input} ${dateErrors.pickUp || errors.pickUpDate ? styles.inputError : ''}`}
-                            min={
-                              formData.dropOffDate
-                                ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
-                                    .toISOString()
-                                    .slice(0, 16)
-                                : getMinDateTime()
-                            }
-                          />
-                          {dateErrors.pickUp && (
-                            <div className={styles.dateErrorBox}>
-                              <span className={styles.dateErrorIcon}>⚠️</span>
-                              <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
-                            </div>
-                          )}
-                          {errors.pickUpDate && !dateErrors.pickUp && (
-                            <span className={styles.errorText}>{errors.pickUpDate}</span>
-                          )}
-                          {autoCorrectPickInfo && (
-                            <div className={styles.autoCorrectInfo}>
-                              ℹ️ {autoCorrectPickInfo}
-                            </div>
-                          )}
-                        </div>
-                      </div>
 
                       <div className={styles.checkboxGroup}>
                         <label className={styles.checkboxLabel}>
@@ -1390,9 +1104,125 @@ const handlePaymentSuccess = async (paymentId) => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setCurrentStep(3)}
+                          onClick={() => isStep2Valid() && setCurrentStep(3)}
                           className={styles.btnPrimary}
                           disabled={!isStep2Valid()}
+                        >
+                          Continue to Personal Info →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 3 && (
+                    <div className={styles.stepContent}>
+                      <h2 className={styles.sectionTitle}>Personal Information</h2>
+
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="fullName" className={styles.label}>
+                          <span className={styles.labelIcon}>👤</span>
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          id="fullName"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleChange}
+                          disabled={isUserLoggedIn}
+                          className={styles.input}
+                          placeholder="John Doe"
+                        />
+                        {errors.fullName && <span className={styles.errorText}>{errors.fullName}</span>}
+                      </div>
+
+                      <div className={styles.inputRow}>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="email" className={styles.label}>
+                            <span className={styles.labelIcon}>✉️</span>
+                            Email Address
+                          </label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            disabled={isUserLoggedIn}
+                            className={styles.input}
+                            placeholder="john@example.com"
+                          />
+                          {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="phone" className={styles.label}>
+                            <span className={styles.labelIcon}>📞</span>
+                            Phone Number
+                          </label>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <div ref={countryRef} style={{ position: "relative", maxWidth: "180px" }}>
+                              <input
+                                type="text"
+                                className={styles.input}
+                                placeholder="Search country"
+                                value={countrySearch || formData.phoneCode}
+                                onFocus={() => setShowCountryDropdown(true)}
+                                onChange={(e) => {
+                                  setCountrySearch(e.target.value);
+                                  setShowCountryDropdown(true);
+                                }}
+                              />
+
+                              {showCountryDropdown && (
+                                <div className={styles.countryDropdown}>
+                                  {filteredCountryCodes.map(c => (
+                                    <div
+                                      key={c.code}
+                                      className={styles.countryOption}
+                                      onClick={() => {
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          phoneCode: c.code,
+                                          phone: `${c.code} ${prev.phoneNumber}`,
+                                        }));
+                                        setCountrySearch("");
+                                        setShowCountryDropdown(false);
+                                      }}
+                                    >
+                                      {c.label}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <input
+                              type="tel"
+                              name="phoneNumber"
+                              value={formData.phoneNumber}
+                              onChange={handleChange}
+                              className={styles.input}
+                              placeholder="412345678"
+                            />
+                          </div>
+                          {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+                        </div>
+                      </div>
+
+                      <div className={styles.buttonRow}>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(2)}
+                          className={styles.btnSecondary}
+                        >
+                          ← Back
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => isStep3Valid() && setCurrentStep(4)}
+                          className={styles.btnPrimary}
+                          disabled={!isStep3Valid()}
                         >
                           Continue to Payment →
                         </button>
@@ -1400,7 +1230,7 @@ const handlePaymentSuccess = async (paymentId) => {
                     </div>
                   )}
 
-                  {currentStep === 3 && (
+                  {currentStep === 4 && (
                     <div className={styles.stepContent}>
                       <h2 className={styles.sectionTitle}>Review & Payment</h2>
 
@@ -1431,25 +1261,16 @@ const handlePaymentSuccess = async (paymentId) => {
                           <h3 className={styles.reviewTitle}>Luggage Information</h3>
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Small Bags:</span>
-                            <span className={styles.reviewValue}>
-                              {formData.smallBagCount}
-                            </span>
+                            <span className={styles.reviewValue}>{formData.smallBagCount}</span>
                           </div>
-
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Medium & Large Bags:</span>
-                            <span className={styles.reviewValue}>
-                              {formData.largeBagCount}
-                            </span>
+                            <span className={styles.reviewValue}>{formData.largeBagCount}</span>
                           </div>
-
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Total Bags:</span>
-                            <span className={styles.reviewValue}>
-                              {totalBags}
-                            </span>
+                            <span className={styles.reviewValue}>{totalBags}</span>
                           </div>
-
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Drop-off:</span>
                             <span className={styles.reviewValue}>
@@ -1466,31 +1287,29 @@ const handlePaymentSuccess = async (paymentId) => {
                       </div>
 
                       <div className={styles.checkboxGroup}>
-  <label className={styles.checkboxLabel}>
-    <input
-      type="checkbox"
-      name="termsAccepted"
-      checked={formData.termsAccepted}
-      onChange={handleChange}
-      className={styles.checkbox}
-    />
-    <span>
-      I agree to the{" "}
-      <button
-        type="button"
-        onClick={() => setShowTermsModal(true)}
-        className={styles.legalBtn}
-      >
-        Terms & Conditions
-      </button>
-    </span>
-  </label>
-
-  {errors.termsAccepted && (
-    <span className={styles.errorText}>{errors.termsAccepted}</span>
-  )}
-</div>
-
+                        <label className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            name="termsAccepted"
+                            checked={formData.termsAccepted}
+                            onChange={handleChange}
+                            className={styles.checkbox}
+                          />
+                          <span>
+                            I agree to the{" "}
+                            <button
+                              type="button"
+                              onClick={() => setShowTermsModal(true)}
+                              className={styles.legalBtn}
+                            >
+                              Terms & Conditions
+                            </button>
+                          </span>
+                        </label>
+                        {errors.termsAccepted && (
+                          <span className={styles.errorText}>{errors.termsAccepted}</span>
+                        )}
+                      </div>
 
                       {isLoading || isPaymentProcessing ? (
                         <div className={styles.loadingContainer}>
@@ -1520,11 +1339,11 @@ const handlePaymentSuccess = async (paymentId) => {
 
                       <button
                         type="button"
-                        onClick={() => setCurrentStep(2)}
+                        onClick={() => setCurrentStep(3)}
                         className={styles.btnSecondary}
                         disabled={isLoading || isPaymentProcessing}
                       >
-                        ← Back to Luggage Details
+                        ← Back to Personal Info
                       </button>
                     </div>
                   )}
@@ -1545,14 +1364,12 @@ const handlePaymentSuccess = async (paymentId) => {
                           {formData.smallBagCount} × A${LUGGAGE_PRICING.small}
                         </span>
                       </div>
-
                       <div className={styles.priceRow}>
                         <span className={styles.priceLabel}>Medium & Large bags</span>
                         <span className={styles.priceValue}>
                           {formData.largeBagCount} × A${LUGGAGE_PRICING.medium_large}
                         </span>
                       </div>
-
                       <div className={styles.priceRow}>
                         <span className={styles.priceLabel}>Storage duration</span>
                         <span className={styles.priceValue}>{numberOfDays} day(s)</span>
@@ -1608,57 +1425,56 @@ const handlePaymentSuccess = async (paymentId) => {
           </div>
         </div>
       </div>
-     {showTermsModal && (
-  <div className={styles.modalOverlay}>
-    <div className={styles.modalBox} role="dialog" aria-modal="true">
-      <button
-        className={styles.modalClose}
-        aria-label="Close terms modal"
-        onClick={() => setShowTermsModal(false)}
-      >
-        ✕
-      </button>
 
-      <h2 className={styles.modalTitle}>Before You Continue</h2>
+      {showTermsModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox} role="dialog" aria-modal="true">
+            <button
+              className={styles.modalClose}
+              aria-label="Close terms modal"
+              onClick={() => setShowTermsModal(false)}
+            >
+              ✕
+            </button>
 
-      <div className={styles.modalContent}>
-        <p>
-          By proceeding with this booking, you agree to Luggage Terminal’s
-          <strong> Terms & Conditions</strong> and acknowledge our
-          <strong> Privacy Policy</strong>.
-        </p>
+            <h2 className={styles.modalTitle}>Before You Continue</h2>
 
-        <p>
-          Please ensure your luggage does not contain prohibited items such as
-          valuables, electronics, passports, or hazardous materials. Refunds and
-          cancellations are subject to our cancellation policy.
-        </p>
+            <div className={styles.modalContent}>
+              <p>
+                By proceeding with this booking, you agree to Luggage Terminal&apos;s
+                <strong> Terms & Conditions</strong> and acknowledge our
+                <strong> Privacy Policy</strong>.
+              </p>
 
-        <div className={styles.modalActions}>
-          <a
-            href="/terms-&-conditions"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.legalBtnSecondary}
-          >
-            Terms & Conditions
-          </a>
+              <p>
+                Please ensure your luggage does not contain prohibited items such as
+                valuables, electronics, passports, or hazardous materials. Refunds and
+                cancellations are subject to our cancellation policy.
+              </p>
 
-          <a
-            href="/privacy-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.legalBtnSecondary}
-          >
-            Privacy Policy
-          </a>
+              <div className={styles.modalActions}>
+                <a
+                  href="/terms-&-conditions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.legalBtnSecondary}
+                >
+                  Terms & Conditions
+                </a>
+
+                <a
+                  href="/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.legalBtnSecondary}
+                >
+                  Privacy Policy
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
-
-
+      )}
     </>
   );
 };
