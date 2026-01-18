@@ -501,9 +501,9 @@ const VisualDateTimePicker = ({
             className={`${styles.dateButton} ${(activeTab === 'dropOff' ? dropOffDate : pickUpDate) === 'tomorrow' ? styles.dateButtonActive : ''}`}
           >
             Tomorrow
-            {activeTab === 'dropOff' && dropOffDate === 'tomorrow' && (
+            {/* {activeTab === 'dropOff' && dropOffDate === 'tomorrow' && (
               <span className={styles.discountBadge}>-10%</span>
-            )}
+            )} */}
           </button>
 
           <button
