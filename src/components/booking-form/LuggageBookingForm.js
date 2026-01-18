@@ -5,7 +5,7 @@ import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../LuggagePay";
 import VisualDateTimePicker from "../DateTimePicker/VisualDateTimePicker";
-import { formatDateTimeLocal, getNearestAvailableTime } from "@/utils/stationTimingValidator";
+// import { formatDateTimeLocal, getNearestAvailableTime } from "@/utils/stationTimingValidator";
 
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const toRad = (deg) => (deg * Math.PI) / 180;
@@ -95,8 +95,8 @@ const [isFormValid, setIsFormValid] = useState(false);
   const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
   const [alternativeStations, setAlternativeStations] = useState([]);
   const [showAlternatives, setShowAlternatives] = useState(false);
-  const [autoCorrectDropInfo, setAutoCorrectDropInfo] = useState("");
-  const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
+  // const [autoCorrectDropInfo, setAutoCorrectDropInfo] = useState("");
+  // const [autoCorrectPickInfo, setAutoCorrectPickInfo] = useState("");
   const [dateErrors, setDateErrors] = useState({
     dropOff: null,
     pickUp: null
@@ -453,139 +453,52 @@ useEffect(() => {
       return;
     }
 
-    if (name === "dropOffDate" && value) {
-      const now = getCurrentDateTime();
-      const selectedDropOff = new Date(value);
-      
-      if (selectedDropOff < now) {
-        // ✅ FIX: Past time detected - need to auto-correct with station hours validation
-        const correctedDropOff = new Date(now);
-        correctedDropOff.setMinutes(correctedDropOff.getMinutes() + 10);
-        
-        // Check if corrected time falls within station hours
-        if (stationTimings && !stationTimings.is24Hours) {
-          const validation = getNearestAvailableTime(
-            correctedDropOff.toISOString(),
-            stationTimings
-          );
-          
-          if (!validation.isValid && validation.suggestions && validation.suggestions.length > 0) {
-            // Use the nearest available time from station hours
-            const nearestValid = validation.suggestions[0].dateTime;
-            const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
-            updatedFormData.dropOffDate = formattedCorrected;
-            setDateErrors(prev => ({ ...prev, dropOff: null }));
-            setAutoCorrectDropInfo(
-              "Your selected drop-off time was in the past and outside station hours, so we adjusted it to the nearest available time."
-            );
-          } else {
-            // Corrected time is valid
-            const formattedCorrected = formatDateTimeLocal(correctedDropOff);
-            updatedFormData.dropOffDate = formattedCorrected;
-            setDateErrors(prev => ({ ...prev, dropOff: null }));
-            setAutoCorrectDropInfo(
-              "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
-            );
-          }
-        } else {
-          // 24-hour station or no timing data
-          const formattedCorrected = formatDateTimeLocal(correctedDropOff);
-          updatedFormData.dropOffDate = formattedCorrected;
-          setDateErrors(prev => ({ ...prev, dropOff: null }));
-          setAutoCorrectDropInfo(
-            "Your selected drop-off time was in the past, so we adjusted it to the nearest valid time."
-          );
-        }
-      } else {
-        updatedFormData.dropOffDate = value;
-        setDateErrors(prev => ({ ...prev, dropOff: null }));
-        setAutoCorrectDropInfo("");
-      }
+    // ✅ NEW: Handle dropOffDate - NO AUTO-FILL
+if (name === "dropOffDate" && value) {
+  updatedFormData.dropOffDate = value;
+  setDateErrors(prev => ({ ...prev, dropOff: null }));
+  // setAutoCorrectDropInfo("");
+  
+  // Clear pick-up if it's now invalid
+  if (formData.pickUpDate) {
+    const dropOff = new Date(value);
+    const pickUp = new Date(formData.pickUpDate);
+    const minPickUp = new Date(dropOff.getTime() + 60 * 60 * 1000);
+    
+    if (pickUp < minPickUp) {
+      updatedFormData.pickUpDate = "";
+      // setAutoCorrectDropInfo("⚠️ Pick-up time was reset. Please select a new pick-up time.");
+    }
+  }
+  
+  setFormData(updatedFormData);
+  return;
+}
 
-      const dropOffTime = new Date(updatedFormData.dropOffDate);
-      const calculatedPickup = new Date(dropOffTime);
-      calculatedPickup.setHours(calculatedPickup.getHours() + 3);
-      const minPickup = new Date(dropOffTime);
-      minPickup.setHours(minPickup.getHours() + 1);
-      const finalPickup = calculatedPickup > minPickup ? calculatedPickup : minPickup;
-      const localPickUpISO = new Date(finalPickup.getTime() - finalPickup.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
-      updatedFormData.pickUpDate = localPickUpISO;
-      setDateErrors(prev => ({ ...prev, pickUp: null }));
-      setFormData(updatedFormData);
+// ✅ NEW: Handle pickUpDate - Simple validation
+if (name === "pickUpDate" && value) {
+  if (formData.dropOffDate) {
+    const dropOff = new Date(formData.dropOffDate);
+    const pickUp = new Date(value);
+    const minPickUp = new Date(dropOff.getTime() + 60 * 60 * 1000);
+    
+    if (pickUp < minPickUp) {
+      setDateErrors(prev => ({ 
+        ...prev, 
+        pickUp: "Pick-up time must be at least 1 hour after drop-off time" 
+      }));
+      // setAutoCorrectPickInfo("");
       return;
     }
-
-    if (name === "pickUpDate" && value) {
-      const selectedPickUp = new Date(value);
-      const now = getCurrentDateTime();
-
-      if (selectedPickUp < now) {
-        // ✅ FIX: Past time detected - need to auto-correct with station hours validation
-        const correctedPickup = new Date(now);
-        correctedPickup.setMinutes(correctedPickup.getMinutes() + 70);
-        
-        // Check if corrected time falls within station hours
-        if (stationTimings && !stationTimings.is24Hours) {
-          const validation = getNearestAvailableTime(
-            correctedPickup.toISOString(),
-            stationTimings
-          );
-          
-          if (!validation.isValid && validation.suggestions && validation.suggestions.length > 0) {
-            // Use the nearest available time from station hours
-            const nearestValid = validation.suggestions[0].dateTime;
-            const formattedCorrected = formatDateTimeLocal(new Date(nearestValid));
-            updatedFormData.pickUpDate = formattedCorrected;
-            setDateErrors(prev => ({ ...prev, pickUp: null }));
-            setAutoCorrectPickInfo(
-              "Your selected pick-up time was in the past and outside station hours, so we adjusted it to the nearest available time."
-            );
-            setFormData(updatedFormData);
-            return;
-          }
-        }
-        
-        // If we get here, use the standard correction
-        const formattedCorrected = formatDateTimeLocal(correctedPickup);
-        updatedFormData.pickUpDate = formattedCorrected;
-        setDateErrors(prev => ({ ...prev, pickUp: null }));
-        setAutoCorrectPickInfo(
-          "Your selected pick-up time was in the past, so we adjusted it to the nearest valid time."
-        );
-        setFormData(updatedFormData);
-        return;
-      }
-
-      if (updatedFormData.dropOffDate) {
-        const dropOffTime = new Date(updatedFormData.dropOffDate);
-        const minPickupTime = new Date(dropOffTime);
-        minPickupTime.setHours(minPickupTime.getHours() + 1);
-
-        if (selectedPickUp <= dropOffTime) {
-          const correctedPickup = new Date(dropOffTime);
-          correctedPickup.setHours(correctedPickup.getHours() + 3);
-          const formattedCorrected = formatDateTimeLocal(correctedPickup);
-          updatedFormData.pickUpDate = formattedCorrected;
-          setDateErrors(prev => ({ ...prev, pickUp: null }));
-          setFormData(updatedFormData);
-          return;
-        }
-
-        if (selectedPickUp < minPickupTime) {
-          const formattedCorrected = formatDateTimeLocal(minPickupTime);
-          updatedFormData.pickUpDate = formattedCorrected;
-          setDateErrors(prev => ({ ...prev, pickUp: null }));
-          setFormData(updatedFormData);
-          return;
-        }
-      }
-
-      updatedFormData.pickUpDate = value;
-      setDateErrors(prev => ({ ...prev, pickUp: null }));
-      setAutoCorrectPickInfo("");
-    }
+  }
+  
+  updatedFormData.pickUpDate = value;
+  setDateErrors(prev => ({ ...prev, pickUp: null }));
+  // setAutoCorrectPickInfo("");
+  setFormData(updatedFormData);
+  return;
+}
+     
 
     setFormData(updatedFormData);
   };
@@ -636,39 +549,58 @@ useEffect(() => {
     setIsFormValid(Object.keys(errorsObj).length === 0);
   }, [formData, capacityStatus, dateErrors]);
 
-  const handlePaymentSuccess = async (paymentId) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/booking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          luggageCount: totalBags,
-          paymentId,
-          totalAmount,
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to send booking details.");
-      }
-      const data = await response.json();
-      if (data.success) {
-        try {
-          if (onBookingComplete) onBookingComplete(data);
-        } catch (err) {
-          console.warn("onBookingComplete threw", err);
-        }
-        window.location.href = "/Booked";
-      } else alert("❌ Failed to send booking email.");
-    } catch (error) {
-      console.error("Error:", error);
-      alert(`An error occurred: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+  // ✅ UPDATE THIS FUNCTION in your LuggageBookingForm.js
+// Replace the existing handlePaymentSuccess function with this one
+
+const handlePaymentSuccess = async (paymentData) => {
+  setIsLoading(true);
+  try {
+    console.log("💳 Payment successful, creating booking with data:", paymentData);
+
+    const response = await fetch("/api/booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        luggageCount: totalBags,
+        paymentData, // ✅ Send complete payment data instead of just paymentId
+        totalAmount,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to send booking details.");
     }
-  };
+
+    const data = await response.json();
+    
+    if (data.success) {
+      console.log("✅ Booking created successfully:", {
+        bookingReference: data.bookingReference,
+        paymentReference: data.paymentReference,
+        bookingId: data.bookingId,
+        paymentId: data.paymentId
+      });
+
+      try {
+        if (onBookingComplete) onBookingComplete(data);
+      } catch (err) {
+        console.warn("onBookingComplete threw", err);
+      }
+
+      // Redirect to success page
+      window.location.href = "/Booked";
+    } else {
+      alert("❌ Failed to send booking email.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert(`An error occurred: ${error.message}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const shouldShowPriceCard =
     currentStep >= 2 &&
@@ -797,77 +729,36 @@ useEffect(() => {
                         </div>
                       )}
 
-                      <div className={styles.inputRow}>
-                        <div className={styles.inputGroup}>
-                          <VisualDateTimePicker
-                            value={formData.dropOffDate}
-                            onChange={handleChange}
-                            minDate={getMinDateTime()}
-                            label="Drop-off Time"
-                            icon="📥"
-                            stationTimings={stationTimings}
-                            type="dropOffDate"
-                            disabled={!formData.stationId}
-                          />
-                          {!formData.stationId && (
-                            <div className={styles.autoCorrectInfo}>
-                              ℹ️ Please select a station first to choose drop-off time
-                            </div>
-                          )}
-                          {dateErrors.dropOff && (
-                            <div className={styles.dateErrorBox}>
-                              <span className={styles.dateErrorIcon}>⚠️</span>
-                              <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
-                            </div>
-                          )}
-                          {errors.dropOffDate && !dateErrors.dropOff && (
-                            <span className={styles.errorText}>{errors.dropOffDate}</span>
-                          )}
-                          {autoCorrectDropInfo && (
-                            <div className={styles.autoCorrectInfo}>
-                              ℹ️ {autoCorrectDropInfo}
-                            </div>
-                          )}
-                        </div>
+<div className={styles.inputGroup}>
+  <VisualDateTimePicker
+    dropOffValue={formData.dropOffDate}
+    pickUpValue={formData.pickUpDate}
+    onChange={handleChange}
+    stationTimings={stationTimings}
+    minDate={getMinDateTime()}
+    disabled={!formData.stationId}
+  />
 
-                        <div className={styles.inputGroup}>
-                          <VisualDateTimePicker
-                            value={formData.pickUpDate}
-                            onChange={handleChange}
-                            minDate={
-                              formData.dropOffDate
-                                ? new Date(new Date(formData.dropOffDate).getTime() + 1 * 60 * 60 * 1000)
-                                    .toISOString()
-                                    .slice(0, 16)
-                                : getMinDateTime()
-                            }
-                            label="Pick-up Time"
-                            icon="📤"
-                            stationTimings={stationTimings}
-                            type="pickUpDate"
-                            disabled={!formData.stationId}
-                          />
-                          {!formData.stationId && (
-                            <div className={styles.autoCorrectInfo}>
-                              ℹ️ Please select a station first to choose pick-up time
-                            </div>
-                          )}
-                          {dateErrors.pickUp && (
-                            <div className={styles.dateErrorBox}>
-                              <span className={styles.dateErrorIcon}>⚠️</span>
-                              <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
-                            </div>
-                          )}
-                          {errors.pickUpDate && !dateErrors.pickUp && (
-                            <span className={styles.errorText}>{errors.pickUpDate}</span>
-                          )}
-                          {autoCorrectPickInfo && (
-                            <div className={styles.autoCorrectInfo}>
-                              ℹ️ {autoCorrectPickInfo}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+  {/* Error Messages */}
+  {dateErrors.dropOff && (
+    <div className={styles.dateErrorBox}>
+      <span className={styles.dateErrorIcon}>⚠️</span>
+      <span className={styles.dateErrorText}>{dateErrors.dropOff}</span>
+    </div>
+  )}
+  {dateErrors.pickUp && (
+    <div className={styles.dateErrorBox}>
+      <span className={styles.dateErrorIcon}>⚠️</span>
+      <span className={styles.dateErrorText}>{dateErrors.pickUp}</span>
+    </div>
+  )}
+  {errors.dropOffDate && !dateErrors.dropOff && (
+    <span className={styles.errorText}>{errors.dropOffDate}</span>
+  )}
+  {errors.pickUpDate && !dateErrors.pickUp && (
+    <span className={styles.errorText}>{errors.pickUpDate}</span>
+  )}
+</div>
 
                       {!isStep1Valid() && (
                         <div className={styles.warningBox} style={{ marginBottom: 12 }}>
