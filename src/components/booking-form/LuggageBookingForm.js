@@ -457,7 +457,7 @@ useEffect(() => {
 if (name === "dropOffDate" && value) {
   updatedFormData.dropOffDate = value;
   setDateErrors(prev => ({ ...prev, dropOff: null }));
-  setAutoCorrectDropInfo("");
+  // setAutoCorrectDropInfo("");
   
   // Clear pick-up if it's now invalid
   if (formData.pickUpDate) {
@@ -467,7 +467,7 @@ if (name === "dropOffDate" && value) {
     
     if (pickUp < minPickUp) {
       updatedFormData.pickUpDate = "";
-      setAutoCorrectDropInfo("⚠️ Pick-up time was reset. Please select a new pick-up time.");
+      // setAutoCorrectDropInfo("⚠️ Pick-up time was reset. Please select a new pick-up time.");
     }
   }
   
@@ -487,14 +487,14 @@ if (name === "pickUpDate" && value) {
         ...prev, 
         pickUp: "Pick-up time must be at least 1 hour after drop-off time" 
       }));
-      setAutoCorrectPickInfo("");
+      // setAutoCorrectPickInfo("");
       return;
     }
   }
   
   updatedFormData.pickUpDate = value;
   setDateErrors(prev => ({ ...prev, pickUp: null }));
-  setAutoCorrectPickInfo("");
+  // setAutoCorrectPickInfo("");
   setFormData(updatedFormData);
   return;
 }
