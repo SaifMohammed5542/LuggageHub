@@ -26,14 +26,19 @@ export const metadata: Metadata = {
 };
 
 // Viewport config supported by Next App Router
+// app/layout.tsx
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5, // ✅ Allow zoom (accessibility)
+  userScalable: true, // ✅ Users can pinch-zoom
+  viewportFit: "cover", // 🚨 CRITICAL for safe areas!
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
-  colorScheme: "light dark",
+  colorScheme: "dark", // ✅ Changed from "light dark" since you only have dark theme
 };
 
 /** Small inline script to prevent theme flash before hydration.
