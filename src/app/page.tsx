@@ -29,8 +29,11 @@ import BecomePartnerButton from '@/components/BecomePartnerButton/become-partner
 function App() {
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  useEffect(() => {                          // ← START HERE
     window.scrollTo(0, 0);
+    
+    // ✅ ADD THIS LINE
+    document.body.style.overscrollBehavior = 'none';
     
     const handleLoad = () => {
       setLoading(false);
@@ -40,9 +43,13 @@ function App() {
       setLoading(false);
     } else {
       window.addEventListener("load", handleLoad);
-      return () => window.removeEventListener("load", handleLoad);
+      return () => {
+        window.removeEventListener("load", handleLoad);
+        // ✅ ADD THIS LINE
+        document.body.style.overscrollBehavior = '';
+      };
     }
-  }, []);
+  }, []);                                    // ← END HERE
 
   // ---------- ADD THIS (one-time hash handler) ----------
 useEffect(() => {
@@ -89,6 +96,9 @@ useEffect(() => {
   if (loading) {
     return <Loader visible={loading} />;  // ✅ Show Loader while loading
   }
+
+
+
 
   return (
     <>

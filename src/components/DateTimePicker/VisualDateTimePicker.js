@@ -1,6 +1,6 @@
-// components/DateTimePicker/VisualDateTimePicker.jsx - BOUNCE STYLE WITH VALIDATION
+// components/DateTimePicker/VisualDateTimePicker.jsx - ENHANCED WITH SMOOTH UX
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styles from './VisualDateTimePicker.module.css';
 
 const VisualDateTimePicker = ({
@@ -8,15 +8,26 @@ const VisualDateTimePicker = ({
   pickUpValue,
   onChange,
   stationTimings = null,
-  // minDate,
   disabled = false
 }) => {
-  const [activeTab, setActiveTab] = useState('dropOff'); // 'dropOff' or 'pickUp'
+  const [activeTab, setActiveTab] = useState('dropOff');
   const [dropOffDate, setDropOffDate] = useState('today');
   const [pickUpDate, setPickUpDate] = useState('today');
   const [customDropOffDate, setCustomDropOffDate] = useState(null);
   const [customPickUpDate, setCustomPickUpDate] = useState(null);
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
+  
+  // 🎯 NEW: UX Enhancement States
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [selectedDropOffSlot, setSelectedDropOffSlot] = useState(null);
+  const [selectedPickUpSlot, setSelectedPickUpSlot] = useState(null);
+  const [pulsePickUpTab, setPulsePickUpTab] = useState(false);
+  const [pulseContinueButton, setPulseContinueButton] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  
+  const containerRef = useRef(null);
+  const pickUpTabRef = useRef(null);
 
   // Get current date/time
   const getCurrentDateTime = () => {
@@ -72,21 +83,19 @@ const VisualDateTimePicker = ({
     }
   };
 
-  // ✅ NEW: Check if pick-up time is valid (must be after drop-off + 1 hour minimum)
+  // Check if pick-up time is valid
   const isPickUpTimeValid = (pickUpDateTime) => {
-    if (!dropOffValue) return true; // No drop-off selected yet, allow all times
+    if (!dropOffValue) return true;
 
     const dropOff = new Date(dropOffValue);
     const pickUp = new Date(pickUpDateTime);
     
-    // Pick-up must be at least 1 hour after drop-off
     const minPickUpTime = new Date(dropOff.getTime() + 60 * 60 * 1000);
     
     return pickUp >= minPickUpTime;
   };
 
-  
-  // Generate time slots for a given date (30-minute intervals)
+  // Generate time slots
   const generateTimeSlots = (dateType, customDate = null, isPickUpTab = false) => {
     const slots = [];
     const now = getCurrentDateTime();
@@ -102,7 +111,6 @@ const VisualDateTimePicker = ({
       return slots;
     }
 
-    // For today, start from current time + 30 minutes
     let startHour = 0;
     let startMinute = 0;
 
@@ -112,12 +120,10 @@ const VisualDateTimePicker = ({
       startMinute = futureTime.getMinutes() >= 30 ? 30 : 0;
     }
 
-    // ✅ NEW: For pick-up tab, enforce minimum 1 hour after drop-off
     if (isPickUpTab && dropOffValue) {
       const dropOff = new Date(dropOffValue);
       const minPickUp = new Date(dropOff.getTime() + 60 * 60 * 1000);
       
-      // If the target date is the same as drop-off date, adjust start time
       if (targetDate.toDateString() === dropOff.toDateString()) {
         startHour = minPickUp.getHours();
         startMinute = minPickUp.getMinutes() >= 30 ? 30 : 0;
@@ -127,24 +133,19 @@ const VisualDateTimePicker = ({
     let lastSlotWasAvailable = false;
     let gapDetected = false;
 
-    // Generate 30-minute slots
     for (let hour = startHour; hour < 24; hour++) {
       for (let minute = (hour === startHour ? startMinute : 0); minute < 60; minute += 30) {
         const slotDate = new Date(targetDate);
         slotDate.setHours(hour, minute, 0, 0);
         
         const available = isTimeSlotAvailable(targetDate, hour, minute);
-        
-        // ✅ NEW: For pick-up, also check if it's after drop-off
         const validPickUp = isPickUpTab ? isPickUpTimeValid(slotDate) : true;
         
-        // ✅ Detect gap between unavailable and available slots (station closed period)
         if (lastSlotWasAvailable && !available) {
           gapDetected = true;
         }
         
         if (gapDetected && available && !lastSlotWasAvailable) {
-          // Find the close and open times from station timings
           if (stationTimings && !stationTimings.is24Hours) {
             const dayOfWeek = targetDate.getDay();
             const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -186,7 +187,6 @@ const VisualDateTimePicker = ({
     return slots;
   };
 
-  // Get time slots based on active tab and selected date
   const currentTimeSlots = useMemo(() => {
     if (activeTab === 'dropOff') {
       return generateTimeSlots(
@@ -198,22 +198,33 @@ const VisualDateTimePicker = ({
       return generateTimeSlots(
         pickUpDate,
         pickUpDate === 'custom' ? customPickUpDate : null,
-        true // ✅ Pass isPickUpTab = true
+        true
       );
     }
   }, [activeTab, dropOffDate, pickUpDate, customDropOffDate, customPickUpDate, stationTimings, dropOffValue]);
 
-  // ✅ DEBUG: Handle time slot selection with logging
+  // 🎯 NEW: Smooth scroll to top
+  const smoothScrollToTop = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  };
+
+  // 🎯 NEW: Show toast message
+  const displayToast = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
+  // 🎯 NEW: Enhanced time slot selection
   const handleTimeSelect = (slot) => {
     const isDropOff = activeTab === 'dropOff';
     const dateType = isDropOff ? dropOffDate : pickUpDate;
     const customDate = isDropOff ? customDropOffDate : customPickUpDate;
-
-    console.log('🔍 DEBUG handleTimeSelect:');
-    console.log('- activeTab:', activeTab);
-    console.log('- dateType:', dateType);
-    console.log('- customDate:', customDate);
-    console.log('- slot:', slot);
 
     let targetDate;
     if (dateType === 'today') {
@@ -222,28 +233,18 @@ const VisualDateTimePicker = ({
     } else if (dateType === 'tomorrow') {
       targetDate = getTomorrowDate();
     } else if (dateType === 'custom' && customDate) {
-      console.log('- Creating date from customDate:', customDate);
-      // Parse the date string as YYYY-MM-DD
       const [year, month, day] = customDate.split('-').map(Number);
-      console.log('- Parsed:', { year, month, day });
       targetDate = new Date(year, month - 1, day, 0, 0, 0, 0);
-      console.log('- Created targetDate:', targetDate.toString());
     }
 
-    // Set the selected time
     targetDate.setHours(slot.hour, slot.minute, 0, 0);
-    console.log('- After setHours:', targetDate.toString());
 
-    // Format as local datetime string (YYYY-MM-DDTHH:mm)
     const year = targetDate.getFullYear();
     const month = String(targetDate.getMonth() + 1).padStart(2, '0');
     const day = String(targetDate.getDate()).padStart(2, '0');
     const hours = String(targetDate.getHours()).padStart(2, '0');
     const minutes = String(targetDate.getMinutes()).padStart(2, '0');
     const localISOTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-    
-    console.log('- Final localISOTime:', localISOTime);
-    console.log('- Sending to form with name:', isDropOff ? 'dropOffDate' : 'pickUpDate');
 
     onChange({
       target: {
@@ -252,13 +253,63 @@ const VisualDateTimePicker = ({
       }
     });
 
-    // Auto-switch to Pick Up tab after Drop Off is selected
+    // 🎯 NEW: Enhanced UX Flow
     if (isDropOff) {
-      setTimeout(() => setActiveTab('pickUp'), 300);
+      // Save selected slot for visual feedback
+      setSelectedDropOffSlot(slot.label);
+      
+      // Show success toast
+      const dateStr = dateType === 'today' ? 'Today' : 
+                      dateType === 'tomorrow' ? 'Tomorrow' : 
+                      targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      displayToast(`✓ Drop-off set for ${dateStr} at ${slot.label}`);
+      
+      // Smooth scroll to top after brief delay
+      setTimeout(() => {
+        smoothScrollToTop();
+      }, 400);
+      
+      // Pulse pick-up tab to draw attention
+      setTimeout(() => {
+        setPulsePickUpTab(true);
+        setTimeout(() => setPulsePickUpTab(false), 1800);
+      }, 900);
+      
+      // Auto-switch to pick-up tab
+      setTimeout(() => {
+        setActiveTab('pickUp');
+      }, 1200);
+    } else {
+      // Pick-up selected
+      setSelectedPickUpSlot(slot.label);
+      
+      // Show summary
+      setShowSummary(true);
+      
+      // Scroll to bottom (where button is)
+      setTimeout(() => {
+        if (containerRef.current) {
+          const containerBottom = containerRef.current.scrollHeight;
+          containerRef.current.parentElement?.scrollTo({
+            top: containerBottom,
+            behavior: 'smooth'
+          });
+        }
+      }, 300);
+      
+      // Pulse the continue button (external - parent will handle)
+      setPulseContinueButton(true);
+      setTimeout(() => setPulseContinueButton(false), 1800);
     }
   };
 
-  // Handle date type selection
+  // 🎯 NEW: Expose pulse state to parent
+  useEffect(() => {
+    if (pulseContinueButton && onChange.onPickUpComplete) {
+      onChange.onPickUpComplete();
+    }
+  }, [pulseContinueButton]);
+
   const handleDateTypeChange = (type) => {
     if (activeTab === 'dropOff') {
       setDropOffDate(type);
@@ -277,42 +328,30 @@ const VisualDateTimePicker = ({
     }
   };
 
-  // ✅ FIXED: Handle custom date selection with validation
   const handleCustomDateSelect = (dateStr) => {
     if (activeTab === 'dropOff') {
       setCustomDropOffDate(dateStr);
     } else {
-      // ✅ For pick-up, only block dates that are BEFORE drop-off date (not same day)
       if (dropOffValue) {
         const dropOffDate = new Date(dropOffValue);
-        dropOffDate.setHours(0, 0, 0, 0); // Reset to start of day
+        dropOffDate.setHours(0, 0, 0, 0);
         const selectedDate = new Date(dateStr);
-        selectedDate.setHours(0, 0, 0, 0); // Reset to start of day
+        selectedDate.setHours(0, 0, 0, 0);
         
-        // Only block if selected date is BEFORE drop-off date (not equal)
         if (selectedDate < dropOffDate) {
           alert('Pick-up date cannot be before drop-off date');
           return;
         }
-        // If same day, time validation will handle the rest
       }
       setCustomPickUpDate(dateStr);
     }
     setShowCustomCalendar(false);
   };
 
-  // ✅ DEBUG: Format display value for tabs
   const formatTabDisplay = (value, dateType, customDate) => {
-    console.log('🎨 DEBUG formatTabDisplay:');
-    console.log('- value:', value);
-    console.log('- dateType:', dateType);
-    console.log('- customDate:', customDate);
-    
     if (!value) return { date: 'Select', time: '' };
 
-    // Parse the datetime string (YYYY-MM-DDTHH:mm format)
     const date = new Date(value);
-    console.log('- Parsed date object:', date.toString());
     
     const hour = date.getHours();
     const minute = date.getMinutes();
@@ -332,14 +371,13 @@ const VisualDateTimePicker = ({
       dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
-    console.log('- Final display:', { date: dateStr, time: timeStr });
     return { date: dateStr, time: timeStr };
   };
 
   const dropOffDisplay = formatTabDisplay(dropOffValue, dropOffDate, customDropOffDate);
   const pickUpDisplay = formatTabDisplay(pickUpValue, pickUpDate, customPickUpDate);
 
-  // Mini calendar for custom date selection
+  // Mini calendar
   const MiniCalendar = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -371,12 +409,11 @@ const VisualDateTimePicker = ({
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // ✅ FIXED: For pick-up calendar, only disable dates BEFORE drop-off (not same day)
       let minDate = today;
       if (activeTab === 'pickUp' && dropOffValue) {
         const dropOffDate = new Date(dropOffValue);
         dropOffDate.setHours(0, 0, 0, 0);
-        minDate = dropOffDate; // Allow same day, time filtering will handle it
+        minDate = dropOffDate;
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
@@ -436,7 +473,6 @@ const VisualDateTimePicker = ({
     );
   };
 
-  // Disabled state
   if (disabled) {
     return (
       <div className={styles.disabledState}>
@@ -447,7 +483,14 @@ const VisualDateTimePicker = ({
   }
 
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
+      {/* 🎯 NEW: Success Toast */}
+      {showToast && (
+        <div className={styles.successToast}>
+          {toastMessage}
+        </div>
+      )}
+
       {/* Tab Headers */}
       <div className={styles.tabHeaders}>
         <button
@@ -461,9 +504,10 @@ const VisualDateTimePicker = ({
         </button>
 
         <button
+          ref={pickUpTabRef}
           type="button"
           onClick={() => setActiveTab('pickUp')}
-          className={`${styles.tabButton} ${activeTab === 'pickUp' ? styles.tabActive : ''}`}
+          className={`${styles.tabButton} ${activeTab === 'pickUp' ? styles.tabActive : ''} ${pulsePickUpTab ? styles.pulseTab : ''}`}
           disabled={!dropOffValue}
         >
           <div className={styles.tabLabel}>PICK UP</div>
@@ -475,7 +519,14 @@ const VisualDateTimePicker = ({
         </button>
       </div>
 
-      {/* ✅ NEW: Warning if on pick-up tab without drop-off */}
+      {/* Helper text for pick-up tab */}
+      {activeTab === 'pickUp' && dropOffValue && !pickUpValue && (
+        <div className={styles.helperText}>
+          <span className={styles.helperIcon}>👇</span>
+          <span>Now select when you&apos;ll pick up your luggage</span>
+        </div>
+      )}
+
       {activeTab === 'pickUp' && !dropOffValue && (
         <div className={styles.pickUpWarning}>
           <span className={styles.warningIcon}>⚠️</span>
@@ -501,9 +552,6 @@ const VisualDateTimePicker = ({
             className={`${styles.dateButton} ${(activeTab === 'dropOff' ? dropOffDate : pickUpDate) === 'tomorrow' ? styles.dateButtonActive : ''}`}
           >
             Tomorrow
-            {/* {activeTab === 'dropOff' && dropOffDate === 'tomorrow' && (
-              <span className={styles.discountBadge}>-10%</span>
-            )} */}
           </button>
 
           <button
@@ -537,7 +585,6 @@ const VisualDateTimePicker = ({
             ) : (
               currentTimeSlots.map((slot, index) => {
                 if (slot.type === 'separator') {
-                  // Convert 24h to 12h format for display
                   const formatTime12h = (time24) => {
                     const [h, m] = time24.split(':').map(Number);
                     const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
@@ -556,14 +603,20 @@ const VisualDateTimePicker = ({
                   );
                 }
                 
+                // 🎯 NEW: Check if this slot is selected
+                const isSelected = activeTab === 'dropOff' 
+                  ? selectedDropOffSlot === slot.label 
+                  : selectedPickUpSlot === slot.label;
+                
                 return (
                   <button
                     key={index}
                     type="button"
                     onClick={() => handleTimeSelect(slot)}
-                    className={styles.timeSlotButton}
+                    className={`${styles.timeSlotButton} ${isSelected ? styles.selectedSlot : ''}`}
                   >
                     {slot.label}
+                    {isSelected && <span className={styles.checkmark}>✓</span>}
                   </button>
                 );
               })
@@ -572,8 +625,32 @@ const VisualDateTimePicker = ({
         </div>
       )}
 
-      {/* Bottom Summary */}
-      {dropOffValue && pickUpValue && (
+      {/* 🎯 NEW: Success Summary */}
+      {showSummary && dropOffValue && pickUpValue && (
+        <div className={styles.successSummary}>
+          <div className={styles.summaryHeader}>
+            <span className={styles.summaryIcon}>✓</span>
+            <span className={styles.summaryTitle}>Times Confirmed</span>
+          </div>
+          <div className={styles.summaryDetails}>
+            <div className={styles.summaryRow}>
+              <span className={styles.summaryLabel}>Drop-off:</span>
+              <span className={styles.summaryValue}>{dropOffDisplay.date}, {dropOffDisplay.time}</span>
+            </div>
+            <div className={styles.summaryRow}>
+              <span className={styles.summaryLabel}>Pick-up:</span>
+              <span className={styles.summaryValue}>{pickUpDisplay.date}, {pickUpDisplay.time}</span>
+            </div>
+          </div>
+          <div className={styles.summaryAction}>
+            <span className={styles.actionIcon}>👇</span>
+            <span className={styles.actionText}>Tap &quot;Continue&quot; below to proceed</span>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Summary (existing) */}
+      {dropOffValue && pickUpValue && !showSummary && (
         <div className={styles.summary}>
           <div className={styles.summaryLabel}>Selected Times</div>
           <div className={styles.summaryValue}>

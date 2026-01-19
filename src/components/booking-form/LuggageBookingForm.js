@@ -77,6 +77,14 @@ const LuggageBookingForm = ({
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const countryRef = useRef(null);
+const [pulseContinueBtn, setPulseContinueBtn] = useState(false);
+useEffect(() => {
+  if (formData.dropOffDate && formData.pickUpDate) {
+    // Trigger pulse when both times are selected
+    setPulseContinueBtn(true);
+    setTimeout(() => setPulseContinueBtn(false), 1800);
+  }
+}, [formData.pickUpDate]); // Only trigger on pickUp change
 
 const [stations, setStations] = useState([]);
 const [stationTimings, setStationTimings] = useState(null);
@@ -640,7 +648,10 @@ const handlePaymentSuccess = async (paymentData) => {
                 <div className={styles.progressBar}>
                   <div className={`${styles.step} ${currentStep >= 1 ? styles.active : ""}`}>
                     <div className={styles.stepCircle}>1</div>
-                    <span className={styles.stepLabel}>Station & Schedule</span>
+                        <span className={styles.stepLabel}>
+      <span className={styles.labelFull}>Station & Schedule</span>
+      <span className={styles.labelShort}>Station</span>
+    </span>
                   </div>
                   <div className={styles.stepLine}></div>
                   <div className={`${styles.step} ${currentStep >= 2 ? styles.active : ""}`}>
@@ -650,7 +661,10 @@ const handlePaymentSuccess = async (paymentData) => {
                   <div className={styles.stepLine}></div>
                   <div className={`${styles.step} ${currentStep >= 3 ? styles.active : ""}`}>
                     <div className={styles.stepCircle}>3</div>
-                    <span className={styles.stepLabel}>Personal Info</span>
+<span className={styles.stepLabel}>
+      <span className={styles.labelFull}>Personal Info</span>
+      <span className={styles.labelShort}>Info</span>
+    </span>
                   </div>
                   <div className={styles.stepLine}></div>
                   <div className={`${styles.step} ${currentStep >= 4 ? styles.active : ""}`}>
@@ -767,13 +781,13 @@ const handlePaymentSuccess = async (paymentData) => {
                       )}
 
                       <button
-                        type="button"
-                        onClick={() => isStep1Valid() && setCurrentStep(2)}
-                        className={styles.btnPrimary}
-                        disabled={!isStep1Valid()}
-                      >
-                        Continue to Luggage →
-                      </button>
+  type="button"
+  onClick={() => isStep1Valid() && setCurrentStep(2)}
+  className={`${styles.btnPrimary} ${pulseContinueBtn ? styles.btnPulse : ''}`}
+  disabled={!isStep1Valid()}
+>
+  Continue to Luggage →
+</button>
                     </div>
                   )}
 
