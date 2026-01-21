@@ -123,36 +123,83 @@ export default function BecomePartnerPage() {
         </section>
 
         {/* STATS with enhanced design */}
-        <section className={styles.stats}>
-          <div className="container is-max">
-            <div className={styles.statsGrid}>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>🎉</div>
-                <strong className={styles.statNumber}>50%</strong>
-                <span className={styles.statLabel}>Commission</span>
-                <p className={styles.statDesc}>For First 60 Days</p>
-              </div>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>💎</div>
-                <strong className={styles.statNumber}>$100</strong>
-                <span className={styles.statLabel}>Bonus</span>
-                <p className={styles.statDesc}>First 100 Bookings</p>
-              </div>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>🚀</div>
-                <strong className={styles.statNumber}>$0</strong>
-                <span className={styles.statLabel}>Setup Cost</span>
-                <p className={styles.statDesc}>Start for Free</p>
-              </div>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>📊</div>
-                <strong className={styles.statNumber}>Live</strong>
-                <span className={styles.statLabel}>Dashboard</span>
-                <p className={styles.statDesc}>Track Everything</p>
-              </div>
-            </div>
-          </div>
-        </section>
+<section className={styles.stats}>
+  <div className="container is-max">
+    <div className={styles.sectionHeader}>
+      <h2>Earn on Every Bag</h2>
+      <p>Simple, flat payouts. No commissions. No revenue sharing.</p>
+    </div>
+
+    <div className={styles.statsGrid}>
+      <div className={styles.statCard}>
+        <div className={styles.statIcon}>🧳</div>
+        <strong className={styles.statNumber}>$4</strong>
+        <span className={styles.statLabel}>Medium / Large Bag</span>
+        <p className={styles.statDesc}>Flat rate for online bookings</p>
+      </div>
+
+      <div className={styles.statCard}>
+        <div className={styles.statIcon}>🎒</div>
+        <strong className={styles.statNumber}>$2</strong>
+        <span className={styles.statLabel}>Small Bag</span>
+        <p className={styles.statDesc}>Flat rate for online bookings</p>
+      </div>
+
+      <div className={styles.statCard}>
+        <div className={styles.statIcon}>🚶‍♂️</div>
+        <strong className={styles.statNumber}>$5</strong>
+        <span className={styles.statLabel}>Walk-in Medium / Large</span>
+        <p className={styles.statDesc}>Higher payout for walk-ins</p>
+      </div>
+
+      <div className={styles.statCard}>
+        <div className={styles.statIcon}>💼</div>
+        <strong className={styles.statNumber}>$2.50</strong>
+        <span className={styles.statLabel}>Walk-in Small Bag</span>
+        <p className={styles.statDesc}>Paid per bag. No commission.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section className={styles.section}>
+  <div className="container is-max">
+    <div className={styles.sectionHeader}>
+      <h2>We Reward Consistency</h2>
+      <p>
+        Because regular bookings deserve extra cash — not complicated rules.
+      </p>
+    </div>
+
+    <div className={styles.statsGrid}>
+      <div className={styles.statCard}>
+        <div className={styles.statIcon}>🎉</div>
+        <strong className={styles.statNumber}>$20</strong>
+        <span className={styles.statLabel}>Every 25th Booking</span>
+        <p className={styles.statDesc}>
+          Bonus for consistent performance within 6 months
+        </p>
+      </div>
+
+      <div className={styles.statCard}>
+        <div className={styles.statIcon}>🚀</div>
+        <strong className={styles.statNumber}>$50</strong>
+        <span className={styles.statLabel}>Every 100th Booking</span>
+        <p className={styles.statDesc}>
+          Bigger reward for high-volume partners
+        </p>
+      </div>
+    </div>
+
+    <p style={{ textAlign: "center", marginTop: "1.5rem", color: "var(--color-muted)" }}>
+      Bonuses stack. The more bookings you handle, the more you earn.
+    </p>
+  </div>
+</section>
+
+
+
 
         {/* WHO with enhanced cards */}
         <section className={styles.section}>
@@ -227,8 +274,12 @@ export default function BecomePartnerPage() {
                   <span>3</span>
                 </div>
                 <div className={styles.timelineContent}>
-                  <h3>Earn Commission Monthly</h3>
-                  <p>Track earnings in real-time through your dashboard. Get paid monthly directly to your account.</p>
+<h3>Get Paid Monthly</h3>
+
+<p>
+  Track earnings in real-time through your dashboard. Flat payouts per bag,
+  plus volume bonuses paid monthly.
+</p>
                   <div className={styles.timelineFeature}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M13 5L6 12L3 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
