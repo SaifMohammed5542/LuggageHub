@@ -5,6 +5,7 @@ import styles from "./Booking.module.css";
 import Header from "@/components/Header";
 import PayPalPayment from "../LuggagePay";
 import VisualDateTimePicker from "../DateTimePicker/VisualDateTimePicker";
+import StationPreviewCard from "../StationPreviewCard/StationPreviewCard.js";
 // import { formatDateTimeLocal, getNearestAvailableTime } from "@/utils/stationTimingValidator";
 
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
@@ -74,6 +75,8 @@ const LuggageBookingForm = ({
     termsAccepted: false,
   });
 
+  const [showStationPreview, setShowStationPreview] = useState(false);
+const [previewStation, setPreviewStation] = useState(null);
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const countryRef = useRef(null);
@@ -323,6 +326,12 @@ useEffect(() => {
   }, [stations, formData.stationId, formData.dropOffDate, formData.pickUpDate, totalBags]);
 
 
+  const handleConfirmStation = () => {
+  setFormData(prev => ({ ...prev, stationId: previewStation._id }));
+  setShowStationPreview(false);
+};
+
+
  const checkStationCapacity = useCallback(async () => {
   if (!formData.stationId || !formData.dropOffDate || !formData.pickUpDate || !totalBags) {
     return;
@@ -431,6 +440,17 @@ useEffect(() => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     };
+
+    if (name === "stationId" && value) {
+  const station = stations.find(s => s._id === value);
+  if (station) {
+    setPreviewStation(station);
+    setShowStationPreview(true);
+    // ✅ ADDED: Update formData immediately
+    setFormData(prev => ({ ...prev, stationId: value }));
+    return;
+  }
+}
 
     if (name === "email") {
       let emailError = "";
@@ -560,6 +580,9 @@ if (name === "pickUpDate" && value) {
   // ✅ UPDATE THIS FUNCTION in your LuggageBookingForm.js
 // Replace the existing handlePaymentSuccess function with this one
 
+// Find this function in your LuggageBookingForm.js (around line 450)
+// and REPLACE it with this:
+
 const handlePaymentSuccess = async (paymentData) => {
   setIsLoading(true);
   try {
@@ -571,7 +594,7 @@ const handlePaymentSuccess = async (paymentData) => {
       body: JSON.stringify({
         ...formData,
         luggageCount: totalBags,
-        paymentData, // ✅ Send complete payment data instead of just paymentId
+        paymentData,
         totalAmount,
       }),
     });
@@ -591,13 +614,19 @@ const handlePaymentSuccess = async (paymentData) => {
         paymentId: data.paymentId
       });
 
+      // ✅ NEW: Store complete booking data in sessionStorage
+      if (data.bookingData) {
+        sessionStorage.setItem('lastBooking', JSON.stringify(data.bookingData));
+        console.log("✅ Booking data saved to sessionStorage");
+      }
+
       try {
         if (onBookingComplete) onBookingComplete(data);
       } catch (err) {
         console.warn("onBookingComplete threw", err);
       }
 
-      // Redirect to success page
+      // Redirect to confirmation page
       window.location.href = "/Booked";
     } else {
       alert("❌ Failed to send booking email.");
@@ -1330,6 +1359,24 @@ const handlePaymentSuccess = async (paymentData) => {
           </div>
         </div>
       </div>
+
+
+            {showStationPreview && previewStation && (
+<div 
+  className={styles.previewModalOverlay} 
+  onClick={() => setShowStationPreview(false)}
+  style={{ padding: '20px' }} // Bigger click target around card
+>    <div onClick={(e) => e.stopPropagation()}>
+      <StationPreviewCard
+        station={previewStation}
+        onBook={handleConfirmStation}
+        onClose={() => setShowStationPreview(false)}
+        currentCapacity={previewStation.currentCapacity}
+        mode="modal"
+      />
+    </div>
+  </div>
+)}
 
       {showTermsModal && (
         <div className={styles.modalOverlay}>

@@ -1,4 +1,4 @@
-/* MapBooking.module.css - ENHANCED VERSION */
+/* MapBooking.module.css - ENHANCED WITH PREVIEW CARD SUPPORT */
 
 /* ========== PAGE LAYOUT ========== */
 .pageWrapper {
@@ -394,7 +394,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: red;
+  background: var(--panel-bg);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
@@ -504,7 +504,6 @@
   cursor: pointer;
   z-index: 10;
   transition: all 0.2s ease;
-  display: none;
 }
 
 .closeDrawerBtn:hover {
@@ -536,6 +535,81 @@
 
 .drawerContent::-webkit-scrollbar-thumb:hover {
   background: var(--color-muted);
+}
+
+/* ========== 🆕 LOCATION PROMPT (for "Use My Location" feature) ========== */
+.locationPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-lg);
+  gap: 16px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.locationPromptContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.locationPromptIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.locationPromptContent span {
+  font-size: 14px;
+  color: var(--color-fg);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.locationPromptActions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.enableLocationBtn,
+.dismissBtn {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.enableLocationBtn {
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border: none;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.enableLocationBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
+}
+
+.dismissBtn {
+  background: transparent;
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+}
+
+.dismissBtn:hover {
+  background: rgba(var(--primary-rgb), 0.05);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* ========== RESPONSIVE DESIGN ========== */
@@ -628,7 +702,7 @@
   }
 
   .drawerContent {
-    height: calc(92vh - 110px);
+    height: calc(95vh - 115px);
     padding: 12px 10px;
   }
 
@@ -739,7 +813,6 @@
   margin-top: 2px;
 }
 
-
 .stationDistance {
   margin-bottom: 10px;
   font-size: 0.85rem;
@@ -773,7 +846,7 @@
 
 /* Accessibility - Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-.searchBox,
+  .searchBox,
   .suggestionItem,
   .mobileDrawer,
   .overlay,
@@ -783,3 +856,39 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* MapBooking.module.css - WITH FORM PROGRESS INDICATOR */
+
+/* ... (keep all existing styles) ... */
+
+/* 🆕 NEW: Form progress badge in drawer header */
+.formProgressBadge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 🆕 Update drawer toggle text for form in progress */
+.drawerToggleText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+/* ... (rest of existing styles) ... */

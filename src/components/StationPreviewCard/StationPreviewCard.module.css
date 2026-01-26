@@ -1,0 +1,403 @@
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+.previewCard {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* ✅ Add GPU acceleration hint for the card */
+  will-change: transform;
+}
+
+.previewCard.drawer {
+  border-radius: 20px 20px 0 0;
+}
+
+.previewCard.modal {
+  max-width: 480px;
+  border-radius: 16px;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #cbd5e0;
+  transition: all 0.2s ease;
+  z-index: 10;
+  /* ✅ GPU acceleration for hover */
+  will-change: transform, background-color;
+}
+
+.closeBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
+  transform: scale(1.05); /* ✅ Add slight scale for feedback */
+}
+
+.imageContainer {
+  width: 100%;
+  height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  position: relative;
+  /* ✅ Optimize for image rendering */
+  contain: layout style paint;
+}
+
+.stationImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* ✅ Improve image rendering quality */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.imageFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+
+.photoNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  /* ✅ GPU acceleration for smooth hover */
+  will-change: transform;
+}
+
+.photoNav:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.photoNavPrev {
+  left: 12px;
+}
+
+.photoNavNext {
+  right: 12px;
+}
+
+.photoIndicator {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: white;
+  font-weight: 600;
+}
+
+.capacityBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  /* ⚠️ MOBILE OPTIMIZATION: Conditionally apply backdrop-filter */
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+/* ✅ OPTIMIZATION: Only apply backdrop-filter on desktop for better mobile performance */
+@media (min-width: 768px) {
+  .capacityBadge {
+    backdrop-filter: blur(10px);
+  }
+}
+
+.stationInfo {
+  margin-bottom: 20px;
+}
+
+.stationName {
+  font-size: 24px;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 8px;
+  line-height: 1.2;
+  /* ✅ Optimize text rendering */
+  text-rendering: optimizeLegibility;
+}
+
+.locationRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.locationIcon {
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.locationText {
+  flex: 1;
+  /* ✅ Prevent text overflow issues */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.distanceBadge {
+  padding: 4px 10px;
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #818cf8;
+  flex-shrink: 0;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* ✅ Optimize grid rendering */
+  contain: layout style;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailIcon {
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.detailIconStar {
+  color: #f59e0b;
+  fill: #f59e0b;
+  flex-shrink: 0;
+}
+
+.detailIconPrice {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.detailLabel {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 14px;
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.detailValuePrice {
+  font-size: 14px;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.description {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  color: #cbd5e0;
+  line-height: 1.6;
+}
+
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.featureItem {
+  font-size: 13px;
+  color: #6ee7b7;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookBtn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* ✅ GPU acceleration for smooth hover */
+  will-change: transform;
+}
+
+.bookBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+}
+
+.bookBtn:active {
+  transform: translateY(0); /* ✅ Add active state */
+}
+
+.secondaryActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.secondaryBtn {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  /* ✅ GPU acceleration */
+  will-change: transform;
+}
+
+.secondaryBtn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: #6366f1;
+  color: #818cf8;
+  transform: translateY(-1px); /* ✅ Subtle lift */
+}
+
+.secondaryBtn:active {
+  transform: translateY(0); /* ✅ Add active state */
+}
+
+@media (max-width: 640px) {
+  .previewCard {
+    padding: 20px;
+  }
+
+  .stationName {
+    font-size: 20px;
+  }
+
+  .detailsGrid {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .imageContainer {
+    height: 140px;
+  }
+  
+  /* ✅ Reduce shadow complexity on mobile */
+  .bookBtn {
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+  }
+  
+  .bookBtn:hover {
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY & PERFORMANCE
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .previewCard *,
+  .photoNav,
+  .bookBtn,
+  .secondaryBtn,
+  .closeBtn {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ✅ Focus styles for accessibility */
+.bookBtn:focus-visible,
+.secondaryBtn:focus-visible,
+.closeBtn:focus-visible,
+.photoNav:focus-visible {
+  outline: 3px solid #6366f1;
+  outline-offset: 2px;
+}

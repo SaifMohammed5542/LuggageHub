@@ -1,18 +1,18 @@
-// /app/api/booking/route.js
-// REPLACE YOUR ENTIRE FILE WITH THIS - BEAUTIFIED VERSION
-
+// app/api/booking/route.js - COMPLETE WITH BOOKING DATA RETURN
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import dbConnect from "../../../lib/dbConnect";
 import Booking from "../../../models/booking";
+import Payment from "../../../models/Payment";
 import Station from "../../../models/Station";
 import User from "../../../models/User";
 import ErrorLog from "../../../models/ErrorLog";
 import { sendErrorNotification } from "../../../utils/mailer";
+import { generateBookingReference, generatePaymentReference } from "../../../utils/generateReference";
 
 void User;
 
-// ✅ Helper function for capacity warnings
+// ✅ Helper function for capacity warnings (unchanged)
 async function sendCapacityWarningEmails(station, capacityPercentage, dropOffDate, pickUpDate) {
   if (capacityPercentage < 85) return;
 
@@ -85,7 +85,6 @@ async function sendCapacityWarningEmails(station, capacityPercentage, dropOffDat
       </div>
     `;
 
-    // Send to admin
     await transporter.sendMail({
       from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_ADMIN,
@@ -93,7 +92,6 @@ async function sendCapacityWarningEmails(station, capacityPercentage, dropOffDat
       html: htmlMessage,
     });
 
-    // Send to partners
     if (station?.partners?.length) {
       for (const partner of station.partners) {
         if (partner?.email && partner.role === "partner") {
@@ -133,10 +131,10 @@ export async function POST(request) {
       smallBagCount = 0,
       largeBagCount = 0,
       specialInstructions,
-      paymentId,
+      paymentData,
       stationId,
       userId,
-      totalAmount, // Added to capture payment amount
+      totalAmount,
     } = body;
 
     const luggageCount = Number(smallBagCount) + Number(largeBagCount);
@@ -160,7 +158,6 @@ export async function POST(request) {
     }
     console.log('✅ Station found:', station.name);
 
-    // Check capacity if station has limits
     if (station.capacity && station.capacity > 0) {
       console.log("🔍 Checking capacity for station:", station.name);
 
@@ -208,9 +205,14 @@ export async function POST(request) {
       console.log("✅ Capacity check passed");
     }
 
-    // ✅ Save the booking
+    // ✅ Generate unique booking reference
+    const bookingReference = generateBookingReference();
+    console.log('🔖 Generated booking reference:', bookingReference);
+
+    // ✅ Save the booking with reference
     console.log('💾 Saving booking to database...');
     const newBooking = new Booking({
+      bookingReference,
       fullName,
       email,
       phone,
@@ -220,15 +222,37 @@ export async function POST(request) {
       largeBagCount,
       luggageCount,
       specialInstructions,
-      paymentId,
+      paymentId: paymentData?.paypalOrderId,
       stationId,
       userId,
-      totalAmount, // Save total amount to database
+      totalAmount,
       status: "confirmed",
     });
 
     await newBooking.save();
-    console.log("✅ Booking saved:", newBooking._id);
+    console.log("✅ Booking saved:", newBooking._id, "Reference:", bookingReference);
+
+    // ✅ Generate payment reference and save payment record
+    const paymentReference = generatePaymentReference();
+    console.log('🔖 Generated payment reference:', paymentReference);
+
+    const newPayment = new Payment({
+      paymentReference,
+      paypalOrderId: paymentData?.paypalOrderId,
+      paypalTransactionId: paymentData?.paypalTransactionId,
+      amount: totalAmount,
+      currency: paymentData?.currency || 'AUD',
+      status: 'completed',
+      payerEmail: paymentData?.payerEmail || email,
+      payerName: paymentData?.payerName || fullName,
+      payerId: paymentData?.payerId,
+      bookingId: newBooking._id,
+      paymentMethod: 'paypal',
+      paypalResponse: paymentData?.fullPayPalResponse,
+    });
+
+    await newPayment.save();
+    console.log("✅ Payment record saved:", newPayment._id, "Reference:", paymentReference);
 
     let stationName = station?.name || stationId;
     const stationLocation = station?.location || "";
@@ -280,11 +304,27 @@ export async function POST(request) {
       await transporter.sendMail({
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
         to: process.env.EMAIL_ADMIN,
-        subject: "🧳 New Luggage Storage Booking",
+        subject: `🧳 New Luggage Storage Booking - ${bookingReference}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #1a73e8;">🧳 New Luggage Storage Booking</h2>
             
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #1a73e8;">
+              <h3 style="margin-top: 0; color: #1565c0;">📋 Reference Numbers</h3>
+              <p style="font-size: 18px; font-weight: bold; color: #1a73e8; margin: 5px 0;">
+                <strong>Booking Ref:</strong> ${bookingReference}
+              </p>
+              <p style="font-size: 16px; color: #1565c0; margin: 5px 0;">
+                <strong>Payment Ref:</strong> ${paymentReference}
+              </p>
+              <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                <strong>PayPal Order:</strong> ${paymentData?.paypalOrderId || 'N/A'}
+              </p>
+              <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                <strong>PayPal Transaction:</strong> ${paymentData?.paypalTransactionId || 'N/A'}
+              </p>
+            </div>
+
             <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin-top: 0;">Customer Details</h3>
               <p><strong>Name:</strong> ${fullName}</p>
@@ -306,7 +346,6 @@ export async function POST(request) {
               ${stationLocation ? `<p><strong>Location:</strong> ${stationLocation}</p>` : ''}
               <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
               <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
-              <p><strong>💳 Payment ID:</strong> ${paymentId}</p>
               <p style="font-size: 18px; font-weight: bold; color: #2e7d32;"><strong>💰 Total Amount:</strong> A${totalAmount ? Number(totalAmount).toFixed(2) : '0.00'}</p>
             </div>
           </div>
@@ -323,7 +362,7 @@ export async function POST(request) {
       await transporter.sendMail({
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "✅ Your Luggage Storage Booking Confirmation",
+        subject: `✅ Booking Confirmed - ${bookingReference}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #1a73e8;">✅ Booking Confirmed!</h2>
@@ -333,7 +372,15 @@ export async function POST(request) {
 
             <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #4caf50;">
               <h3 style="margin-top: 0; color: #2e7d32;">✓ Booking Confirmed</h3>
-              <p style="color: #2e7d32; margin: 0;">Your booking has been successfully processed and confirmed.</p>
+              <p style="font-size: 20px; font-weight: bold; color: #2e7d32; margin: 10px 0;">
+                Booking Reference: ${bookingReference}
+              </p>
+              <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                Payment Reference: ${paymentReference}
+              </p>
+              <p style="color: #2e7d32; margin: 10px 0;">
+                ⚠️ <strong>Please save this booking reference for your records.</strong>
+              </p>
             </div>
 
             <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -360,17 +407,19 @@ export async function POST(request) {
 
             <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin-top: 0;">Payment Information</h3>
-              <p><strong>💳 Payment ID:</strong> ${paymentId}</p>
               <p style="font-size: 20px; font-weight: bold; color: #2e7d32; margin: 10px 0;"><strong>💰 Total Paid:</strong> A${totalAmount ? Number(totalAmount).toFixed(2) : '0.00'}</p>
               <p style="color: #4caf50; font-weight: bold;">✓ Payment Confirmed</p>
+              <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                PayPal Transaction ID: ${paymentData?.paypalTransactionId || 'N/A'}
+              </p>
             </div>
 
             <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #1a73e8;">
-              <p style="margin: 0; font-size: 14px;"><strong>📌 Important:</strong> Please bring a valid ID when dropping off and picking up your luggage.</p>
+              <p style="margin: 0; font-size: 14px;"><strong>📌 Important:</strong> Please bring a valid ID and this booking reference (${bookingReference}) when dropping off and picking up your luggage.</p>
             </div>
 
             <p style="margin-top: 30px;">Thank you for choosing Luggage Terminal!</p>
-            <p style="color: #666; font-size: 14px;">If you have any questions, please don't hesitate to contact us.</p>
+            <p style="color: #666; font-size: 14px;">If you have any questions, please contact us with your booking reference: ${bookingReference}</p>
           </div>
         `,
       });
@@ -388,13 +437,16 @@ export async function POST(request) {
             await transporter.sendMail({
               from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
               to: partner.email,
-              subject: "🧳 New Luggage Storage Booking at Your Station",
+              subject: `🧳 New Booking - ${bookingReference}`,
               html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                   <h2 style="color: #1a73e8;">🧳 New Booking at Your Station</h2>
                   
                   <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
                     <p style="margin: 0; color: #856404; font-weight: bold;">A new luggage storage booking has been made at your station.</p>
+                    <p style="font-size: 18px; font-weight: bold; color: #856404; margin: 10px 0;">
+                      Booking Reference: ${bookingReference}
+                    </p>
                   </div>
 
                   <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -417,7 +469,6 @@ export async function POST(request) {
                     <p><strong>📍 Station:</strong> ${stationName}</p>
                     <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
                     <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
-                    <p><strong>💳 Payment ID:</strong> ${paymentId}</p>
                     <p style="font-size: 18px; font-weight: bold; color: #2e7d32;"><strong>💰 Total Amount:</strong> A${totalAmount ? Number(totalAmount).toFixed(2) : '0.00'}</p>
                   </div>
                 </div>
@@ -434,8 +485,50 @@ export async function POST(request) {
     console.log('✅ All processing complete!');
     console.log('========== API CALL FINISHED ==========\n');
 
+    // ✅ NEW: Prepare complete booking data for confirmation page
+    const confirmationData = {
+      bookingReference,
+      paymentReference,
+      bookingId: newBooking._id.toString(),
+      paymentId: newPayment._id.toString(),
+      
+      // Customer details
+      fullName,
+      email,
+      phone,
+      
+      // Station details
+      stationName,
+      stationLocation,
+      
+      // Booking details
+      dropOffDate: new Date(dropOffDate).toISOString(),
+      pickUpDate: new Date(pickUpDate).toISOString(),
+      smallBagCount,
+      largeBagCount,
+      totalBags: luggageCount,
+      specialInstructions,
+      
+      // Payment details
+      totalAmount,
+      paypalOrderId: paymentData?.paypalOrderId,
+      paypalTransactionId: paymentData?.paypalTransactionId,
+      
+      // Metadata
+      bookingDate: new Date().toISOString(),
+      status: 'confirmed'
+    };
+
     return NextResponse.json(
-      { success: true, message: "Booking saved and emails sent" },
+      { 
+        success: true, 
+        message: "Booking saved and emails sent",
+        bookingReference,
+        paymentReference,
+        bookingId: newBooking._id,
+        paymentId: newPayment._id,
+        bookingData: confirmationData // ✅ NEW: Full data for frontend
+      },
       { status: 200 }
     );
   } catch (error) {

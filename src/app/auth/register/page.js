@@ -7,8 +7,12 @@ import Footer from "@/components/Footer";
 import toast from "react-hot-toast";
 import styles from "./register.module.css";
 
+// ✅ Password rule: letters + numbers, min 8 chars
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
 export default function RegisterPage() {
   const router = useRouter();
+  
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -58,6 +62,9 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  const isPasswordInvalid =
+    formData.password && !passwordRegex.test(formData.password);
 
   return (
     <>
@@ -117,10 +124,20 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 className={styles.loginInput}
-                aria-invalid={!!fieldErrors.password}
-                aria-describedby={fieldErrors.password ? "password-error" : undefined}
+                aria-invalid={!!fieldErrors.password || isPasswordInvalid}
+                aria-describedby="password-hint password-error"
               />
-              <p className={styles.passwordHint}>Use at least 8 characters</p>
+
+              <p id="password-hint" className={styles.passwordHint}>
+                At least 8 characters, letters & numbers only
+              </p>
+
+              {isPasswordInvalid && !fieldErrors.password && (
+                <p className={styles.errorMessage}>
+                  Must contain at least one letter and one number
+                </p>
+              )}
+
               {fieldErrors.password && (
                 <p id="password-error" className={styles.errorMessage}>
                   {fieldErrors.password}

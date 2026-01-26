@@ -40,12 +40,31 @@ export default function PartnerDashboard() {
     return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
   };
 
-  const bookingGrossAmount = (booking) => {
-    const dropOff = new Date(booking.dropOffDate);
-    const pickUp = new Date(booking.pickUpDate);
-    const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
-    return booking.luggageCount * days * 7.99;
-  };
+const bookingGrossAmount = (booking) => {
+  // ✅ CASE 1: New bookings with totalAmount field
+  if (booking?.totalAmount != null && booking.totalAmount > 0) {
+    return Number(booking.totalAmount);
+  }
+  
+  // Calculate days for fallback calculations
+  const dropOff = new Date(booking.dropOffDate);
+  const pickUp = new Date(booking.pickUpDate);
+  const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
+  
+  // ✅ CASE 2: Bookings with ACTUAL bag breakdown (at least one bag type > 0)
+  const hasSmallBags = (booking.smallBagCount || 0) > 0;
+  const hasLargeBags = (booking.largeBagCount || 0) > 0;
+  
+  if (hasSmallBags || hasLargeBags) {
+    const smallBagTotal = (booking.smallBagCount || 0) * days * 3.99;
+    const largeBagTotal = (booking.largeBagCount || 0) * days * 8.49;
+    return smallBagTotal + largeBagTotal;
+  }
+  
+  // ✅ CASE 3: Old bookings with only luggageCount (all bags were 7.99)
+  return (booking.luggageCount || 0) * days * 7.99;
+};
+
 
   const bookingPartnerShare = (booking) => +(bookingGrossAmount(booking) * PARTNER_SHARE);
 

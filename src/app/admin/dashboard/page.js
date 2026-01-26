@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import styles from "./AdminDashboard.module.css";
 
+
 /**
  * Admin Dashboard (months-first view + compact toggle + CSV export + animated week accordions)
  *
@@ -36,6 +37,17 @@ export default function AdminDashboard() {
     setToast({ show: true, msg, type });
     setTimeout(() => setToast((prev) => ({ ...prev, show: false })), duration);
   };
+
+
+//   const getPaymentStatus = (booking) => {
+//   if (!booking.payments || booking.payments.length === 0) return "unpaid";
+
+//   const latest = booking.payments[0];
+
+//   return latest.status; // pending | completed | refunded | failed
+// };
+
+
 
   // Station create form (kept)
   const [stationName, setStationName] = useState("");
@@ -288,14 +300,35 @@ export default function AdminDashboard() {
     return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
   };
 
-  const calculateBookingAmount = (booking) => {
-    const dropOff = new Date(booking.dropOffDate);
-    const pickUp = new Date(booking.pickUpDate);
-    const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
-    return booking.luggageCount * days * 7.99;
-  };
+const getBookingAmount = (booking) => {
+  // CASE 1: New bookings (source of truth)
+  if (booking?.totalAmount != null && booking.totalAmount > 0) {
+    return Number(booking.totalAmount);
+  }
 
-  const calculateTotalAmount = (bookings) => bookings.reduce((t, b) => t + calculateBookingAmount(b), 0);
+  const dropOff = new Date(booking.dropOffDate);
+  const pickUp = new Date(booking.pickUpDate);
+  const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
+
+  const smallCount = booking.smallBagCount || 0;
+  const largeCount = booking.largeBagCount || 0;
+
+  // CASE 2: Has bag breakdown
+  if (smallCount > 0 || largeCount > 0) {
+    const total =
+      smallCount * days * 3.99 +
+      largeCount * days * 8.49;
+
+    return Number(total.toFixed(2));
+  }
+
+  // CASE 3: Very old legacy bookings
+  const legacyTotal = (booking.luggageCount || 0) * days * 7.99;
+  return Number(legacyTotal.toFixed(2));
+};
+
+
+  const calculateTotalAmount = (bookings) => bookings.reduce((t, b) => t + getBookingAmount(b), 0);
 
   const groupBookingsByMonth = (bookings) => {
     const monthlyGrouped = {};
@@ -871,7 +904,7 @@ export default function AdminDashboard() {
           escapeCsv(r.dropOffDate || ""),
           escapeCsv(r.pickUpDate || ""),
           r.luggageCount || 0,
-          calculateBookingAmount(r).toFixed(2),
+          getBookingAmount(r).toFixed(2),
           escapeCsv(r.paymentId || ""),
           escapeCsv(r.specialInstructions || ""),
         ].join(",")
@@ -991,7 +1024,7 @@ Total: ${booking.luggageCount}
                 <div className={styles.statIcon}>💰</div>
                 <div>
                   <div className={styles.statValue}>
-                    A${allBookings.reduce((sum, b) => sum + calculateBookingAmount(b), 0).toFixed(2)}
+                    A${allBookings.reduce((sum, b) => sum + getBookingAmount(b), 0).toFixed(2)}
                   </div>
                   <div className={styles.statLabel}>Total Revenue</div>
                 </div>
@@ -1308,7 +1341,7 @@ Total: ${booking.luggageCount}
                                         }}
                                       >
                                         {weekData.bookings.map((booking) => {
-                                          const bookingAmount = calculateBookingAmount(booking);
+                                          const bookingAmount = getBookingAmount(booking);
                                           return (
                                             <div key={booking._id} className={styles.bookingRow}>
                                               <div style={{ display: "flex", gap: 12, alignItems: "center", minWidth: 0 }}>

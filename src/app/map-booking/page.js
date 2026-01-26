@@ -1,4 +1,4 @@
-// app/map-booking/page.js - IMPROVED VERSION
+// app/map-booking/page.js - WITH STATION PREVIEW CARD
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, Suspense} from "react";
@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import InteractiveMap from "@/components/InteractiveMap";
 import LuggageBookingForm from "../../components/booking-form/LuggageBookingForm.js";
+import StationPreviewCard from "../../components/StationPreviewCard/StationPreviewCard.js"; // 🆕 ADDED
 import { Search, X, MapPin, Navigation, ChevronUp, Loader as LoaderIcon, AlertCircle } from "lucide-react";
 import styles from "./MapBooking.module.css";
 
@@ -39,6 +40,10 @@ function MapBookingContent() {
   const [nearMeMode, setNearMeMode] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [locationPromptMessage, setLocationPromptMessage] = useState("");
+  
+  // 🆕 NEW STATES FOR PREVIEW FLOW
+  const [showPreview, setShowPreview] = useState(false);
+  const [showBookingForm, setShowBookingForm] = useState(false);
   
   const suggestionsRef = useRef(null);
   const hasProcessedParams = useRef(false);
@@ -123,7 +128,6 @@ function MapBookingContent() {
     }
   };
 
-  // ✅ IMPROVED: Memoized sorting function
   const sortStationsByDistance = useCallback((stations, userLoc) => {
     if (!userLoc || !userLoc.lat || !userLoc.lng) return stations;
     return [...stations]
@@ -151,6 +155,11 @@ function MapBookingContent() {
           setSelectedStation({ ...station, lat, lng });
           setZoomTo({ lat, lng });
           setSearchTerm(station.name || "");
+          
+          // 🆕 MODIFIED: Show preview first
+          setShowPreview(true);
+          setShowBookingForm(false);
+          
           if (isMobile) {
             setShowMobileDrawer(true);
             setDrawerExpanded(true);
@@ -160,7 +169,6 @@ function MapBookingContent() {
       return;
     }
 
-    // ✅ CRITICAL FIX: Handle nearby mode - ONLY show location prompt here
     if (urlNearby && urlLat && urlLng) {
       const lat = parseFloat(urlLat);
       const lng = parseFloat(urlLng);
@@ -172,34 +180,27 @@ function MapBookingContent() {
         const sorted = sortStationsByDistance(allStations, userLoc);
         setFilteredStations(sorted);
         setSearchTerm("Nearest locations");
-        checkAndPromptLocation(); // ✅ ONLY show prompt for "Use My Location"
+        checkAndPromptLocation();
       }
       return;
     }
 
-    // ✅ CRITICAL FIX: Handle area search - NO location prompt, ZOOM TO SEARCHED AREA
     if (urlSearch) {
       const query = urlSearch.toLowerCase().trim();
       setSearchTerm(urlSearch);
 
-      // If coordinates provided, zoom there (NOT to user location)
       if (urlLat && urlLng) {
         const lat = parseFloat(urlLat);
         const lng = parseFloat(urlLng);
         if (!isNaN(lat) && !isNaN(lng)) {
-          // ✅ CRITICAL: Set zoom coordinates but DON'T set userLocation
-          setZoomTo({ lat, lng }); // Zoom to searched area
-          
-          // Filter and sort stations by distance from SEARCHED location (not user location)
+          setZoomTo({ lat, lng });
           const searchedLocation = { lat, lng };
           const sorted = sortStationsByDistance(allStations, searchedLocation);
           setFilteredStations(sorted);
-          // ✅ DO NOT call checkAndPromptLocation() here
           return;
         }
       }
 
-      // Regular search without coordinates
       const matches = allStations.filter(
         (station) =>
           station.name?.toLowerCase().includes(query) ||
@@ -278,21 +279,42 @@ function MapBookingContent() {
     setSearchTerm(station.name || "");
     setSuggestions([]);
     setHighlightedIndex(-1);
+    
+    // 🆕 MODIFIED: Show preview first
+    setShowPreview(true);
+    setShowBookingForm(false);
+    
     if (isMobile) {
       setShowMobileDrawer(true);
       setDrawerExpanded(true);
     }
   };
 
+  // 🆕 MODIFIED: handleStationSelect now shows preview first
   const handleStationSelect = (station) => {
     const lat = station.lat ?? station.coordinates?.coordinates?.[1];
     const lng = station.lng ?? station.coordinates?.coordinates?.[0];
     if (!lat || !lng) return;
     setSelectedStation({ ...station, lat, lng });
     setZoomTo({ lat, lng });
+    
+    // 🆕 Show preview instead of form
+    setShowPreview(true);
+    setShowBookingForm(false);
+    
     if (isMobile) {
       setShowMobileDrawer(true);
-      setDrawerExpanded(false);
+      setDrawerExpanded(false); // Start minimized
+    }
+  };
+
+  // 🆕 NEW FUNCTION: Handle "Book This Station" from preview
+  const handleBookStation = () => {
+    setShowPreview(false);
+    setShowBookingForm(true);
+    
+    if (isMobile) {
+      setDrawerExpanded(true); // Expand drawer for form
     }
   };
 
@@ -309,6 +331,8 @@ function MapBookingContent() {
     setShowMobileDrawer(false);
     setDrawerExpanded(false);
     setSelectedStation(null);
+    setShowPreview(false);
+    setShowBookingForm(false);
     document.body.style.overflow = "";
   };
 
@@ -325,6 +349,8 @@ function MapBookingContent() {
     setSelectedStation(null);
     setShowMobileDrawer(false);
     setDrawerExpanded(false);
+    setShowPreview(false);
+    setShowBookingForm(false);
     document.body.style.overflow = "";
   };
 
@@ -496,16 +522,37 @@ function MapBookingContent() {
             />
           </div>
 
+          {/* 🆕 DESKTOP SIDEBAR - PREVIEW OR FORM */}
           {!isMobile && (
             <div className={styles.formSidebar}>
               {selectedStation ? (
-                <LuggageBookingForm
-                  prefilledStation={selectedStation}
-                  mode="map"
-                  onBookingComplete={handleBookingComplete}
-                  showHeader={false}
-                  compact={true}
-                />
+                <>
+                  {/* 🆕 Show preview first */}
+                  {showPreview && (
+                    <StationPreviewCard
+                      station={selectedStation}
+                      onBook={handleBookStation}
+                      onClose={closeDrawer}
+                      onViewOnMap={() => setZoomTo({ 
+                        lat: selectedStation.lat, 
+                        lng: selectedStation.lng 
+                      })}
+                      currentCapacity={selectedStation.currentCapacity}
+                      mode="modal"
+                    />
+                  )}
+                  
+                  {/* 🆕 Show form after "Book" clicked */}
+                  {showBookingForm && (
+                    <LuggageBookingForm
+                      prefilledStation={selectedStation}
+                      mode="map"
+                      onBookingComplete={handleBookingComplete}
+                      showHeader={false}
+                      compact={true}
+                    />
+                  )}
+                </>
               ) : (
                 <div className={styles.placeholder}>
                   <Navigation size={48} color="var(--color-primary)" />
@@ -531,6 +578,7 @@ function MapBookingContent() {
           )}
         </div>
 
+        {/* 🆕 MOBILE DRAWER - PREVIEW OR FORM */}
         {isMobile && showMobileDrawer && selectedStation && (
           <>
             {drawerExpanded && (
@@ -541,48 +589,100 @@ function MapBookingContent() {
                 drawerExpanded ? styles.mobileDrawerExpanded : styles.mobileDrawerMinimized
               }`}
             >
-              <div className={styles.drawerHeader} onClick={toggleDrawer}>
-                <div className={styles.drawerHandle} />
-                <div className={styles.drawerHeaderContent}>
-                  <div className={styles.drawerStationInfo}>
-                    <MapPin size={20} color="var(--color-primary)" />
-                    <div>
-                      <div className={styles.drawerStationName}>{selectedStation.name}</div>
-                      <div className={styles.drawerStationLocation}>{selectedStation.location}</div>
+              {/* 🆕 PREVIEW MODE - Minimized header */}
+              {showPreview && !drawerExpanded && (
+                <div className={styles.drawerHeader} onClick={toggleDrawer}>
+                  <div className={styles.drawerHandle} />
+                  <div className={styles.drawerHeaderContent}>
+                    <div className={styles.drawerStationInfo}>
+                      <MapPin size={20} color="var(--color-primary)" />
+                      <div>
+                        <div className={styles.drawerStationName}>{selectedStation.name}</div>
+                        <div className={styles.drawerStationLocation}>{selectedStation.location}</div>
+                      </div>
+                    </div>
+                    <div className={styles.drawerToggle}>
+                      <span className={styles.drawerToggleText}>View Details</span>
+                      <ChevronUp size={20} className={styles.drawerToggleIcon} />
                     </div>
                   </div>
-                  <div className={styles.drawerToggle}>
-                    <span className={styles.drawerToggleText}>
-                      {drawerExpanded ? "Minimize" : "Book Now"}
-                    </span>
-                    <ChevronUp
-                      size={20}
-                      className={styles.drawerToggleIcon}
-                      style={{ transform: drawerExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
-                    />
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeDrawer();
+                    }}
+                    className={styles.closeDrawerBtn}
+                    title="Close"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    closeDrawer();
-                  }}
-                  className={styles.closeDrawerBtn}
-                  title="Close"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              {drawerExpanded && (
+              )}
+
+              {/* 🆕 PREVIEW CONTENT - When expanded */}
+              {showPreview && drawerExpanded && (
                 <div className={styles.drawerContent}>
-                  <LuggageBookingForm
-                    prefilledStation={selectedStation}
-                    mode="map"
-                    onBookingComplete={handleBookingComplete}
-                    showHeader={false}
-                    compact={true}
+                  <StationPreviewCard
+                    station={selectedStation}
+                    onBook={handleBookStation}
+                    onClose={closeDrawer}
+                    onViewOnMap={() => {
+                      setZoomTo({ lat: selectedStation.lat, lng: selectedStation.lng });
+                      setDrawerExpanded(false);
+                    }}
+                    currentCapacity={selectedStation.currentCapacity}
+                    mode="drawer"
                   />
                 </div>
+              )}
+
+              {/* 🆕 BOOKING FORM - After "Book" clicked */}
+              {showBookingForm && (
+                <>
+                  <div className={styles.drawerHeader} onClick={toggleDrawer}>
+                    <div className={styles.drawerHandle} />
+                    <div className={styles.drawerHeaderContent}>
+                      <div className={styles.drawerStationInfo}>
+                        <MapPin size={20} color="var(--color-primary)" />
+                        <div>
+                          <div className={styles.drawerStationName}>{selectedStation.name}</div>
+                          <div className={styles.drawerStationLocation}>{selectedStation.location}</div>
+                        </div>
+                      </div>
+                      <div className={styles.drawerToggle}>
+                        <span className={styles.drawerToggleText}>
+                          {drawerExpanded ? "Minimize" : "Book Now"}
+                        </span>
+                        <ChevronUp
+                          size={20}
+                          className={styles.drawerToggleIcon}
+                          style={{ transform: drawerExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeDrawer();
+                      }}
+                      className={styles.closeDrawerBtn}
+                      title="Close"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                  {drawerExpanded && (
+                    <div className={styles.drawerContent}>
+                      <LuggageBookingForm
+                        prefilledStation={selectedStation}
+                        mode="map"
+                        onBookingComplete={handleBookingComplete}
+                        showHeader={false}
+                        compact={true}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </>
