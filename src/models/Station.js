@@ -98,6 +98,31 @@ const StationSchema = new mongoose.Schema({
     ref: 'User'
   }],
 
+
+ rating: { 
+    type: Number, 
+    default: 4.8,
+    min: 0,
+    max: 5 
+  },
+  
+  reviewCount: { 
+    type: Number, 
+    default: 0 
+  },
+  
+  features: [{ 
+    type: String,
+    enum: [
+      '24/7 Security',
+      'Insurance Included', 
+      'Easy Access',
+      'Instant Booking',
+      'Climate Controlled',
+      'CCTV Monitored'
+    ]
+  }],
+
   // 📍 Status
   status: { 
     type: String, 
@@ -112,6 +137,7 @@ const StationSchema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
+  
 });
 
 // Auto-generate slug from name

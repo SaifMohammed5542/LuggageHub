@@ -2,6 +2,7 @@
 import dbConnect from '../../../../lib/dbConnect';
 import Station from '../../../../models/Station';
 import jwt from 'jsonwebtoken';
+import Booking from '../../../../models/booking';
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
@@ -22,15 +23,51 @@ export async function GET(req) {
     }
 
     // Fetch all stations regardless of authentication status
-    const stations = await Station.find();
-    return NextResponse.json({ stations });
+const stations = await Station.find({ status: 'active' });
+    // Calculate current capacity for each station
+const enrichedStations = await Promise.all(
+  stations.map(async (station) => {
+    const stationObj = station.toObject();
+    
+    // Count active bookings (bags currently stored)
+    const activeBookings = await Booking.aggregate([
+      {
+        $match: {
+          stationId: station._id,
+          dropOffDate: { $lte: new Date() },
+          pickUpDate: { $gte: new Date() },
+          status: { $in: ['confirmed', 'active'] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalBags: { 
+            $sum: { $add: ['$smallBagCount', '$largeBagCount'] }
+          }
+        }
+      }
+    ]);
+    
+    stationObj.currentCapacity = activeBookings[0]?.totalBags || 0;
+    return stationObj;
+  })
+);
+
+return NextResponse.json({ 
+  success: true,
+  stations: enrichedStations 
+});
 
   } catch (jwtError) {
     console.error("JWT Verification Error:", jwtError);
     // If token verification fails, still fetch and return all stations
     try {
-      const stations = await Station.find();
-      return NextResponse.json({ stations });
+      const stations = await Station.find({ status: 'active' });
+return NextResponse.json({ 
+  success: true,
+  stations: stations.map(s => ({ ...s.toObject(), currentCapacity: 0 }))
+});
     } catch (dbError) {
       console.error("Database Error:", dbError);
       return NextResponse.json({ error: 'Failed to fetch stations from the database' }, { status: 500 });

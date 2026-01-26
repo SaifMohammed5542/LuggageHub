@@ -1,28 +1,23 @@
-// app/Booked/page.js
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import '../../../public/ALL CSS/confirmation.css'
+import { useEffect, useState } from "react";
+import dynamic from 'next/dynamic';
+
+const BookedConfirmation = dynamic(() => import('@/components/BookedConfirmation/BookedConfirmation.js'), {
+  ssr: false
+});
 
 const Booked = () => {
-  const router = useRouter();
+  const [bookingData, setBookingData] = useState(null);
 
   useEffect(() => {
-    // Redirect to home page after 5 seconds
-    const timer = setTimeout(() => {
-      router.push("/");
-    }, 5000);
+    // Get booking data from sessionStorage or localStorage
+    const booking = sessionStorage.getItem('lastBooking');
+    if (booking) {
+      setBookingData(JSON.parse(booking));
+    }
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [router]);
-
-  return (
-    <div className="confirmation-container">
-      <h1>✅ Booking Confirmed!</h1>
-      <p>Thank you for booking with us. A confirmation email has been sent to your inbox.</p>
-      <p>You will be redirected to the home page in 5 seconds...</p>
-    </div>
-  );
+  return <BookedConfirmation bookingData={bookingData} />;
 };
 
 export default Booked;
