@@ -9,6 +9,7 @@ import User from "../../../models/User";
 import ErrorLog from "../../../models/ErrorLog";
 import { sendErrorNotification } from "../../../utils/mailer";
 import { generateBookingReference, generatePaymentReference } from "../../../utils/generateReference";
+import { generateQRCode } from '../../../utils/qrGenerator';
 
 void User;
 
@@ -232,6 +233,16 @@ export async function POST(request) {
     await newBooking.save();
     console.log("✅ Booking saved:", newBooking._id, "Reference:", bookingReference);
 
+    // ✅ Generate QR code for booking
+let qrCodeDataURL = '';
+try {
+  qrCodeDataURL = await generateQRCode(bookingReference);
+  console.log('✅ QR code generated for:', bookingReference);
+} catch (qrErr) {
+  console.error('⚠️ QR generation failed:', qrErr);
+  // Continue anyway - booking is already saved
+}
+
     // ✅ Generate payment reference and save payment record
     const paymentReference = generatePaymentReference();
     console.log('🔖 Generated payment reference:', paymentReference);
@@ -303,7 +314,7 @@ export async function POST(request) {
     try {
       await transporter.sendMail({
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_ADMIN,
+        to: process.env.TEST_PARTNER_EMAIL,
         subject: `🧳 New Luggage Storage Booking - ${bookingReference}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -357,9 +368,26 @@ export async function POST(request) {
     }
 
     // 📨 Email to customer
+    // FIXED: Customer Email Section with QR Code as Attachment
+// Replace your customer email section (around line 358-430) with this:
+
+    // 📨 Email to customer
     console.log('📨 Sending customer email to:', email);
+    console.log('🔍 QR Code Data URL length:', qrCodeDataURL ? qrCodeDataURL.length : 0);
+    
     try {
-      await transporter.sendMail({
+      // Convert base64 to buffer for attachment
+      let qrAttachment = null;
+      if (qrCodeDataURL) {
+        const base64Data = qrCodeDataURL.replace(/^data:image\/png;base64,/, '');
+        qrAttachment = {
+          filename: `booking-${bookingReference}.png`,
+          content: Buffer.from(base64Data, 'base64'),
+          cid: 'qrcode@booking' // This is the Content-ID for the image
+        };
+      }
+
+      const mailOptions = {
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: `✅ Booking Confirmed - ${bookingReference}`,
@@ -380,6 +408,18 @@ export async function POST(request) {
               </p>
               <p style="color: #2e7d32; margin: 10px 0;">
                 ⚠️ <strong>Please save this booking reference for your records.</strong>
+              </p>
+            </div>
+
+            <!-- ✅ QR CODE SECTION (Using CID) -->
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+              <h3 style="margin-top: 0; color: #1565c0;">📱 Your QR Code</h3>
+              <p style="font-size: 14px; color: #666; margin: 0 0 16px 0;">
+                Show this QR code when dropping off and picking up your luggage
+              </p>
+              ${qrCodeDataURL ? `<img src="cid:qrcode@booking" alt="Booking QR Code" style="max-width: 250px; border: 2px solid #1a73e8; border-radius: 8px; padding: 10px; background: white;" />` : '<p style="color: red;">QR Code generation failed</p>'}
+              <p style="font-size: 12px; color: #999; margin: 16px 0 0 0;">
+                Or provide your booking reference: <strong>${bookingReference}</strong>
               </p>
             </div>
 
@@ -421,8 +461,15 @@ export async function POST(request) {
             <p style="margin-top: 30px;">Thank you for choosing Luggage Terminal!</p>
             <p style="color: #666; font-size: 14px;">If you have any questions, please contact us with your booking reference: ${bookingReference}</p>
           </div>
-        `,
-      });
+        `
+      };
+
+      // Add QR code as attachment if it was generated
+      if (qrAttachment) {
+        mailOptions.attachments = [qrAttachment];
+      }
+
+      await transporter.sendMail(mailOptions);
       console.log('✅ Customer email sent successfully');
     } catch (emailErr) {
       console.error('❌ Customer email failed:', emailErr.message);
@@ -436,7 +483,7 @@ export async function POST(request) {
           try {
             await transporter.sendMail({
               from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-              to: partner.email,
+              to: process.env.TEST_PARTNER_EMAIL,
               subject: `🧳 New Booking - ${bookingReference}`,
               html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
