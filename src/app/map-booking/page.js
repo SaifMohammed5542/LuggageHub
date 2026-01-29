@@ -621,7 +621,7 @@ function MapBookingContent() {
 
               {/* 🆕 PREVIEW CONTENT - When expanded */}
               {showPreview && drawerExpanded && (
-                <div className={styles.drawerContent}>
+<div className={styles.drawerContentPreview}>  {/* ✅ NEW CLASS */}
                   <StationPreviewCard
                     station={selectedStation}
                     onBook={handleBookStation}
