@@ -2,8 +2,12 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
+import Station from '@/models/Station';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
+
+// Ensure Station model is registered
+void Station;
 
 /**
  * POST /api/partner/app/verify-qr
