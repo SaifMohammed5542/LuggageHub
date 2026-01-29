@@ -1,0 +1,207 @@
+/* components/partner-app/BookingCard.module.css */
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
+  color: #fff;
+}
+
+.customerName {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusPending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusStored {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.statusCompleted {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusCancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.statusDefault {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.cardBody {
+  padding: 20px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+  word-break: break-word;
+}
+
+.valueHighlight {
+  font-size: 16px;
+  color: #1a73e8;
+  font-weight: 700;
+  text-align: right;
+}
+
+.divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 16px 0;
+}
+
+.instructions {
+  margin-top: 12px;
+}
+
+.instructionsText {
+  font-size: 14px;
+  color: #333;
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 8px 0 0 0;
+  line-height: 1.5;
+}
+
+.cardFooter {
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actionButton.primary {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.actionButton.primary:hover {
+  background: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+}
+
+.actionButton.success {
+  background: #28a745;
+  color: #fff;
+}
+
+.actionButton.success:hover {
+  background: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.actionButton:active {
+  transform: translateY(0);
+}
+
+.cardReference {
+  padding: 12px 20px;
+  background: #f0f0f0;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.refCode {
+  font-family: 'Courier New', monospace;
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a73e8;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .cardHeader {
+    padding: 12px 16px;
+  }
+
+  .customerName {
+    font-size: 16px;
+  }
+
+  .cardBody {
+    padding: 16px;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .value,
+  .valueHighlight {
+    text-align: left;
+  }
+
+  .actionButton {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+}

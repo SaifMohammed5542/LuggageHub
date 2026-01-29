@@ -1,0 +1,65 @@
+/* components/partner-app/QRScanner.module.css */
+
+.scannerContainer {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.scannerWrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.qrReader {
+  width: 100%;
+}
+
+/* Override html5-qrcode default styles */
+.qrReader :global(#qr-shaded-region) {
+  border: 2px solid #1a73e8 !important;
+  border-radius: 8px;
+}
+
+.qrReader :global(video) {
+  border-radius: 8px;
+}
+
+.instructions {
+  margin-top: 24px;
+  text-align: center;
+  padding: 16px;
+  background: #e3f2fd;
+  border-radius: 8px;
+  border-left: 4px solid #1a73e8;
+}
+
+.instructionText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1565c0;
+  margin: 0 0 8px 0;
+}
+
+.instructionSubtext {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .scannerContainer {
+    padding: 0 16px;
+  }
+
+  .instructionText {
+    font-size: 14px;
+  }
+
+  .instructionSubtext {
+    font-size: 12px;
+  }
+}

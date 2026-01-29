@@ -1,0 +1,124 @@
+/* app/partner/app/dashboard/Dashboard.module.css */
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.welcomeSection {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.welcomeTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a73e8;
+  margin: 0 0 8px 0;
+}
+
+.welcomeText {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.actionCard:hover {
+  border-color: #1a73e8;
+  background: #e3f2fd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+}
+
+.actionCard:active {
+  transform: translateY(0);
+}
+
+.actionIcon {
+  font-size: 40px;
+}
+
+.actionLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: #fff;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .welcomeTitle {
+    font-size: 24px;
+  }
+
+  .welcomeText {
+    font-size: 14px;
+  }
+
+  .quickActions {
+    gap: 12px;
+  }
+
+  .actionCard {
+    padding: 20px;
+  }
+
+  .actionIcon {
+    font-size: 32px;
+  }
+
+  .actionLabel {
+    font-size: 14px;
+  }
+}
