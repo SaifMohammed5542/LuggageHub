@@ -84,11 +84,11 @@ const bookingSchema = new mongoose.Schema({
   
   // ✅ Status tracking
   status: {
-    type: String,
-    enum: ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'],
-    default: 'pending',
-    index: true,
-  },
+  type: String,
+  enum: ['pending', 'confirmed', 'stored', 'completed', 'cancelled', 'no_show'],
+  default: 'pending',
+  index: true,
+},
   
   // ✅ Additional tracking
   checkInTime: Date,
