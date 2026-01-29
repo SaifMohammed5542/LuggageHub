@@ -379,7 +379,7 @@
   font-weight: 500;
 }
 
-/* ========== MOBILE DRAWER ========== */
+/* ========== MOBILE DRAWER - SAFARI iOS COMPATIBLE ========== */
 .overlay {
   position: fixed;
   inset: 0;
@@ -400,6 +400,11 @@
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
   z-index: 999;
   transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ✅ SAFARI FIX: Flexbox layout */
+  display: flex;
+  flex-direction: column;
+  /* ✅ SAFARI FIX: Safe area support for notched iPhones */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .mobileDrawerMinimized {
@@ -408,7 +413,9 @@
 
 .mobileDrawerExpanded {
   height: 90vh;
+  height: 90dvh; /* ✅ SAFARI FIX: Dynamic viewport height */
   max-height: 90vh;
+  max-height: 90dvh;
 }
 
 .drawerHeader {
@@ -420,6 +427,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* ✅ SAFARI FIX: Prevent shrinking in flexbox */
+  flex-shrink: 0;
 }
 
 .drawerHandle {
@@ -483,6 +492,7 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--color-primary);
+  white-space: nowrap;
 }
 
 .drawerToggleIcon {
@@ -512,28 +522,57 @@
   color: var(--color-primary);
 }
 
+/* ✅ For booking form */
 .drawerContent {
   padding: 16px 12px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   overflow-y: auto;
+  overflow-x: hidden;
   height: calc(90vh - 120px);
+  height: calc(90dvh - 120px - env(safe-area-inset-bottom)); /* ✅ Safari dvh */
   -webkit-overflow-scrolling: touch;
+  /* ✅ SAFARI FIX: GPU acceleration */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
-/* Custom scrollbar for drawer */
-.drawerContent::-webkit-scrollbar {
+/* ✅ For preview card - Safari-compatible */
+.drawerContentPreview {
+  /* ✅ SAFARI FIX: Flexbox child takes remaining space */
+  flex: 1;
+  min-height: 0; /* ✅ CRITICAL for Safari scrolling */
+  padding: 16px 12px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* ✅ SAFARI FIX: GPU acceleration */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  /* ✅ SAFARI FIX: Proper positioning */
+  position: relative;
+  z-index: 1;
+}
+
+/* Custom scrollbar for both */
+.drawerContent::-webkit-scrollbar,
+.drawerContentPreview::-webkit-scrollbar {
   width: 6px;
 }
 
-.drawerContent::-webkit-scrollbar-track {
+.drawerContent::-webkit-scrollbar-track,
+.drawerContentPreview::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.drawerContent::-webkit-scrollbar-thumb {
+.drawerContent::-webkit-scrollbar-thumb,
+.drawerContentPreview::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: 3px;
 }
 
-.drawerContent::-webkit-scrollbar-thumb:hover {
+.drawerContent::-webkit-scrollbar-thumb:hover,
+.drawerContentPreview::-webkit-scrollbar-thumb:hover {
   background: var(--color-muted);
 }
 
@@ -698,12 +737,23 @@
 
   .mobileDrawerExpanded {
     height: 92vh;
+    height: 92dvh; /* ✅ Safari */
     max-height: 92vh;
+    max-height: 92dvh;
   }
 
+  /* Booking form */
   .drawerContent {
-    height: calc(95vh - 115px);
+    height: calc(92vh - 115px);
+    height: calc(92dvh - 115px - env(safe-area-inset-bottom));
     padding: 12px 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* Preview card */
+  .drawerContentPreview {
+    padding: 12px 10px 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
   }
 
   .locationPrompt {
@@ -857,10 +907,6 @@
   }
 }
 
-/* MapBooking.module.css - WITH FORM PROGRESS INDICATOR */
-
-/* ... (keep all existing styles) ... */
-
 /* 🆕 NEW: Form progress badge in drawer header */
 .formProgressBadge {
   margin-left: 8px;
@@ -883,12 +929,12 @@
   }
 }
 
-/* 🆕 Update drawer toggle text for form in progress */
-.drawerToggleText {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-primary);
-  white-space: nowrap;
-}
+/* ========== SAFARI-SPECIFIC WEBKIT FIXES ========== */
 
-/* ... (rest of existing styles) ... */
+/* Fix Safari rubber-band scrolling */
+@supports (-webkit-touch-callout: none) {
+  .drawerContentPreview,
+  .drawerContent {
+    overscroll-behavior-y: contain;
+  }
+}

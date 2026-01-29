@@ -469,7 +469,6 @@ export async function POST(request) {
                     <p><strong>📍 Station:</strong> ${stationName}</p>
                     <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
                     <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
-                    <p style="font-size: 18px; font-weight: bold; color: #2e7d32;"><strong>💰 Total Amount:</strong> A${totalAmount ? Number(totalAmount).toFixed(2) : '0.00'}</p>
                   </div>
                 </div>
               `,
