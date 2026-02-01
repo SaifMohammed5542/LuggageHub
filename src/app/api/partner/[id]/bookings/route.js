@@ -4,6 +4,8 @@ import Station from '../../../../../models/Station';
 import User from '../../../../../models/User';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
+import { getNovember2025Range } from "@/utils/dateRange";
+
 
 // await params if it's a promise (handles Next versions where params is async)
 const getParams = async (p) => (typeof p?.then === 'function' ? await p : p);
@@ -44,21 +46,50 @@ export async function GET(req, ctx) {
       return NextResponse.json({ success: false, error: 'Assigned station not found' }, { status: 404 });
     }
 
-    const stationId = station._id;
-    const stationIdStr = stationId.toString();
+const stationId = station._id;
+const stationIdStr = stationId.toString();
 
-    // 2) be flexible: match various historical schemas
-    const query = {
+// ✅ DEFINE FIRST
+const { start } = getNovember2025Range();
+
+// ✅ THEN USE
+const query = {
+  $and: [
+    // ✅ station matching (unchanged)
+    {
       $or: [
-        { station: stationId },            // proper ObjectId ref
-        { station: stationIdStr },         // station saved as string id
-        { stationId: stationIdStr },       // separate stationId field
-        { stationId: stationId },          // stationId as ObjectId
-        { 'station._id': stationId },      // embedded station object
-        { stationSlug: station.slug },     // saved by slug
-        { stationName: station.name },     // saved by name
+        { station: stationId },
+        { station: stationIdStr },
+        { stationId: stationIdStr },
+        { stationId: stationId },
+        { 'station._id': stationId },
+        { stationSlug: station.slug },
+        { stationName: station.name },
       ],
-    };
+    },
+
+    // ✅ FROM NOVEMBER 2025 → PRESENT (CORE FIX)
+    {
+      $or: [
+        // booking starts on/after Nov 1
+        {
+          dropOffDate: { $gte: start },
+        },
+
+        // booking started before Nov 1 but continues after
+        {
+          dropOffDate: { $lt: start },
+          pickUpDate: { $gte: start },
+        },
+      ],
+    },
+
+    // ✅ exclude invalid states
+    {
+      status: { $nin: ["cancelled", "no_show"] },
+    },
+  ],
+};
 
     const bookings = await Booking.find(query)
       .sort({ dropOffDate: -1 })
