@@ -1,4 +1,4 @@
-/* app/partner/app/login/Login.module.css */
+/* app/partner/application/login/Login.module.css */
 
 .container {
   min-height: 100vh;
@@ -21,13 +21,20 @@
 .logoSection {
   background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
   color: #fff;
-  padding: 40px 32px;
+  padding: 20px 40px 32px;
   text-align: center;
 }
 
 .logo {
-  font-size: 64px;
-  margin: 0 0 16px 0;
+
+  justify-items: center;
+  margin-bottom: 16px;
+  height: 100px;
+}
+
+.logo img {
+  height: 100px;
+  width: auto;
 }
 
 .title {
@@ -155,7 +162,7 @@
   }
 
   .logoSection {
-    padding: 32px 24px;
+    padding: 20px 32px 32px;
   }
 
   .logo {

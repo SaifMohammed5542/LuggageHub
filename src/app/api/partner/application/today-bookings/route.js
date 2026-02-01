@@ -1,4 +1,4 @@
-// app/api/partner/app/today-bookings/route.js
+// app/api/partner/applicationlication/today-bookings/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
@@ -6,7 +6,7 @@ import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
 /**
- * GET /api/partner/app/today-bookings
+ * GET /api/partner/application/today-bookings
  * Get today's drop-offs and pick-ups for partner's assigned station
  * Returns two arrays: todayDropOffs and todayPickUps
  */

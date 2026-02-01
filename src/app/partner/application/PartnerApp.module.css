@@ -1,4 +1,4 @@
-/* app/partner/app/PartnerApp.module.css */
+/* app/partner/application/PartnerApp.module.css */
 
 .appContainer {
   display: flex;
@@ -51,9 +51,12 @@
 }
 
 .logo {
-  font-size: 20px;
-  font-weight: 700;
   margin: 0;
+}
+
+.logo img {
+  width: 80px;
+  height: auto;
 }
 
 .headerRight {

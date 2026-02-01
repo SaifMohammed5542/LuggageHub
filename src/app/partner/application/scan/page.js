@@ -1,4 +1,4 @@
-// app/partner/app/scan/page.js
+// app/partner/application/scan/page.js
 'use client';
 import { useState } from 'react';
 import QRScanner from '../../../../components/partner-app/QRScanner/QRScanner';
@@ -24,7 +24,7 @@ export default function ScanPage() {
       }
 
       // Verify the QR code with backend
-      const response = await fetch('/api/partner/app/verify-qr', {
+      const response = await fetch('/api/partner/application/verify-qr', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -65,7 +65,7 @@ export default function ScanPage() {
   const handleConfirmAction = async (booking) => {
     const isDropOff = booking.status === 'pending' || booking.status === 'confirmed';
     const actionType = isDropOff ? 'drop-off' : 'pick-up';
-    const endpoint = isDropOff ? '/api/partner/app/confirm-dropoff' : '/api/partner/app/confirm-pickup';
+    const endpoint = isDropOff ? '/api/partner/application/confirm-dropoff' : '/api/partner/application/confirm-pickup';
 
     const confirmed = window.confirm(
       `Confirm ${actionType} for ${booking.fullName}?\n\n` +

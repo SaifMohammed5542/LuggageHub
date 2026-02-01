@@ -25,7 +25,7 @@ export default function TodayBookings({ onConfirmDropoff, onConfirmPickup }) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('/api/partner/app/today-bookings', {
+      const response = await fetch('/api/partner/application/today-bookings', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

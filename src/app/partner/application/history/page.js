@@ -1,4 +1,4 @@
-// app/partner/app/history/page.js
+// app/partner/application/history/page.js
 'use client';
 import { useEffect, useState } from 'react';
 import BookingCard from '../../../../components/partner-app/BookingCard/BookingCard';
