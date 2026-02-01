@@ -173,3 +173,79 @@
     font-size: 11px;
   }
 }
+
+/* Install Banner */
+.installBanner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
+  color: white;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.installBannerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.installBannerButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.installButton {
+  padding: 6px 16px;
+  background: white;
+  color: #1a73e8;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.installButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dismissButton {
+  padding: 4px 8px;
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dismissButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Adjust main content when banner is shown */
+.appContainer:has(.installBanner) .header {
+  margin-top: 48px;
+}
