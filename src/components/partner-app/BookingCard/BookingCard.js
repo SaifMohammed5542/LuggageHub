@@ -2,6 +2,8 @@
 'use client';
 import styles from './BookingCard.module.css';
 
+const PARTNER_SHARE = 0.4; // 40% partner share
+
 /**
  * BookingCard Component
  * Displays booking information in a card format
@@ -35,6 +37,18 @@ export default function BookingCard({ booking, onAction, actionLabel, actionVari
       </span>
     );
   };
+
+  // Calculate partner share (40%)
+  const calculatePartnerShare = (booking) => {
+    if (!booking.totalAmount) return 0;
+    
+    const totalAmount = Number(booking.totalAmount);
+    const partnerShare = totalAmount * PARTNER_SHARE;
+    
+    return partnerShare;
+  };
+
+  const partnerShare = calculatePartnerShare(booking);
 
   return (
     <div className={styles.card}>
@@ -88,10 +102,11 @@ export default function BookingCard({ booking, onAction, actionLabel, actionVari
           </div>
         )}
 
-        {booking.totalAmount && (
+        {/* ✅ SHOW ONLY PARTNER SHARE (40%) */}
+        {partnerShare > 0 && (
           <div className={styles.infoRow}>
-            <span className={styles.label}>💰 Amount:</span>
-            <span className={styles.valueHighlight}>A${Number(booking.totalAmount).toFixed(2)}</span>
+            <span className={styles.label}>💰 Your Share (40%):</span>
+            <span className={styles.valueHighlight}>A${partnerShare.toFixed(2)}</span>
           </div>
         )}
 
