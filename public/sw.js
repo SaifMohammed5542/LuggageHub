@@ -1,10 +1,10 @@
 // Service Worker for PWA
 const CACHE_NAME = 'luggage-terminal-partner-v1';
 const urlsToCache = [
-  '/partner/app/dashboard',
-  '/partner/app/scan',
-  '/partner/app/history',
-  '/partner/app/login',
+  '/partner/applicationlication/dashboard',
+  '/partner/applicationlication/scan',
+  '/partner/applicationlication/history',
+  '/partner/applicationlication/login',
 ];
 
 // Install event

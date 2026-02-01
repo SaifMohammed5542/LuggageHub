@@ -1,4 +1,4 @@
-// app/api/partner/app/confirm-pickup/route.js
+// app/api/partner/applicationlication/confirm-pickup/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
@@ -6,7 +6,7 @@ import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
 /**
- * POST /api/partner/app/confirm-pickup
+ * POST /api/partner/applicationlication/confirm-pickup
  * Confirm customer has picked up their luggage
  * Updates status: stored → completed (with checkOutTime)
  */

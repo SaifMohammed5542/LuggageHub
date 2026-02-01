@@ -1,8 +1,9 @@
-// app/partner/app/login/page.js
+// app/partner/application/login/page.js
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './Login.module.css';
+import Image from 'next/image';
 
 export default function PartnerLogin() {
   const router = useRouter();
@@ -97,7 +98,7 @@ const handleInstall = async () => {
       localStorage.setItem('username', data.username || data.email);
 
       console.log('✅ Partner login successful');
-      router.push('/partner/app/dashboard');
+      router.push('/partner/application/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Invalid email or password');
@@ -110,7 +111,14 @@ const handleInstall = async () => {
     <div className={styles.container}>
       <div className={styles.loginCard}>
         <div className={styles.logoSection}>
-          <h1 className={styles.logo}>🧳</h1>
+          <div className={styles.logo}>
+            <Image
+              src="/images/latestLogo.png"
+              alt="Luggage Terminal Partner"
+              width={150}
+              height={50}
+            />
+          </div>
           <h2 className={styles.title}>Partner Login</h2>
           <p className={styles.subtitle}>Luggage Terminal</p>
         </div>

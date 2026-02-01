@@ -1,9 +1,10 @@
-// app/partner/app/layout.js
+// app/partner/application/layout.js
 'use client';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import styles from './PartnerApp.module.css';
+import Image from 'next/image';
 
 export default function PartnerAppLayout({ children }) {
   const pathname = usePathname();
@@ -19,13 +20,13 @@ export default function PartnerAppLayout({ children }) {
     const role = localStorage.getItem('role');
     
     // Skip auth check on login page
-    if (pathname === '/partner/app/login') {
+    if (pathname === '/partner/application/login') {
       setIsLoading(false);
       return;
     }
 
     if (!token || role !== 'partner') {
-      router.push('/partner/app/login');
+      router.push('/partner/application/login');
       return;
     }
 
@@ -81,11 +82,11 @@ export default function PartnerAppLayout({ children }) {
 
   const handleLogout = () => {
     localStorage.clear();
-    router.push('/partner/app/login');
+    router.push('/partner/application/login');
   };
 
   // Show loading on protected pages
-  if (isLoading && pathname !== '/partner/app/login') {
+  if (isLoading && pathname !== '/partner/application/login') {
     return (
       <div className={styles.loadingScreen}>
         <div className={styles.spinner}></div>
@@ -95,7 +96,7 @@ export default function PartnerAppLayout({ children }) {
   }
 
   // Don't show nav on login page
-  if (pathname === '/partner/app/login') {
+  if (pathname === '/partner/application/login') {
     return (
       <>
         <Head>
@@ -146,7 +147,14 @@ export default function PartnerAppLayout({ children }) {
         {/* Top Header */}
         <header className={styles.header}>
           <div className={styles.headerContent}>
-            <h1 className={styles.logo}>🧳 Luggage Terminal</h1>
+            <div className={styles.logo}>
+              <Image
+                src="/images/latestLogo.png"
+                alt="Luggage Terminal Partner"
+                width={150}
+                height={50}
+              />
+            </div>
             <div className={styles.headerRight}>
               <span className={styles.partnerName}>{partnerName}</span>
               <button className={styles.logoutBtn} onClick={handleLogout}>
@@ -164,24 +172,24 @@ export default function PartnerAppLayout({ children }) {
         {/* Bottom Navigation */}
         <nav className={styles.bottomNav}>
           <button
-            className={`${styles.navItem} ${pathname === '/partner/app/dashboard' ? styles.navItemActive : ''}`}
-            onClick={() => router.push('/partner/app/dashboard')}
+            className={`${styles.navItem} ${pathname === '/partner/application/dashboard' ? styles.navItemActive : ''}`}
+            onClick={() => router.push('/partner/application/dashboard')}
           >
             <span className={styles.navIcon}>🏠</span>
             <span className={styles.navLabel}>Home</span>
           </button>
 
           <button
-            className={`${styles.navItem} ${pathname === '/partner/app/scan' ? styles.navItemActive : ''}`}
-            onClick={() => router.push('/partner/app/scan')}
+            className={`${styles.navItem} ${pathname === '/partner/application/scan' ? styles.navItemActive : ''}`}
+            onClick={() => router.push('/partner/application/scan')}
           >
             <span className={styles.navIcon}>📷</span>
             <span className={styles.navLabel}>Scan</span>
           </button>
 
           <button
-            className={`${styles.navItem} ${pathname === '/partner/app/history' ? styles.navItemActive : ''}`}
-            onClick={() => router.push('/partner/app/history')}
+            className={`${styles.navItem} ${pathname === '/partner/application/history' ? styles.navItemActive : ''}`}
+            onClick={() => router.push('/partner/application/history')}
           >
             <span className={styles.navIcon}>📋</span>
             <span className={styles.navLabel}>History</span>

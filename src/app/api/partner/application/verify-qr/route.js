@@ -1,4 +1,4 @@
-// app/api/partner/app/verify-qr/route.js
+// app/api/partner/application/verify-qr/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 void Station;
 
 /**
- * POST /api/partner/app/verify-qr
+ * POST /api/partner/application/verify-qr
  * Verify a scanned QR code (booking reference) and return booking details
  * Only returns booking if it belongs to the partner's assigned station
  */

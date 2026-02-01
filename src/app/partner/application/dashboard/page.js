@@ -1,4 +1,4 @@
-// app/partner/app/dashboard/page.js
+// app/partner/application/dashboard/page.js
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -24,7 +24,7 @@ export default function PartnerAppDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/partner/app/confirm-dropoff', {
+      const response = await fetch('/api/partner/application/confirm-dropoff', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -68,7 +68,7 @@ export default function PartnerAppDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/partner/app/confirm-pickup', {
+      const response = await fetch('/api/partner/application/confirm-pickup', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -109,7 +109,7 @@ export default function PartnerAppDashboard() {
       <div className={styles.quickActions}>
         <button
           className={styles.actionCard}
-          onClick={() => router.push('/partner/app/scan')}
+          onClick={() => router.push('/partner/application/scan')}
         >
           <span className={styles.actionIcon}>📷</span>
           <span className={styles.actionLabel}>Scan QR Code</span>
@@ -117,7 +117,7 @@ export default function PartnerAppDashboard() {
 
         <button
           className={styles.actionCard}
-          onClick={() => router.push('/partner/app/history')}
+          onClick={() => router.push('/partner/application/history')}
         >
           <span className={styles.actionIcon}>📋</span>
           <span className={styles.actionLabel}>View History</span>
