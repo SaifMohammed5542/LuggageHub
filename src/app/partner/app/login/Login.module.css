@@ -178,3 +178,37 @@
     padding: 16px 24px;
   }
 }
+
+/* Install Section */
+.installSection {
+  padding: 16px 32px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.installButton {
+  width: 100%;
+  padding: 12px 24px;
+  background: #fff;
+  color: #1a73e8;
+  border: 2px solid #1a73e8;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.installButton:hover {
+  background: #1a73e8;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.installButton:active {
+  transform: translateY(0);
+}
