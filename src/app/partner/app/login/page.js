@@ -1,6 +1,6 @@
 // app/partner/app/login/page.js
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './Login.module.css';
 
@@ -12,6 +12,51 @@ export default function PartnerLogin() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  // Capture the install prompt event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstallable(false);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  
+
+const handleInstall = async () => {
+    if (!deferredPrompt) {
+      // Show instructions for iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        alert('To install on iOS:\n\n1. Tap the Share button (⬆️)\n2. Scroll down\n3. Tap "Add to Home Screen"\n4. Tap "Add"');
+      } else {
+        alert('To install:\n\n1. Tap menu (⋮)\n2. Tap "Install app" or "Add to Home Screen"');
+      }
+      return;
+    }
+
+    // Android/Chrome automatic install
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`Install outcome: ${outcome}`);
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,7 +64,7 @@ export default function PartnerLogin() {
       ...prev,
       [name]: value
     }));
-    setError(''); // Clear error on input change
+    setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -42,20 +87,16 @@ export default function PartnerLogin() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Check if user is a partner
       if (data.role !== 'partner') {
         throw new Error('Access denied. Partners only.');
       }
 
-      // Store auth data
       localStorage.setItem('token', data.token);
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('role', data.role);
       localStorage.setItem('username', data.username || data.email);
 
       console.log('✅ Partner login successful');
-
-      // Redirect to dashboard
       router.push('/partner/app/dashboard');
     } catch (err) {
       console.error('Login error:', err);
@@ -130,6 +171,19 @@ export default function PartnerLogin() {
             )}
           </button>
         </form>
+
+        {/* ✅ ADD INSTALL BUTTON HERE */}
+        {isInstallable && (
+          <div className={styles.installSection}>
+            <button
+              type="button"
+              className={styles.installButton}
+              onClick={handleInstall}
+            >
+              📱 Install App
+            </button>
+          </div>
+        )}
 
         <div className={styles.footer}>
           <p className={styles.footerText}>
