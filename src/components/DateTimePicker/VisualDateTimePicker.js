@@ -1,4 +1,4 @@
-// components/DateTimePicker/VisualDateTimePicker.jsx - ENHANCED WITH SMOOTH UX + NOW OPTION
+// components/DateTimePicker/VisualDateTimePicker.jsx - ENHANCED WITH SMOOTH UX
 "use client";
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styles from './VisualDateTimePicker.module.css';
@@ -35,14 +35,6 @@ const VisualDateTimePicker = ({
     const minutes = now.getMinutes();
     const roundedMinutes = Math.ceil(minutes / 30) * 30;
     now.setMinutes(roundedMinutes);
-    now.setSeconds(0);
-    now.setMilliseconds(0);
-    return now;
-  };
-
-  // ✅ NEW: Get exact current time (not rounded)
-  const getExactCurrentTime = () => {
-    const now = new Date();
     now.setSeconds(0);
     now.setMilliseconds(0);
     return now;
@@ -117,28 +109,6 @@ const VisualDateTimePicker = ({
       targetDate = new Date(customDate);
     } else {
       return slots;
-    }
-
-    // ✅ NEW: Add "Now" option for drop-off on today
-    if (!isPickUpTab && dateType === 'today') {
-      const exactNow = getExactCurrentTime();
-      const nowAvailable = isTimeSlotAvailable(targetDate, exactNow.getHours(), exactNow.getMinutes());
-      
-      if (nowAvailable) {
-        const displayHour = exactNow.getHours() === 0 ? 12 : exactNow.getHours() > 12 ? exactNow.getHours() - 12 : exactNow.getHours();
-        const period = exactNow.getHours() >= 12 ? 'PM' : 'AM';
-        const label = `${displayHour}:${String(exactNow.getMinutes()).padStart(2, '0')} ${period}`;
-        
-        slots.push({
-          type: 'now',
-          hour: exactNow.getHours(),
-          minute: exactNow.getMinutes(),
-          label: 'Now',
-          sublabel: label,
-          available: true,
-          dateTime: exactNow
-        });
-      }
     }
 
     let startHour = 0;
@@ -286,14 +256,13 @@ const VisualDateTimePicker = ({
     // 🎯 NEW: Enhanced UX Flow
     if (isDropOff) {
       // Save selected slot for visual feedback
-      setSelectedDropOffSlot(slot.type === 'now' ? 'Now' : slot.label);
+      setSelectedDropOffSlot(slot.label);
       
       // Show success toast
       const dateStr = dateType === 'today' ? 'Today' : 
                       dateType === 'tomorrow' ? 'Tomorrow' : 
                       targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const timeStr = slot.type === 'now' ? slot.sublabel : slot.label;
-      displayToast(`✓ Drop-off set for ${dateStr} at ${timeStr}`);
+      displayToast(`✓ Drop-off set for ${dateStr} at ${slot.label}`);
       
       // Smooth scroll to top after brief delay
       setTimeout(() => {
@@ -634,28 +603,7 @@ const VisualDateTimePicker = ({
                   );
                 }
                 
-                // ✅ NEW: Handle "Now" slot differently
-                if (slot.type === 'now') {
-                  const isSelected = selectedDropOffSlot === 'Now';
-                  
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleTimeSelect(slot)}
-                      className={`${styles.timeSlotButton} ${styles.nowButton} ${isSelected ? styles.selectedSlot : ''}`}
-                    >
-                      <div className={styles.nowLabel}>
-                        <span className={styles.nowIcon}>⚡</span>
-                        <span className={styles.nowText}>Now</span>
-                      </div>
-                      <div className={styles.nowSublabel}>{slot.sublabel}</div>
-                      {isSelected && <span className={styles.checkmark}>✓</span>}
-                    </button>
-                  );
-                }
-                
-                // Regular time slot
+                // 🎯 NEW: Check if this slot is selected
                 const isSelected = activeTab === 'dropOff' 
                   ? selectedDropOffSlot === slot.label 
                   : selectedPickUpSlot === slot.label;
