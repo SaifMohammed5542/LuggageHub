@@ -481,45 +481,66 @@ try {
       for (const partner of station.partners) {
         if (partner?.email && partner.role === "partner") {
           try {
-            await transporter.sendMail({
-              from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-              to: partner.email,
-              subject: `🧳 New Booking - ${bookingReference}`,
-              html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                  <h2 style="color: #1a73e8;">🧳 New Booking at Your Station</h2>
-                  
-                  <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                    <p style="margin: 0; color: #856404; font-weight: bold;">A new luggage storage booking has been made at your station.</p>
-                    <p style="font-size: 18px; font-weight: bold; color: #856404; margin: 10px 0;">
-                      Booking Reference: ${bookingReference}
-                    </p>
-                  </div>
+await transporter.sendMail({
+  from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
+  to: partner.email,
+  subject: `🧳 New Booking - ${bookingReference}`,
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #1a73e8;">🧳 New Booking at Your Station</h2>
+      
+      <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <p style="margin: 0; color: #856404; font-weight: bold;">A new luggage storage booking has been made at your station.</p>
+        <p style="font-size: 18px; font-weight: bold; color: #856404; margin: 10px 0;">
+          Booking Reference: ${bookingReference}
+        </p>
+      </div>
 
-                  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="margin-top: 0;">Customer Details</h3>
-                    <p><strong>Name:</strong> ${fullName}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Phone:</strong> ${phone}</p>
-                  </div>
+      <div style="background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%); padding: 24px; border-radius: 12px; margin: 20px 0; text-align: center;">
+        <h3 style="margin: 0 0 12px 0; color: #fff; font-size: 20px;">📱 Manage Bookings Faster with Our Partner App!</h3>
+        <p style="color: #fff; margin: 0 0 16px 0; font-size: 14px; line-height: 1.6;">
+          Scan QR codes, confirm drop-offs & pick-ups, view booking history — all from your phone. 
+          <strong>No more email checking!</strong>
+        </p>
+        <a href="https://luggageterminal.com/partner/application/login" 
+           style="display: inline-block; background: #fff; color: #1a73e8; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          🚀 Install Partner App
+        </a>
+        <p style="color: rgba(255,255,255,0.9); margin: 12px 0 0 0; font-size: 12px;">
+          Works on iPhone & Android • Install directly from your browser
+        </p>
+      </div>
 
-                  <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="margin-top: 0; color: #1565c0;">Luggage Details</h3>
-                    <p><strong>🎒 Small Bags:</strong> ${smallBagCount}</p>
-                    <p><strong>🧳 Medium/Large Bags:</strong> ${largeBagCount}</p>
-                    <p style="font-size: 18px; font-weight: bold; color: #1a73e8;"><strong>📦 Total Bags:</strong> ${luggageCount}</p>
-                    ${specialInstructions ? `<p><strong>📝 Special Instructions:</strong> ${specialInstructions}</p>` : ''}
-                  </div>
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin-top: 0;">Customer Details</h3>
+        <p><strong>Name:</strong> ${fullName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+      </div>
 
-                  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="margin-top: 0;">Booking Details</h3>
-                    <p><strong>📍 Station:</strong> ${stationName}</p>
-                    <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
-                    <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
-                  </div>
-                </div>
-              `,
-            });
+      <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #1565c0;">Luggage Details</h3>
+        <p><strong>🎒 Small Bags:</strong> ${smallBagCount}</p>
+        <p><strong>🧳 Medium/Large Bags:</strong> ${largeBagCount}</p>
+        <p style="font-size: 18px; font-weight: bold; color: #1a73e8;"><strong>📦 Total Bags:</strong> ${luggageCount}</p>
+        ${specialInstructions ? `<p><strong>📝 Special Instructions:</strong> ${specialInstructions}</p>` : ''}
+      </div>
+
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin-top: 0;">Booking Details</h3>
+        <p><strong>📍 Station:</strong> ${stationName}</p>
+        <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
+        <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+      </div>
+
+      <div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50; text-align: center;">
+        <p style="margin: 0; color: #2e7d32; font-size: 13px;">
+          💡 <strong>Pro Tip:</strong> Use the Partner App to scan the customer's QR code for instant confirmation!
+        </p>
+      </div>
+    </div>
+  `,
+});
             console.log(`✅ Partner email sent to: ${partner.email}`);
           } catch (emailErr) {
             console.error(`❌ Partner email failed for ${partner.email}:`, emailErr.message);
