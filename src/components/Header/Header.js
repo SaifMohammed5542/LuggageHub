@@ -121,8 +121,9 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
           <div className={styles.logo}>
             <Link href="/" onClick={closeMenu}>
               <Image
-                src="/images/NewLogo.png"
+                src="/images/latestLogo.png"
                 alt="Luggage Terminal"
+                className="LOGO1"
                 width={500}
                 height={300}
                 priority

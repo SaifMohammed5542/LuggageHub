@@ -1,25 +1,31 @@
 /* app/partner/application/dashboard/Dashboard.module.css */
+/* OCEAN BLUE & GOLDEN AMBER THEME */
 
 .container {
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .welcomeSection {
   margin-bottom: 24px;
   text-align: center;
+  padding: 20px 0;
 }
 
 .welcomeTitle {
   font-size: 28px;
   font-weight: 700;
-  color: #1a73e8;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 8px 0;
 }
 
 .welcomeText {
   font-size: 16px;
-  color: #666;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -37,33 +43,39 @@
   justify-content: center;
   gap: 12px;
   padding: 24px;
-  background: #fff;
-  border: 2px solid #e0e0e0;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .actionCard:hover {
-  border-color: #1a73e8;
-  background: #e3f2fd;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+  border-color: var(--primary);
+  background: var(--info-bg);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .actionCard:active {
-  transform: translateY(0);
+  transform: translateY(-2px);
 }
 
 .actionIcon {
   font-size: 40px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .actionLabel {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
+}
+
+.actionCard:hover .actionLabel {
+  color: var(--primary);
 }
 
 .loadingOverlay {
@@ -72,20 +84,27 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
+  backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  color: #fff;
+  color: var(--text-on-primary);
+}
+
+.loadingOverlay p {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-on-primary);
 }
 
 .loadingSpinner {
   width: 50px;
   height: 50px;
   border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #fff;
+  border-top: 4px solid var(--text-on-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -98,6 +117,10 @@
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
+  .container {
+    padding: 0 12px;
+  }
+
   .welcomeTitle {
     font-size: 24px;
   }
@@ -121,4 +144,44 @@
   .actionLabel {
     font-size: 14px;
   }
+}
+
+/* Tablet responsiveness */
+@media (min-width: 601px) and (max-width: 900px) {
+  .container {
+    padding: 0 24px;
+  }
+
+  .quickActions {
+    gap: 20px;
+  }
+
+  .actionCard {
+    padding: 28px;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+  .actionCard {
+    min-height: 120px;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :global(*),
+  :global(*::before),
+  :global(*::after) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states for keyboard navigation */
+.actionCard:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 12px;
 }

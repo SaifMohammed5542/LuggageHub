@@ -1,50 +1,326 @@
 /* theme.css
-   Dark theme ONLY — light theme permanently removed
+   Ocean Blue & Golden Amber
+   Professional, trustworthy theme for luggage storage platform
+   Primary: #0284C7 (Ocean Blue)
+   Secondary: #F59E0B (Golden Amber)
 */
 
-/* ----- DARK THEME (DEFAULT & ONLY) ----- */
 :root {
-  --bg: #0a0a0a;
-  --bg-grad-start: #0a0a0a;
-  --bg-grad-end: #001e44be;
-
+  /* ===== BACKGROUNDS ===== */
+  --bg: #F8FAFB;
+  --bg-grad-start: #F8FAFB;
+  --bg-grad-end: #EFF6FF;
+  
   --header-logo: url('/NewLogo.png');
 
-  --text: #ffffff;
-  --text-muted: rgba(255,255,255,0.8);
+  /* ===== TEXT COLORS ===== */
+  --text: #1A2B3C;
+  --text-muted: #5A6C7D;
+  --text-on-primary: #FFFFFF;
+  
+  /* ===== BRAND COLORS ===== */
+  --primary: #0284C7;        /* Ocean Blue */
+  --primary-rgb: 2, 132, 199;
+  --primary-light: #38BDF8;
+  --primary-dark: #0369A1;
+  
+  --secondary: #F59E0B;      /* Golden Amber */
+  --secondary-rgb: 245, 158, 11;
+  --secondary-light: #FBBF24;
+  --secondary-dark: #D97706;
 
-  --primary: #667eea;
-  --primary-rgb: 102,126,234;
-  --secondary: #764ba2;
-  --secondary-rgb: 118,75,162;
+  --accent: #0284C7;
+  --accent-rgb: 2, 132, 199;
 
-  --glass-bg: rgba(var(--primary-rgb), 0.10);
-  --glass-border: rgba(var(--primary-rgb), 0.30);
-  --panel-bg: rgba(255,255,255,0.03);
-  --panel-border: rgba(255,255,255,0.10);
-  --soft-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.40);
+  /* ===== SURFACE COLORS ===== */
+  --glass-bg: rgba(2, 132, 199, 0.04);
+  --glass-border: rgba(2, 132, 199, 0.12);
+  
+  --panel-bg: #FFFFFF;
+  --panel-border: #E2E8F0;
+  --panel-shadow: 0 4px 20px rgba(26, 43, 60, 0.08);
+  
+  --surface-elevated: #FFFFFF;
+  --surface-base: #F8FAFB;
+  --surface-hover: #F1F5F9;
 
-  --cta-grad: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  --cta-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.40);
-  --cta-hover-shadow: 0 15px 40px rgba(var(--primary-rgb), 0.60);
-  --cta-fg: #ffffff;
+  /* ===== SEMANTIC COLORS ===== */
+  --success: #10B981;
+  --success-bg: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-bg: #FEF3C7;
+  --error: #EF4444;
+  --error-bg: #FEE2E2;
+  --info: #0284C7;
+  --info-bg: #DBEAFE;
 
-  --pattern-line: rgba(var(--primary-rgb), 0.03);
-  --blob1: rgba(var(--primary-rgb), 0.25);
-  --blob2: rgba(var(--secondary-rgb), 0.25);
+  /* ===== BORDERS ===== */
+  --border-light: #F1F5F9;
+  --border-base: #E2E8F0;
+  --border-strong: #CBD5E1;
 
-  --outline: var(--primary);
-  --icon-on-primary: #ffffff;
+  /* ===== SHADOWS ===== */
+  --soft-shadow: 0 4px 12px rgba(26, 43, 60, 0.08);
+  --shadow-sm: 0 1px 2px rgba(26, 43, 60, 0.05);
+  --shadow-md: 0 4px 16px rgba(2, 132, 199, 0.12);
+  --shadow-lg: 0 10px 30px rgba(26, 43, 60, 0.1);
+  --shadow-xl: 0 20px 50px rgba(26, 43, 60, 0.15);
 
-  /* legacy bridge */
+  /* ===== CTA STYLES (Primary - Ocean Blue) ===== */
+  --cta-grad: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  --cta-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  --cta-hover-shadow: 0 8px 24px rgba(2, 132, 199, 0.4);
+  --cta-fg: #FFFFFF;
+
+  /* ===== SECONDARY CTA (Golden Amber) ===== */
+  --cta-secondary-grad: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  --cta-secondary-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+  --cta-secondary-hover-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+  --cta-secondary-fg: #FFFFFF;
+
+  /* ===== DECORATIVE ELEMENTS ===== */
+  --pattern-line: rgba(2, 132, 199, 0.06);
+  --blob1: rgba(2, 132, 199, 0.12);
+  --blob2: rgba(245, 158, 11, 0.12);
+
+  /* ===== ACCESSIBILITY ===== */
+  --outline: #0284C7;
+  --icon-on-primary: #FFFFFF;
+  --focus-ring: rgba(2, 132, 199, 0.5);
+
+  /* ===== LEGACY COMPATIBILITY ===== */
   --background: var(--bg);
   --foreground: var(--text);
 
-  /* browser hint */
-  color-scheme: dark;
+  /* ===== BRAND PALETTE ===== */
+  --palette-blue: #0284C7;
+  --palette-blue-light: #38BDF8;
+  --palette-blue-dark: #0369A1;
+  --palette-amber: #F59E0B;
+  --palette-amber-light: #FBBF24;
+  --palette-amber-dark: #D97706;
 
+  /* ===== BROWSER HINT ===== */
+  color-scheme: light;
 
-     /* brand palette */
-  --palette-blue: #1561aa;
+  /* ===== INTERACTIVE STATES ===== */
+  --btn-primary-hover: var(--primary-light);
+  --btn-primary-active: var(--primary-dark);
+  --btn-secondary-hover: var(--secondary-light);
+  --btn-secondary-active: var(--secondary-dark);
+  
+  --input-border: #E2E8F0;
+  --input-border-focus: var(--primary);
+  --input-bg: #FFFFFF;
+  --input-bg-disabled: #F8FAFC;
+  
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  --card-hover-shadow: 0 10px 30px rgba(2, 132, 199, 0.12);
 
+  /* ===== GRADIENT PRESETS ===== */
+  --gradient-primary: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+  --gradient-secondary: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  --gradient-glow: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+  --gradient-bg: linear-gradient(135deg, #F8FAFB 0%, #EFF6FF 100%);
+  --gradient-hero: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+
+  /* ===== BADGE/TAG STYLES ===== */
+  --badge-bg: rgba(2, 132, 199, 0.08);
+  --badge-border: rgba(2, 132, 199, 0.25);
+  --badge-text: #0369A1;
+
+  --badge-secondary-bg: rgba(245, 158, 11, 0.08);
+  --badge-secondary-border: rgba(245, 158, 11, 0.25);
+  --badge-secondary-text: #D97706;
+
+  /* ===== FLOATING CARD STYLES ===== */
+  --floating-card-bg: #FFFFFF;
+  --floating-card-shadow: 0 10px 30px rgba(2, 132, 199, 0.12);
+  --floating-card-icon-bg: var(--gradient-primary);
+
+  /* ===== NAVIGATION ===== */
+  --nav-bg: #FFFFFF;
+  --nav-border: #E2E8F0;
+  --nav-shadow: 0 2px 8px rgba(26, 43, 60, 0.06);
+  --nav-link-hover: rgba(2, 132, 199, 0.08);
+  --nav-link-active: rgba(2, 132, 199, 0.12);
+
+  /* ===== HEADER/HERO ===== */
+  --hero-bg: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+  --hero-shadow: 0 20px 40px rgba(2, 132, 199, 0.2);
+  --hero-text: #FFFFFF;
+
+  /* ===== STATS/HIGHLIGHTS ===== */
+  --stats-bg: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+  --stats-text: #FFFFFF;
+  --stats-text-muted: rgba(255, 255, 255, 0.9);
+
+  /* ===== FEATURE CARDS ===== */
+  --feature-icon-bg: linear-gradient(135deg, #0284C7, #38BDF8);
+  --feature-icon-secondary-bg: linear-gradient(135deg, #F59E0B, #FBBF24);
+  --feature-card-hover-lift: translateY(-8px);
+
+  /* ===== BUTTONS ===== */
+  --btn-primary-bg: var(--primary);
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover-bg: var(--primary-light);
+  --btn-primary-active-bg: var(--primary-dark);
+  
+  --btn-secondary-bg: var(--secondary);
+  --btn-secondary-text: #FFFFFF;
+  --btn-secondary-hover-bg: var(--secondary-light);
+  --btn-secondary-active-bg: var(--secondary-dark);
+
+  --btn-outline-border: var(--primary);
+  --btn-outline-text: var(--primary);
+  --btn-outline-hover-bg: var(--primary);
+  --btn-outline-hover-text: #FFFFFF;
+
+  /* ===== FORMS ===== */
+  --form-label-text: var(--text);
+  --form-input-bg: #FFFFFF;
+  --form-input-border: #E2E8F0;
+  --form-input-focus-border: var(--primary);
+  --form-input-text: var(--text);
+  --form-input-placeholder: #94A3B8;
+
+  /* ===== TABLES ===== */
+  --table-header-bg: #F8FAFC;
+  --table-header-text: var(--text);
+  --table-row-hover: rgba(2, 132, 199, 0.04);
+  --table-border: #E2E8F0;
+
+  /* ===== MODALS/OVERLAYS ===== */
+  --modal-bg: #FFFFFF;
+  --modal-overlay: rgba(15, 23, 42, 0.5);
+  --modal-shadow: 0 25px 50px rgba(26, 43, 60, 0.25);
+
+  /* ===== TOOLTIPS ===== */
+  --tooltip-bg: #1A2B3C;
+  --tooltip-text: #FFFFFF;
+  --tooltip-shadow: 0 4px 12px rgba(26, 43, 60, 0.2);
+
+  /* ===== LOADING/SKELETON ===== */
+  --skeleton-base: #E2E8F0;
+  --skeleton-highlight: #F1F5F9;
+  --loading-spinner: var(--primary);
+
+  /* ===== DIVIDERS ===== */
+  --divider-light: #F1F5F9;
+  --divider-base: #E2E8F0;
+  --divider-dark: #CBD5E1;
+
+  /* ===== SCROLLBAR ===== */
+  --scrollbar-track: #F1F5F9;
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-thumb-hover: #94A3B8;
+
+  /* ===== ADDITIONAL COLORS (NEW) ===== */
+  
+  /* Trust Indicators */
+  --trust-badge-bg: rgba(2, 132, 199, 0.1);
+  --trust-badge-border: rgba(2, 132, 199, 0.3);
+  --trust-badge-text: #0369A1;
+  
+  /* Value Indicators (Golden Amber) */
+  --value-badge-bg: rgba(245, 158, 11, 0.1);
+  --value-badge-border: rgba(245, 158, 11, 0.3);
+  --value-badge-text: #D97706;
+  
+  /* Hover States for Cards */
+  --card-hover-border: rgba(2, 132, 199, 0.3);
+  --card-hover-glow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+  
+  /* Premium Elements */
+  --premium-gradient: linear-gradient(135deg, #0284C7 0%, #F59E0B 50%, #0284C7 100%);
+  --premium-text-gradient: linear-gradient(135deg, #0284C7 0%, #F59E0B 100%);
+  
+  /* Pricing/Value Elements */
+  --price-highlight-bg: rgba(245, 158, 11, 0.08);
+  --price-highlight-text: #D97706;
+  --price-highlight-border: rgba(245, 158, 11, 0.2);
+  
+  /* Status Colors */
+  --status-pending: #F59E0B;
+  --status-confirmed: #10B981;
+  --status-cancelled: #EF4444;
+  --status-completed: #0284C7;
+
+  /* ===== PRIMARY/SECONDARY GRADIENT (NEW) ===== */
+  --primary-grad: #0369A1;
+  --secondary-grad: #D97706;
+}
+
+/* ===== SMOOTH TRANSITIONS ===== */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* ===== BASE BODY STYLES ===== */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 2px solid var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ===== UTILITY CLASSES (NEW) ===== */
+
+/* Text Gradients */
+.text-gradient-primary {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-secondary {
+  background: var(--gradient-secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-premium {
+  background: var(--premium-text-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow Effects */
+.glow-primary {
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.3);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+/* Focus Visible for Accessibility */
+*:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }

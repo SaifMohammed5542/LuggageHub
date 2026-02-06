@@ -1,25 +1,31 @@
 /* app/partner/application/history/History.module.css */
+/* OCEAN BLUE & GOLDEN AMBER THEME */
 
 .container {
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .header {
   text-align: center;
   margin-bottom: 24px;
+  padding: 20px 0;
 }
 
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a73e8;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -29,36 +35,55 @@
   margin-bottom: 24px;
   overflow-x: auto;
   padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.filters::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filters::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filters::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
 }
 
 .filterButton {
   padding: 10px 20px;
-  background: #fff;
-  border: 2px solid #e0e0e0;
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .filterButton:hover {
-  border-color: #1a73e8;
-  color: #1a73e8;
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--info-bg);
 }
 
 .filterActive {
-  background: #1a73e8;
-  border-color: #1a73e8;
-  color: #fff;
+  background: var(--cta-grad);
+  border-color: var(--primary);
+  color: var(--cta-fg);
+  box-shadow: var(--cta-shadow);
 }
 
 .filterActive:hover {
-  background: #1565c0;
-  border-color: #1565c0;
+  background: var(--gradient-primary);
+  border-color: var(--primary);
+  box-shadow: var(--cta-hover-shadow);
 }
 
 .loadingContainer {
@@ -68,13 +93,20 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
+  min-height: 400px;
+}
+
+.loadingContainer p {
+  color: var(--text-muted);
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #1a73e8;
+  border: 4px solid var(--border-light);
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
@@ -88,30 +120,37 @@
 .errorContainer {
   padding: 40px 20px;
   text-align: center;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .errorText {
-  color: #d32f2f;
+  color: var(--error);
   font-size: 16px;
   margin-bottom: 16px;
+  font-weight: 600;
 }
 
 .retryButton {
   padding: 12px 24px;
-  background: #1a73e8;
-  color: #fff;
+  background: var(--cta-grad);
+  color: var(--cta-fg);
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: var(--cta-shadow);
 }
 
 .retryButton:hover {
-  background: #1565c0;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+  background: var(--gradient-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--cta-hover-shadow);
 }
 
 .retryButton:active {
@@ -121,17 +160,23 @@
 .emptyState {
   text-align: center;
   padding: 60px 20px;
+  background: var(--panel-bg);
+  border-radius: 16px;
+  border: 2px dashed var(--border-light);
+  margin: 20px 0;
 }
 
 .emptyIcon {
   font-size: 64px;
   margin-bottom: 16px;
+  filter: grayscale(0.3);
+  opacity: 0.8;
 }
 
 .emptyText {
   font-size: 18px;
   font-weight: 600;
-  color: #666;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -149,21 +194,23 @@
 
 .refreshButton {
   padding: 12px 32px;
-  background: #fff;
-  border: 2px solid #1a73e8;
+  background: var(--panel-bg);
+  border: 2px solid var(--secondary);
   border-radius: 8px;
-  color: #1a73e8;
+  color: var(--secondary);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .refreshButton:hover {
-  background: #1a73e8;
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+  background: var(--cta-secondary-grad);
+  color: var(--cta-secondary-fg);
+  border-color: var(--secondary);
+  transform: translateY(-2px);
+  box-shadow: var(--cta-secondary-shadow);
 }
 
 .refreshButton:active {
@@ -172,6 +219,10 @@
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
+  .container {
+    padding: 0 12px;
+  }
+
   .title {
     font-size: 24px;
   }
@@ -195,5 +246,75 @@
 
   .emptyText {
     font-size: 16px;
+  }
+
+  .loadingContainer {
+    padding: 40px 20px;
+    min-height: 300px;
+  }
+
+  .errorContainer {
+    padding: 30px 15px;
+    min-height: 250px;
+  }
+}
+
+/* Tablet responsiveness */
+@media (min-width: 601px) and (max-width: 900px) {
+  .container {
+    padding: 0 24px;
+  }
+
+  .filters {
+    gap: 10px;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :global(*),
+  :global(*::before),
+  :global(*::after) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states for keyboard navigation */
+.filterButton:focus-visible,
+.retryButton:focus-visible,
+.refreshButton:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Loading state improvements */
+.loadingContainer {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Empty state animation */
+.emptyState {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

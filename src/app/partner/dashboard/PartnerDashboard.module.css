@@ -1,12 +1,11 @@
 /* ==========================================
-   PARTNER DASHBOARD — DARK LUXE STYLE (V1)
-   Matches Admin Dashboard Visual Identity
+   PARTNER DASHBOARD — OCEAN BLUE & GOLDEN AMBER
    ========================================== */
 
 /* ===== BASE LAYOUT ===== */
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0b0f22 0%, #12192f 100%);
+  background: var(--gradient-bg);
   padding: clamp(20px, 4vw, 32px);
   padding-bottom: clamp(80px, 10vh, 120px);
   animation: fadeIn 0.6s ease-out;
@@ -22,7 +21,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  color: #a3b1ff;
+  color: var(--primary-light);
   font-size: 18px;
   animation: pulse 1.8s infinite;
 }
@@ -46,7 +45,7 @@
   font-size: clamp(26px, 6vw, 38px);
   font-weight: 900;
   letter-spacing: -0.02em;
-  background: linear-gradient(90deg,#a5b4fc,#c084fc);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -54,32 +53,32 @@
 .subtitle {
   font-size: 15px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .subtitle strong {
-  color: #a5b4fc;
+  color: var(--primary-light);
 }
 
 /* ===== USER ACTIONS ===== */
 .logoutButton {
   padding: 10px 22px;
   border-radius: 10px;
-  background: #1e293b;
-  color: #ff6b6b;
-  border: 1px solid #ff6b6b33;
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid var(--error);
   font-weight: 600;
   transition: .2s;
 }
 
 .logoutButton:hover {
-  background: #ff4d4d;
-  color: white;
-  box-shadow: 0 8px 20px rgba(255,70,70,0.3);
+  background: var(--error);
+  color: var(--text-on-primary);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
   transform: translateY(-2px);
 }
 
-/* ===== TOP STATS (3 CARDS LIKE ADMIN) ===== */
+/* ===== TOP STATS (3 CARDS) ===== */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
@@ -88,11 +87,11 @@
 }
 
 .statCard {
-  background: #121829;
+  background: var(--panel-bg);
   border-radius: 18px;
   padding: 1.4rem 1.6rem;
-  border: 1px solid #2e3a5c;
-  box-shadow: 0 10px 25px rgba(103,120,255,0.15);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -100,20 +99,21 @@
 }
 
 .statCard:hover {
-  box-shadow: 0 25px 45px rgba(103,120,255,0.25);
+  box-shadow: var(--floating-card-shadow);
   transform: translateY(-4px);
+  border-color: var(--primary);
 }
 
 .statLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #8fa3d9;
+  color: var(--text-muted);
 }
 
 .statValue {
   font-size: clamp(22px,5vw,30px);
   font-weight: 900;
-  background: linear-gradient(90deg,#8da2fb,#a779ff);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -133,10 +133,10 @@
 
 /* ===== SHARED CARD STYLE ===== */
 .card {
-  background: #111727;
-  border: 1px solid #2a3550;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(103,120,255,0.12);
+  box-shadow: var(--shadow-lg);
   animation: fadeUp .45s ease both;
   overflow: hidden;
 }
@@ -148,22 +148,28 @@
 
 .cardHeader {
   padding: 20px 24px;
-  border-bottom: 1px solid #26304b;
-  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .cardTitle {
-  color: #dbe4ff;
+  color: var(--text);
   font-size: 20px;
   font-weight: 700;
 }
 
 .cardMeta {
   font-size: 13px;
-  background: rgba(165,180,252,0.12);
-  color: #a5b4fc;
+  background: var(--badge-bg);
+  color: var(--badge-text);
   padding: 6px 10px;
   border-radius: 8px;
+  font-weight: 600;
 }
 
 .cardBody {
@@ -173,8 +179,8 @@
 /* ===== STATION INFO ===== */
 .stationInfo div {
   padding: 6px 0;
-  border-bottom: 1px solid #2a3550;
-  color: #ced7f6;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
   font-size: 15px;
 }
 
@@ -183,7 +189,7 @@
 }
 
 .stationInfo strong {
-  color: #7d8fe8;
+  color: var(--primary);
   font-weight: 700;
   min-width: 95px;
   display: inline-block;
@@ -195,17 +201,19 @@
   flex-direction: column;
   gap: 16px;
 }
+
 .monthCard {
-  background: #141c32;
-  border: 1px solid #2a3550;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(103,120,255,0.12);
+  box-shadow: var(--shadow-md);
   transition: .25s;
 }
 
 .monthCard:hover {
   transform: translateY(-3px);
-  box-shadow: 0 20px 40px rgba(103,120,255,0.22);
+  box-shadow: var(--floating-card-shadow);
+  border-color: var(--primary);
 }
 
 .monthCardHeader {
@@ -219,46 +227,66 @@
   cursor: pointer;
   border: none;
   display: block;
+  text-align: left;
 }
 
 .monthCardBtn:hover {
-  background: rgba(165,180,252,0.05);
+  background: var(--glass-bg);
+}
+
+.monthCardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.monthCol {
+  flex: 1;
+  min-width: 0;
 }
 
 .monthCardTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #cdd6ff;
+  color: var(--text);
 }
 
 .monthCardSub {
   font-size: 13px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-muted);
+}
+
+.monthMetaGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .monthCaret {
   width: 24px;
   height: 24px;
-  background: #1f2a44;
+  background: var(--surface-hover);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a5b4fc;
+  color: var(--primary);
   transition: transform .3s;
+  font-size: 14px;
 }
 
 .monthCardBtn[aria-expanded="true"] .monthCaret {
   transform: rotate(90deg);
 }
 
-/* Continue into PART 2… */
 /* ===== MONTH PANEL ===== */
 .monthPanel {
   padding: 20px;
-  background: #0e1424;
+  background: var(--surface-base);
   animation: fadeDown .35s ease;
+  border-top: 1px solid var(--border-light);
 }
 
 @keyframes fadeDown {
@@ -272,37 +300,45 @@
 
 .backToMonthsBtn {
   padding: 10px 16px;
-  background: #1a2338;
-  color: #a5b4fc;
+  background: var(--panel-bg);
+  color: var(--primary);
   border-radius: 10px;
-  border: 1px solid #2e3a5c;
+  border: 1px solid var(--border-base);
   font-size: 14px;
   transition: .25s;
+  font-weight: 600;
 }
 
 .backToMonthsBtn:hover {
-  background: #3b48ff;
-  color: white;
+  background: var(--primary);
+  color: var(--text-on-primary);
   transform: translateX(-3px);
+}
+
+/* ===== WEEKS LIST ===== */
+.weeksList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* ===== WEEKS ACCORDION ===== */
 .weekSectionAccordion {
-  border: 1px solid #2a3550;
-  background: #111827;
+  border: 1px solid var(--border-base);
+  background: var(--panel-bg);
   border-radius: 14px;
   overflow: hidden;
   transition: .25s;
 }
 
 .weekSectionAccordion:hover {
-  border-color: rgba(165,180,252,0.4);
+  border-color: var(--primary);
 }
 
 .weekHeaderRow {
   display: flex;
   align-items: stretch;
-  background: rgba(255,255,255,0.03);
+  background: var(--glass-bg);
 }
 
 .weekAccordionHeader {
@@ -312,15 +348,16 @@
   cursor: pointer;
   text-align: left;
   padding: 14px 18px;
-  color: #c7d2fe;
+  color: var(--text);
   font-weight: 700;
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  transition: .2s;
 }
 
 .weekAccordionHeader:hover {
-  background: rgba(165,180,252,0.06);
+  background: var(--surface-hover);
 }
 
 .weekMeta {
@@ -328,20 +365,22 @@
   gap: 10px;
   flex-wrap: wrap;
   font-size: 13px;
+  align-items: center;
 }
 
 .weekCount {
-  color: #7c8ac9;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .weekRevenue {
   font-size: 13px;
-  background: rgba(165,180,252,0.12);
+  background: var(--value-badge-bg);
   padding: 4px 8px;
   border-radius: 8px;
   font-weight: 700;
-  color: #a5b4fc;
+  color: var(--value-badge-text);
+  border: 1px solid var(--value-badge-border);
 }
 
 .weekActions {
@@ -363,7 +402,7 @@
 
 .bookingRow,
 .handoverRow {
-  border-bottom: 1px solid #2a3550;
+  border-bottom: 1px solid var(--border-light);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -373,23 +412,34 @@
 
 .bookingRow:hover,
 .handoverRow:hover {
-  background: rgba(255,255,255,0.04);
+  background: var(--surface-hover);
+}
+
+.bookingRow:last-child,
+.handoverRow:last-child {
+  border-bottom: none;
 }
 
 .bookingHeaderRow,
 .handoverHeader {
   display: flex;
   justify-content: space-between;
-  color: #dbe4ff;
+  align-items: center;
+  color: var(--text);
   font-weight: 700;
 }
 
+.bookingName {
+  font-size: 16px;
+}
+
 .amount {
-  background: rgba(45,255,196,0.18);
+  background: var(--success-bg);
   padding: 4px 10px;
   border-radius: 8px;
-  color: #4df6ca;
+  color: var(--success);
   font-size: 14px;
+  font-weight: 700;
 }
 
 .bookingMeta,
@@ -398,31 +448,40 @@
   grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
   font-size: 14px;
   gap: 6px;
-  color: #9ba8cb;
+  color: var(--text-muted);
 }
 
 .bookingMeta strong,
 .handoverMeta strong {
-  color: #cbd5ff;
+  color: var(--text);
+}
+
+.bookingActions,
+.handoverActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 /* ===== STATUS BADGE ===== */
 .statusBadge {
-  background: #192a39;
+  background: var(--info-bg);
   padding: 5px 10px;
   border-radius: 6px;
-  color: #38bdf8;
+  color: var(--info);
   font-size: 12px;
   text-transform: capitalize;
+  font-weight: 600;
 }
 
 .code {
   font-family: monospace;
   font-size: 13px;
-  background: #1e263b;
+  background: var(--surface-base);
   padding: 4px 8px;
   border-radius: 6px;
-  color: #a5b4fc;
+  color: var(--primary);
+  border: 1px solid var(--border-base);
 }
 
 /* ===== BUTTONS ===== */
@@ -433,87 +492,112 @@
   border-radius: 8px;
   font-weight: 600;
   transition: .25s;
+  cursor: pointer;
 }
 
 .smallButton {
-  background: #3b48ff;
-  color: #fff;
+  background: var(--cta-grad);
+  color: var(--cta-fg);
   border: none;
+  box-shadow: var(--cta-shadow);
 }
 
 .smallButton:hover {
-  box-shadow: 0 8px 20px rgba(103,120,255,0.32);
+  box-shadow: var(--cta-hover-shadow);
   transform: translateY(-2px);
 }
 
 .smallGhost {
   background: transparent;
-  color: #a5b4fc;
-  border: 1px solid #2e3a5c;
+  color: var(--primary);
+  border: 1px solid var(--border-base);
 }
 
 .smallGhost:hover {
-  background: rgba(165,180,252,0.08);
-  color: white;
+  background: var(--glass-bg);
+  color: var(--primary-light);
+  border-color: var(--primary);
 }
 
 /* ===== EMPTY ===== */
 .empty {
-  color: #7d89b3;
+  color: var(--text-muted);
   text-align: center;
   padding: 30px;
+  font-size: 15px;
 }
 
 /* ===== MODAL ===== */
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: var(--modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
-  background: #0f1525;
-  border: 1px solid #2a3550;
+  background: var(--modal-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 18px;
   width: 95%;
   max-width: 550px;
   max-height: 90vh;
   overflow: auto;
   animation: fadeUp .3s ease;
+  box-shadow: var(--modal-shadow);
 }
 
 .modalHeader {
   padding: 20px;
   display: flex;
   justify-content: space-between;
-  color: #cdd6ff;
-  background: rgba(255,255,255,0.03);
+  align-items: center;
+  color: var(--text);
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--border-base);
+}
+
+.modalHeader h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
 }
 
 .modalClose {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid #2e3a5c;
+  border: 1px solid var(--border-base);
   background: transparent;
-  color: #cdd6ff;
+  color: var(--text);
   font-size: 18px;
   transition: .25s;
+  cursor: pointer;
 }
 
 .modalClose:hover {
-  background: #3b48ff;
+  background: var(--primary);
+  color: var(--text-on-primary);
   transform: rotate(90deg);
 }
 
 .modalBody {
   padding: 20px;
-  color: #96a1c8;
+  color: var(--text-muted);
   font-size: 15px;
+}
+
+.modalBody p {
+  margin: 8px 0;
+  color: var(--text);
+}
+
+.modalBody strong {
+  color: var(--primary);
 }
 
 .modalFooter {
@@ -521,8 +605,8 @@
   gap: 10px;
   justify-content: flex-end;
   padding: 16px 20px;
-  background: rgba(255,255,255,0.03);
-  border-top: 1px solid #2e3a5c;
+  background: var(--glass-bg);
+  border-top: 1px solid var(--border-base);
 }
 
 /* ===== MOBILE OPTIMIZED ===== */
@@ -536,8 +620,20 @@
     grid-template-columns: 1fr;
   }
 
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+  }
+
   .weekAccordionHeader {
     flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .weekMeta {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 6px;
   }
 
@@ -551,16 +647,35 @@
     justify-content: flex-end;
   }
 
+  .monthCardContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .modalFooter {
     flex-direction: column;
+  }
+
+  .modalFooter button {
+    width: 100%;
+  }
+
+  .bookingActions,
+  .handoverActions {
+    flex-direction: column;
+  }
+
+  .bookingActions button,
+  .handoverActions button {
+    width: 100%;
   }
 }
 
 /* ===== REDUCED MOTION SAFE ===== */
 @media (prefers-reduced-motion: reduce) {
-  .container :global(*),
-  .container :global(*::before),
-  .container :global(*::after) {
+  .container *,
+  .container *::before,
+  .container *::after {
     animation: none !important;
     transition: none !important;
   }

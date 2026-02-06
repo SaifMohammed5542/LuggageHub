@@ -21,6 +21,7 @@ button { cursor: pointer; }
   --safe-area-right: env(safe-area-inset-right, 0);
 }
 
+
 /* ===== FONT VARIABLES ===== */
 :root {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -28,12 +29,16 @@ button { cursor: pointer; }
 }
 
 /* ===== GLOBAL DARK MODE LOCK ===== */
+/* ===== GLOBAL LIGHT MODE LOCK ===== */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 /* ===== THEME TOKEN MAPPING =====
    Maps semantic tokens to theme.css variables (dark only)
+*/
+/* ===== THEME TOKEN MAPPING =====
+   Maps semantic tokens to theme.css variables (light theme)
 */
 :root {
   --color-bg: var(--bg);
@@ -48,6 +53,11 @@ button { cursor: pointer; }
   --color-border: var(--panel-border);
 
   --shadow-soft: var(--soft-shadow);
+
+  /* New light theme additions */
+  --color-surface: var(--surface-base);
+  --color-border-strong: var(--border-strong);
+  --color-text-on-primary: var(--text-on-primary);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -244,9 +254,10 @@ body {
 }
 
 /* ===== SELECTION & FOCUS ===== */
+/* ===== SELECTION & FOCUS ===== */
 ::selection {
-  background: rgb(var(--color-primary-rgb));
-  color: #fff;
+  background: rgba(var(--color-primary-rgb), 0.2);
+  color: var(--text);
 }
 
 :where(a, button, input, textarea, select):focus-visible {
@@ -265,13 +276,17 @@ body {
 :focus { outline-offset: 3px; }
 
 /* ===== SCROLLBARS ===== */
+/* ===== SCROLLBARS ===== */
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.18);
+  background: rgba(15, 23, 42, 0.15);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
 }
 
 /* ===== MOTION REDUCTION (Accessibility) ===== */
@@ -290,4 +305,16 @@ body {
 @media print {
   body { background: #fff; color: #000; }
   nav, .hamburger, .scrollTop { display: none !important; }
+}
+
+
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease;
+}
+
+/* Disable transitions on page load */
+.no-transition * {
+  transition: none !important;
 }
