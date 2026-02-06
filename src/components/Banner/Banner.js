@@ -275,7 +275,7 @@ export default function Banner() {
             </div>
             <div className={styles.imgContent}>
                <Image
-                      src="/images/GLowedwhite.png"
+                      src="/images/Glowedwhite.png"
                       alt="Secure Luggage Storage"
                       width={280}
                       height={200}
