@@ -30,7 +30,7 @@ const Amount = () => {
         </div>
 
         <div className={styles.note}>
-          🔒 Secure · 🕒 Flexible · 💳 Transparent pricing
+          🔒 Secure · 🕒 Flexible · 💳 Flat pricing
         </div>
       </div>
 

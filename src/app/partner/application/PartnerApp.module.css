@@ -1,10 +1,11 @@
 /* app/partner/application/PartnerApp.module.css */
+/* OCEAN BLUE & GOLDEN AMBER THEME */
 
 .appContainer {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--surface-base);
 }
 
 .loadingScreen {
@@ -13,14 +14,21 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--gradient-bg);
+}
+
+.loadingScreen p {
+  color: var(--text-muted);
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 20px;
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #1a73e8;
+  border: 4px solid var(--border-light);
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
@@ -33,10 +41,10 @@
 
 /* Header */
 .header {
-  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
-  color: #fff;
+  background: var(--gradient-primary);
+  color: var(--text-on-primary);
   padding: 16px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -57,6 +65,7 @@
 .logo img {
   width: 80px;
   height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .headerRight {
@@ -68,6 +77,7 @@
 .partnerName {
   font-size: 14px;
   font-weight: 500;
+  color: var(--text-on-primary);
 }
 
 .logoutBtn {
@@ -75,15 +85,22 @@
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 6px;
-  color: #fff;
+  color: var(--text-on-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
 }
 
 .logoutBtn:hover {
   background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logoutBtn:active {
+  transform: translateY(0);
 }
 
 /* Main Content */
@@ -102,12 +119,12 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fff;
-  border-top: 1px solid #e0e0e0;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border-light);
   display: flex;
   justify-content: space-around;
   padding: 8px 0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   z-index: 100;
 }
 
@@ -122,21 +139,24 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #666;
+  color: var(--text-muted);
   min-width: 80px;
+  border-radius: 8px;
 }
 
 .navItem:hover {
-  background: #f5f5f5;
+  background: var(--surface-hover);
+  color: var(--primary);
 }
 
 .navItemActive {
-  color: #1a73e8;
-  background: #e3f2fd;
+  color: var(--primary);
+  background: var(--info-bg);
 }
 
 .navIcon {
   font-size: 24px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
 .navLabel {
@@ -152,6 +172,10 @@
 
   .logo {
     font-size: 18px;
+  }
+
+  .logo img {
+    width: 70px;
   }
 
   .partnerName {
@@ -177,16 +201,24 @@
   }
 }
 
+/* Tablet adjustments */
+@media (min-width: 601px) and (max-width: 900px) {
+  .mainContent {
+    padding: 24px;
+    padding-bottom: 90px;
+  }
+}
+
 /* Install Banner */
 .installBanner {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
-  color: white;
+  background: var(--gradient-secondary);
+  color: var(--text-on-primary);
   padding: 12px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
   animation: slideDown 0.3s ease-out;
 }
@@ -194,9 +226,11 @@
 @keyframes slideDown {
   from {
     transform: translateY(-100%);
+    opacity: 0;
   }
   to {
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -218,30 +252,37 @@
 
 .installButton {
   padding: 6px 16px;
-  background: white;
-  color: #1a73e8;
+  background: var(--panel-bg);
+  color: var(--secondary);
   border: none;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .installButton:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--text-on-primary);
+}
+
+.installButton:active {
+  transform: translateY(0);
 }
 
 .dismissButton {
   padding: 4px 8px;
   background: transparent;
-  color: white;
+  color: var(--text-on-primary);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
+  line-height: 1;
 }
 
 .dismissButton:hover {
@@ -251,4 +292,52 @@
 /* Adjust main content when banner is shown */
 .appContainer:has(.installBanner) .header {
   margin-top: 48px;
+}
+
+/* Accessibility - Reduced motion */
+
+
+/* Focus states for keyboard navigation */
+.navItem:focus-visible,
+.logoutBtn:focus-visible,
+.installButton:focus-visible,
+.dismissButton:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Safe area insets for modern mobile devices (notches, etc.) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottomNav {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .mainContent {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .navItem {
+    border: 2px solid transparent;
+  }
+
+  .navItemActive {
+    border-color: var(--primary);
+  }
+}
+
+/* Loading screen animation */
+.loadingScreen {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

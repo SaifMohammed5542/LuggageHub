@@ -1,12 +1,12 @@
-/* BookedConfirmation.module.css */
+/* BookedConfirmation.module.css - Ocean Blue & Golden Amber Theme */
 
 /* ========================================
-   MOBILE-FIRST BASE STYLES (COMPACT)
+   MOBILE-FIRST BASE STYLES
    ======================================== */
 
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-grad-start, #0a0a0a) 0%, var(--bg-grad-end, #001e44be) 100%);
+  background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   padding: 0.75rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
@@ -22,24 +22,24 @@
    ======================================== */
 
 .confirmationCard {
-  background: var(--panel-bg, rgba(255,255,255,0.03));
-  border: 1px solid var(--panel-border, rgba(255,255,255,0.10));
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
   border-radius: 12px;
-  box-shadow: var(--soft-shadow, 0 10px 30px rgba(102,126,234, 0.40));
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   margin-bottom: 1rem;
   backdrop-filter: blur(10px);
 }
 
 /* ========================================
-   SUCCESS HEADER (COMPACT)
+   SUCCESS HEADER
    ======================================== */
 
 .successHeader {
-  background: var(--cta-grad, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  background: var(--gradient-primary);
   padding: 1.25rem 1rem;
   text-align: center;
-  color: var(--cta-fg, #ffffff);
+  color: var(--cta-fg);
 }
 
 .checkmarkCircle {
@@ -62,6 +62,7 @@
 
 .checkmark {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  color: var(--cta-fg);
 }
 
 .mainTitle {
@@ -79,19 +80,19 @@
 }
 
 /* ========================================
-   BOOKING REFERENCE (COMPACT)
+   BOOKING REFERENCE
    ======================================== */
 
 .referenceSection {
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border-bottom: 1px dashed var(--glass-border, rgba(102,126,234, 0.30));
+  background: var(--info-bg);
+  border-bottom: 1px dashed var(--primary-light);
   padding: 1rem;
   text-align: center;
 }
 
 .referenceLabel {
   font-size: 0.75rem;
-  color: var(--primary, #667eea);
+  color: var(--primary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -101,7 +102,7 @@
 .referenceNumber {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-family: 'Courier New', monospace;
   letter-spacing: 2px;
   margin-bottom: 0.75rem;
@@ -113,11 +114,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--panel-bg, rgba(255,255,255,0.03));
-  border: 1px solid var(--panel-border, rgba(255,255,255,0.10));
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .infoIcon {
@@ -126,17 +127,17 @@
 
 .instructionText {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 /* ========================================
-   SECTIONS (COMPACT)
+   SECTIONS
    ======================================== */
 
 .section {
   padding: 1rem;
-  border-bottom: 1px solid var(--panel-border, rgba(255,255,255,0.10));
+  border-bottom: 1px solid var(--border-base);
 }
 
 .section:last-of-type {
@@ -149,7 +150,7 @@
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text, #ffffff);
+  color: var(--text);
   margin: 0 0 0.75rem 0;
 }
 
@@ -158,7 +159,7 @@
 }
 
 /* ========================================
-   DETAILS GRID (COMPACT)
+   DETAILS GRID
    ======================================== */
 
 .detailsGrid {
@@ -172,34 +173,34 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.625rem;
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border: 1px solid var(--glass-border, rgba(102,126,234, 0.30));
+  background: var(--surface-base);
+  border: 1px solid var(--border-base);
   border-radius: 6px;
   gap: 0.75rem;
 }
 
 .detailLabel {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   font-weight: 500;
   flex-shrink: 0;
 }
 
 .detailValue {
   font-size: 0.8125rem;
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-weight: 600;
   text-align: right;
   word-break: break-word;
 }
 
 /* ========================================
-   LOCATION CARD (COMPACT)
+   LOCATION CARD
    ======================================== */
 
 .locationCard {
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border: 1px solid var(--glass-border, rgba(102,126,234, 0.30));
+  background: var(--surface-base);
+  border: 1px solid var(--border-base);
   padding: 1rem;
   border-radius: 8px;
 }
@@ -207,18 +208,18 @@
 .locationName {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--primary, #667eea);
+  color: var(--primary);
   margin-bottom: 0.25rem;
 }
 
 .locationAddress {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
 /* ========================================
-   SCHEDULE GRID (COMPACT)
+   SCHEDULE GRID
    ======================================== */
 
 .scheduleGrid {
@@ -228,8 +229,8 @@
 }
 
 .scheduleCard {
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border: 1px solid var(--glass-border, rgba(102,126,234, 0.30));
+  background: var(--surface-base);
+  border: 2px solid var(--border-base);
   padding: 0.875rem;
   border-radius: 8px;
   text-align: center;
@@ -237,9 +238,9 @@
 }
 
 .scheduleCard:hover {
-  border-color: var(--primary, #667eea);
+  border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
 .scheduleIcon {
@@ -249,7 +250,7 @@
 
 .scheduleLabel {
   font-size: 0.75rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -258,13 +259,13 @@
 
 .scheduleTime {
   font-size: 0.75rem;
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-weight: 600;
   line-height: 1.3;
 }
 
 /* ========================================
-   LUGGAGE GRID (COMPACT)
+   LUGGAGE GRID
    ======================================== */
 
 .luggageGrid {
@@ -275,8 +276,8 @@
 }
 
 .luggageCard {
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border: 1px solid var(--glass-border, rgba(102,126,234, 0.30));
+  background: var(--surface-base);
+  border: 2px solid var(--border-base);
   padding: 0.875rem;
   border-radius: 8px;
   text-align: center;
@@ -285,12 +286,12 @@
 
 .luggageCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
 .totalCard {
-  background: rgba(var(--primary-rgb, 102,126,234), 0.2);
-  border-color: var(--primary, #667eea);
+  background: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary);
 }
 
 .luggageIcon {
@@ -301,19 +302,19 @@
 .luggageCount {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text, #ffffff);
+  color: var(--text);
   margin-bottom: 0.125rem;
 }
 
 .luggageLabel {
   font-size: 0.75rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .instructionsBox {
-  background: rgba(var(--secondary-rgb, 118,75,162), 0.15);
-  border: 1px solid var(--secondary, #764ba2);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
   border-radius: 6px;
   padding: 0.75rem;
   margin-top: 0.75rem;
@@ -322,23 +323,23 @@
 .instructionsLabel {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--primary, #667eea);
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 
 .instructionsText {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
 /* ========================================
-   PAYMENT CARD (COMPACT)
+   PAYMENT CARD
    ======================================== */
 
 .paymentCard {
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border: 1px solid var(--glass-border, rgba(102,126,234, 0.30));
+  background: var(--surface-base);
+  border: 1px solid var(--border-base);
   padding: 1rem;
   border-radius: 8px;
 }
@@ -353,13 +354,13 @@
 
 .paymentLabel {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .paymentValue {
   font-size: 0.8125rem;
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-weight: 600;
   text-align: right;
   word-break: break-all;
@@ -367,19 +368,22 @@
 
 .paymentDivider {
   height: 1px;
-  background: var(--panel-border, rgba(255,255,255,0.10));
+  background: var(--border-base);
   margin: 0.5rem 0;
 }
 
 .totalLabel {
   font-size: 0.9375rem;
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-weight: 700;
 }
 
 .totalAmount {
   font-size: 1.375rem;
-  color: var(--primary, #667eea);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-weight: 700;
 }
 
@@ -390,31 +394,31 @@
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding: 0.625rem;
-  background: rgba(var(--primary-rgb, 102,126,234), 0.2);
-  border: 1px solid var(--primary, #667eea);
+  background: var(--success-bg);
+  border: 1px solid var(--success);
   border-radius: 6px;
 }
 
 .statusIcon {
   font-size: 1rem;
-  color: var(--primary, #667eea);
+  color: var(--success);
 }
 
 .statusText {
   font-size: 0.8125rem;
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-weight: 600;
 }
 
 /* ========================================
-   NOTICE BOX (COMPACT)
+   NOTICE BOX
    ======================================== */
 
 .noticeBox {
   display: flex;
   gap: 0.75rem;
-  background: rgba(var(--secondary-rgb, 118,75,162), 0.15);
-  border: 1px solid var(--secondary, #764ba2);
+  background: var(--info-bg);
+  border: 2px solid var(--info);
   border-radius: 8px;
   padding: 1rem;
   margin: 1rem;
@@ -432,14 +436,14 @@
 .noticeTitle {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--text, #ffffff);
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .noticeList {
   margin: 0;
   padding-left: 1rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
 }
 
 .noticeList li {
@@ -453,7 +457,7 @@
 }
 
 /* ========================================
-   ACTION BUTTONS (COMPACT)
+   ACTION BUTTONS
    ======================================== */
 
 .actionsContainer {
@@ -474,9 +478,11 @@
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   width: 100%;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .button:disabled {
@@ -485,14 +491,14 @@
 }
 
 .primaryButton {
-  background: var(--cta-grad, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
-  color: var(--cta-fg, #ffffff);
-  box-shadow: var(--cta-shadow, 0 10px 30px rgba(102,126,234, 0.40));
+  background: var(--gradient-primary);
+  color: var(--cta-fg);
+  box-shadow: var(--cta-shadow);
 }
 
 .primaryButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: var(--cta-hover-shadow, 0 15px 40px rgba(102,126,234, 0.60));
+  box-shadow: var(--cta-hover-shadow);
 }
 
 .primaryButton:active:not(:disabled) {
@@ -500,17 +506,21 @@
 }
 
 .secondaryButton {
-  background: var(--panel-bg, rgba(255,255,255,0.03));
-  color: var(--text, #ffffff);
-  border: 1px solid var(--panel-border, rgba(255,255,255,0.10));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .secondaryButton:hover:not(:disabled) {
-  background: var(--glass-bg, rgba(102,126,234, 0.10));
-  border-color: var(--primary, #667eea);
+  background: rgba(var(--primary-rgb), 0.08);
+  border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
+}
+
+.secondaryButton:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .buttonIcon {
@@ -534,7 +544,7 @@
 }
 
 /* ========================================
-   FOOTER INFO (COMPACT)
+   FOOTER INFO
    ======================================== */
 
 .footerInfo {
@@ -544,19 +554,19 @@
 
 .footerText {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   margin: 0.375rem 0;
 }
 
 .footerLink {
-  color: var(--primary, #667eea);
+  color: var(--primary);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .footerLink:hover {
-  color: var(--secondary, #764ba2);
+  color: var(--primary-light);
   text-decoration: underline;
 }
 
@@ -570,15 +580,15 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-grad-start, #0a0a0a) 0%, var(--bg-grad-end, #001e44be) 100%);
+  background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   padding: 2rem;
 }
 
 .spinner {
   width: 60px;
   height: 60px;
-  border: 4px solid rgba(var(--primary-rgb, 102,126,234), 0.2);
-  border-top-color: var(--primary, #667eea);
+  border: 4px solid rgba(var(--primary-rgb), 0.2);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -586,7 +596,7 @@
 .loadingText {
   margin-top: 1.5rem;
   font-size: 1rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -600,7 +610,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-grad-start, #0a0a0a) 0%, var(--bg-grad-end, #001e44be) 100%);
+  background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   padding: 2rem;
   text-align: center;
 }
@@ -613,22 +623,41 @@
 .errorTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text, #ffffff);
+  color: var(--text);
   margin: 0 0 1rem 0;
 }
 
 .errorText {
   font-size: 1rem;
-  color: var(--text-muted, rgba(255,255,255,0.8));
+  color: var(--text-muted);
   margin: 0 0 2rem 0;
   line-height: 1.6;
   max-width: 500px;
 }
 
 /* ========================================
-   TABLET BREAKPOINT (768px+)
+   RESPONSIVE BREAKPOINTS
    ======================================== */
 
+/* Small Phones (360px+) */
+@media (min-width: 360px) {
+  .confirmationCard {
+    border-radius: 14px;
+  }
+}
+
+/* Larger Phones (480px+) */
+@media (min-width: 480px) {
+  .pageWrapper {
+    padding: 1rem;
+  }
+
+  .luggageGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet (768px+) */
 @media (min-width: 768px) {
   .pageWrapper {
     padding: 1.5rem;
@@ -718,10 +747,7 @@
   }
 }
 
-/* ========================================
-   DESKTOP BREAKPOINT (1024px+)
-   ======================================== */
-
+/* Desktop (1024px+) */
 @media (min-width: 1024px) {
   .pageWrapper {
     padding: 2rem;
@@ -730,9 +756,12 @@
   .scheduleTime {
     font-size: 0.8125rem;
   }
+}
 
-  .luggageGrid {
-    grid-template-columns: repeat(3, 1fr);
+/* Touch Device Optimization */
+@media (hover: none) and (pointer: coarse) {
+  .button {
+    min-height: 56px;
   }
 }
 
@@ -753,46 +782,10 @@
     border: 1px solid #e5e7eb;
   }
 
-  .successHeader,
-  .referenceSection,
-  .section,
-  .detailRow,
-  .locationCard,
-  .scheduleCard,
-  .luggageCard,
-  .paymentCard,
-  .noticeBox {
-    background: white !important;
-    color: #000 !important;
-    border-color: #e5e7eb !important;
-  }
-
-  .mainTitle,
-  .subtitle,
-  .referenceNumber,
-  .sectionTitle,
-  .detailValue,
-  .locationName,
-  .scheduleTime,
-  .luggageCount,
-  .totalAmount,
-  .noticeTitle,
-  .errorTitle {
-    color: #000 !important;
-  }
-
-  .detailLabel,
-  .locationAddress,
-  .scheduleLabel,
-  .luggageLabel,
-  .paymentLabel,
-  .instructionText,
-  .instructionsText,
-  .noticeList,
-  .footerText,
-  .loadingText,
-  .errorText {
-    color: #6b7280 !important;
+  .successHeader {
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .actionsContainer,
@@ -815,13 +808,16 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .scheduleCard:hover,
+  .luggageCard:hover,
+  .button:hover {
+    transform: none;
+  }
 }
 
-/* Focus styles for keyboard navigation */
 .button:focus-visible,
 .footerLink:focus-visible {
-  outline: 3px solid var(--outline, #667eea);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
-
-

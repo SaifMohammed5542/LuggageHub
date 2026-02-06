@@ -14,31 +14,22 @@ export default function PartnerLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
 
-  // Capture the install prompt event
+  // Capture the install prompt event (Android only)
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setIsInstallable(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstallable(false);
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
-  
-
-const handleInstall = async () => {
+  const handleInstall = async () => {
     if (!deferredPrompt) {
       // Show instructions for iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -56,7 +47,6 @@ const handleInstall = async () => {
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`Install outcome: ${outcome}`);
     setDeferredPrompt(null);
-    setIsInstallable(false);
   };
 
   const handleChange = (e) => {
@@ -180,18 +170,16 @@ const handleInstall = async () => {
           </button>
         </form>
 
-        {/* ✅ ADD INSTALL BUTTON HERE */}
-        {isInstallable && (
-          <div className={styles.installSection}>
-            <button
-              type="button"
-              className={styles.installButton}
-              onClick={handleInstall}
-            >
-              📱 Install App
-            </button>
-          </div>
-        )}
+        {/* ✅ INSTALL BUTTON - ALWAYS VISIBLE */}
+        <div className={styles.installSection}>
+          <button
+            type="button"
+            className={styles.installButton}
+            onClick={handleInstall}
+          >
+            📱 Install App
+          </button>
+        </div>
 
         <div className={styles.footer}>
           <p className={styles.footerText}>
