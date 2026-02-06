@@ -1,4 +1,4 @@
-// components/Banner.js - FINAL FIXED VERSION
+// components/Banner.js - HYBRID 3: FINAL CORRECTED VERSION
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -6,12 +6,9 @@ import {
   Search,
   MapPin,
   Navigation,
-  Star,
-  Users,
-  Shield,
-  TrendingUp,
-  AlertCircle,
   BoxIcon,
+  AlertCircle,
+  LockKeyhole,
 } from "lucide-react";
 import styles from "./Banner.module.css";
 import Image from "next/image";
@@ -21,19 +18,15 @@ export default function Banner() {
   const [searchInput, setSearchInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [visible, setVisible] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const [bookingType, setBookingType] = useState("luggage"); 
-// "luggage" | "key"
+  const [bookingType, setBookingType] = useState("luggage");
   const autocompleteService = useRef(null);
   const geocoderService = useRef(null);
   const sessionToken = useRef(null);
 
   useEffect(() => {
-    setVisible(true);
-    
     const initializeGoogleMaps = () => {
       if (typeof window !== "undefined" && window.google?.maps) {
         try {
@@ -250,7 +243,8 @@ export default function Banner() {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (!e.target.closest(`.${styles.searchContainer}`)) {
+      const floatingCard = document.querySelector('[class*="floatingCard"]');
+      if (floatingCard && !floatingCard.contains(e.target)) {
         setShowSuggestions(false);
       }
     };
@@ -261,242 +255,306 @@ export default function Banner() {
 
   return (
     <section className={styles.banner}>
-      <div className={styles.background} aria-hidden />
-      <div className={styles.pattern} aria-hidden />
-      <div className={styles.blobOne} aria-hidden />
-      <div className={styles.blobTwo} aria-hidden />
-
       <div className={styles.content}>
-        <div className={styles.wrapper}>
-          <div className={styles.grid}>
-            <div className={`${styles.left} ${visible ? styles.show : ""}`}>
-              <div className={styles.intro}>
-                <div className={styles.textImageRow}>
-                  <div className={styles.text}>
-                    <div className={styles.badge}>
-                      <span>✨ Trusted • Secure • Convenient</span>
-                    </div>
-                    <h1 className={styles.heading}>
-                      Secure Your
-                      <br />
-                      <span className={styles.gradient}>Luggage</span>
-                      <br />
-                      Anywhere
-                    </h1>
-                  </div>
-                 
-                  <div className={styles.imageBox}>
-                    <Image
-                      src="/images/GlowBag.png"
+        {/* Diagonal Blue Header */}
+        <div className={styles.heroHeader}>
+          <div className={styles.heroContent}>
+            <div className={styles.badge}>
+              <LockKeyhole className={styles.lockIcon} />
+              <span> Trusted by 5,000+ Travelers</span>
+            </div>
+          <div className={styles.textImgContent}>
+            <div className={styles.textContent}>
+            <h1 className={styles.heading}>
+              Store Your
+              {/* <br /> */}
+              <span className={styles.gradient}>Luggage</span>
+              {/* <br /> */}
+              Securely
+            </h1>
+            </div>
+            <div className={styles.imgContent}>
+               <Image
+                      src="/images/GLowedwhite.png"
                       alt="Secure Luggage Storage"
-                      width={340}
-                      height={340}
+                      width={280}
+                      height={200}
                       priority
                       sizes="(max-width: 768px) 28vw, 240px"
                       className={styles.logo}
                     />
-                  </div>
-                  
-               <div className={styles.subtitleBox}>
-                  <p className={styles.subtitle}>
-                      Find secure storage near you in seconds. Fully insured. Starting from A$3.99/day.
-                  </p>
-                  </div>
+            </div>
+          </div>  
 
-
-                </div>
+            <p className={styles.subtitle}>
+              Find verified storage near you. A$2000 insurance. From A$3.99/day.
+            </p>
+{/* 
+            <div className={styles.heroStats}>
+              <div className={styles.heroStat}>
+                <div className={styles.heroStatValue}>5K+</div>
+                <div className={styles.heroStatLabel}>Customers</div>
               </div>
-              <div className={styles.searchSection}>
-                <div className={styles.searchContainer}>
-                  <div className={styles.searchBox}>
-                    <Search className={styles.searchIcon} />
-                    <input
-                      type="text"
-                      placeholder="Search city, area, or landmark..."
-                      value={searchInput}
-                      onChange={handleSearchChange}
-                      onKeyDown={handleKeyDown}
-                      className={styles.searchInput}
-                      aria-label="Search for storage locations"
-                    />
-                    <button
-                      onClick={handleSearch}
-                      className={styles.searchButton}
-                      disabled={!searchInput.trim()}
-                    >
-                      Find Storage
-                    </button>
+              <div className={styles.heroStat}>
+                <div className={styles.heroStatValue}>4.8★</div>
+                <div className={styles.heroStatLabel}>Rating</div>
+              </div>
+              <div className={styles.heroStat}>
+                <div className={styles.heroStatValue}>5+</div>
+                <div className={styles.heroStatLabel}>Locations</div>
+              </div>
+            </div> */}
+            <div className={styles.quickActions2}>
+          <div className={styles.quickActionsTitle}>
+            <h3>Quick Actions</h3>
+          </div>
+                    {/* <div className={styles.or}>
+            <p>OR</p>
+          </div> */}
+
+          <div className={styles.bookingWrapper}>
+            <div className={styles.bookingToggle}>
+              <button
+                type="button"
+                className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
+                onClick={() => setBookingType("luggage")}
+              >
+                🧳 Luggage
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
+                onClick={() => setBookingType("key")}
+              >
+                🔑 Key
+              </button>
+            </div>
+
+            <button
+              onClick={() =>
+                router.push(
+                  bookingType === "key" ? "/key-handover" : "/booking-form"
+                )
+              }
+              className={styles.directBookingCTA}
+            >
+              <BoxIcon className={styles.locationIcon} />
+              {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
+            </button>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        {/* Floating Search Card */}
+        <div className={styles.floatingCard}>
+          <h2 className={styles.cardTitle}>Find Storage Now</h2>
+          <p className={styles.cardSubtitle}>Enter your location to see nearby options</p>
+
+          <div className={styles.searchWrapper}>
+            <Search className={styles.searchIcon} />
+            <input 
+              type="text" 
+              className={styles.searchInput} 
+              placeholder="City, area, or landmark..."
+              value={searchInput}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              aria-label="Search for storage locations"
+            />
+
+            {showSuggestions && (
+              <div className={styles.suggestionsDropdown}>
+                {isLoadingSuggestions ? (
+                  <div className={styles.loadingSuggestions}>
+                    <div className={styles.spinner}></div>
+                    <span>Searching...</span>
                   </div>
-
-                  {showSuggestions && (
-                    <div className={styles.suggestionsDropdown}>
-                      {isLoadingSuggestions ? (
-                        <div className={styles.loadingSuggestions}>
-                          <div className={styles.spinner}></div>
-                          <span>Searching...</span>
+                ) : suggestions.length > 0 ? (
+                  suggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      className={styles.suggestionItem}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                      <MapPin className={styles.suggestionIcon} />
+                      <div className={styles.suggestionText}>
+                        <div className={styles.suggestionName}>
+                          {suggestion.name}
+                          {suggestion.type === "station" && (
+                            <span className={styles.stationBadge}>Storage Station</span>
+                          )}
                         </div>
-                      ) : suggestions.length > 0 ? (
-                        suggestions.map((suggestion, idx) => (
-                          <div
-                            key={idx}
-                            className={styles.suggestionItem}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                          >
-                            <MapPin className={styles.suggestionIcon} />
-                            <div className={styles.suggestionText}>
-                              <div className={styles.suggestionName}>
-                                {suggestion.name}
-                                {suggestion.type === "station" && (
-                                  <span className={styles.stationBadge}>Storage Station</span>
-                                )}
-                              </div>
-                              <div className={styles.suggestionLocation}>{suggestion.location}</div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className={styles.noSuggestions}>
-                          No results found
-                        </div>
-                      )}
+                        <div className={styles.suggestionLocation}>{suggestion.location}</div>
+                      </div>
                     </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={handleUseMyLocation}
-                  disabled={isLoadingLocation}
-                  className={styles.locationButton}
-                >
-                  <Navigation className={styles.locationIcon} />
-                  <span>
-                    {isLoadingLocation ? "Getting your location..." : "Use My Location - Find Nearest"}
-                  </span>
-                </button>
-                {/* Booking Type Toggle */}
-
-<div className={styles.or}>
-  <p>OR</p>
-</div>
-
-{/* Wrapper for toggle + button */}
-<div className={styles.bookingWrapper}>
-  {/* Booking Type Toggle */}
-  <div className={styles.bookingToggle}>
-    <button
-      type="button"
-      className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
-      onClick={() => setBookingType("luggage")}
-    >
-      🧳 Luggage
-    </button>
-
-    <button
-      type="button"
-      className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
-      onClick={() => setBookingType("key")}
-    >
-      🔑 Key
-    </button>
-  </div>
-
-  {/* Direct Booking Button */}
-  <button
-    onClick={() =>
-      router.push(
-        bookingType === "key" ? "/key-handover" : "/booking-form"
-      )
-    }
-    className={styles.directBookingCTA}
-  >
-    <BoxIcon className={styles.locationIcon} />
-    {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
-  </button>
-</div>
-
-                {locationError && (
-                  <div className={styles.locationError}>
-                    <AlertCircle className={styles.errorIcon} />
-                    <span>{locationError}</span>
+                  ))
+                ) : (
+                  <div className={styles.noSuggestions}>
+                    No results found
                   </div>
                 )}
               </div>
+            )}
+          </div>
 
-              <div className={styles.statsBar}>
-                <div className={styles.statItem}>
-                  <Users className={styles.statIcon} />
-                  <div className={styles.statText}>
-                    <div className={styles.statValue}>5,000+</div>
-                    <div className={styles.statLabel}>Customers</div>
-                  </div>
-                </div>
+          <button 
+            className={styles.btnPrimary}
+            onClick={handleSearch}
+            disabled={!searchInput.trim()}
+          >
+            <span>Search Locations</span>
+            <span>→</span>
+          </button>
 
-                <div className={styles.statItem}>
-                  <MapPin className={styles.statIcon} />
-                  <div className={styles.statText}>
-                    <div className={styles.statValue}>5+</div>
-                    <div className={styles.statLabel}>Locations</div>
-                  </div>
-                </div>
+          <button 
+            className={styles.btnLocation}
+            onClick={handleUseMyLocation}
+            disabled={isLoadingLocation}
+          >
+            <Navigation className={styles.locationIcon} />
+            <span>
+              {isLoadingLocation ? "Getting your location..." : "Use My Current Location"}
+            </span>
+          </button>
 
-                <div className={styles.statItem}>
-                  <Star className={styles.statIcon} />
-                  <div className={styles.statText}>
-                    <div className={styles.statValue}>4.8★</div>
-                    <div className={styles.statLabel}>Rating</div>
-                  </div>
-                </div>
+          {locationError && (
+            <div className={styles.locationError}>
+              <AlertCircle className={styles.errorIcon} />
+              <span>{locationError}</span>
+            </div>
+          )}
 
-                <div className={styles.statItem}>
-                  <TrendingUp className={styles.statIcon} />
-                  <div className={styles.statText}>
-                    <div className={styles.statValue}>15K+</div>
-                    <div className={styles.statLabel}>Bags Stored</div>
-                  </div>
-                </div>
-              </div>
+          {/* OR + Booking Toggle */}
+          {/* <div className={styles.or}>
+            <p>OR</p>
+          </div>
+
+          <div className={styles.bookingWrapper}>
+            <div className={styles.bookingToggle}>
+              <button
+                type="button"
+                className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
+                onClick={() => setBookingType("luggage")}
+              >
+                🧳 Luggage
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
+                onClick={() => setBookingType("key")}
+              >
+                🔑 Key
+              </button>
             </div>
 
-            <div className={`${styles.right} ${visible ? styles.show : ""}`}>
-              <div className={styles.visualBox}>
-                <div className={styles.iconBox}>
-                  <Shield className={styles.mainIcon} />
-                </div>
-                <h3 className={styles.visualTitle}>24/7 Secure Storage</h3>
-                <p className={styles.visualText}>
-                  Every bag is insured and stored with verified partners
-                </p>
+            <button
+              onClick={() =>
+                router.push(
+                  bookingType === "key" ? "/key-handover" : "/booking-form"
+                )
+              }
+              className={styles.directBookingCTA}
+            >
+              <BoxIcon className={styles.locationIcon} />
+              {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
+            </button>
+          </div> */}
+        </div>
 
-                <div className={styles.featureGrid}>
-                  <div className={styles.feature}>
-                    <div className={styles.featureIcon}>🔐</div>
-                    <p>A$2000 Coverage</p>
-                  </div>
-                  <div className={styles.feature}>
-                    <div className={styles.featureIcon}>✓</div>
-                    <p>Verified Partners</p>
-                  </div>
-                  <div className={styles.feature}>
-                    <div className={styles.featureIcon}>⚡</div>
-                    <p>Instant Booking</p>
-                  </div>
-                  <div className={styles.feature}>
-                    <div className={styles.featureIcon}>📱</div>
-                    <p>24/7 Support</p>
-                  </div>
-                  <div className={styles.feature}>
-                    <div className={styles.featureIcon}>🚶</div>
-                    <p>Walk Distance</p>
-                  </div>
-                  <div className={styles.feature}>
-                    <div className={styles.featureIcon}>💳</div>
-                    <p>Secure Pay</p>
-                  </div>
-                </div>
-              </div>
+        {/* Quick Actions (RIGHT AFTER SEARCH) */}
+        <div className={styles.quickActions}>
+          <div className={styles.quickActionsTitle}>
+            <h3>Quick Actions</h3>
+          </div>
+                    {/* <div className={styles.or}>
+            <p>OR</p>
+          </div> */}
+
+          <div className={styles.bookingWrapper}>
+            <div className={styles.bookingToggle}>
+              <button
+                type="button"
+                className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
+                onClick={() => setBookingType("luggage")}
+              >
+                🧳 Luggage
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
+                onClick={() => setBookingType("key")}
+              >
+                🔑 Key
+              </button>
+            </div>
+
+            <button
+              onClick={() =>
+                router.push(
+                  bookingType === "key" ? "/key-handover" : "/booking-form"
+                )
+              }
+              className={styles.directBookingCTA}
+            >
+              <BoxIcon className={styles.locationIcon} />
+              {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
+            </button>
+          </div>
+        </div>
+
+        {/* Why Choose Us (FEATURE CARDS - AFTER QUICK ACTIONS) */}
+        <div className={styles.whyChooseUs}>
+          <h3 className={styles.whyTitle}>Why Choose Us?</h3>
+          <div className={styles.featuresGrid}>
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>🔐</div>
+              <div className={styles.featureLabel}>A$2000 Insured</div>
+              <div className={styles.featureDesc}>Every bag fully covered</div>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>⚡</div>
+              <div className={styles.featureLabel}>Instant Book</div>
+              <div className={styles.featureDesc}>Reserve in 30 sec</div>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureLabel}>Verified</div>
+              <div className={styles.featureDesc}>All locations checked</div>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>📱</div>
+              <div className={styles.featureLabel}>24/7 Support</div>
+              <div className={styles.featureDesc}>Always here to help</div>
             </div>
           </div>
         </div>
+
+        {/* Stats Bar */}
+        {/* <div className={styles.statsBar}>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>5K+</div>
+            <div className={styles.statLabel}>Users</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>5+</div>
+            <div className={styles.statLabel}>Spots</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>4.8★</div>
+            <div className={styles.statLabel}>Rating</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>15K</div>
+            <div className={styles.statLabel}>Bags</div>
+          </div>
+        </div> */}
       </div>
     </section>
   );

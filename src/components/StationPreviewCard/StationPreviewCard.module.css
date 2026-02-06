@@ -1,17 +1,18 @@
 /* ========================================
-   PERFORMANCE OPTIMIZATIONS
+   StationPreviewCard - Ocean Blue & Golden Amber Theme
+   PERFORMANCE OPTIMIZED - GPU accelerated, mobile-first
    ======================================== */
 
 .previewCard {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 24px;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--card-border);
+  box-shadow: var(--shadow-lg);
   position: relative;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /* ✅ Add GPU acceleration hint for the card */
   will-change: transform;
+  transform: translateZ(0);
 }
 
 .previewCard.drawer {
@@ -23,42 +24,50 @@
   border-radius: 16px;
 }
 
+/* ===== CLOSE BUTTON ===== */
 .closeBtn {
   position: absolute;
   top: 16px;
-  right: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  left: 16px;
+  background: white;
+  border: 2px solid var(--primary-light);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #cbd5e0;
-  transition: all 0.2s ease;
+  color: var(--primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
-  /* ✅ GPU acceleration for hover */
   will-change: transform, background-color;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .closeBtn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: #ef4444;
-  color: #ef4444;
-  transform: scale(1.05); /* ✅ Add slight scale for feedback */
+  background: rgba(var(--primary-rgb), 0.2);
+  border-color: var(--primary);
+  transform: scale(1.05);
 }
 
+.closeBtn:active {
+  transform: scale(0.95);
+}
+
+/* ===== IMAGE CONTAINER ===== */
 .imageContainer {
   width: 100%;
-  height: 160px;
+  height: 180px;
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-rgb), 0.08), 
+    rgba(var(--secondary-rgb), 0.08));
   position: relative;
-  /* ✅ Optimize for image rendering */
   contain: layout style paint;
 }
 
@@ -66,7 +75,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* ✅ Improve image rendering quality */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
 }
@@ -78,17 +86,23 @@
   align-items: center;
   justify-content: center;
   font-size: 48px;
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-rgb), 0.1), 
+    rgba(var(--secondary-rgb), 0.1));
 }
 
+/* ===== PHOTO NAVIGATION ===== */
 .photoNav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.6);
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 18px;
@@ -96,13 +110,18 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  /* ✅ GPU acceleration for smooth hover */
   will-change: transform;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .photoNav:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(var(--primary-rgb), 0.8);
+  border-color: var(--primary-light);
   transform: translateY(-50%) scale(1.1);
+}
+
+.photoNav:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 .photoNavPrev {
@@ -126,12 +145,12 @@
   font-weight: 600;
 }
 
+/* ===== CAPACITY BADGE ===== */
 .capacityBadge {
   position: absolute;
   top: 12px;
   right: 12px;
   background: rgba(0, 0, 0, 0.7);
-  /* ⚠️ MOBILE OPTIMIZATION: Conditionally apply backdrop-filter */
   padding: 6px 12px;
   border-radius: 20px;
   display: flex;
@@ -139,27 +158,30 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid;
+  border: 2px solid;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* ✅ OPTIMIZATION: Only apply backdrop-filter on desktop for better mobile performance */
 @media (min-width: 768px) {
   .capacityBadge {
     backdrop-filter: blur(10px);
   }
 }
 
+/* ===== STATION INFO ===== */
 .stationInfo {
   margin-bottom: 20px;
 }
 
 .stationName {
-  font-size: 24px;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
   font-weight: 800;
-  color: #f8fafc;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 8px;
   line-height: 1.2;
-  /* ✅ Optimize text rendering */
   text-rendering: optimizeLegibility;
 }
 
@@ -167,43 +189,45 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 15px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .locationIcon {
-  color: #6366f1;
+  color: var(--primary);
   flex-shrink: 0;
 }
 
 .locationText {
   flex: 1;
-  /* ✅ Prevent text overflow issues */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .distanceBadge {
   padding: 4px 10px;
-  background: rgba(99, 102, 241, 0.15);
+  background: var(--badge-bg);
+  border: 1px solid var(--badge-border);
   border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #818cf8;
+  color: var(--badge-text);
   flex-shrink: 0;
 }
 
+/* ===== DETAILS GRID ===== */
 .detailsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-base);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  /* ✅ Optimize grid rendering */
+  border: 1px solid var(--border-base);
   contain: layout style;
 }
 
@@ -214,24 +238,24 @@
 }
 
 .detailIcon {
-  color: #6366f1;
+  color: var(--primary);
   flex-shrink: 0;
 }
 
 .detailIconStar {
-  color: #f59e0b;
-  fill: #f59e0b;
+  color: var(--secondary);
+  fill: var(--secondary);
   flex-shrink: 0;
 }
 
 .detailIconPrice {
-  color: #10b981;
+  color: var(--success);
   flex-shrink: 0;
 }
 
 .detailLabel {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -239,46 +263,50 @@
 
 .detailValue {
   font-size: 14px;
-  color: #f8fafc;
+  color: var(--text);
   font-weight: 600;
 }
 
 .detailValuePrice {
   font-size: 14px;
-  color: #10b981;
+  color: var(--success);
   font-weight: 700;
 }
 
+/* ===== DESCRIPTION ===== */
 .description {
   margin-bottom: 20px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-base);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-base);
   font-size: 14px;
-  color: #cbd5e0;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
+/* ===== FEATURES ===== */
 .features {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
   padding: 12px 16px;
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--success-bg);
   border-radius: 10px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .featureItem {
   font-size: 13px;
-  color: #6ee7b7;
+  color: var(--success);
   display: flex;
   align-items: center;
   gap: 4px;
+  font-weight: 500;
 }
 
+/* ===== ACTION BUTTONS ===== */
 .actions {
   display: flex;
   flex-direction: column;
@@ -288,30 +316,31 @@
 .bookBtn {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--cta-fg);
   border: none;
   border-radius: 12px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: var(--cta-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  /* ✅ GPU acceleration for smooth hover */
   will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 52px;
 }
 
 .bookBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+  box-shadow: var(--cta-hover-shadow);
 }
 
 .bookBtn:active {
-  transform: translateY(0); /* ✅ Add active state */
+  transform: translateY(0);
 }
 
 .secondaryActions {
@@ -322,40 +351,48 @@
 
 .secondaryBtn {
   padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #cbd5e0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--card-border);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  /* ✅ GPU acceleration */
   will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
 }
 
 .secondaryBtn:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: #6366f1;
-  color: #818cf8;
-  transform: translateY(-1px); /* ✅ Subtle lift */
+  background: rgba(var(--primary-rgb), 0.08);
+  border-color: var(--primary-light);
+  color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .secondaryBtn:active {
-  transform: translateY(0); /* ✅ Add active state */
+  transform: translateY(0);
 }
 
-@media (max-width: 640px) {
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Small phones (320px - 480px) */
+@media (max-width: 480px) {
   .previewCard {
-    padding: 20px;
+    padding: 18px;
+  }
+
+  .imageContainer {
+    height: 150px;
   }
 
   .stationName {
-    font-size: 20px;
+    font-size: 1.2rem;
   }
 
   .detailsGrid {
@@ -363,23 +400,54 @@
     padding: 12px;
   }
 
-  .imageContainer {
-    height: 140px;
-  }
-  
-  /* ✅ Reduce shadow complexity on mobile */
   .bookBtn {
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.3);
   }
   
   .bookBtn:hover {
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+  }
+
+  .secondaryActions {
+    grid-template-columns: 1fr;
   }
 }
 
-/* ========================================
-   ACCESSIBILITY & PERFORMANCE
-   ======================================== */
+/* Larger phones (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
+  .previewCard {
+    padding: 20px;
+  }
+
+  .imageContainer {
+    height: 160px;
+  }
+
+  .detailsGrid {
+    gap: 10px;
+    padding: 14px;
+  }
+}
+
+/* Tablet (641px+) */
+@media (min-width: 641px) {
+  .imageContainer {
+    height: 200px;
+  }
+
+  .detailsGrid {
+    padding: 18px;
+  }
+}
+
+/* Desktop hover states */
+@media (hover: hover) and (pointer: fine) {
+  .photoNav:hover {
+    background: rgba(var(--primary-rgb), 0.9);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
 
 @media (prefers-reduced-motion: reduce) {
   .previewCard *,
@@ -391,13 +459,57 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .bookBtn:hover,
+  .secondaryBtn:hover,
+  .closeBtn:hover,
+  .photoNav:hover {
+    transform: none;
+  }
 }
 
-/* ✅ Focus styles for accessibility */
 .bookBtn:focus-visible,
 .secondaryBtn:focus-visible,
 .closeBtn:focus-visible,
 .photoNav:focus-visible {
-  outline: 3px solid #6366f1;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .closeBtn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .photoNav {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .bookBtn {
+    min-height: 56px;
+  }
+
+  .secondaryBtn {
+    min-height: 48px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .previewCard {
+    border: 2px solid #000;
+    box-shadow: none;
+  }
+
+  .photoNav,
+  .closeBtn {
+    display: none;
+  }
 }
