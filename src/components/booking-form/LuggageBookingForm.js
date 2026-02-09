@@ -54,7 +54,9 @@ const getStationLatLng = (station) => {
 };
 
 const LuggageBookingForm = ({ 
-  prefilledStation = undefined, 
+  prefilledStation = undefined,
+  prefilledStationId = undefined,
+  isStationLocked = false, // ✅ NEW: Lock station when true
   mode = "direct", 
   onBookingComplete = undefined, 
   showHeader = true, 
@@ -74,6 +76,9 @@ const LuggageBookingForm = ({
     phone: "+61 ",
     termsAccepted: false,
   });
+
+
+  
 
   const [showStationPreview, setShowStationPreview] = useState(false);
 const [previewStation, setPreviewStation] = useState(null);
@@ -192,36 +197,53 @@ const [isFormValid, setIsFormValid] = useState(false);
     }
   }, []);
 
-  useEffect(() => {
-    if (!prefilledStation) return;
-    try {
-      const stationId = prefilledStation._id || prefilledStation.id || undefined;
-      if (!stationId) return;
-      if (formData.stationId === stationId) {
-        setSelectedStationMeta(prefilledStation);
-        return;
-      }
+ // ✅ UPDATED: Handle prefilledStation object (from direct API)
+useEffect(() => {
+  if (!prefilledStation) return;
+  
+  try {
+    const stationId = prefilledStation._id || prefilledStation.id;
+    if (!stationId) return;
+    
+    // ✅ Set immediately without waiting for stations list
+    if (formData.stationId !== stationId) {
       setFormData(prev => ({ ...prev, stationId }));
       setSelectedStationMeta(prefilledStation);
-      if (typeof window !== "undefined" && window.scrollTo) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    } catch (err) {
-      console.warn("Failed to apply prefilledStation:", err);
+      
+      // ✅ Also add to stations list if not already there
+      setStations(prev => {
+        const exists = prev.some(s => s._id === stationId);
+        return exists ? prev : [prefilledStation, ...prev];
+      });
     }
-  }, [prefilledStation]);
+    
+    if (typeof window !== "undefined" && window.scrollTo) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  } catch (err) {
+    console.warn("Failed to apply prefilledStation:", err);
+  }
+}, [prefilledStation]);
 
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("/api/station/list", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        let stationsList = data.stations || [];
+ useEffect(() => {
+  const fetchStations = async () => {
+    // ✅ NEW: Skip fetching stations if we already have a locked prefilled station
+    if (isStationLocked && prefilledStation) {
+      console.log('⚡ Skipping station list fetch - station already locked');
+      return;
+    }
 
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/station/list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      let stationsList = data.stations || [];
+
+      // ✅ NEW: Only try to get user location if station is NOT locked
+      if (!isStationLocked) {
         const getUserPosition = () =>
           new Promise((resolve, reject) => {
             if (!navigator.geolocation) return reject(new Error('Geolocation not available'));
@@ -247,15 +269,34 @@ const [isFormValid, setIsFormValid] = useState(false);
             .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
         } catch (err) {
           console.warn('⚠️ Could not obtain user location', err);
+          // Continue without sorting by distance
         }
-
-        setStations(stationsList);
-      } catch (error) {
-        console.error("Failed to fetch stations:", error);
       }
-    };
-    fetchStations();
-  }, []);
+
+      setStations(stationsList);
+    } catch (error) {
+      console.error("Failed to fetch stations:", error);
+    }
+  };
+  
+  fetchStations();
+}, [isStationLocked, prefilledStation]); // ✅ Added dependencies
+
+
+
+  // ✅ NEW: Handle prefilledStationId from URL parameter
+useEffect(() => {
+  if (!prefilledStationId || !stations.length) return;
+  
+  const station = stations.find(s => s._id === prefilledStationId);
+  if (!station) return;
+  
+  // Only set if not already set
+  if (formData.stationId !== prefilledStationId) {
+    setFormData(prev => ({ ...prev, stationId: prefilledStationId }));
+    setSelectedStationMeta(station);
+  }
+}, [prefilledStationId, stations]);
 
 useEffect(() => {
   const fetchStationTimings = async () => {
@@ -441,13 +482,25 @@ useEffect(() => {
       [name]: type === "checkbox" ? checked : value,
     };
 
-    if (name === "stationId" && value) {
+
+if (name === "stationId" && value) {
   const station = stations.find(s => s._id === value);
   if (station) {
-    setPreviewStation(station);
-    setShowStationPreview(true);
-    // ✅ ADDED: Update formData immediately
+    // ✅ Only show preview if station is NOT locked
+    if (!isStationLocked) {
+      setPreviewStation(station);
+      setShowStationPreview(true);
+    }
+    
     setFormData(prev => ({ ...prev, stationId: value }));
+    
+    // Update URL when station is selected (only in direct mode, not locked)
+    if (mode === "direct" && !isStationLocked && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('stationId', value);
+      window.history.pushState({}, '', url);
+    }
+    
     return;
   }
 }
@@ -708,49 +761,70 @@ const handlePaymentSuccess = async (paymentData) => {
                       <h2 className={styles.sectionTitle}>Where & When?</h2>
 
                       <div className={styles.inputGroup}>
-                        <label htmlFor="stationId" className={styles.label}>
-                          <span className={styles.labelIcon}>📍</span>
-                          Storage Station
-                        </label>
+  <label htmlFor="stationId" className={styles.label}>
+    <span className={styles.labelIcon}>📍</span>
+    Storage Station
+  </label>
 
-                        {mode !== "map" && (
-                          <select
-                            id="stationId"
-                            name="stationId"
-                            value={formData.stationId}
-                            onChange={handleChange}
-                            className={styles.select}
-                          >
-                            <option value="">Select a station</option>
-                            {stations.map((station) => (
-                              <option key={station._id} value={station._id}>
-                                {station.name} - {station.location}
-                                {station.distance ? ` (${station.distance.toFixed(1)} km)` : ""}
-                              </option>
-                            ))}
-                          </select>
-                        )}
+  {/* ✅ NEW: Show locked station or dropdown */}
+  {isStationLocked && formData.stationId ? (
+    // ✅ LOCKED STATE: Show selected station (no changing allowed)
+    <div className={styles.lockedStation}>
+      <div className={styles.lockedStationContent}>
+        <div className={styles.lockedStationIcon}>🔒</div>
+        <div className={styles.lockedStationInfo}>
+          <div className={styles.lockedStationName}>
+            {stations.find(s => s._id === formData.stationId)?.name || 'Loading...'}
+          </div>
+          <div className={styles.lockedStationLocation}>
+            {stations.find(s => s._id === formData.stationId)?.location || ''}
+          </div>
+        </div>
+      </div>
+      <div className={styles.lockedStationNote}>
+        📱 Station pre-selected from QR code
+      </div>
+    </div>
+  ) : mode !== "map" ? (
+    // ✅ NORMAL STATE: Show dropdown
+    <select
+      id="stationId"
+      name="stationId"
+      value={formData.stationId}
+      onChange={handleChange}
+      className={styles.select}
+    >
+      <option value="">Select a station</option>
+      {stations.map((station) => (
+        <option key={station._id} value={station._id}>
+          {station.name} - {station.location}
+          {station.distance ? ` (${station.distance.toFixed(1)} km)` : ""}
+        </option>
+      ))}
+    </select>
+  ) : (
+    // ✅ MAP MODE: Show selected station with change option
+    selectedStationMeta && (
+      <div className={styles.selectedStation}>
+        <div className={styles.selectedStationTitle}>Selected Station</div>
+        <div className={styles.selectedStationName}>{selectedStationMeta.name}</div>
+        <div className={styles.selectedStationLocation}>{selectedStationMeta.location}</div>
+        <div style={{ height: 8 }} />
+        <button
+          type="button"
+          onClick={() => {
+            setFormData(prev => ({ ...prev, stationId: "" }));
+            setSelectedStationMeta(null);
+          }}
+          className={styles.selectAlternativeBtn}
+        >
+          Change station
+        </button>
+      </div>
+    )
+  )}
 
-                        {mode === "map" && selectedStationMeta && (
-                          <div className={styles.selectedStation}>
-                            <div className={styles.selectedStationTitle}>Selected Station</div>
-                            <div className={styles.selectedStationName}>{selectedStationMeta.name}</div>
-                            <div className={styles.selectedStationLocation}>{selectedStationMeta.location}</div>
-                            <div style={{ height: 8 }} />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFormData(prev => ({ ...prev, stationId: "" }));
-                                setSelectedStationMeta(null);
-                              }}
-                              className={styles.selectAlternativeBtn}
-                            >
-                              Change station
-                            </button>
-                          </div>
-                        )}
-
-                        {errors.stationId && <span className={styles.errorText}>{errors.stationId}</span>}
+  {errors.stationId && <span className={styles.errorText}>{errors.stationId}</span>}
 </div>
 
 {isLoadingTimings && (
