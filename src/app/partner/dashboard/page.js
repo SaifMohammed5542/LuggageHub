@@ -40,6 +40,22 @@ export default function PartnerDashboard() {
     return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
   };
 
+
+  // Format UTC dates without conversion
+const formatUTC = (dateString) => {
+  if (!dateString) return '-';
+  const d = new Date(dateString);
+  const month = d.getUTCMonth() + 1;
+  const day = d.getUTCDate();
+  const year = d.getUTCFullYear();
+  const hours = d.getUTCHours();
+  const minutes = d.getUTCMinutes();
+  const hour12 = hours % 12 || 12;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  return `${month}/${day}/${year} ${hour12}:${String(minutes).padStart(2, '0')} ${ampm}`;
+};
+
+
 const bookingGrossAmount = (booking) => {
   // ✅ CASE 1: New bookings with totalAmount field
   if (booking?.totalAmount != null && booking.totalAmount > 0) {
@@ -376,8 +392,8 @@ const bookingGrossAmount = (booking) => {
 <strong>Large:</strong> {b.largeBagCount ?? 0} |
 <strong>Total:</strong> {b.luggageCount}
 </div>
-                                      <div><strong>Drop-off:</strong> {new Date(b.dropOffDate).toLocaleString()}</div>
-                                      <div><strong>Pick-up:</strong> {new Date(b.pickUpDate).toLocaleString()}</div>
+                                      <div><strong>Drop-off:</strong> {formatUTC(b.dropOffDate)}</div>
+<div><strong>Pick-up:</strong> {formatUTC(b.pickUpDate)}</div>
                                     </div>
 
                                     <div className={styles.bookingActions}>
@@ -601,8 +617,8 @@ const bookingGrossAmount = (booking) => {
               <p><strong>Email:</strong> {detailBooking.email}</p>
               <p><strong>Phone:</strong> {detailBooking.phone}</p>
               <p><strong>Luggage:</strong> {detailBooking.luggageCount}</p>
-              <p><strong>Drop-off:</strong> {new Date(detailBooking.dropOffDate).toLocaleString()}</p>
-              <p><strong>Pick-up:</strong> {new Date(detailBooking.pickUpDate).toLocaleString()}</p>
+              <p><strong>Drop-off:</strong> {formatUTC(detailBooking.dropOffDate)}</p>
+<p><strong>Pick-up:</strong> {formatUTC(detailBooking.pickUpDate)}</p>
               <p><strong>Status:</strong> {detailBooking.status}</p>
               <p><strong>Your Share ({Math.round(PARTNER_SHARE * 100)}%):</strong> {fmt(bookingPartnerShare(detailBooking))}</p>
               {detailBooking.specialInstructions && <p><strong>Instructions:</strong> {detailBooking.specialInstructions}</p>}

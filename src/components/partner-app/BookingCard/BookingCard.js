@@ -9,16 +9,31 @@ const PARTNER_SHARE = 0.4; // 40% partner share
  * Displays booking information in a card format
  */
 export default function BookingCard({ booking, onAction, actionLabel, actionVariant = 'primary' }) {
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-AU', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+ // ✅ NO TIMEZONE CONVERSION - Display exact time user selected
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  
+  const date = new Date(dateString);
+  
+  // Use UTC methods to avoid timezone conversion
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  const dayOfWeek = dayNames[date.getUTCDay()];
+  const monthName = monthNames[month];
+  
+  const hour12 = hours % 12 || 12;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const minuteStr = minutes.toString().padStart(2, '0');
+  
+  return `${dayOfWeek}, ${monthName} ${day}, ${year} ${hour12}:${minuteStr} ${ampm}`;
+};
 
   const getStatusBadge = (status) => {
     const statusMap = {
