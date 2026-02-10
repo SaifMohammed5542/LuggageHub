@@ -38,6 +38,23 @@ export default function AdminDashboard() {
     setTimeout(() => setToast((prev) => ({ ...prev, show: false })), duration);
   };
 
+  // ✅ Format dates without timezone conversion
+const formatSimpleDate = (dateString) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  
+  const hour12 = hours % 12 || 12;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const minuteStr = minutes.toString().padStart(2, '0');
+  
+  return `${day}/${month}/${year} ${hour12}:${minuteStr} ${ampm}`;
+};
+
 
 //   const getPaymentStatus = (booking) => {
 //   if (!booking.payments || booking.payments.length === 0) return "unpaid";
@@ -1354,7 +1371,7 @@ Total: ${booking.luggageCount}
                                                   )}
                                                   <div className={styles.bookingMeta}>
                                                     {booking.smallBagCount ?? 0} small • {booking.largeBagCount ?? 0} large
- • {new Date(booking.dropOffDate).toLocaleDateString()} →{" "}
+{formatSimpleDate(booking.dropOffDate)} → {formatSimpleDate(booking.pickUpDate)} →{" "}
                                                     {new Date(booking.pickUpDate).toLocaleDateString()}
                                                   </div>
                                                 </div>
