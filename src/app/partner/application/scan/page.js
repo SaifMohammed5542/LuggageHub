@@ -1,193 +1,209 @@
 // app/partner/application/scan/page.js
 'use client';
-import { useState } from 'react';
-import QRScanner from '../../../../components/partner-app/QRScanner/QRScanner';
-import BookingCard from '../../../../components/partner-app/BookingCard/BookingCard';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import styles from './Scan.module.css';
 
 export default function ScanPage() {
-  const [scannedBooking, setScannedBooking] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [scannerKey, setScannerKey] = useState(0); // For re-mounting scanner
+  const router = useRouter();
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [processing, setProcessing] = useState(false);
 
-  const handleScan = async (qrData) => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    // ✅ AUTO-START SCANNER WITH REAR CAMERA IMMEDIATELY
+    let scanner = null;
 
-    try {
-      console.log('🔍 Scanned QR data:', qrData);
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Not authenticated');
-      }
-
-      // Verify the QR code with backend
-      const response = await fetch('/api/partner/application/verify-qr', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+    const startScanner = () => {
+      scanner = new Html5QrcodeScanner(
+        'qr-reader',
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          // ✅ FORCE REAR CAMERA (environment-facing)
+          aspectRatio: 1.0,
+          showTorchButtonIfSupported: true, // Show flash toggle if available
+          // ✅ CRITICAL: This hides all camera selection UI
+          rememberLastUsedCamera: false,
+          showZoomSliderIfSupported: false,
         },
-        body: JSON.stringify({
-          bookingReference: qrData
-        })
-      });
+        false
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.notFound) {
-          throw new Error('Booking not found');
-        } else if (data.wrongStation) {
-          throw new Error('This booking is not for your station');
+      scanner.render(
+        (decodedText) => {
+          setResult(decodedText);
+          setScanning(false);
+          scanner.clear();
+        },
+        (errorMessage) => {
+          // Ignore continuous scan errors (they're normal)
+          console.log('Scan error:', errorMessage);
         }
-        throw new Error(data.error || 'Verification failed');
+      );
+
+      setScanning(true);
+    };
+
+    // ✅ AUTO-START ON MOUNT
+    startScanner();
+
+    // Cleanup
+    return () => {
+      if (scanner) {
+        scanner.clear().catch(console.error);
       }
+    };
+  }, []);
 
-      console.log('✅ Booking verified:', data.booking);
-      setScannedBooking(data.booking);
-    } catch (err) {
-      console.error('Scan error:', err);
-      setError(err.message);
-      
-      // Auto-clear error after 5 seconds
-      setTimeout(() => {
-        setError(null);
-        setScannerKey(prev => prev + 1); // Reset scanner
-      }, 5000);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleConfirmDropoff = async () => {
+    if (!result || processing) return;
 
-  const handleConfirmAction = async (booking) => {
-    const isDropOff = booking.status === 'pending' || booking.status === 'confirmed';
-    const actionType = isDropOff ? 'drop-off' : 'pick-up';
-    const endpoint = isDropOff ? '/api/partner/application/confirm-dropoff' : '/api/partner/application/confirm-pickup';
-
-    const confirmed = window.confirm(
-      `Confirm ${actionType} for ${booking.fullName}?\n\n` +
-      `${booking.luggageCount} bag(s)\n` +
-      `Ref: ${booking.bookingReference}`
-    );
-
-    if (!confirmed) return;
-
-    setLoading(true);
+    setProcessing(true);
+    setError('');
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/partner/application/confirm-dropoff', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          bookingReference: booking.bookingReference
-        })
+          bookingReference: result,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to confirm ${actionType}`);
+        throw new Error(data.error || 'Failed to confirm drop-off');
       }
 
-      alert(`✅ ${actionType.charAt(0).toUpperCase() + actionType.slice(1)} confirmed successfully!`);
-      
-      // Reset scanner
-      setScannedBooking(null);
-      setScannerKey(prev => prev + 1);
+      alert(`✅ Drop-off confirmed for booking: ${result}`);
+      router.push('/partner/application/dashboard');
     } catch (err) {
-      console.error(`Confirm ${actionType} error:`, err);
-      alert(`❌ Error: ${err.message}`);
+      console.error('Confirm drop-off error:', err);
+      setError(err.message);
     } finally {
-      setLoading(false);
+      setProcessing(false);
     }
   };
 
-  const handleScanAnother = () => {
-    setScannedBooking(null);
-    setError(null);
-    setScannerKey(prev => prev + 1); // Re-mount scanner
+  const handleConfirmPickup = async () => {
+    if (!result || processing) return;
+
+    setProcessing(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/partner/application/confirm-pickup', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookingReference: result,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to confirm pick-up');
+      }
+
+      alert(`✅ Pick-up confirmed for booking: ${result}`);
+      router.push('/partner/application/dashboard');
+    } catch (err) {
+      console.error('Confirm pick-up error:', err);
+      setError(err.message);
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  const getActionLabel = (booking) => {
-    if (booking.status === 'pending' || booking.status === 'confirmed') {
-      return 'Confirm Drop-off';
-    } else if (booking.status === 'stored') {
-      return 'Confirm Pick-up';
-    } else if (booking.status === 'completed') {
-      return 'Already Completed';
-    }
-    return 'View Details';
-  };
-
-  const getActionVariant = (booking) => {
-    if (booking.status === 'pending' || booking.status === 'confirmed') {
-      return 'primary';
-    } else if (booking.status === 'stored') {
-      return 'success';
-    }
-    return 'primary';
+  const handleScanAgain = () => {
+    setResult(null);
+    setError('');
+    window.location.reload(); // Reload to restart scanner
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
+        <button className={styles.backButton} onClick={() => router.push('/partner/application/dashboard')}>
+          ← Back
+        </button>
         <h1 className={styles.title}>📷 Scan QR Code</h1>
-        <p className={styles.subtitle}>
-          Scan the customer&apos;s booking QR code to verify and confirm
-        </p>
       </div>
 
-      {!scannedBooking && !error && (
+      {!result ? (
         <div className={styles.scannerSection}>
-          <QRScanner key={scannerKey} onScan={handleScan} />
-        </div>
-      )}
+          <p className={styles.instruction}>
+            Position the QR code within the frame
+          </p>
+          
+          {/* ✅ SCANNER CONTAINER - NO UI CONTROLS */}
+          {!result && scanning && (
+  <p className={styles.status}>📡 Scanning...</p>
+)}
 
-      {loading && (
-        <div className={styles.loadingState}>
-          <div className={styles.spinner}></div>
-          <p>Verifying booking...</p>
-        </div>
-      )}
+          <div id="qr-reader" className={styles.qrReader}></div>
 
-      {error && (
-        <div className={styles.errorState}>
-          <div className={styles.errorIcon}>❌</div>
-          <h3 className={styles.errorTitle}>Verification Failed</h3>
-          <p className={styles.errorMessage}>{error}</p>
-          <button className={styles.retryButton} onClick={handleScanAnother}>
-            Scan Another
-          </button>
+          <p className={styles.hint}>
+            💡 Make sure the QR code is well-lit and in focus
+          </p>
         </div>
-      )}
-
-      {scannedBooking && !loading && (
+      ) : (
         <div className={styles.resultSection}>
-          <div className={styles.resultHeader}>
-            <h3 className={styles.resultTitle}>✅ Booking Verified</h3>
+          <div className={styles.successBanner}>
+            <div className={styles.successIcon}>✅</div>
+            <div className={styles.successTitle}>QR Code Scanned!</div>
           </div>
 
-          <BookingCard
-            booking={scannedBooking}
-            onAction={
-              scannedBooking.status !== 'completed' 
-                ? handleConfirmAction 
-                : null
-            }
-            actionLabel={getActionLabel(scannedBooking)}
-            actionVariant={getActionVariant(scannedBooking)}
-          />
+          <div className={styles.resultCard}>
+            <div className={styles.resultLabel}>Booking Reference:</div>
+            <div className={styles.resultValue}>{result}</div>
+          </div>
 
-          <button className={styles.scanAnotherButton} onClick={handleScanAnother}>
-            Scan Another Booking
-          </button>
+          {error && (
+            <div className={styles.errorBanner}>
+              <div className={styles.errorIcon}>⚠️</div>
+              <div className={styles.errorText}>{error}</div>
+            </div>
+          )}
+
+          <div className={styles.actionButtons}>
+            <button
+              className={styles.dropoffButton}
+              onClick={handleConfirmDropoff}
+              disabled={processing}
+            >
+              {processing ? 'Processing...' : '📥 Confirm Drop-off'}
+            </button>
+
+            <button
+              className={styles.pickupButton}
+              onClick={handleConfirmPickup}
+              disabled={processing}
+            >
+              {processing ? 'Processing...' : '📤 Confirm Pick-up'}
+            </button>
+
+            <button
+              className={styles.scanAgainButton}
+              onClick={handleScanAgain}
+              disabled={processing}
+            >
+              🔄 Scan Again
+            </button>
+          </div>
         </div>
       )}
     </div>
