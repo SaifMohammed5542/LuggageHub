@@ -4,7 +4,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import dbConnect from '../../../../../lib/dbConnect';
 import Booking from '../../../../../models/booking';
-import { verifyToken } from '../../../../../lib/auth';
+import { verifyJWT } from '../../../../../lib/auth';
 
 export async function POST(request) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
+    const decoded = verifyJWT(token);
     
     if (!decoded || decoded.role !== 'partner') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
