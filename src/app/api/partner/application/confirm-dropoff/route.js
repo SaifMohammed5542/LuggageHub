@@ -1,15 +1,10 @@
-// app/api/partner/applicationlication/confirm-dropoff/route.js
+// app/api/partner/application/confirm-dropoff/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
-/**
- * POST /api/partner/applicationlication/confirm-dropoff
- * Confirm customer has dropped off their luggage
- * Updates status: pending/confirmed → stored (with checkInTime)
- */
 export async function POST(request) {
   try {
     await dbConnect();
@@ -115,7 +110,8 @@ export async function POST(request) {
         status: booking.status,
         checkInTime: booking.checkInTime,
         fullName: booking.fullName,
-        luggageCount: booking.luggageCount
+        luggageCount: booking.luggageCount,
+        luggagePhotoUrl: booking.luggagePhotoUrl, // ✅ ADDED: Include photo URL
       }
     }, { status: 200 });
 
