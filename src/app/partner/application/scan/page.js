@@ -12,12 +12,9 @@ export default function ScanPage() {
   const [bookingData, setBookingData] = useState(null);
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     let scanner = null;
@@ -87,59 +84,51 @@ export default function ScanPage() {
     }
   };
 
-  const startPhotoCapture = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Rear camera
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setShowCamera(true);
-      }
-    } catch (err) {
-      console.error('Camera access error:', err);
-      alert('Unable to access camera. Please check permissions.');
+  // ✅ FIXED: Use native file input with camera
+  const handleTakePhoto = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0);
-      
-      const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-      setCapturedPhoto(photoDataUrl);
-      
-      // Stop camera
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      setShowCamera(false);
+  // ✅ Handle photo selection from camera
+  const handlePhotoSelected = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
     }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image too large. Please choose an image under 5MB.');
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCapturedPhoto({
+        dataUrl: e.target.result,
+        file: file
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const uploadPhoto = async () => {
-    if (!capturedPhoto || !result) return;
+    if (!capturedPhoto?.file || !result) return;
 
     setUploadingPhoto(true);
     setError('');
 
     try {
-      // Convert base64 to blob
-      const response = await fetch(capturedPhoto);
-      const blob = await response.blob();
-      
       const formData = new FormData();
       formData.append('bookingReference', result);
-      formData.append('image', blob, 'luggage.jpg');
+      formData.append('image', capturedPhoto.file);
 
       const token = localStorage.getItem('token');
       const uploadResponse = await fetch('/api/partner/application/upload-luggage-photo', {
@@ -161,6 +150,11 @@ export default function ScanPage() {
       // Refresh booking data to show new photo
       await fetchBookingDetails(result);
       setCapturedPhoto(null);
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (err) {
       console.error('Upload error:', err);
       setError(err.message);
@@ -171,10 +165,9 @@ export default function ScanPage() {
 
   const cancelPhoto = () => {
     setCapturedPhoto(null);
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-    setShowCamera(false);
   };
 
   const handleConfirmDropoff = async () => {
@@ -264,15 +257,27 @@ export default function ScanPage() {
         <h1 className={styles.title}>📷 Scan QR Code</h1>
       </div>
 
+      {/* ✅ HIDDEN FILE INPUT - Opens native camera */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handlePhotoSelected}
+        style={{ display: 'none' }}
+      />
+
       {!result ? (
         <div className={styles.scannerSection}>
           <p className={styles.instruction}>
             Position the QR code within the frame
           </p>
           
-        {/* ✅ SCANNER CONTAINER - NO UI CONTROLS */} 
+           {/* ✅ SCANNER CONTAINER - NO UI CONTROLS */} 
         {!result && scanning && ( <p className={styles.status}>📡 Scanning...</p> )} 
         <div id="qr-reader" className={styles.qrReader}></div>
+          <p className={styles.hint}></p>
+
           <p className={styles.hint}>
             💡 Make sure the QR code is well-lit and in focus
           </p>
@@ -293,16 +298,20 @@ export default function ScanPage() {
                 <span className={styles.detailValue}>{bookingData.fullName}</span>
               </div>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Bags:</span>
+                <span className={styles.detailLabel}>Small Bags:</span>
+                <span className={styles.detailValue}>{bookingData.smallBagCount || 0}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Large Bags:</span>
+                <span className={styles.detailValue}>{bookingData.largeBagCount || 0}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Total Bags:</span>
                 <span className={styles.detailValue}>{bookingData.luggageCount}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Status:</span>
                 <span className={styles.detailValue}>{bookingData.status}</span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Reference:</span>
-                <span className={styles.detailValue}>{result}</span>
               </div>
             </div>
           )}
@@ -322,44 +331,18 @@ export default function ScanPage() {
                 </div>
               ) : bookingData.status === 'confirmed' || bookingData.status === 'pending' ? (
                 <div className={styles.photoCapture}>
-                  {!showCamera && !capturedPhoto && (
+                  {!capturedPhoto ? (
                     <button 
                       className={styles.photoButton}
-                      onClick={startPhotoCapture}
+                      onClick={handleTakePhoto}
                     >
                       📷 Take Luggage Photo
                     </button>
-                  )}
-
-                  {showCamera && (
-                    <div className={styles.cameraView}>
-                      <video 
-                        ref={videoRef}
-                        autoPlay 
-                        playsInline
-                        className={styles.videoPreview}
-                      />
-                      <div className={styles.cameraControls}>
-                        <button 
-                          className={styles.captureButton}
-                          onClick={capturePhoto}
-                        >
-                          📸 Capture
-                        </button>
-                        <button 
-                          className={styles.cancelButton}
-                          onClick={cancelPhoto}
-                        >
-                          ✕ Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {capturedPhoto && (
+                  ) : (
                     <div className={styles.photoPreview}>
+                      <h4 className={styles.photoTitle}>Preview</h4>
                       <img 
-                        src={capturedPhoto} 
+                        src={capturedPhoto.dataUrl} 
                         alt="Captured luggage" 
                         className={styles.capturedImage}
                       />
@@ -373,7 +356,7 @@ export default function ScanPage() {
                         </button>
                         <button 
                           className={styles.retakeButton}
-                          onClick={() => setCapturedPhoto(null)}
+                          onClick={cancelPhoto}
                           disabled={uploadingPhoto}
                         >
                           🔄 Retake
@@ -386,9 +369,6 @@ export default function ScanPage() {
             </div>
           )}
 
-          {/* Hidden canvas for photo capture */}
-          <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-
           {error && (
             <div className={styles.errorBanner}>
               <div className={styles.errorIcon}>⚠️</div>
@@ -398,7 +378,7 @@ export default function ScanPage() {
 
           {/* Action Buttons */}
           <div className={styles.actionButtons}>
-            {bookingData && bookingData.status !== 'stored' && (
+            {bookingData && bookingData.status !== 'stored' && bookingData.status !== 'completed' && (
               <button
                 className={styles.dropoffButton}
                 onClick={handleConfirmDropoff}
