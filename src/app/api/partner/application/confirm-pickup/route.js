@@ -1,15 +1,12 @@
-// app/api/partner/applicationlication/confirm-pickup/route.js
+// app/api/partner/application/confirm-pickup/route.js
 import { NextResponse } from 'next/server';
+import { unlink } from 'fs/promises';
+import path from 'path';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
-/**
- * POST /api/partner/applicationlication/confirm-pickup
- * Confirm customer has picked up their luggage
- * Updates status: stored → completed (with checkOutTime)
- */
 export async function POST(request) {
   try {
     await dbConnect();
@@ -98,9 +95,22 @@ export async function POST(request) {
       );
     }
 
-    // 6. Update booking status
+    // ✅ 6. DELETE LUGGAGE PHOTO if it exists (space-friendly cleanup)
+    if (booking.luggagePhotoUrl) {
+      try {
+        const photoPath = path.join(process.cwd(), 'public', booking.luggagePhotoUrl);
+        await unlink(photoPath);
+        console.log(`🗑️ Deleted luggage photo: ${booking.luggagePhotoUrl}`);
+      } catch (deleteErr) {
+        console.error('⚠️ Failed to delete photo:', deleteErr.message);
+        // Continue anyway - don't fail the pickup if photo delete fails
+      }
+    }
+
+    // 7. Update booking status
     booking.status = 'completed';
     booking.checkOutTime = new Date();
+    booking.luggagePhotoUrl = null; // ✅ Clear photo URL from database
     await booking.save();
 
     console.log('✅ Pick-up confirmed:', bookingReference);

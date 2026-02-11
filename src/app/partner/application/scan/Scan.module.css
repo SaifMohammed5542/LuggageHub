@@ -179,3 +179,193 @@
     font-size: 20px;
   }
 }
+
+/* Add these new styles to your existing Scan.module.css */
+
+/* Booking Details Card */
+.bookingDetails {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #e0e0e0;
+}
+
+.detailsTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #1a73e8;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-weight: 600;
+  color: #666;
+}
+
+.detailValue {
+  font-weight: 700;
+  color: #333;
+}
+
+/* Photo Section */
+.photoSection {
+  margin: 20px 0;
+}
+
+.photoTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.existingPhoto {
+  text-align: center;
+}
+
+.luggagePhoto {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: 12px;
+  border: 2px solid #1a73e8;
+  margin: 12px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.photoHint {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.photoCapture {
+  text-align: center;
+}
+
+.photoButton {
+  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin: 12px 0;
+}
+
+.photoButton:hover {
+  transform: scale(1.05);
+}
+
+.photoButton:active {
+  transform: scale(0.98);
+}
+
+/* Camera View */
+.cameraView {
+  margin: 20px 0;
+}
+
+.videoPreview {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  border: 2px solid #1a73e8;
+  background: #000;
+}
+
+.cameraControls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.captureButton {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancelButton {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Photo Preview */
+.photoPreview {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.capturedImage {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  border: 2px solid #4caf50;
+  margin-bottom: 16px;
+}
+
+.photoActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.uploadButton {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uploadButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.retakeButton {
+  background: #ff9800;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.retakeButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

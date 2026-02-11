@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 
 const bookingSchema = new mongoose.Schema({
   
+  
   // ✅ NEW: Your internal booking reference
   bookingReference: {
     type: String,
@@ -98,6 +99,11 @@ const bookingSchema = new mongoose.Schema({
   cancelledAt: Date,
   
   notes: String,
+
+  luggagePhotoUrl: {
+    type: String,
+    default: null,
+  },
   
 }, { 
   timestamps: true,
