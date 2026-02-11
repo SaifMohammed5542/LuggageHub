@@ -1,10 +1,8 @@
 // app/api/partner/application/confirm-pickup/route.js
 import { NextResponse } from 'next/server';
-import { unlink } from 'fs/promises';
-import path from 'path';
-import dbConnect from '@/lib/dbConnect';
-import Booking from '@/models/booking';
-import User from '@/models/User';
+import dbConnect from '../../../../../lib/dbConnect';
+import Booking from '../../../../../models/booking';
+import User from '../../../../../models/User';
 import jwt from 'jsonwebtoken';
 
 export async function POST(request) {
@@ -95,22 +93,15 @@ export async function POST(request) {
       );
     }
 
-    // ✅ 6. DELETE LUGGAGE PHOTO if it exists (space-friendly cleanup)
+    // ✅ 6. AUTO-DELETE PHOTO (space-friendly - removes base64 data from MongoDB)
     if (booking.luggagePhotoUrl) {
-      try {
-        const photoPath = path.join(process.cwd(), 'public', booking.luggagePhotoUrl);
-        await unlink(photoPath);
-        console.log(`🗑️ Deleted luggage photo: ${booking.luggagePhotoUrl}`);
-      } catch (deleteErr) {
-        console.error('⚠️ Failed to delete photo:', deleteErr.message);
-        // Continue anyway - don't fail the pickup if photo delete fails
-      }
+      console.log(`🗑️ Clearing luggage photo for: ${bookingReference}`);
     }
 
     // 7. Update booking status
     booking.status = 'completed';
     booking.checkOutTime = new Date();
-    booking.luggagePhotoUrl = null; // ✅ Clear photo URL from database
+    booking.luggagePhotoUrl = null; // ✅ Clear photo data from MongoDB
     await booking.save();
 
     console.log('✅ Pick-up confirmed:', bookingReference);
