@@ -5,7 +5,11 @@ import { NextResponse } from "next/server";
 import dbConnect from "../../../../lib/dbConnect";
 import Booking from "../../../../models/booking";
 import User from "../../../../models/User";
+import Station from "../../../../models/Station"; // ✅ ADDED
 import jwt from "jsonwebtoken";
+
+// ✅ Ensure Station is registered
+void Station;
 
 export async function GET(req) {
   try {
