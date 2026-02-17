@@ -1,48 +1,42 @@
-// components/Header.js - IMPROVED VERSION WITH ICONS
+// components/Header.js
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./Header.module.css";
-import { 
-  Home, 
-  MapPin, 
-  HelpCircle, 
-  Package, 
-  // Key, 
-  // Calendar,
-  Handshake, 
-  BookOpen, 
-  LayoutDashboard 
+import {
+  Home,
+  MapPin,
+  HelpCircle,
+  Package,
+  Handshake,
+  BookOpen,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function Header({ scrollToServices, scrollTohowItWorks }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [username, setUsername] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+  const [username, setUsername]     = useState(null);
+  const [userRole, setUserRole]     = useState(null);
 
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
 
-  /* ===== USER INIT ===== */
+  /* ─── USER INIT ──────────────────────────────────────── */
   useEffect(() => {
-    const storedUser = localStorage.getItem("username");
-    const storedRole = localStorage.getItem("role");
-    setUsername(storedUser);
-    setUserRole(storedRole);
-
-    // Ensure any old theme value is wiped (optional safety)
+    setUsername(localStorage.getItem("username"));
+    setUserRole(localStorage.getItem("role"));
     localStorage.removeItem("theme");
   }, []);
 
-  /* ===== MOBILE MENU OUTSIDE CLICK + SCROLL LOCK ===== */
+  /* ─── MOBILE MENU: outside-click + scroll-lock ───────── */
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (e) => {
       if (
         isMenuOpen &&
-        !event.target.closest(`.${styles.menu}`) &&
-        !event.target.closest(`.${styles.hamburger}`)
+        !e.target.closest(`.${styles.menu}`) &&
+        !e.target.closest(`.${styles.hamburger}`)
       ) {
         setIsMenuOpen(false);
       }
@@ -61,50 +55,51 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
     };
   }, [isMenuOpen]);
 
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const toggleMenu = () => setIsMenuOpen((p) => !p);
+  const closeMenu  = () => setIsMenuOpen(false);
 
-  const closeMenu = () => setIsMenuOpen(false);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
-    setUsername(null);
-    setUserRole(null);
-    router.push("/auth/login");
+  /* ─── LOGOUT ─────────────────────────────────────────── */
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    } catch (err) {
+      console.error("Logout API error:", err);
+    } finally {
+      ["token", "username", "email", "userId", "role"].forEach((k) =>
+        localStorage.removeItem(k)
+      );
+      setUsername(null);
+      setUserRole(null);
+      router.push("/auth/login");
+    }
   };
 
-  /* ===== NAVIGATION TO SECTION HELPER ===== */
-  const goToSection = (hashName, scrollFunction) => {
+  /* ─── SECTION SCROLL HELPER ──────────────────────────── */
+  const goToSection = (hashName, scrollFn) => {
     setIsMenuOpen(false);
-
     if (pathname === "/") {
-      if (typeof scrollFunction === "function") {
-        scrollFunction();
+      if (typeof scrollFn === "function") {
+        scrollFn();
       } else {
-        const el = document.getElementById(hashName);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        document.getElementById(hashName)?.scrollIntoView({ behavior: "smooth" });
       }
       return;
     }
-
     router.push(`/#${hashName}`);
   };
 
-  // ✅ IMPROVED: Active link checker
-  const isActive = (path) => {
-    if (path === "/") return pathname === "/";
-    return pathname.startsWith(path);
-  };
+  /* ─── ACTIVE LINK HELPER ─────────────────────────────── */
+  const isActive = (path) =>
+    path === "/" ? pathname === "/" : pathname.startsWith(path);
 
   return (
     <>
-      {/* Overlay for mobile menu */}
       {isMenuOpen && <div className={styles.overlay} onClick={closeMenu} />}
 
       <nav className={styles.nav}>
         <div className={styles.wrapper}>
-          {/* Hamburger - Mobile Only */}
+
+          {/* Hamburger — left on mobile/tablet */}
           <button
             className={styles.hamburger}
             onClick={toggleMenu}
@@ -117,7 +112,7 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
             <span className={`${styles.bar} ${isMenuOpen ? styles.open : ""}`} />
           </button>
 
-          {/* Logo */}
+          {/* Logo — centered on mobile/tablet, left on desktop */}
           <div className={styles.logo}>
             <Link href="/" onClick={closeMenu}>
               <Image
@@ -131,23 +126,19 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
             </Link>
           </div>
 
-          {/* Navigation Menu */}
+          {/* Nav menu + auth */}
           <div className={`${styles.menu} ${isMenuOpen ? styles.open : ""}`}>
             <ul>
               <li>
-                <Link 
-                  href="/" 
-                  onClick={closeMenu}
-                  className={isActive("/") ? styles.active : ""}
-                >
+                <Link href="/" onClick={closeMenu} className={isActive("/") ? styles.active : ""}>
                   <Home size={20} />
                   <span>Home</span>
                 </Link>
               </li>
 
               <li>
-                <Link 
-                  href="/map-booking" 
+                <Link
+                  href="/map-booking"
                   onClick={closeMenu}
                   className={isActive("/map-booking") ? styles.active : ""}
                 >
@@ -163,7 +154,6 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                     e.preventDefault();
                     goToSection("how-it-works", scrollTohowItWorks);
                   }}
-                  className={pathname === "/" && window.location.hash === "#how-it-works" ? styles.active : ""}
                 >
                   <HelpCircle size={20} />
                   <span>How it Works</span>
@@ -177,38 +167,15 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                     e.preventDefault();
                     goToSection("services", scrollToServices);
                   }}
-                  className={pathname === "/" && window.location.hash === "#services" ? styles.active : ""}
                 >
                   <Package size={20} />
                   <span>Services</span>
                 </a>
               </li>
 
-              {/* <li>
-                <Link 
-                  href="/key-handover" 
-                  onClick={closeMenu}
-                  className={isActive("/key-handover") ? styles.active : ""}
-                >
-                  <Key size={20} />
-                  <span>Key Handover</span>
-                </Link>
-              </li> */}
-
-              {/* <li className={styles.bookNowLink}>
-                <Link 
-                  href="/booking-form" 
-                  onClick={closeMenu}
-                  className={isActive("/booking-form") ? styles.active : ""}
-                >
-                  <Calendar size={20} />
-                  <span>Book Now</span>
-                </Link>
-              </li> */}
-
               <li>
-                <Link 
-                  href="/blog" 
+                <Link
+                  href="/blog"
                   onClick={closeMenu}
                   className={isActive("/blog") ? styles.active : ""}
                 >
@@ -218,8 +185,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
               </li>
 
               <li>
-                <Link 
-                  href="/become-a-partner" 
+                <Link
+                  href="/become-a-partner"
                   onClick={closeMenu}
                   className={isActive("/become-a-partner") ? styles.active : ""}
                 >
@@ -230,8 +197,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
 
               {userRole === "admin" && (
                 <li>
-                  <Link 
-                    href="/admin/dashboard" 
+                  <Link
+                    href="/admin/dashboard"
                     onClick={closeMenu}
                     className={isActive("/admin/dashboard") ? styles.active : ""}
                   >
@@ -243,8 +210,8 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
 
               {userRole === "partner" && (
                 <li>
-                  <Link 
-                    href="/partner/dashboard" 
+                  <Link
+                    href="/partner/dashboard"
                     onClick={closeMenu}
                     className={isActive("/partner/dashboard") ? styles.active : ""}
                   >
@@ -255,12 +222,12 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
               )}
             </ul>
 
-            {/* Auth section */}
+            {/* Auth */}
             <div className={styles.menuExtras}>
               {username ? (
                 <>
                   <div className={styles.userInfo}>
-                    <span className={styles.username}>Welcome, {username}</span>
+                    <span className={styles.username}>👋 {username}</span>
                   </div>
                   <button className={styles.logoutBtn} onClick={handleLogout}>
                     Logout
@@ -273,6 +240,7 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
               )}
             </div>
           </div>
+
         </div>
       </nav>
     </>

@@ -158,6 +158,25 @@ const formatSimpleDate = (dateString) => {
 
   const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
+  // Add this useEffect at the top of your dashboard component
+useEffect(() => {
+  // Auto-refresh token every 10 minutes
+  const refreshInterval = setInterval(async () => {
+    const res = await fetch('/api/auth/refresh', { 
+      method: 'POST',
+      credentials: 'include' 
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      // Update localStorage with new token
+      localStorage.setItem("token", data.token);
+    }
+  }, 10 * 60 * 1000); // 10 minutes
+
+  return () => clearInterval(refreshInterval);
+}, []);
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
