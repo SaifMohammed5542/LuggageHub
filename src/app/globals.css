@@ -329,3 +329,9 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Remove all complex animations, keep only essentials */
+* {
+  transition-duration: 0.2s;
+}
+

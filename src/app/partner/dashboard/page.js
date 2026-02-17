@@ -121,6 +121,25 @@ const bookingGrossAmount = (booking) => {
     });
   };
 
+  // Add this useEffect at the top of your dashboard component
+useEffect(() => {
+  // Auto-refresh token every 10 minutes
+  const refreshInterval = setInterval(async () => {
+    const res = await fetch('/api/auth/refresh', { 
+      method: 'POST',
+      credentials: 'include' 
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      // Update localStorage with new token
+      localStorage.setItem("token", data.token);
+    }
+  }, 10 * 60 * 1000); // 10 minutes
+
+  return () => clearInterval(refreshInterval);
+}, []);
+
   useEffect(() => {
     const fetchPartnerData = async () => {
       const token = localStorage.getItem('token');

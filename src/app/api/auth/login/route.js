@@ -1,10 +1,10 @@
-// Ensure this route runs on Node.js (not Edge), so DNS + Mongoose work reliably
+// app/api/auth/login/route.js - UPDATED WITH EMAIL VERIFICATION CHECK
 export const runtime = "nodejs";
 
-import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 import dbConnect from "../../../../lib/dbConnect";
 import User from "../../../../models/User";
-import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   try {
@@ -12,10 +12,11 @@ export async function POST(req) {
 
     const { email, password } = await req.json();
 
-    // 1) Basic validation
+    // 1) Validation
     const errors = {};
     if (!email) errors.email = "Email is required";
     if (!password) errors.password = "Password is required";
+    
     if (Object.keys(errors).length > 0) {
       return NextResponse.json({ errors }, { status: 400 });
     }
@@ -38,19 +39,36 @@ export async function POST(req) {
       );
     }
 
-    // 4) Issue JWT
+    // ✅ NEW: Check if email is verified (only for regular users, not admin/partner)
+    if (user.role === 'user' && !user.isEmailVerified) {
+      return NextResponse.json(
+        { 
+          errors: { 
+            email: "Please verify your email before logging in. Check your inbox for the verification link." 
+          },
+          needsVerification: true,
+          email: user.email
+        },
+        { status: 403 }
+      );
+    }
+
+    // 4) Create tokens
     const token = jwt.sign(
       {
         userId: user._id,
         username: user.username,
+        email: user.email,
         role: user.role,
         assignedStation: user.assignedStation || null,
+        lastActivity: Date.now()
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "15m" }
     );
 
-    return NextResponse.json(
+    // 5) Create response with HttpOnly cookie
+    const response = NextResponse.json(
       {
         message: "Login successful",
         token,
@@ -62,8 +80,22 @@ export async function POST(req) {
       },
       { status: 200 }
     );
+
+    // Set HttpOnly cookie for refresh token
+    response.cookies.set('auth_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 // 30 days
+    });
+
+    return response;
+
   } catch (error) {
     console.error("Login Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
