@@ -10,6 +10,7 @@ import ErrorLog from "../../../models/ErrorLog";
 import { sendErrorNotification } from "../../../utils/mailer";
 import { generateBookingReference, generatePaymentReference } from "../../../utils/generateReference";
 import { generateQRCode } from '../../../utils/qrGenerator';
+import { getMaxListeners } from "events";
 
 void User;
 
