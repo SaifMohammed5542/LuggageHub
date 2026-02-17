@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
     default: null
   },
 
-  // ✅ NEW: Email Verification Fields
+  // ✅ Email Verification Fields
   isEmailVerified: { 
     type: Boolean, 
     default: false 
@@ -54,6 +54,15 @@ const userSchema = new mongoose.Schema({
   emailVerificationExpires: { 
     type: Date,
     default: null
+  },
+
+  // ✅ NEW: Auto-delete unverified accounts after 30 days
+  // MongoDB TTL index - automatically deletes document when this date passes
+  // Set to null when user verifies (so verified accounts are NEVER deleted)
+  unverifiedExpiresAt: {
+    type: Date,
+    default: null,
+    index: { expireAfterSeconds: 0 }
   },
 
   // 📅 Timestamps
@@ -80,4 +89,9 @@ userSchema.methods.comparePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+// Force delete old model to use updated schema
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
+
+export default mongoose.model('User', userSchema);

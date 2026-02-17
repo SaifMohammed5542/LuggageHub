@@ -76,6 +76,8 @@ export async function POST(req) {
       isEmailVerified: false,
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
+      // ✅ Auto-delete if not verified within 30 days
+      unverifiedExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
 
     await newUser.save();

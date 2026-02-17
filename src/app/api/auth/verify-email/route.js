@@ -49,6 +49,7 @@ export async function GET(req) {
     user.isEmailVerified = true;
     user.emailVerificationToken = null;
     user.emailVerificationExpires = null;
+    user.unverifiedExpiresAt = null; // ✅ Remove TTL - verified accounts are never deleted
     user.updatedAt = new Date();
     await user.save();
     
