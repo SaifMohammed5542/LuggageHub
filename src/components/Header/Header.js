@@ -13,6 +13,7 @@ import {
   Handshake,
   BookOpen,
   LayoutDashboard,
+  Luggage,
 } from "lucide-react";
 
 export default function Header({ scrollToServices, scrollTohowItWorks }) {
@@ -194,6 +195,20 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
                   <span>Become a Partner</span>
                 </Link>
               </li>
+
+              {/* ✅ My Bookings — visible to everyone except admin/partner */}
+              {userRole !== "admin" && userRole !== "partner" && (
+                <li>
+                  <Link
+                    href="/my-bookings"
+                    onClick={closeMenu}
+                    className={isActive("/my-bookings") ? styles.active : ""}
+                  >
+                    <Luggage size={20} />
+                    <span>My Bookings</span>
+                  </Link>
+                </li>
+              )}
 
               {userRole === "admin" && (
                 <li>
