@@ -127,6 +127,20 @@ export default function Header({ scrollToServices, scrollTohowItWorks }) {
             </Link>
           </div>
 
+          {/* ✅ My Bookings Quick Access (mobile/tablet only) */}
+          {userRole !== "admin" && userRole !== "partner" && (
+            <Link 
+              href="/my-bookings" 
+              className={styles.mobileMyBookings}
+              aria-label="My Bookings"
+            >
+              <div className={styles.iconWithBadge}>
+                <Luggage size={22} />
+                <span className={styles.myBadge}>MY</span>
+              </div>
+            </Link>
+          )}
+
           {/* Nav menu + auth */}
           <div className={`${styles.menu} ${isMenuOpen ? styles.open : ""}`}>
             <ul>
