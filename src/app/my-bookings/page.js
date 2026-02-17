@@ -334,7 +334,7 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-//   const [isEmailVerified, setIsEmailVerified] = useState(false);
+
   const [activeFilter, setActiveFilter] = useState("all");
   const [username, setUsername] = useState("");
 
@@ -372,7 +372,6 @@ export default function MyBookingsPage() {
       }
 
       setBookings(data.bookings || []);
-      setIsEmailVerified(data.isEmailVerified);
     } catch (err) {
       setError(err.message);
     } finally {
