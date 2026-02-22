@@ -27,13 +27,11 @@ const BookedConfirmationPage = () => {
     }
   }, []);
 
-  // ✅ OPTIMIZATION: Lazy load html2canvas only when needed
   const handleDownloadScreenshot = useCallback(async () => {
     if (!confirmationRef.current) return;
     
     setIsDownloading(true);
     try {
-      // ✅ Dynamic import - loads only when user clicks download
       const { default: html2canvas } = await import('html2canvas');
       
       const canvas = await html2canvas(confirmationRef.current, {
@@ -54,33 +52,29 @@ const BookedConfirmationPage = () => {
     } finally {
       setIsDownloading(false);
     }
-  }, [bookingData?.bookingReference]); // ✅ Memoized with dependency
+  }, [bookingData?.bookingReference]);
 
-  // ✅ OPTIMIZATION: Memoize date formatting function
-// ✅ OPTIMIZATION: Memoize date formatting function
-const formatDateTime = useCallback((dateString) => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-AU', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-  } catch {
-    return 'Invalid date';
-  }
-}, []);
+  const formatDateTime = useCallback((dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-AU', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  }, []);
 
-  // ✅ OPTIMIZATION: Memoize navigation handlers
   const handlePrint = useCallback(() => window.print(), []);
   const handleGoHome = useCallback(() => window.location.href = '/', []);
 
-  // Loading state
   if (!bookingData && !error) {
     return (
       <div className={styles.loadingContainer}>
@@ -90,7 +84,6 @@ const formatDateTime = useCallback((dateString) => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <>
@@ -116,7 +109,6 @@ const formatDateTime = useCallback((dateString) => {
     <Header />
     <div className={styles.pageWrapper}>
       <div className={styles.container}>
-        {/* Main Confirmation Card */}
         <div ref={confirmationRef} className={styles.confirmationCard}>
           {/* Success Header */}
           <div className={styles.successHeader}>
@@ -129,6 +121,28 @@ const formatDateTime = useCallback((dateString) => {
             <h1 className={styles.mainTitle}>Booking Confirmed!</h1>
             <p className={styles.subtitle}>Your luggage storage has been successfully booked</p>
           </div>
+
+          {/* ✅ QR CODE SECTION - NEW */}
+          {bookingData.qrCodeDataURL && (
+            <div className={styles.qrSection}>
+              <div className={styles.qrContainer}>
+                <img 
+                  src={bookingData.qrCodeDataURL} 
+                  alt="Booking QR Code" 
+                  className={styles.qrImage}
+                />
+              </div>
+              <div className={styles.qrInstructions}>
+                <div className={styles.qrInstructionTitle}>📱 Your QR Code</div>
+                <p className={styles.qrInstructionText}>
+                  Show this QR code when dropping off and picking up your luggage
+                </p>
+                <p className={styles.qrInstructionSubtext}>
+                  Or provide your booking reference: <strong>{bookingData.bookingReference}</strong>
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Booking Reference */}
           <div className={styles.referenceSection}>
@@ -268,8 +282,8 @@ const formatDateTime = useCallback((dateString) => {
             <div className={styles.noticeContent}>
               <div className={styles.noticeTitle}>Important Reminders</div>
               <ul className={styles.noticeList}>
-                <li>Bring a valid ID and this booking reference when dropping off and picking up</li>
-                <li>A confirmation email has been sent to {bookingData.email}</li>
+                <li>Bring a valid ID and show the QR code or booking reference when dropping off and picking up</li>
+                <li>A confirmation email with QR code has been sent to {bookingData.email}</li>
                 <li>Your luggage is covered up to A$2000</li>
                 <li>Contact us if you need to modify your booking</li>
               </ul>

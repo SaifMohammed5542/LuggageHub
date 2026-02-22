@@ -314,7 +314,7 @@ try {
     try {
       await transporter.sendMail({
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_ADMIN,
+        to:  process.env.EMAIL_ADMIN,
         subject: `🧳 New Luggage Storage Booking - ${bookingReference}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -569,8 +569,8 @@ await transporter.sendMail({
       stationLocation,
       
       // Booking details
-      dropOffDate: new Date(dropOffDate).toISOString(),
-      pickUpDate: new Date(pickUpDate).toISOString(),
+dropOffDate: dropOffDate,
+pickUpDate: pickUpDate,
       smallBagCount,
       largeBagCount,
       totalBags: luggageCount,
@@ -594,8 +594,10 @@ await transporter.sendMail({
         paymentReference,
         bookingId: newBooking._id,
         paymentId: newPayment._id,
-        bookingData: confirmationData // ✅ NEW: Full data for frontend
-      },
+bookingData: {
+  ...confirmationData,
+  qrCodeDataURL: qrCodeDataURL,  // ✅ Correct - inside bookingData
+}      },
       { status: 200 }
     );
   } catch (error) {
