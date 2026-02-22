@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode'; // ✅ Changed from Html5QrcodeScanner
 import styles from './Scan.module.css';
 
 export default function ScanPage() {
@@ -15,66 +15,57 @@ export default function ScanPage() {
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef(null);
-  const scannerRef = useRef(null);
+  const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
-    const startScanner = () => {
-      const scanner = new Html5QrcodeScanner(
-        'qr-reader',
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          // ✅ FORCE REAR CAMERA
-          videoConstraints: {
-            facingMode: { exact: "environment" } // Forces rear camera
+    let html5QrCode = null;
+
+    const startScanner = async () => {
+      try {
+        html5QrCode = new Html5Qrcode('qr-reader');
+        html5QrCodeRef.current = html5QrCode;
+
+        // ✅ Start with rear camera DIRECTLY - NO UI
+        await html5QrCode.start(
+          { facingMode: "environment" }, // ✅ Rear camera constraint
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
           },
-          // ✅ DISABLE ALL UI CONTROLS
-          showTorchButtonIfSupported: false,
-          rememberLastUsedCamera: false,
-          showZoomSliderIfSupported: false,
-          disableFlip: true,
-        },
-        false // verbose = false
-      );
-
-      scannerRef.current = scanner;
-
-      scanner.render(
-        async (decodedText) => {
-          console.log('✅ QR Code scanned:', decodedText);
-          setResult(decodedText);
-          setScanning(false);
-          
-          // Stop scanner
-          try {
-            await scanner.clear();
-          } catch  {
-            console.log('Scanner cleanup');
+          async (decodedText) => {
+            console.log('✅ QR Code scanned:', decodedText);
+            setResult(decodedText);
+            setScanning(false);
+            
+            // Stop scanner
+            try {
+              await html5QrCode.stop();
+            } catch {
+              console.log('Stop cleanup');
+            }
+            
+            // Fetch booking details
+            await fetchBookingDetails(decodedText);
+          },
+          () => {
+            // Ignore scan errors (continuous scanning)
           }
-          
-          // Fetch booking details
-          await fetchBookingDetails(decodedText);
-        },
-        () => {
-          // Ignore continuous scan errors
-        }
-      );
+        );
 
-      setScanning(true);
+        setScanning(true);
+        console.log('✅ Scanner started with rear camera');
+      } catch (err) {
+        console.error('❌ Camera error:', err);
+        setError('Unable to access camera. Please allow camera permissions.');
+      }
     };
 
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(startScanner, 200);
+    const timer = setTimeout(startScanner, 300);
 
     return () => {
       clearTimeout(timer);
-      if (scannerRef.current) {
-        try {
-          scannerRef.current.clear();
-        } catch  {
-          console.log('Cleanup');
-        }
+      if (html5QrCodeRef.current) {
+        html5QrCodeRef.current.stop().catch(() => {});
       }
     };
   }, []);
@@ -125,9 +116,9 @@ export default function ScanPage() {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = () => {
       setCapturedPhoto({
-        dataUrl: e.target.result,
+        dataUrl: reader.result,
         file: file
       });
     };
@@ -285,10 +276,15 @@ export default function ScanPage() {
             Position the QR code within the frame
           </p>
           
-          <div id="qr-reader" className={styles.qrReader}></div>
+          {/* ✅ Simple container - NO UI will appear */}
+          <div id="qr-reader" style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}></div>
 
           {scanning && (
             <p className={styles.status}>📡 Scanning...</p>
+          )}
+
+          {error && (
+            <p className={styles.errorText}>{error}</p>
           )}
 
           <p className={styles.hint}>
