@@ -369,3 +369,44 @@
   background: #ccc;
   cursor: not-allowed;
 }
+
+/* Add these styles to Scan.module.css to hide camera selection UI */
+
+/* ✅ Hide camera selection dropdown */
+.qrReader :global(#html5-qrcode-select-camera) {
+  display: none !important;
+}
+
+/* ✅ Hide camera permission button (shows automatically) */
+.qrReader :global(.html5-qrcode-element) select {
+  display: none !important;
+}
+
+/* ✅ Hide file selection button */
+.qrReader :global(#html5-qrcode-button-file-selection) {
+  display: none !important;
+}
+
+/* ✅ Hide camera selection label */
+.qrReader :global(label[for="html5-qrcode-select-camera"]) {
+  display: none !important;
+}
+
+/* ✅ Clean up the scanner box */
+.qrReader :global(#html5-qrcode-anchor-scan-type-change) {
+  display: none !important;
+}
+
+/* ✅ Make video fill the container nicely */
+.qrReader :global(video) {
+  width: 100% !important;
+  max-width: 500px !important;
+  border-radius: 12px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* ✅ Center the scanning box */
+.qrReader :global(#qr-shaded-region) {
+  border-radius: 12px !important;
+}
