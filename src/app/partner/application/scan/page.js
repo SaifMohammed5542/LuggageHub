@@ -15,46 +15,66 @@ export default function ScanPage() {
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef(null);
+  const scannerRef = useRef(null);
 
   useEffect(() => {
-    let scanner = null;
-
     const startScanner = () => {
-      scanner = new Html5QrcodeScanner(
+      const scanner = new Html5QrcodeScanner(
         'qr-reader',
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
-          showTorchButtonIfSupported: true,
+          // ✅ FORCE REAR CAMERA
+          videoConstraints: {
+            facingMode: { exact: "environment" } // Forces rear camera
+          },
+          // ✅ DISABLE ALL UI CONTROLS
+          showTorchButtonIfSupported: false,
           rememberLastUsedCamera: false,
           showZoomSliderIfSupported: false,
+          disableFlip: true,
         },
-        false
+        false // verbose = false
       );
+
+      scannerRef.current = scanner;
 
       scanner.render(
         async (decodedText) => {
+          console.log('✅ QR Code scanned:', decodedText);
           setResult(decodedText);
           setScanning(false);
-          scanner.clear();
+          
+          // Stop scanner
+          try {
+            await scanner.clear();
+          } catch (e) {
+            console.log('Scanner cleanup');
+          }
           
           // Fetch booking details
           await fetchBookingDetails(decodedText);
         },
         (errorMessage) => {
-          console.log('Scan error:', errorMessage);
+          // Ignore continuous scan errors
         }
       );
 
       setScanning(true);
     };
 
-    startScanner();
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(startScanner, 200);
 
     return () => {
-      if (scanner) {
-        scanner.clear().catch(console.error);
+      clearTimeout(timer);
+      if (scannerRef.current) {
+        try {
+          scannerRef.current.clear();
+        } catch (e) {
+          console.log('Cleanup');
+        }
       }
     };
   }, []);
@@ -84,31 +104,26 @@ export default function ScanPage() {
     }
   };
 
-  // ✅ FIXED: Use native file input with camera
   const handleTakePhoto = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  // ✅ Handle photo selection from camera
   const handlePhotoSelected = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image too large. Please choose an image under 5MB.');
       return;
     }
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setCapturedPhoto({
@@ -147,11 +162,9 @@ export default function ScanPage() {
 
       alert('✅ Photo uploaded successfully!');
       
-      // Refresh booking data to show new photo
       await fetchBookingDetails(result);
       setCapturedPhoto(null);
       
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -257,7 +270,6 @@ export default function ScanPage() {
         <h1 className={styles.title}>📷 Scan QR Code</h1>
       </div>
 
-      {/* ✅ HIDDEN FILE INPUT - Opens native camera */}
       <input
         ref={fileInputRef}
         type="file"
@@ -273,10 +285,11 @@ export default function ScanPage() {
             Position the QR code within the frame
           </p>
           
-           {/* ✅ SCANNER CONTAINER - NO UI CONTROLS */} 
-        {!result && scanning && ( <p className={styles.status}>📡 Scanning...</p> )} 
-        <div id="qr-reader" className={styles.qrReader}></div>
-          <p className={styles.hint}></p>
+          <div id="qr-reader" className={styles.qrReader}></div>
+
+          {scanning && (
+            <p className={styles.status}>📡 Scanning...</p>
+          )}
 
           <p className={styles.hint}>
             💡 Make sure the QR code is well-lit and in focus
@@ -289,7 +302,6 @@ export default function ScanPage() {
             <div className={styles.successTitle}>QR Code Scanned!</div>
           </div>
 
-          {/* Booking Details */}
           {bookingData && (
             <div className={styles.bookingDetails}>
               <h3 className={styles.detailsTitle}>Booking Details</h3>
@@ -316,7 +328,6 @@ export default function ScanPage() {
             </div>
           )}
 
-          {/* Photo Section */}
           {bookingData && (
             <div className={styles.photoSection}>
               {bookingData.luggagePhotoUrl ? (
@@ -376,7 +387,6 @@ export default function ScanPage() {
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className={styles.actionButtons}>
             {bookingData && bookingData.status !== 'stored' && bookingData.status !== 'completed' && (
               <button
