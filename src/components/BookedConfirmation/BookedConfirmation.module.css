@@ -821,3 +821,95 @@
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
+
+
+/* Add these styles to BookedConfirmation.module.css */
+
+/* ✅ QR Code Section */
+.qrSection {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 24px 0;
+  text-align: center;
+  border: 2px solid #e0e7ff;
+}
+
+.qrContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: inline-block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.qrImage {
+  width: 250px;
+  height: 250px;
+  display: block;
+  border-radius: 8px;
+}
+
+.qrInstructions {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.qrInstructionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a73e8;
+  margin-bottom: 12px;
+}
+
+.qrInstructionText {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.qrInstructionSubtext {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Mobile responsiveness for QR code */
+@media (max-width: 768px) {
+  .qrSection {
+    padding: 20px;
+  }
+
+  .qrImage {
+    width: 200px;
+    height: 200px;
+  }
+
+  .qrInstructionTitle {
+    font-size: 18px;
+  }
+
+  .qrInstructionText {
+    font-size: 14px;
+  }
+
+  .qrInstructionSubtext {
+    font-size: 12px;
+  }
+}
+
+/* Print styles - ensure QR code prints well */
+@media print {
+  .qrSection {
+    background: white !important;
+    border: 2px solid #333 !important;
+    page-break-inside: avoid;
+  }
+
+  .qrContainer {
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+  }
+}
