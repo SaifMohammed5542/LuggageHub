@@ -115,9 +115,13 @@ const VisualDateTimePicker = ({
     let startMinute = 0;
 
     if (dateType === 'today') {
-      const futureTime = new Date(now.getTime() + 30 * 60000);
-      startHour = futureTime.getHours();
-      startMinute = Math.floor(futureTime.getMinutes() / 15) * 15;
+     const futureTime = new Date(now.getTime() + 15 * 60000);
+startHour = futureTime.getHours();
+startMinute = Math.ceil(futureTime.getMinutes() / 15) * 15;
+if (startMinute === 60) {
+  startMinute = 0;
+  startHour += 1;
+}
     }
 
     if (isPickUpTab && dropOffValue) {
@@ -126,7 +130,11 @@ const VisualDateTimePicker = ({
       
       if (targetDate.toDateString() === dropOff.toDateString()) {
         startHour = minPickUp.getHours();
-        startMinute = minPickUp.getMinutes() >= 30 ? 30 : 0;
+        startMinute = Math.ceil(minPickUp.getMinutes() / 15) * 15;
+if (startMinute === 60) {
+  startMinute = 0;
+  startHour += 1;
+}
       }
     }
 
