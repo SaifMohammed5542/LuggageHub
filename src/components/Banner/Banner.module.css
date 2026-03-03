@@ -283,7 +283,7 @@
 
 /* ── Mobile trust section ────────────────────────────────────────────────── */
 .mobileTrust {
-  background: linear-gradient(168deg, var(--secondary-light) 0%, var(--secondary) 45%, var(--secondary-dark) 100%);
+  background: #fff;
   padding: 28px 16px 32px;
 }
 
@@ -296,7 +296,7 @@
 }
 
 .mobileTrustCard {
-  background: #fff;
+  background: linear-gradient(168deg, #0284c7 0%, #0369a1 45%, #075985 100%);
   border: 1.5px solid rgba(2,132,199,0.1);
   border-radius: 16px;
   padding: 16px 12px;
@@ -312,13 +312,13 @@
 .mobileTrustTitle {
   font-size: 12px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-on-primary);
   margin-bottom: 3px;
 }
 
 .mobileTrustSub {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-subtle);
   line-height: 1.4;
 }
 
