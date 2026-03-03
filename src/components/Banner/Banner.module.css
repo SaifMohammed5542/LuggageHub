@@ -283,7 +283,7 @@
 
 /* ── Mobile trust section ────────────────────────────────────────────────── */
 .mobileTrust {
-  background: #f1f5f9;
+  background: linear-gradient(168deg, var(--secondary-light) 0%, var(--secondary) 45%, var(--secondary-dark) 100%);
   padding: 28px 16px 32px;
 }
 
@@ -490,8 +490,8 @@
 .locationChip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
+  gap: 3px;
+  padding: 7px 10px;
   border-radius: 99px;
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.22);
