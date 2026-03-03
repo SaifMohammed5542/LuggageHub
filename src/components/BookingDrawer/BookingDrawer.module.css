@@ -2080,8 +2080,8 @@
 .quickChip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 12px;
+  gap: 3px;
+  padding: 5px 10px;
   border-radius: 99px;
   background: #EFF6FF;
   border: 1px solid #BFDBFE;

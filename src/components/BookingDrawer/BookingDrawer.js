@@ -488,8 +488,9 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
   const [locateError, setLocateError] = useState(false);
   const [mapSearchResult, setMapSearchResult] = useState(null);
 
-  const useMyLocation = () => {
+  const locateMe = () => {
     if (!navigator.geolocation) return;
+    setSelected(null);
     setLocating(true);
     setLocateError(false);
     navigator.geolocation.getCurrentPosition(
@@ -497,22 +498,22 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
         const coords = pos.coords;
         setUserCoords(coords);
         setLocateError(false);
-        setStations(prev => {
-          const sorted = prev
+        setStations(prev =>
+          prev
             .map(s => {
               const c = getCoords(s);
               return c ? { ...s, distance: haversine(coords.latitude, coords.longitude, c.lat, c.lon) } : s;
             })
-            .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-          if (lMapRef.current && showMap) {
-            try { lMapRef.current.flyTo([coords.latitude, coords.longitude], 14, { animate: true, duration: 1.2 }); } catch {}
-            // Trigger the same no-nearby toast logic as search
-            setMapSearchResult({ lat: coords.latitude, lon: coords.longitude, label: "your location" });
-          }
-          return sorted;
-        });
+            .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+        );
+        setSelected(null);
+        if (lMapRef.current) {
+          try { lMapRef.current.flyTo([coords.latitude, coords.longitude], 14, { animate: true, duration: 1.2 }); } catch {}
+        }
+        setMapSearchResult({ lat: coords.latitude, lon: coords.longitude, label: "your location" });
         setLocating(false);
-        setSearch(""); setListGeoResult(null);
+        setSearch("");
+        setListGeoResult(null);
       },
       () => {
         setLocating(false);
@@ -652,6 +653,7 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
       : [];
 
 if (showMap && result) {
+      setSelected(null);
       setMapSearchResult({ lat: result.lat, lon: result.lon, label: search.trim() });
     } else if (!showMap) {
       const hasNearby = stationsWithDist.some(s => s.distFromSearch <= 10);
@@ -739,8 +741,8 @@ if (showMap && result) {
 
   return (
     <div className={styles.screenWrap}>
-      {/* Header */}
-      <div className={styles.screenHeader}>
+      {/* Header — hidden in map mode, controls float on map instead */}
+      <div className={styles.screenHeader} style={showMap ? { display: "none" } : {}}>
         <div className={styles.screenTitle}>Choose a Station</div>
 
         {/* ── Search field / Near a place ── */}
@@ -753,13 +755,13 @@ if (showMap && result) {
                 onChange={e => handleSearchChange(e.target.value)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleSearchSubmit(); } }}
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); setSelected(null); handleSearchSubmit(); } }}
                 placeholder="Search area or landmark…"
                 className={styles.searchInput}
               />
               {search && (
                 <>
-                  <button type="button" onClick={handleSearchSubmit} className={styles.searchSubmit} title="Search">→</button>
+                  <button type="button" onClick={() => { setSelected(null); handleSearchSubmit(); }} className={styles.searchSubmit} title="Search">→</button>
                   <button type="button" onClick={() => { handleSearchChange(""); setSuggestions([]); setShowSuggestions(false); setListGeoResult(null); setCommittedSearch(""); pendingSuggestion.current = null; }} className={styles.searchClear}>✕</button>
                 </>
               )}
@@ -769,7 +771,7 @@ if (showMap && result) {
           <button
             type="button"
             className={`${styles.intentBtn} ${userCoords ? styles.intentBtnActive : ""}`}
-            onClick={useMyLocation}
+            onClick={() => { setSelected(null); locateMe(); }}
             disabled={locating}
           >
             <span className={styles.intentIcon}>{locating ? "⏳" : "📍"}</span>
@@ -866,13 +868,95 @@ if (showMap && result) {
 
       {/* Content */}
       <div className={showMap ? styles.screenMapMode : styles.screenScroll}>
-        {showMap ? (
-          <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
-<StationMap
+{showMap ? (
+          <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", isolation: "isolate" }}>
+
+            {/* Floating search bar */}
+            <div style={{ position:"absolute", top:12, left:12, right:12, zIndex:1100, display:"flex", flexDirection:"column", gap:8 }}>
+              <div style={{ display:"flex", gap:8 }}>
+                {/* Search input */}
+                <div style={{ flex:1, position:"relative" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, background:"white", borderRadius:14, padding:"10px 13px", boxShadow:"0 4px 20px rgba(0,0,0,0.18)" }}>
+                    <span style={{ fontSize:13 }}>{geocoding ? "⏳" : "🔍"}</span>
+                    <input
+                      value={search}
+                      onChange={e => handleSearchChange(e.target.value)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                      onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                      onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); setSelected(null); handleSearchSubmit(); } }}
+                      placeholder="Search area or landmark…"
+                      style={{ border:"none", outline:"none", fontSize:13, flex:1, background:"transparent", color:"#1e293b" }}
+                    />
+                    {search && (
+                      <>
+                        <button type="button" onClick={() => { setSelected(null); handleSearchSubmit(); }} style={{ background:"none", border:"none", fontSize:16, cursor:"pointer", color:"#0284c7", padding:0 }}>→</button>
+                        <button type="button" onClick={() => { handleSearchChange(""); setSuggestions([]); setShowSuggestions(false); setListGeoResult(null); setCommittedSearch(""); pendingSuggestion.current = null; }} style={{ background:"none", border:"none", fontSize:13, cursor:"pointer", color:"#94a3b8", padding:0 }}>✕</button>
+                      </>
+                    )}
+                  </div>
+                  {/* Suggestions dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div style={{ position:"absolute", top:"100%", left:0, right:0, background:"white", borderRadius:12, boxShadow:"0 8px 24px rgba(0,0,0,0.15)", marginTop:4, overflow:"hidden", zIndex:500 }}>
+                      {suggestions.map((s, i) => (
+                        <button key={i} type="button" onMouseDown={() => handleSuggestionSelect(s)} style={{ width:"100%", textAlign:"left", padding:"10px 14px", border:"none", background:"none", cursor:"pointer", fontSize:12, color:"#1e293b", display:"flex", alignItems:"center", gap:8, borderBottom:"1px solid #f1f5f9" }}>
+                          <span>📍</span>{s.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Near me button */}
+                <button
+                  type="button"
+                  onClick={() => { setSelected(null); locateMe(); }}
+                  disabled={locating}
+                  style={{ display:"flex", alignItems:"center", gap:6, background: userCoords ? "#0284c7" : "white", borderRadius:14, padding:"10px 12px", boxShadow:"0 4px 16px rgba(0,0,0,0.15)", border:"none", cursor:"pointer", whiteSpace:"nowrap" }}
+                >
+                  <span style={{ fontSize:13 }}>{locating ? "⏳" : "📍"}</span>
+                  <span style={{ fontSize:11, fontWeight:700, color: userCoords ? "white" : "#374151" }}>{locating ? "Finding…" : userCoords ? "Near me ✓" : "Near me"}</span>
+                </button>
+                {/* List toggle */}
+                <button
+                  type="button"
+                  onClick={() => setShowMap(false)}
+                  style={{ background:"white", borderRadius:14, padding:"10px 11px", boxShadow:"0 4px 16px rgba(0,0,0,0.15)", border:"none", cursor:"pointer", fontSize:11, fontWeight:700, color:"#374151" }}
+                >
+                  📋 List
+                </button>
+              </div>
+
+              {/* Quick chips */}
+              {!search && (() => {
+                const chipSet = new Map();
+                stations.forEach(s => {
+                  if (s.suburb && s.city) { const label = `${s.suburb}, ${s.city}`; const c = getCoords(s); if (!chipSet.has(label) && c) chipSet.set(label, { label, lat:c.lat, lon:c.lon }); }
+                  else if (s.city) { const label = s.city; const c = getCoords(s); if (!chipSet.has(label) && c) chipSet.set(label, { label, lat:c.lat, lon:c.lon }); }
+                });
+                const chips = [...chipSet.values()].slice(0, 3);
+                if (!chips.length) return null;
+                return (
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                    {chips.map((chip, i) => (
+                      <button key={i} type="button" onClick={() => { setSelected(null); setSearch(chip.label); setCommittedSearch(chip.label); setMapSearchResult({ lat:chip.lat, lon:chip.lon, label:chip.label }); }} style={{ background:"white", borderRadius:20, padding:"6px 12px", fontSize:11, fontWeight:600, color:"#0284c7", boxShadow:"0 2px 10px rgba(0,0,0,0.12)", border:"none", cursor:"pointer" }}>
+                        📍 {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Station count bubble — bottom left */}
+            <div style={{ position:"absolute", bottom: selected ? 178 : 20, left:12, zIndex:1100, background:"white", borderRadius:12, padding:"7px 11px", fontSize:11, color:"#64748b", boxShadow:"0 4px 14px rgba(0,0,0,0.12)", transition:"bottom 0.3s ease", pointerEvents:"none" }}>
+              {filtered.length} station{filtered.length !== 1 ? "s" : ""}{userCoords ? " near you" : ""}
+            </div>
+
+            <StationMap
               stations={filtered}
               allStations={stations}
               selected={selected}
-              onSelect={setSelected}
+              onSelect={s => setSelected(s)}
+              onBook={s => { setSelected(s); onSelect(s); }}
               userCoords={userCoords}
               mapSearchResult={mapSearchResult}
               onClearMapSearch={() => setMapSearchResult(null)}
@@ -938,7 +1022,7 @@ if (showMap && result) {
         )}
       </div>
 
-      {selected && (
+      {!showMap && selected && (
         <div className={styles.stickyBar}>
           <button type="button" onClick={() => onSelect(selected)} className={styles.ctaBlue}>
             Book {selected.name} →
@@ -950,7 +1034,7 @@ if (showMap && result) {
 }
 
 // ─── Station Map ──────────────────────────────────────────────────────────────
-function StationMap({ stations, allStations, selected, onSelect, userCoords, mapSearchResult, onClearMapSearch, onMapReady }) {
+function StationMap({ stations, allStations, selected, onSelect, onBook, userCoords, mapSearchResult, onClearMapSearch, onMapReady }) {
   const containerRef  = useRef(null);
   const mapRef        = useRef(null);
   const markersRef    = useRef({});
@@ -1176,7 +1260,7 @@ function fitDenseCluster(map, pool) {
                 {selected.distance ? ` · ${selected.distance.toFixed(1)} km away` : ""}
               </div>
             </div>
-            <button type="button" onClick={() => onSelect(selected)} className={styles.stationMapPopupBtn}>
+            <button type="button" onClick={() => onBook(selected)} className={styles.stationMapPopupBtn}>
               Book →
             </button>
           </div>
