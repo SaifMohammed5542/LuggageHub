@@ -2104,3 +2104,14 @@
   padding: 4px 4px 2px;
   animation: screenFadeIn 0.15s ease both;
 }
+
+.noNearbyDismiss {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
