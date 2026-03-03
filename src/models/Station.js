@@ -21,6 +21,18 @@ const StationSchema = new mongoose.Schema({
     required: true,
     trim: true 
   },
+  // ── NEW: Suburb and city for search ──────────────────────
+  suburb: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  city: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  // ─────────────────────────────────────────────────────────
   coordinates: {
     type: {
       type: String,
@@ -98,8 +110,7 @@ const StationSchema = new mongoose.Schema({
     ref: 'User'
   }],
 
-
- rating: { 
+  rating: { 
     type: Number, 
     default: 4.8,
     min: 0,

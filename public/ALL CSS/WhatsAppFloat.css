@@ -6,11 +6,11 @@
 /* Floating WhatsApp button (always bottom-left) */
 .lt-whatsapp-btn {
   position: fixed;
-  left: 20px;    /* 👈 left side */
-  bottom: 20px;
+  left: 10px;    /* 👈 left side */
+  bottom: 10px;
   z-index: 999;
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--wa-green);
   display: flex;
@@ -35,8 +35,8 @@
 /* CTA text (desktop only, sits to the right of button) */
 .lt-whatsapp-cta {
   position: fixed;
-  left: 92px; /* sits right of button */
-  bottom: 28px;
+  left: 62px; /* sits right of button */
+  bottom: 20px;
   z-index: 9998;
   display: none;
 }
@@ -53,7 +53,7 @@
 }
 
 /* Show CTA on medium+ screens */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .lt-whatsapp-cta {
     display: block;
   }

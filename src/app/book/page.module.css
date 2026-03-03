@@ -1,0 +1,72 @@
+/* book/page.module.css */
+.page {
+  min-height: 100svh;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(168deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+}
+
+.bgDots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.bgBlob1 {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(251,191,36,0.12);
+  filter: blur(80px);
+}
+
+.bgBlob2 {
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  filter: blur(70px);
+}
+
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+}
+
+.logo {
+  font-size: 52px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.2));
+}
+
+.brand {
+  color: #fff;
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: -0.8px;
+  margin-bottom: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+.tagline {
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  font-family: -apple-system, sans-serif;
+}

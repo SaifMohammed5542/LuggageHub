@@ -1,34 +1,44 @@
-import { NextResponse } from 'next/server';
-import Station from '../../../../models/Station';
-import connectDB from '../../../../lib/dbConnect';  // adjust to your DB connection file
+// app/api/station/nearest/route.js
+import { NextResponse } from "next/server";
+import dbConnect from "../../../../lib/dbConnect";
+import Station from "../../../../models/Station";
 
 export async function POST(request) {
   try {
-    await connectDB();
+    await dbConnect();
+
     const { latitude, longitude } = await request.json();
 
     if (latitude == null || longitude == null) {
-      return NextResponse.json({ message: 'Coordinates missing' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Coordinates required" },
+        { status: 400 }
+      );
     }
-
-    console.log('Searching for stations near:', latitude, longitude);  // Log the incoming coordinates
 
     const stations = await Station.aggregate([
       {
         $geoNear: {
           near: { type: "Point", coordinates: [longitude, latitude] },
-          distanceField: "distance",
-          spherical: true
-        }
+          distanceField: "distanceMeters",
+          spherical: true,
+          query: { status: "active" },
+        },
       },
-      { $limit: 5 }  // return the top 5 nearest, adjust as needed
+      { $limit: 5 },
+      {
+        $addFields: {
+          distanceKm: { $round: [{ $divide: ["$distanceMeters", 1000] }, 2] },
+        },
+      },
     ]);
 
-    console.log('Stations found:', stations);  // Log the search result
-
-    return NextResponse.json(stations);
+    return NextResponse.json({ success: true, stations });
   } catch (error) {
-    console.error('Error during station search:', error);
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    console.error("Nearest station search failed:", error);
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    );
   }
 }

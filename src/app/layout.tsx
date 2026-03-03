@@ -4,7 +4,6 @@ import "./globals.css";
 import "./theme.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import GoogleMapsWrapper from "@/components/GoogleMapsWrapper"; // ✅ Import wrapper
 
 // Fonts (next/font sets CSS variables we reference in body)
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -85,7 +84,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {/* body applies font CSS variables provided by next/font */}
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {/* ✅ Wrap everything with Google Maps loader */}
-        <GoogleMapsWrapper>
           <main className="min-h-dvh">{children}</main>
 
           {/* Global toast container (client component). OK to keep here.) */}
@@ -96,7 +94,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               error: { style: { background: "#f44336", color: "#fff" } },
             }}
           />
-        </GoogleMapsWrapper>
       </body>
     </html>
   );
