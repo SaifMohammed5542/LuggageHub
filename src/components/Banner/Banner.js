@@ -1,561 +1,205 @@
-// components/Banner.js - HYBRID 3: FINAL CORRECTED VERSION
 "use client";
-import React, { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Search,
-  MapPin,
-  Navigation,
-  BoxIcon,
-  AlertCircle,
-  LockKeyhole,
-} from "lucide-react";
-import styles from "./Banner.module.css";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import styles from "./Banner.module.css";
+import BookingDrawer from "@/components/BookingDrawer/BookingDrawer";
 
 export default function Banner() {
-  const router = useRouter();
-  const [searchInput, setSearchInput] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [locationError, setLocationError] = useState("");
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const [bookingType, setBookingType] = useState("luggage");
-  const autocompleteService = useRef(null);
-  const geocoderService = useRef(null);
-  const sessionToken = useRef(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [locationChips, setLocationChips] = useState([]);
+const [userCoords,    setUserCoords]    = useState(null);
+const [initialSearch, setInitialSearch] = useState(null);
 
   useEffect(() => {
-    const initializeGoogleMaps = () => {
-      if (typeof window !== "undefined" && window.google?.maps) {
-        try {
-          if (window.google.maps.places && !autocompleteService.current) {
-            autocompleteService.current = new window.google.maps.places.AutocompleteService();
-            sessionToken.current = new window.google.maps.places.AutocompleteSessionToken();
-          }
-          
-          if (!geocoderService.current) {
-            geocoderService.current = new window.google.maps.Geocoder();
-          }
-        } catch (error) {
-          console.error("Google Maps initialization error:", error);
-        }
-      }
-    };
-
-    initializeGoogleMaps();
-
-    if (!window.google?.maps) {
-      const checkInterval = setInterval(() => {
-        if (window.google?.maps) {
-          initializeGoogleMaps();
-          clearInterval(checkInterval);
-        }
-      }, 100);
-
-      setTimeout(() => clearInterval(checkInterval), 10000);
-      return () => clearInterval(checkInterval);
-    }
+    const t = setTimeout(() => setVisible(true), 80);
+    return () => clearTimeout(t);
   }, []);
 
-  const handleSearchChange = async (e) => {
-    const value = e.target.value;
-    setSearchInput(value);
-
-    if (value.trim().length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    setIsLoadingSuggestions(true);
-
-    const stationSuggestions = await fetchStationSuggestions(value);
-
-    if (autocompleteService.current) {
-      try {
-        const request = {
-          input: value,
-          componentRestrictions: { country: "au" },
-          types: ["geocode", "establishment"],
-          sessionToken: sessionToken.current,
-        };
-
-        autocompleteService.current.getPlacePredictions(
-          request,
-          (predictions, status) => {
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-              const placeSuggestions = predictions.slice(0, 4).map((prediction) => ({
-                type: "place",
-                name: prediction.structured_formatting.main_text,
-                location: prediction.structured_formatting.secondary_text || "",
-                description: prediction.description,
-                placeId: prediction.place_id,
-              }));
-
-              const combined = [...placeSuggestions, ...stationSuggestions];
-              setSuggestions(combined);
-              setShowSuggestions(combined.length > 0);
-            } else {
-              setSuggestions(stationSuggestions);
-              setShowSuggestions(stationSuggestions.length > 0);
-            }
-            
-            setIsLoadingSuggestions(false);
-          }
-        );
-      } catch {
-        setSuggestions(stationSuggestions);
-        setShowSuggestions(stationSuggestions.length > 0);
-        setIsLoadingSuggestions(false);
-      }
-    } else {
-      setSuggestions(stationSuggestions);
-      setShowSuggestions(stationSuggestions.length > 0);
-      setIsLoadingSuggestions(false);
-    }
-  };
-
-  const fetchStationSuggestions = async (query) => {
+  useEffect(() => {
+  (async () => {
     try {
-      const response = await fetch("/api/station/list");
-      const data = await response.json();
-      
-      if (data.stations) {
-        const matches = data.stations
-          .filter(
-            (station) =>
-              station.name?.toLowerCase().includes(query.toLowerCase()) ||
-              station.location?.toLowerCase().includes(query.toLowerCase())
-          )
-          .slice(0, 4)
-          .map((station) => ({
-            type: "station",
-            name: station.name,
-            location: station.location,
-            stationId: station._id,
-            coordinates: station.coordinates?.coordinates,
-          }));
-        
-        return matches;
-      }
-      return [];
-    } catch {
-      return [];
-    }
-  };
-
-  const geocodePlace = async (placeId) => {
-    return new Promise((resolve, reject) => {
-      if (!geocoderService.current) {
-        reject(new Error("Geocoder not available"));
-        return;
-      }
-
-      geocoderService.current.geocode(
-        { placeId: placeId },
-        (results, status) => {
-          if (status === "OK" && results[0]) {
-            const location = results[0].geometry.location;
-            const coords = {
-              lat: location.lat(),
-              lng: location.lng(),
-            };
-            resolve(coords);
-          } else {
-            reject(new Error("Geocoding failed: " + status));
-          }
+      const res  = await fetch("/api/station/list");
+      const data = await res.json();
+      const list = data.stations || [];
+      const chipMap = new Map();
+      list.forEach(s => {
+        const coords = s.coordinates?.coordinates;
+        if (!coords) return;
+        const [lon, lat] = coords;
+        if (s.suburb && s.city) {
+          const label = `${s.suburb}, ${s.city}`;
+          if (!chipMap.has(label)) chipMap.set(label, { label, lat, lon });
+        } else if (s.city) {
+          if (!chipMap.has(s.city)) chipMap.set(s.city, { label: s.city, lat, lon });
         }
-      );
-    });
-  };
+      });
+      setLocationChips([...chipMap.values()].slice(0, 4));
+    } catch {}
+  })();
+}, []);
 
-  const handleSuggestionClick = async (suggestion) => {
-    setSearchInput(suggestion.name);
-    setShowSuggestions(false);
+useEffect(() => {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => setUserCoords(pos.coords),
+    () => {}
+  );
+}, []);
 
-    if (suggestion.type === "station") {
-      router.push(`/map-booking?stationId=${suggestion.stationId}`);
-    } else if (suggestion.type === "place") {
-      try {
-        const coords = await geocodePlace(suggestion.placeId);
-        router.push(`/map-booking?lat=${coords.lat}&lng=${coords.lng}&search=${encodeURIComponent(suggestion.description)}`);
-      } catch {
-        router.push(`/map-booking?search=${encodeURIComponent(suggestion.description)}`);
-      }
-    }
-  };
-
-  const handleSearch = () => {
-    if (!searchInput.trim()) {
-      return;
-    }
-    router.push(`/map-booking?search=${encodeURIComponent(searchInput.trim())}`);
-    setShowSuggestions(false);
-  };
-
-  const handleUseMyLocation = () => {
-    setIsLoadingLocation(true);
-    setLocationError("");
-
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser");
-      setIsLoadingLocation(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setIsLoadingLocation(false);
-        router.push(`/map-booking?lat=${latitude}&lng=${longitude}&nearby=true`);
-      },
-      (error) => {
-        let errorMessage = "";
-        
-        if (error.code === 1) {
-          errorMessage = "Location access denied. Please enable location permission in your browser settings.";
-        } else if (error.code === 2) {
-          errorMessage = "Location information is unavailable. Please try again.";
-        } else if (error.code === 3) {
-          errorMessage = "Location request timed out. Please try again.";
-        } else {
-          errorMessage = "Unable to get your location. Please try again or use the search bar.";
-        }
-        
-        setLocationError(errorMessage);
-        setIsLoadingLocation(false);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 15000,
-        maximumAge: 300000,
-      }
-    );
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      const floatingCard = document.querySelector('[class*="floatingCard"]');
-      if (floatingCard && !floatingCard.contains(e.target)) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+const openWithChip = (chip) => { setInitialSearch(chip); setDrawerOpen(true); };
+const openDrawer   = ()     => { setInitialSearch(null); setDrawerOpen(true); };
 
   return (
-    <section className={styles.banner}>
-      <div className={styles.content}>
-        {/* Diagonal Blue Header */}
-        <div className={styles.heroHeader}>
-          <div className={styles.heroContent}>
-            <div className={styles.badge}>
-              <LockKeyhole className={styles.lockIcon} />
-              <span> Trusted by 5,000+ Travelers</span>
-            </div>
-          <div className={styles.textImgContent}>
-            <div className={styles.textContent}>
-            <h1 className={styles.heading}>
-              Store Your
-              {/* <br /> */}
-              <span className={styles.gradient}>Luggage</span>
-              {/* <br /> */}
-              Securely
-            </h1>
-            </div>
-            <div className={styles.imgContent}>
-               <Image
-                      src="/images/Glowedwhite.png"
-                      alt="Secure Luggage Storage"
-                      width={280}
-                      height={200}
-                      priority
-                      sizes="(max-width: 768px) 28vw, 240px"
-                      className={styles.logo}
-                    />
-            </div>
-          </div>  
+    <>
+      <section className={styles.banner}>
+        {/* Texture & ambient glows */}
+        <div className={styles.dots} />
+        <div className={styles.blob1} />
+        <div className={styles.blob2} />
 
-            <p className={styles.subtitle}>
-              Find verified storage near you. A$2000 insurance. From A$3.99/day.
-            </p>
-{/* 
-            <div className={styles.heroStats}>
-              <div className={styles.heroStat}>
-                <div className={styles.heroStatValue}>5K+</div>
-                <div className={styles.heroStatLabel}>Customers</div>
-              </div>
-              <div className={styles.heroStat}>
-                <div className={styles.heroStatValue}>4.8★</div>
-                <div className={styles.heroStatLabel}>Rating</div>
-              </div>
-              <div className={styles.heroStat}>
-                <div className={styles.heroStatValue}>5+</div>
-                <div className={styles.heroStatLabel}>Locations</div>
-              </div>
-            </div> */}
-            <div className={styles.quickActions2}>
-          <div className={styles.quickActionsTitle}>
-            <h3>Quick Actions</h3>
+        {/* ── Nav ──────────────────────────────────────────────────────── */}
+        <div className={styles.nav}>
+          <div className={styles.navBrand}>
+            <div className={styles.navIcon}>🧳</div>
+            <span className={styles.navName}>LuggageTerminal</span>
           </div>
-                    {/* <div className={styles.or}>
-            <p>OR</p>
+          <a href="/booking-form" className={styles.navLink}>
+            Direct Booking →
+          </a>
+        </div>
+
+        {/* ── Left: Hero copy ──────────────────────────────────────────── */}
+        <div className={`${styles.hero} ${visible ? styles.heroIn : ""}`}>
+          <div className={styles.badge}>
+            <span className={styles.badgeDot} />
+            Trusted by 5,000+ travellers
+          </div>
+
+          <h1 className={styles.heading}>
+            Store Your{" "}
+            <span className={styles.accent}>Luggage</span>
+            {" "}&amp; Explore Free
+          </h1>
+
+          <p className={styles.sub}>
+            Verified storage spots near you. Drop off in minutes, explore freely.
+            From A$3.99/day.
+          </p>
+
+          {/* Price chips */}
+          <div className={styles.prices}>
+            {[
+              { emoji: "🎒", label: "Small bag",        price: "A$3.99" },
+              { emoji: "🧳", label: "Large / Suitcase", price: "A$8.49" },
+            ].map((p) => (
+              <div key={p.label} className={styles.priceChip}>
+                <span className={styles.priceChipEmoji}>{p.emoji}</span>
+                <div>
+                  <div className={styles.priceChipLabel}>{p.label}</div>
+                  <div className={styles.priceChipAmt}>
+                    {p.price}
+                    <span className={styles.priceChipPer}>/day</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button onClick={openDrawer} className={styles.cta}>
+            <span>Find Storage Near Me</span>
+            <span className={styles.ctaArrow}>→</span>
+          </button>
+
+          {locationChips.length > 0 && (
+  <div className={styles.locationChipsWrap}>
+    <span className={styles.locationChipsLabel}>
+      {userCoords ? "📍 Near you" : "⭐ Popular locations"}
+    </span>
+    <div className={styles.locationChips}>
+      {locationChips.map((chip, i) => (
+        <button key={i} type="button" className={styles.locationChip} onClick={() => openWithChip(chip)}>
+          {chip.label}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+          {/* Stats */}
+          {/* <div className={styles.stats}>
+            {[
+              ["5K+",  "Travellers"],
+              ["4.8★", "Rating"],
+              ["60s",  "To book"],
+              ["A$2K", "Insured"],
+            ].map(([v, l]) => (
+              <div key={l} className={styles.stat}>
+                <div className={styles.statVal}>{v}</div>
+                <div className={styles.statLbl}>{l}</div>
+              </div>
+            ))}
           </div> */}
-
-          <div className={styles.bookingWrapper}>
-            <div className={styles.bookingToggle}>
-              <button
-                type="button"
-                className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
-                onClick={() => setBookingType("luggage")}
-              >
-                🧳 Luggage
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
-                onClick={() => setBookingType("key")}
-              >
-                🔑 Key
-              </button>
-            </div>
-
-            <button
-              onClick={() =>
-                router.push(
-                  bookingType === "key" ? "/key-handover" : "/booking-form"
-                )
-              }
-              className={styles.directBookingCTA}
-            >
-              <BoxIcon className={styles.locationIcon} />
-              {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
-            </button>
-          </div>
-        </div>
-          </div>
         </div>
 
-        {/* Floating Search Card */}
-        <div className={styles.floatingCard}>
-          <h2 className={styles.cardTitle}>Find Storage Now</h2>
-          <p className={styles.cardSubtitle}>Enter your location to see nearby options</p>
-
-          <div className={styles.searchWrapper}>
-            <Search className={styles.searchIcon} />
-            <input 
-              type="text" 
-              className={styles.searchInput} 
-              placeholder="City, area, or landmark..."
-              value={searchInput}
-              onChange={handleSearchChange}
-              onKeyDown={handleKeyDown}
-              aria-label="Search for storage locations"
+        {/* ── Right panel: desktop only ─────────────────────────────────── */}
+        <div className={`${styles.rightPanel} ${visible ? styles.rightPanelIn : ""}`}>
+          {/* Luggage image */}
+          <div className={styles.imgWrap}>
+            <Image
+              src="/images/Glowedwhite.png"
+              alt="Secure Luggage Storage"
+              width={220}
+              height={180}
+              priority
+              className={styles.luggageImg}
             />
+          </div>
 
-            {showSuggestions && (
-              <div className={styles.suggestionsDropdown}>
-                {isLoadingSuggestions ? (
-                  <div className={styles.loadingSuggestions}>
-                    <div className={styles.spinner}></div>
-                    <span>Searching...</span>
-                  </div>
-                ) : suggestions.length > 0 ? (
-                  suggestions.map((suggestion, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.suggestionItem}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <MapPin className={styles.suggestionIcon} />
-                      <div className={styles.suggestionText}>
-                        <div className={styles.suggestionName}>
-                          {suggestion.name}
-                          {suggestion.type === "station" && (
-                            <span className={styles.stationBadge}>Storage Station</span>
-                          )}
-                        </div>
-                        <div className={styles.suggestionLocation}>{suggestion.location}</div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className={styles.noSuggestions}>
-                    No results found
-                  </div>
-                )}
+          {/* Trust cards 2×2 */}
+          <div className={styles.trustGrid}>
+            {[
+              { icon: "🔐", title: "A$2,000 Insured",   sub: "Every bag covered" },
+              { icon: "⚡", title: "Book in 60 seconds", sub: "Instant QR code" },
+              { icon: "✓",  title: "Verified Locations", sub: "All sites checked" },
+              { icon: "📱", title: "24/7 Support",       sub: "Always here" },
+            ].map((c) => (
+              <div key={c.title} className={styles.trustCard}>
+                <span className={styles.trustCardIcon}>{c.icon}</span>
+                <div>
+                  <div className={styles.trustCardTitle}>{c.title}</div>
+                  <div className={styles.trustCardSub}>{c.sub}</div>
+                </div>
               </div>
-            )}
-          </div>
-
-          <button 
-            className={styles.btnPrimary}
-            onClick={handleSearch}
-            disabled={!searchInput.trim()}
-          >
-            <span>Search Locations</span>
-            <span>→</span>
-          </button>
-
-          <button 
-            className={styles.btnLocation}
-            onClick={handleUseMyLocation}
-            disabled={isLoadingLocation}
-          >
-            <Navigation className={styles.locationIcon} />
-            <span>
-              {isLoadingLocation ? "Getting your location..." : "Use My Current Location"}
-            </span>
-          </button>
-
-          {locationError && (
-            <div className={styles.locationError}>
-              <AlertCircle className={styles.errorIcon} />
-              <span>{locationError}</span>
-            </div>
-          )}
-
-          {/* OR + Booking Toggle */}
-          {/* <div className={styles.or}>
-            <p>OR</p>
-          </div>
-
-          <div className={styles.bookingWrapper}>
-            <div className={styles.bookingToggle}>
-              <button
-                type="button"
-                className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
-                onClick={() => setBookingType("luggage")}
-              >
-                🧳 Luggage
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
-                onClick={() => setBookingType("key")}
-              >
-                🔑 Key
-              </button>
-            </div>
-
-            <button
-              onClick={() =>
-                router.push(
-                  bookingType === "key" ? "/key-handover" : "/booking-form"
-                )
-              }
-              className={styles.directBookingCTA}
-            >
-              <BoxIcon className={styles.locationIcon} />
-              {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
-            </button>
-          </div> */}
-        </div>
-
-        {/* Quick Actions (RIGHT AFTER SEARCH) */}
-        <div className={styles.quickActions}>
-          <div className={styles.quickActionsTitle}>
-            <h3>Quick Actions</h3>
-          </div>
-                    {/* <div className={styles.or}>
-            <p>OR</p>
-          </div> */}
-
-          <div className={styles.bookingWrapper}>
-            <div className={styles.bookingToggle}>
-              <button
-                type="button"
-                className={`${styles.toggleOption} ${bookingType === "luggage" ? styles.active : ""}`}
-                onClick={() => setBookingType("luggage")}
-              >
-                🧳 Luggage
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.toggleOption} ${bookingType === "key" ? styles.active : ""}`}
-                onClick={() => setBookingType("key")}
-              >
-                🔑 Key
-              </button>
-            </div>
-
-            <button
-              onClick={() =>
-                router.push(
-                  bookingType === "key" ? "/key-handover" : "/booking-form"
-                )
-              }
-              className={styles.directBookingCTA}
-            >
-              <BoxIcon className={styles.locationIcon} />
-              {bookingType === "key" ? "Book Key Handover" : "Book Luggage Storage"}
-            </button>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Why Choose Us (FEATURE CARDS - AFTER QUICK ACTIONS) */}
-        <div className={styles.whyChooseUs}>
-          <h3 className={styles.whyTitle}>Why Choose Us?</h3>
-          <div className={styles.featuresGrid}>
-            <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>🔐</div>
-              <div className={styles.featureLabel}>A$2000 Insured</div>
-              <div className={styles.featureDesc}>Every bag fully covered</div>
+      {/* Mobile trust section — hidden on desktop */}
+      <section className={styles.mobileTrust}>
+        <div className={styles.mobileTrustGrid}>
+          {[
+            { icon: "🔐", title: "A$2,000 Insured",   sub: "Every bag fully covered" },
+            { icon: "⚡", title: "Book in 60 seconds", sub: "Instant confirmation" },
+            { icon: "✓",  title: "Verified Locations", sub: "All sites inspected" },
+            { icon: "📱", title: "24/7 Support",       sub: "Always here to help" },
+          ].map((c) => (
+            <div key={c.title} className={styles.mobileTrustCard}>
+              <div className={styles.mobileTrustIcon}>{c.icon}</div>
+              <div className={styles.mobileTrustTitle}>{c.title}</div>
+              <div className={styles.mobileTrustSub}>{c.sub}</div>
             </div>
-
-            <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>⚡</div>
-              <div className={styles.featureLabel}>Instant Book</div>
-              <div className={styles.featureDesc}>Reserve in 30 sec</div>
-            </div>
-
-            <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>✓</div>
-              <div className={styles.featureLabel}>Verified</div>
-              <div className={styles.featureDesc}>All locations checked</div>
-            </div>
-
-            <div className={styles.featureCard}>
-              <div className={styles.featureIcon}>📱</div>
-              <div className={styles.featureLabel}>24/7 Support</div>
-              <div className={styles.featureDesc}>Always here to help</div>
-            </div>
-          </div>
+          ))}
         </div>
+      </section>
 
-        {/* Stats Bar */}
-        {/* <div className={styles.statsBar}>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>5K+</div>
-            <div className={styles.statLabel}>Users</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>5+</div>
-            <div className={styles.statLabel}>Spots</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>4.8★</div>
-            <div className={styles.statLabel}>Rating</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>15K</div>
-            <div className={styles.statLabel}>Bags</div>
-          </div>
-        </div> */}
-      </div>
-    </section>
+<BookingDrawer
+  isOpen={drawerOpen}
+  onClose={() => setDrawerOpen(false)}
+  onOpen={() => setDrawerOpen(true)}
+  initialSearch={initialSearch}
+/></>
   );
 }

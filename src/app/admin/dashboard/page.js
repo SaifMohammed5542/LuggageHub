@@ -69,6 +69,8 @@ const formatSimpleDate = (dateString) => {
   // Station create form (kept)
   const [stationName, setStationName] = useState("");
   const [stationLocation, setStationLocation] = useState("");
+  const [stationSuburb, setStationSuburb] = useState("");
+  const [stationCity, setStationCity] = useState("");
   const [stationLatitude, setStationLatitude] = useState("");
   const [stationLongitude, setStationLongitude] = useState("");
   const [stationImages, setStationImages] = useState("");
@@ -123,12 +125,14 @@ const formatSimpleDate = (dateString) => {
 
   // Station edit UI state
   const [showStationEditForm, setShowStationEditForm] = useState(false);
-  const [editStation, setEditStation] = useState({
-    name: "",
-    location: "",
-    latitude: "",
-    longitude: "",
-  });
+const [editStation, setEditStation] = useState({
+  name: "",
+  location: "",
+  suburb: "",   // ADD
+  city: "",     // ADD
+  latitude: "",
+  longitude: "",
+});
   const [editStationImages, setEditStationImages] = useState("");
   const [editStationBank, setEditStationBank] = useState({
     accountHolderName: "",
@@ -226,6 +230,8 @@ useEffect(() => {
         location: selectedStation.location || "",
         latitude: latValue,
         longitude: lonValue,
+        suburb: selectedStation.suburb || "",
+        city: selectedStation.city || "",
       });
 
       setEditStationBank({
@@ -580,6 +586,8 @@ const getBookingAmount = (booking) => {
         body: JSON.stringify({
           name: stationName.trim(),
           location: stationLocation.trim(),
+          suburb: stationSuburb.trim(),
+          city: stationCity.trim(),
           latitude: lat,
           longitude: lon,
           images: imagesArr,
@@ -603,6 +611,8 @@ const getBookingAmount = (booking) => {
         // reset
         setStationName("");
         setStationLocation("");
+        setStationSuburb("");
+        setStationCity("");
         setStationLatitude("");
         setStationLongitude("");
         setStationImages("");
@@ -809,6 +819,8 @@ const getBookingAmount = (booking) => {
     const payload = {
       name: editStation.name?.trim(),
       location: editStation.location?.trim(),
+      suburb: editStation.suburb?.trim(),
+      city: editStation.city?.trim(),
       latitude: lat,
       longitude: lon,
       images: imagesArr,
@@ -1087,6 +1099,8 @@ Total: ${booking.luggageCount}
                     <div className={styles.formGrid}>
                       <input className={styles.input} value={stationName} onChange={(e) => setStationName(e.target.value)} placeholder="Station Name" />
                       <input className={styles.input} value={stationLocation} onChange={(e) => setStationLocation(e.target.value)} placeholder="Station Location" />
+                      <input className={styles.input} value={stationSuburb} onChange={(e) => setStationSuburb(e.target.value)} placeholder="Suburb (e.g. CBD, Southbank, Fitzroy)" />
+                      <input className={styles.input} value={stationCity} onChange={(e) => setStationCity(e.target.value)} placeholder="City (e.g. Melbourne)" />
                       <input className={styles.input} value={stationLatitude} onChange={(e) => setStationLatitude(e.target.value)} placeholder="Latitude (e.g., -33.86)" />
                       <input className={styles.input} value={stationLongitude} onChange={(e) => setStationLongitude(e.target.value)} placeholder="Longitude (e.g., 151.20)" />
                       <input className={styles.input} value={stationImages} onChange={(e) => setStationImages(e.target.value)} placeholder="Station images (optional) — comma separated URLs" />
@@ -1523,6 +1537,8 @@ Total: ${booking.luggageCount}
                     <div className={styles.formGrid}>
                       <input className={styles.input} value={editStation.name} onChange={(e) => setEditStation((s) => ({ ...s, name: e.target.value }))} placeholder="Station Name" />
                       <input className={styles.input} value={editStation.location} onChange={(e) => setEditStation((s) => ({ ...s, location: e.target.value }))} placeholder="Station Location" />
+                      <input className={styles.input} value={editStation.suburb} onChange={(e) => setEditStation((s) => ({ ...s, suburb: e.target.value }))} placeholder="Suburb (e.g. CBD, Southbank, Fitzroy)" />
+                      <input className={styles.input} value={editStation.city} onChange={(e) => setEditStation((s) => ({ ...s, city: e.target.value }))} placeholder="City (e.g. Melbourne)" />
                       <input className={styles.input} value={editStation.latitude} onChange={(e) => setEditStation((s) => ({ ...s, latitude: e.target.value }))} placeholder="Latitude (e.g., -33.86)" />
                       <input className={styles.input} value={editStation.longitude} onChange={(e) => setEditStation((s) => ({ ...s, longitude: e.target.value }))} placeholder="Longitude (e.g., 151.20)" />
                       <input className={styles.input} value={editStationImages} onChange={(e) => setEditStationImages(e.target.value)} placeholder="Station images (optional) — comma separated URLs" />

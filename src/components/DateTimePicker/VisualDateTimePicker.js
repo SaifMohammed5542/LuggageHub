@@ -1,674 +1,400 @@
-// components/DateTimePicker/VisualDateTimePicker.jsx - ENHANCED WITH SMOOTH UX
 "use client";
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import styles from './VisualDateTimePicker.module.css';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import styles from "./VisualDateTimePicker.module.css";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getRoundedNow = () => {
+  const d = new Date();
+  const mins = d.getMinutes();
+  d.setMinutes(mins < 30 ? 30 : 60, 0, 0);
+  return d;
+};
+
+const addHours = (date, h) => new Date(date.getTime() + h * 3600000);
+
+const toLocalISO = (date) => {
+  const y = date.getFullYear();
+  const mo = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${y}-${mo}-${d}T${h}:${m}`;
+};
+
+const fmt12 = (date) =>
+  date.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true });
+
+// const fmtDate = (date) => {
+//   const today = new Date();
+//   const tomorrow = new Date(today);
+//   tomorrow.setDate(today.getDate() + 1);
+//   if (date.toDateString() === today.toDateString()) return "Today";
+//   if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+//   return date.toLocaleDateString("en-AU", {
+//     weekday: "short", day: "numeric", month: "short",
+//   });
+// };
+
+const fmtDateFull = (date) =>
+  date.toLocaleDateString("en-AU", {
+    weekday: "short", day: "numeric", month: "short", year: "numeric",
+  });
+
+// Generate next N days starting from today
+const getNextDays = (n = 14) => {
+  const days = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (let i = 0; i < n; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    days.push(d);
+  }
+  return days;
+};
+
+// Generate time slots every 15 minutes
+const getTimeSlots = () => {
+  const slots = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      slots.push({ h, m, label: new Date(0, 0, 0, h, m).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }) });
+    }
+  }
+  return slots;
+};
+
+
+
+const PRESETS = [
+  { label: "2 hrs", hours: 2 },
+  { label: "4 hrs", hours: 4 },
+  { label: "Half day", hours: 6 },
+  { label: "Full day", hours: 24 },
+  { label: "2 days", hours: 48 },
+  { label: "1 week", hours: 168 },
+];
+
+const DAYS = getNextDays(14);
+const TIME_SLOTS = getTimeSlots();
+
+// ─── Scroll Drum ──────────────────────────────────────────────────────────────
+
+function ScrollDrum({ items, selectedIndex, onSelect, getLabel }) {
+  const ref = useRef(null);
+  const ITEM_H = 46;
+  const PAD = 2; // items above/below center
+
+  // Scroll to selected on mount
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollTop = selectedIndex * ITEM_H;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (!ref.current) return;
+    const idx = Math.round(ref.current.scrollTop / ITEM_H);
+    const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    if (clamped !== selectedIndex) onSelect(clamped);
+  }, [items.length, selectedIndex, onSelect]);
+
+  const scrollTo = (idx) => {
+    ref.current?.scrollTo({ top: idx * ITEM_H, behavior: "smooth" });
+  };
+
+  return (
+    <div className={styles.drumWrap}>
+      {/* Selection band */}
+      <div className={styles.drumBand} />
+      {/* Fade top */}
+      <div className={styles.drumFadeTop} />
+      {/* Fade bottom */}
+      <div className={styles.drumFadeBottom} />
+
+      <div
+        ref={ref}
+        className={styles.drumScroll}
+        onScroll={handleScroll}
+        style={{ paddingTop: ITEM_H * PAD, paddingBottom: ITEM_H * PAD }}
+      >
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={`${styles.drumItem} ${i === selectedIndex ? styles.drumItemActive : ""}`}
+            style={{ height: ITEM_H }}
+            onClick={() => { onSelect(i); scrollTo(i); }}
+          >
+            {getLabel(item)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Date + Time Picker Panel ─────────────────────────────────────────────────
+
+function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose }) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const initDayIdx = Math.max(0, DAYS.findIndex((d) => d.toDateString() === initialDate.toDateString()));
+  const initSlotIdx = Math.max(0, TIME_SLOTS.findIndex(
+    (s) => s.h === initialDate.getHours() && s.m <= initialDate.getMinutes()
+  ));
+
+  const [dayIdx, setDayIdx] = useState(initDayIdx);
+  const [slotIdx, setSlotIdx] = useState(initSlotIdx);
+
+  const result = useMemo(() => {
+    const d = new Date(DAYS[dayIdx]);
+    const s = TIME_SLOTS[slotIdx];
+    d.setHours(s.h, s.m, 0, 0);
+    return d;
+  }, [dayIdx, slotIdx]);
+
+  const isValid = result >= (minDate || new Date());
+
+  return (
+    <div className={styles.pickerOverlay}>
+      <div className={styles.pickerSheet}>
+        {/* Header */}
+        <div className={styles.pickerHeader}>
+          <button type="button" onClick={onClose} className={styles.pickerCancel}>Cancel</button>
+          <span className={styles.pickerTitle}>{title}</span>
+          <button
+            type="button"
+            onClick={() => isValid && onConfirm(result)}
+            disabled={!isValid}
+            className={`${styles.pickerSet} ${isValid ? styles.pickerSetActive : ""}`}
+          >
+            Set
+          </button>
+        </div>
+
+        {/* Preview */}
+        <div className={styles.pickerPreview}>
+          <span className={styles.pickerPreviewText}>
+            {fmtDateFull(DAYS[dayIdx])} · {TIME_SLOTS[slotIdx]?.label}
+          </span>
+          {!isValid && <span className={styles.pickerPreviewError}>Must be after minimum time</span>}
+        </div>
+
+        {/* Column labels */}
+        <div className={styles.pickerCols}>
+          <div className={styles.pickerColLabel}>Date</div>
+          <div className={styles.pickerColDivider} />
+          <div className={styles.pickerColLabel}>Time</div>
+        </div>
+
+        {/* Drums */}
+        <div className={styles.pickerDrums}>
+          <div className={styles.drumCol} style={{ flex: 1.5 }}>
+            <ScrollDrum
+              items={DAYS}
+              selectedIndex={dayIdx}
+              onSelect={setDayIdx}
+              getLabel={(d) => {
+                if (d.toDateString() === today.toDateString()) return "Today";
+                const tom = new Date(today); tom.setDate(today.getDate() + 1);
+                if (d.toDateString() === tom.toDateString()) return "Tomorrow";
+                return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+              }}
+            />
+          </div>
+          <div className={styles.pickerDrumDivider} />
+          <div className={styles.drumCol} style={{ flex: 1 }}>
+            <ScrollDrum
+              items={TIME_SLOTS}
+              selectedIndex={slotIdx}
+              onSelect={setSlotIdx}
+              getLabel={(s) => s.label}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const VisualDateTimePicker = ({
   dropOffValue,
   pickUpValue,
   onChange,
-  stationTimings = null,
-  disabled = false
+  disabled = false,
 }) => {
-  const [activeTab, setActiveTab] = useState('dropOff');
-  const [dropOffDate, setDropOffDate] = useState('today');
-  const [pickUpDate, setPickUpDate] = useState('today');
-  const [customDropOffDate, setCustomDropOffDate] = useState(null);
-  const [customPickUpDate, setCustomPickUpDate] = useState(null);
-  const [showCustomCalendar, setShowCustomCalendar] = useState(false);
-  
-  // 🎯 NEW: UX Enhancement States
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [selectedDropOffSlot, setSelectedDropOffSlot] = useState(null);
-  const [selectedPickUpSlot, setSelectedPickUpSlot] = useState(null);
-  const [pulsePickUpTab, setPulsePickUpTab] = useState(false);
-  const [pulseContinueButton, setPulseContinueButton] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-  
-  const containerRef = useRef(null);
-  const pickUpTabRef = useRef(null);
+  const [openPicker, setOpenPicker] = useState(null); // "dropoff" | "pickup" | null
+  const [selectedPreset, setSelectedPreset] = useState(null);
 
-  // Get current date/time
-  const getCurrentDateTime = () => {
-    const now = new Date();
-    const minutes = now.getMinutes();
-    const roundedMinutes = Math.ceil(minutes / 30) * 30;
-    now.setMinutes(roundedMinutes);
-    now.setSeconds(0);
-    now.setMilliseconds(0);
-    return now;
+  const dropOff = dropOffValue ? new Date(dropOffValue) : null;
+  const pickUp = pickUpValue ? new Date(pickUpValue) : null;
+
+  const hours = dropOff && pickUp ? (pickUp - dropOff) / 3600000 : 0;
+  const days = Math.max(1, Math.ceil(hours / 24));
+
+  const emit = (name, date) => {
+    onChange({ target: { name, value: toLocalISO(date) } });
   };
 
-  // Get tomorrow's date
-  const getTomorrowDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow;
+  const choosePreset = (preset) => {
+    const base = dropOff || getRoundedNow();
+    setSelectedPreset(preset.hours);
+    if (!dropOff) emit("dropOffDate", base);
+    emit("pickUpDate", addHours(base, preset.hours));
   };
 
-  // Check if time slot is available based on station hours
-  const isTimeSlotAvailable = (date, hour, minute) => {
-    if (!stationTimings || stationTimings.is24Hours) return true;
-
-    const testDate = new Date(date);
-    testDate.setHours(hour, minute, 0, 0);
-
-    const dayOfWeek = testDate.getDay();
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const dayName = dayNames[dayOfWeek];
-
-    const daySchedule = stationTimings[dayName];
-
-    if (!daySchedule || daySchedule.closed) return false;
-
-    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    const openTime = daySchedule.open;
-    const closeTime = daySchedule.close;
-
-    const timeToMinutes = (time) => {
-      const [h, m] = time.split(':').map(Number);
-      return h * 60 + m;
-    };
-
-    const currentMinutes = timeToMinutes(timeStr);
-    const openMinutes = timeToMinutes(openTime);
-    const closeMinutes = timeToMinutes(closeTime);
-
-    if (closeMinutes < openMinutes) {
-      return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
-    } else {
-      return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  const setDropOffCustom = (date) => {
+    setSelectedPreset(null);
+    emit("dropOffDate", date);
+    // Clear pickup if it's now invalid
+    if (pickUp && pickUp <= addHours(date, 1)) {
+      onChange({ target: { name: "pickUpDate", value: "" } });
     }
+    setOpenPicker(null);
   };
 
-  // Check if pick-up time is valid
-  const isPickUpTimeValid = (pickUpDateTime) => {
-    if (!dropOffValue) return true;
-
-    const dropOff = new Date(dropOffValue);
-    const pickUp = new Date(pickUpDateTime);
-    
-    const minPickUpTime = new Date(dropOff.getTime() + 60 * 60 * 1000);
-    
-    return pickUp >= minPickUpTime;
+  const setPickUpCustom = (date) => {
+    setSelectedPreset(null);
+    emit("pickUpDate", date);
+    setOpenPicker(null);
   };
 
-  // Generate time slots
-  const generateTimeSlots = (dateType, customDate = null, isPickUpTab = false) => {
-    const slots = [];
-    const now = getCurrentDateTime();
-    let targetDate;
-
-    if (dateType === 'today') {
-      targetDate = new Date();
-    } else if (dateType === 'tomorrow') {
-      targetDate = getTomorrowDate();
-    } else if (dateType === 'custom' && customDate) {
-      targetDate = new Date(customDate);
-    } else {
-      return slots;
-    }
-
-    let startHour = 0;
-    let startMinute = 0;
-
-    if (dateType === 'today') {
-     const futureTime = new Date(now.getTime() + 15 * 60000);
-startHour = futureTime.getHours();
-startMinute = Math.ceil(futureTime.getMinutes() / 15) * 15;
-if (startMinute === 60) {
-  startMinute = 0;
-  startHour += 1;
-}
-    }
-
-    if (isPickUpTab && dropOffValue) {
-      const dropOff = new Date(dropOffValue);
-      const minPickUp = new Date(dropOff.getTime() + 60 * 60 * 1000);
-      
-      if (targetDate.toDateString() === dropOff.toDateString()) {
-        startHour = minPickUp.getHours();
-        startMinute = Math.ceil(minPickUp.getMinutes() / 15) * 15;
-if (startMinute === 60) {
-  startMinute = 0;
-  startHour += 1;
-}
-      }
-    }
-
-    let lastSlotWasAvailable = false;
-    let gapDetected = false;
-
-    for (let hour = startHour; hour < 24; hour++) {
-      for (let minute = (hour === startHour ? startMinute : 0); minute < 60; minute += 15) {
-        const slotDate = new Date(targetDate);
-        slotDate.setHours(hour, minute, 0, 0);
-        
-        const available = isTimeSlotAvailable(targetDate, hour, minute);
-        const validPickUp = isPickUpTab ? isPickUpTimeValid(slotDate) : true;
-        
-        if (lastSlotWasAvailable && !available) {
-          gapDetected = true;
-        }
-        
-        if (gapDetected && available && !lastSlotWasAvailable) {
-          if (stationTimings && !stationTimings.is24Hours) {
-            const dayOfWeek = targetDate.getDay();
-            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            const dayName = dayNames[dayOfWeek];
-            const daySchedule = stationTimings[dayName];
-            
-            if (daySchedule) {
-              slots.push({
-                type: 'separator',
-                closeTime: daySchedule.close,
-                openTime: daySchedule.open
-              });
-            }
-          }
-          gapDetected = false;
-        }
-        
-        if (available && validPickUp) {
-          const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-          const period = hour >= 12 ? 'PM' : 'AM';
-          const label = `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
-
-          slots.push({
-            type: 'slot',
-            hour,
-            minute,
-            label,
-            available,
-            dateTime: slotDate
-          });
-          
-          lastSlotWasAvailable = true;
-        } else {
-          lastSlotWasAvailable = false;
-        }
-      }
-    }
-
-    return slots;
-  };
-
-  const currentTimeSlots = useMemo(() => {
-    if (activeTab === 'dropOff') {
-      return generateTimeSlots(
-        dropOffDate,
-        dropOffDate === 'custom' ? customDropOffDate : null,
-        false
-      );
-    } else {
-      return generateTimeSlots(
-        pickUpDate,
-        pickUpDate === 'custom' ? customPickUpDate : null,
-        true
-      );
-    }
-  }, [activeTab, dropOffDate, pickUpDate, customDropOffDate, customPickUpDate, stationTimings, dropOffValue]);
-
-  // 🎯 NEW: Smooth scroll to top
-  const smoothScrollToTop = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
-    }
-  };
-
-  // 🎯 NEW: Show toast message
-  const displayToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
-
-  // 🎯 NEW: Enhanced time slot selection
-  const handleTimeSelect = (slot) => {
-    const isDropOff = activeTab === 'dropOff';
-    const dateType = isDropOff ? dropOffDate : pickUpDate;
-    const customDate = isDropOff ? customDropOffDate : customPickUpDate;
-
-    let targetDate;
-    if (dateType === 'today') {
-      targetDate = new Date();
-      targetDate.setHours(0, 0, 0, 0);
-    } else if (dateType === 'tomorrow') {
-      targetDate = getTomorrowDate();
-    } else if (dateType === 'custom' && customDate) {
-      const [year, month, day] = customDate.split('-').map(Number);
-      targetDate = new Date(year, month - 1, day, 0, 0, 0, 0);
-    }
-
-    targetDate.setHours(slot.hour, slot.minute, 0, 0);
-
-    const year = targetDate.getFullYear();
-    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-    const day = String(targetDate.getDate()).padStart(2, '0');
-    const hours = String(targetDate.getHours()).padStart(2, '0');
-    const minutes = String(targetDate.getMinutes()).padStart(2, '0');
-    const localISOTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-    onChange({
-      target: {
-        name: isDropOff ? 'dropOffDate' : 'pickUpDate',
-        value: localISOTime
-      }
-    });
-
-    // 🎯 NEW: Enhanced UX Flow
-    if (isDropOff) {
-      // Save selected slot for visual feedback
-      setSelectedDropOffSlot(slot.label);
-      
-      // Show success toast
-      const dateStr = dateType === 'today' ? 'Today' : 
-                      dateType === 'tomorrow' ? 'Tomorrow' : 
-                      targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      displayToast(`✓ Drop-off set for ${dateStr} at ${slot.label}`);
-      
-      // Smooth scroll to top after brief delay
-      setTimeout(() => {
-        smoothScrollToTop();
-      }, 400);
-      
-      // Pulse pick-up tab to draw attention
-      setTimeout(() => {
-        setPulsePickUpTab(true);
-        setTimeout(() => setPulsePickUpTab(false), 1800);
-      }, 900);
-      
-      // Auto-switch to pick-up tab
-      setTimeout(() => {
-        setActiveTab('pickUp');
-      }, 1200);
-    } else {
-      // Pick-up selected
-      setSelectedPickUpSlot(slot.label);
-      
-      // Show summary
-      setShowSummary(true);
-      
-      // Scroll to bottom (where button is)
-      setTimeout(() => {
-        if (containerRef.current) {
-          const containerBottom = containerRef.current.scrollHeight;
-          containerRef.current.parentElement?.scrollTo({
-            top: containerBottom,
-            behavior: 'smooth'
-          });
-        }
-      }, 300);
-      
-      // Pulse the continue button (external - parent will handle)
-      setPulseContinueButton(true);
-      setTimeout(() => setPulseContinueButton(false), 1800);
-    }
-  };
-
-  // 🎯 NEW: Expose pulse state to parent
-  useEffect(() => {
-    if (pulseContinueButton && onChange.onPickUpComplete) {
-      onChange.onPickUpComplete();
-    }
-  }, [pulseContinueButton]);
-
-  const handleDateTypeChange = (type) => {
-    if (activeTab === 'dropOff') {
-      setDropOffDate(type);
-      if (type === 'custom') {
-        setShowCustomCalendar(true);
-      } else {
-        setShowCustomCalendar(false);
-      }
-    } else {
-      setPickUpDate(type);
-      if (type === 'custom') {
-        setShowCustomCalendar(true);
-      } else {
-        setShowCustomCalendar(false);
-      }
-    }
-  };
-
-  const handleCustomDateSelect = (dateStr) => {
-    if (activeTab === 'dropOff') {
-      setCustomDropOffDate(dateStr);
-    } else {
-      if (dropOffValue) {
-        const dropOffDate = new Date(dropOffValue);
-        dropOffDate.setHours(0, 0, 0, 0);
-        const selectedDate = new Date(dateStr);
-        selectedDate.setHours(0, 0, 0, 0);
-        
-        if (selectedDate < dropOffDate) {
-          alert('Pick-up date cannot be before drop-off date');
-          return;
-        }
-      }
-      setCustomPickUpDate(dateStr);
-    }
-    setShowCustomCalendar(false);
-  };
-
-  const formatTabDisplay = (value, dateType, customDate) => {
-    if (!value) return { date: 'Select', time: '' };
-
-    const date = new Date(value);
-    
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const timeStr = `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
-
-    let dateStr;
-    if (dateType === 'today') {
-      dateStr = 'Today';
-    } else if (dateType === 'tomorrow') {
-      dateStr = 'Tomorrow';
-    } else if (dateType === 'custom' && customDate) {
-      const customDateObj = new Date(customDate + 'T00:00:00');
-      dateStr = customDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    } else {
-      dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-
-    return { date: dateStr, time: timeStr };
-  };
-
-  const dropOffDisplay = formatTabDisplay(dropOffValue, dropOffDate, customDropOffDate);
-  const pickUpDisplay = formatTabDisplay(pickUpValue, pickUpDate, customPickUpDate);
-
-  // Mini calendar
-  const MiniCalendar = () => {
-    const [currentMonth, setCurrentMonth] = useState(new Date());
-
-    const getDaysInMonth = (date) => {
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const daysInMonth = lastDay.getDate();
-      const startingDayOfWeek = firstDay.getDay();
-
-      return { daysInMonth, startingDayOfWeek, year, month };
-    };
-
-    const isPreviousMonthDisabled = () => {
-      const today = new Date();
-      const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
-      return prevMonth < new Date(today.getFullYear(), today.getMonth());
-    };
-
-    const renderCalendar = () => {
-      const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth);
-      const days = [];
-
-      for (let i = 0; i < startingDayOfWeek; i++) {
-        days.push(<div key={`empty-${i}`} className={styles.calendarDay} />);
-      }
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      let minDate = today;
-      if (activeTab === 'pickUp' && dropOffValue) {
-        const dropOffDate = new Date(dropOffValue);
-        dropOffDate.setHours(0, 0, 0, 0);
-        minDate = dropOffDate;
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day, 0, 0, 0, 0);
-        const isDisabled = date < minDate;
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-        days.push(
-          <button
-            key={day}
-            type="button"
-            disabled={isDisabled}
-            onClick={() => handleCustomDateSelect(dateStr)}
-            className={`${styles.calendarDay} ${styles.calendarDayActive} ${isDisabled ? styles.disabled : ''}`}
-          >
-            {day}
-          </button>
-        );
-      }
-
-      return days;
-    };
-
-    return (
-      <div className={styles.miniCalendar}>
-        <div className={styles.calendarHeader}>
-          <button
-            type="button"
-            className={styles.navBtn}
-            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-            disabled={isPreviousMonthDisabled()}
-          >
-            ←
-          </button>
-          <span className={styles.monthYear}>
-            {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-          </span>
-          <button
-            type="button"
-            className={styles.navBtn}
-            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-          >
-            →
-          </button>
-        </div>
-
-        <div className={styles.weekdays}>
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className={styles.weekday}>{day}</div>
-          ))}
-        </div>
-
-        <div className={styles.calendarGrid}>
-          {renderCalendar()}
-        </div>
-      </div>
-    );
-  };
+  // Station hours label for selected station
+  // const getHoursLabel = () => {
+  //   if (!stationTimings || stationTimings.is24Hours) return null;
+  //   return null; // Parent shows timing warnings; no need to duplicate
+  // };
 
   if (disabled) {
     return (
-      <div className={styles.disabledState}>
+      <div className={styles.disabled}>
         <span className={styles.disabledIcon}>📍</span>
-        <span className={styles.disabledText}>Please select a station first to choose date & time</span>
+        <span className={styles.disabledText}>Select a station first to choose dates & times</span>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className={styles.container}>
-      {/* 🎯 NEW: Success Toast */}
-      {showToast && (
-        <div className={styles.successToast}>
-          {toastMessage}
-        </div>
-      )}
-
-      {/* Tab Headers */}
-      <div className={styles.tabHeaders}>
+    <div className={styles.container}>
+      {/* ── DROP OFF ── */}
+      <div className={styles.section}>
+        <div className={styles.sectionLabel}>📦 Drop off</div>
         <button
           type="button"
-          onClick={() => setActiveTab('dropOff')}
-          className={`${styles.tabButton} ${activeTab === 'dropOff' ? styles.tabActive : ''}`}
+          onClick={() => setOpenPicker("dropoff")}
+          className={`${styles.timeCard} ${dropOff ? styles.timeCardFilled : styles.timeCardEmpty}`}
         >
-          <div className={styles.tabLabel}>DROP OFF</div>
-          <div className={styles.tabDate}>{dropOffDisplay.date}</div>
-          <div className={styles.tabTime}>{dropOffDisplay.time || 'Select time'}</div>
-        </button>
-
-        <button
-          ref={pickUpTabRef}
-          type="button"
-          onClick={() => setActiveTab('pickUp')}
-          className={`${styles.tabButton} ${activeTab === 'pickUp' ? styles.tabActive : ''} ${pulsePickUpTab ? styles.pulseTab : ''}`}
-          disabled={!dropOffValue}
-        >
-          <div className={styles.tabLabel}>PICK UP</div>
-          <div className={styles.tabDate}>{pickUpDisplay.date}</div>
-          <div className={styles.tabTime}>{pickUpDisplay.time || 'Select time'}</div>
-          {!dropOffValue && (
-            <div className={styles.tabDisabledHint}>Select drop-off first</div>
+          {dropOff ? (
+            <>
+              <div>
+                <div className={styles.timeCardTime}>{fmt12(dropOff)}</div>
+                <div className={styles.timeCardDate}>{fmtDateFull(dropOff)}</div>
+              </div>
+              <span className={styles.timeCardEdit}>✏️ Change</span>
+            </>
+          ) : (
+            <>
+              <span className={styles.timeCardPlaceholder}>Tap to set drop-off</span>
+              <span className={styles.timeCardPlus}>+</span>
+            </>
           )}
         </button>
       </div>
 
-      {/* Helper text for pick-up tab */}
-      {activeTab === 'pickUp' && dropOffValue && !pickUpValue && (
-        <div className={styles.helperText}>
-          <span className={styles.helperIcon}>👇</span>
-          <span>Now select when you&apos;ll pick up your luggage</span>
-        </div>
-      )}
-
-      {activeTab === 'pickUp' && !dropOffValue && (
-        <div className={styles.pickUpWarning}>
-          <span className={styles.warningIcon}>⚠️</span>
-          <span>Please select a drop-off time first</span>
-        </div>
-      )}
-
-      {/* Date Selection */}
-      <div className={styles.dateSection}>
-        <div className={styles.sectionTitle}>Date</div>
-        <div className={styles.dateButtons}>
-          <button
-            type="button"
-            onClick={() => handleDateTypeChange('today')}
-            className={`${styles.dateButton} ${(activeTab === 'dropOff' ? dropOffDate : pickUpDate) === 'today' ? styles.dateButtonActive : ''}`}
-          >
-            Today
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleDateTypeChange('tomorrow')}
-            className={`${styles.dateButton} ${(activeTab === 'dropOff' ? dropOffDate : pickUpDate) === 'tomorrow' ? styles.dateButtonActive : ''}`}
-          >
-            Tomorrow
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleDateTypeChange('custom')}
-            className={`${styles.dateButton} ${(activeTab === 'dropOff' ? dropOffDate : pickUpDate) === 'custom' ? styles.dateButtonActive : ''}`}
-          >
-            <span>📅</span> Custom
-          </button>
+      {/* ── PRESETS ── */}
+      <div className={styles.section}>
+        <div className={styles.sectionLabel}>⚡ Quick duration</div>
+        <div className={styles.presets}>
+          {PRESETS.map((p) => (
+            <button
+              key={p.hours}
+              type="button"
+              onClick={() => choosePreset(p)}
+              className={`${styles.preset} ${selectedPreset === p.hours ? styles.presetActive : ""}`}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Custom Calendar */}
-      {showCustomCalendar && <MiniCalendar />}
+      {/* ── DIVIDER ── */}
+      <div className={styles.divider}>
+        <div className={styles.dividerLine} />
+        <span className={styles.dividerText}>or set exact pick-up</span>
+        <div className={styles.dividerLine} />
+      </div>
 
-      {/* Time Selection */}
-      {!showCustomCalendar && (
-        <div className={styles.timeSection}>
-          <div className={styles.sectionTitle}>Time</div>
-          <div className={styles.timeSlotList}>
-            {currentTimeSlots.length === 0 ? (
-              <div className={styles.noTimeSlots}>
-                <span className={styles.noTimeSlotsIcon}>🕐</span>
-                <div className={styles.noTimeSlotsTitle}>No available times</div>
-                <div className={styles.noTimeSlotsText}>
-                  {activeTab === 'pickUp' && dropOffValue
-                    ? 'Pick-up must be at least 1 hour after drop-off'
-                    : 'Station is closed or all slots are booked'}
-                </div>
+      {/* ── PICK UP ── */}
+      <div className={styles.section}>
+        <div className={styles.sectionLabel}>📤 Pick up</div>
+        <button
+          type="button"
+          onClick={() => setOpenPicker("pickup")}
+          className={`${styles.timeCard} ${pickUp ? styles.timeCardFilled : styles.timeCardEmpty}`}
+        >
+          {pickUp ? (
+            <>
+              <div>
+                <div className={styles.timeCardTime}>{fmt12(pickUp)}</div>
+                <div className={styles.timeCardDate}>{fmtDateFull(pickUp)}</div>
               </div>
-            ) : (
-              currentTimeSlots.map((slot, index) => {
-                if (slot.type === 'separator') {
-                  const formatTime12h = (time24) => {
-                    const [h, m] = time24.split(':').map(Number);
-                    const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
-                    const period = h >= 12 ? 'PM' : 'AM';
-                    return `${hour}:${String(m).padStart(2, '0')} ${period}`;
-                  };
-                  
-                  return (
-                    <div key={index} className={styles.timeSeparator}>
-                      <div className={styles.separatorLine} />
-                      <div className={styles.separatorText}>
-                        Station closed {formatTime12h(slot.closeTime)} - {formatTime12h(slot.openTime)}
-                      </div>
-                      <div className={styles.separatorLine} />
-                    </div>
-                  );
-                }
-                
-                // 🎯 NEW: Check if this slot is selected
-                const isSelected = activeTab === 'dropOff' 
-                  ? selectedDropOffSlot === slot.label 
-                  : selectedPickUpSlot === slot.label;
-                
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => handleTimeSelect(slot)}
-                    className={`${styles.timeSlotButton} ${isSelected ? styles.selectedSlot : ''}`}
-                  >
-                    {slot.label}
-                    {isSelected && <span className={styles.checkmark}>✓</span>}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
+              <span className={styles.timeCardEdit}>✏️ Change</span>
+            </>
+          ) : (
+            <>
+              <span className={styles.timeCardPlaceholder}>Tap to set pick-up</span>
+              <span className={styles.timeCardPlus}>+</span>
+            </>
+          )}
+        </button>
+      </div>
 
-      {/* 🎯 NEW: Success Summary */}
-      {showSummary && dropOffValue && pickUpValue && (
-        <div className={styles.successSummary}>
-          <div className={styles.summaryHeader}>
-            <span className={styles.summaryIcon}>✓</span>
-            <span className={styles.summaryTitle}>Times Confirmed</span>
-          </div>
-          <div className={styles.summaryDetails}>
-            <div className={styles.summaryRow}>
-              <span className={styles.summaryLabel}>Drop-off:</span>
-              <span className={styles.summaryValue}>{dropOffDisplay.date}, {dropOffDisplay.time}</span>
-            </div>
-            <div className={styles.summaryRow}>
-              <span className={styles.summaryLabel}>Pick-up:</span>
-              <span className={styles.summaryValue}>{pickUpDisplay.date}, {pickUpDisplay.time}</span>
-            </div>
-          </div>
-          <div className={styles.summaryAction}>
-            <span className={styles.actionIcon}>👇</span>
-            <span className={styles.actionText}>Tap &quot;Continue&quot; below to proceed</span>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Summary (existing) */}
-      {dropOffValue && pickUpValue && !showSummary && (
+      {/* ── DURATION SUMMARY ── */}
+      {dropOff && pickUp && pickUp > dropOff && (
         <div className={styles.summary}>
-          <div className={styles.summaryLabel}>Selected Times</div>
-          <div className={styles.summaryValue}>
-            {dropOffDisplay.date}, {dropOffDisplay.time}
-            {" → "}
-            {pickUpDisplay.date !== dropOffDisplay.date
-              ? `${pickUpDisplay.date}, ${pickUpDisplay.time}`
-              : pickUpDisplay.time}
+          <div>
+            <div className={styles.summaryLabel}>Duration</div>
+            <div className={styles.summaryValue}>
+              {hours < 24
+                ? `${Math.round(hours)} hour${Math.round(hours) !== 1 ? "s" : ""}`
+                : `${days} day${days > 1 ? "s" : ""}`}
+            </div>
           </div>
+          <div className={styles.summaryDivider} />
+          <div>
+            <div className={styles.summaryLabel}>From</div>
+            <div className={styles.summaryValue} style={{ color: "var(--primary)" }}>
+              A${(days * 3.99).toFixed(2)}
+              <span style={{ fontSize: 11, fontWeight: 400, color: "var(--text-muted)" }}> /small bag</span>
+            </div>
+          </div>
+          <div className={styles.summaryCheck}>✓</div>
         </div>
+      )}
+
+      {/* ── PICKERS ── */}
+      {openPicker === "dropoff" && (
+        <DateTimePicker
+          title="Drop-off Time"
+          initialDate={dropOff || getRoundedNow()}
+          minDate={new Date()}
+          onConfirm={setDropOffCustom}
+          onClose={() => setOpenPicker(null)}
+        />
+      )}
+
+      {openPicker === "pickup" && (
+        <DateTimePicker
+          title="Pick-up Time"
+          initialDate={pickUp || addHours(dropOff || getRoundedNow(), 2)}
+          minDate={addHours(dropOff || new Date(), 1)}
+          onConfirm={setPickUpCustom}
+          onClose={() => setOpenPicker(null)}
+        />
       )}
     </div>
   );
