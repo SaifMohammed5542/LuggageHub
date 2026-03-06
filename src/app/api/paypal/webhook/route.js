@@ -29,11 +29,17 @@ export async function POST(req) {
       .digest("hex")}`;
 
     // ✅ Verify PayPal signature
-    const verifier = crypto.createVerify(authAlgo);
+    const certResponse = await fetch(certUrl);
+    const cert = await certResponse.text();
+
+    const normalizedAlgo = authAlgo.replace("withRSA", "").replace("with", "-");
+
+    const verifier = crypto.createVerify(normalizedAlgo);
     verifier.update(expected);
     verifier.end();
 
-    const isValid = verifier.verify(certUrl, transmissionSig, "base64");
+    const isValid = verifier.verify(cert, transmissionSig, "base64");
+
     if (!isValid) {
       console.error("⚠️ Invalid PayPal webhook signature");
       return NextResponse.json({ status: "invalid signature" }, { status: 400 });
@@ -59,31 +65,27 @@ export async function POST(req) {
         return NextResponse.json({ status: "missing transaction id" }, { status: 400 });
       }
 
-      // Find payment record using PayPal transaction ID
       const payment = await Payment.findOne({ paypalTransactionId });
 
       if (!payment) {
         console.error("❌ Payment not found for transaction:", paypalTransactionId);
-        
-        // Log this - webhook might arrive before our booking API completes
+
         await ErrorLog.create({
           user: userEmail,
           station: "Unknown",
           errorType: "WEBHOOK_PAYMENT_NOT_FOUND",
           message: `Webhook received but payment not found. Transaction: ${paypalTransactionId}, Order: ${paypalOrderId}`,
         });
-        
+
         return NextResponse.json({ status: "payment not found" }, { status: 404 });
       }
 
-      // Update payment status if not already completed
       if (payment.status !== "completed") {
         payment.status = "completed";
         await payment.save();
         console.log("✅ Payment marked as completed:", payment.paymentReference);
       }
 
-      // Confirm the booking if not already confirmed
       const booking = await Booking.findById(payment.bookingId);
       if (booking && booking.status !== "confirmed") {
         booking.status = "confirmed";
@@ -106,7 +108,6 @@ export async function POST(req) {
     ) {
       console.log("⚠️ Payment failure event:", eventType);
 
-      // Try to find and update payment status
       if (paypalTransactionId) {
         const payment = await Payment.findOne({ paypalTransactionId });
         if (payment) {
@@ -115,14 +116,12 @@ export async function POST(req) {
           await payment.save();
           console.log("⚠️ Payment marked as failed:", payment.paymentReference);
 
-          // Also update booking status
           await Booking.findByIdAndUpdate(payment.bookingId, {
             status: "cancelled"
           });
         }
       }
 
-      // Log the error
       await ErrorLog.create({
         user: userEmail,
         station: "Unknown",
@@ -131,7 +130,6 @@ export async function POST(req) {
         createdAt: new Date(),
       });
 
-      // Send notification
       await sendErrorNotification({
         user: userEmail,
         station: "Unknown",
@@ -147,7 +145,7 @@ export async function POST(req) {
         const payment = await Payment.findOne({ paypalTransactionId });
         if (payment) {
           const refundAmount = body?.resource?.amount?.value || 0;
-          
+
           await payment.addRefund({
             refundId: body?.resource?.id,
             amount: parseFloat(refundAmount),
@@ -165,8 +163,7 @@ export async function POST(req) {
     return NextResponse.json({ status: "ok" }, { status: 200 });
   } catch (err) {
     console.error("💥 Webhook processing error:", err);
-    
-    // Log system errors
+
     try {
       await ErrorLog.create({
         user: "System",
@@ -178,7 +175,7 @@ export async function POST(req) {
     } catch (logError) {
       console.error("Failed to log webhook error:", logError);
     }
-    
+
     return NextResponse.json({ status: "error", message: err.message }, { status: 500 });
   }
 }

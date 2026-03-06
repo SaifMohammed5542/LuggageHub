@@ -199,14 +199,13 @@ export default function ScanPage() {
         throw new Error(data.error || 'Failed to confirm drop-off');
       }
 
-      alert(`✅ Drop-off confirmed for booking: ${result}`);
-      router.push('/partner/application/dashboard');
-    } catch (err) {
-      console.error('Confirm drop-off error:', err);
-      setError(err.message);
-    } finally {
-      setProcessing(false);
-    }
+alert(`✅ Drop-off confirmed for booking: ${result}`);
+window.location.href = '/partner/application/dashboard';
+} catch (err) {
+  console.error('Confirm drop-off error:', err);
+  setError(err.message);
+  setProcessing(false);
+}
   };
 
   const handleConfirmPickup = async () => {
@@ -234,14 +233,13 @@ export default function ScanPage() {
         throw new Error(data.error || 'Failed to confirm pick-up');
       }
 
-      alert(`✅ Pick-up confirmed for booking: ${result}`);
-      router.push('/partner/application/dashboard');
-    } catch (err) {
-      console.error('Confirm pick-up error:', err);
-      setError(err.message);
-    } finally {
-      setProcessing(false);
-    }
+alert(`✅ Pick-up confirmed for booking: ${result}`);
+window.location.href = '/partner/application/dashboard';
+} catch (err) {
+  console.error('Confirm pick-up error:', err);
+  setError(err.message);
+  setProcessing(false);
+}
   };
 
   const handleScanAgain = () => {
