@@ -1,8 +1,10 @@
 // app/partner/application/scan/page.js
+// ✅ WITH ON-SCREEN TOAST NOTIFICATIONS (NO ALERTS!)
+
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Html5Qrcode } from 'html5-qrcode'; // ✅ Changed from Html5QrcodeScanner
+import { Html5Qrcode } from 'html5-qrcode';
 import styles from './Scan.module.css';
 
 export default function ScanPage() {
@@ -12,10 +14,22 @@ export default function ScanPage() {
   const [bookingData, setBookingData] = useState(null);
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  
+  // Multi-photo state
+  const [capturedPhotos, setCapturedPhotos] = useState([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  
+  // ✅ TOAST NOTIFICATION STATE
+  const [toast, setToast] = useState(null);
+  
   const fileInputRef = useRef(null);
   const html5QrCodeRef = useRef(null);
+
+  // ✅ TOAST HELPER FUNCTION
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000); // Auto-hide after 4 seconds
+  };
 
   useEffect(() => {
     let html5QrCode = null;
@@ -25,9 +39,8 @@ export default function ScanPage() {
         html5QrCode = new Html5Qrcode('qr-reader');
         html5QrCodeRef.current = html5QrCode;
 
-        // ✅ Start with rear camera DIRECTLY - NO UI
         await html5QrCode.start(
-          { facingMode: "environment" }, // ✅ Rear camera constraint
+          { facingMode: "environment" },
           {
             fps: 10,
             qrbox: { width: 250, height: 250 },
@@ -37,19 +50,15 @@ export default function ScanPage() {
             setResult(decodedText);
             setScanning(false);
             
-            // Stop scanner
             try {
               await html5QrCode.stop();
             } catch {
               console.log('Stop cleanup');
             }
             
-            // Fetch booking details
             await fetchBookingDetails(decodedText);
           },
-          () => {
-            // Ignore scan errors (continuous scanning)
-          }
+          () => {}
         );
 
         setScanning(true);
@@ -60,7 +69,7 @@ export default function ScanPage() {
       }
     };
 
-    const timer = setTimeout(startScanner, 300);
+    const timer = setTimeout(startScanner, 100);
 
     return () => {
       clearTimeout(timer);
@@ -85,6 +94,10 @@ export default function ScanPage() {
         const booking = data.bookings?.find(b => b.bookingReference === bookingRef);
         if (booking) {
           setBookingData(booking);
+          // Load existing photos if any
+          if (booking.luggagePhotos && Array.isArray(booking.luggagePhotos)) {
+            setCapturedPhotos(booking.luggagePhotos.map(url => ({ dataUrl: url, uploaded: true })));
+          }
         } else {
           setError('Booking not found in your station');
         }
@@ -96,6 +109,10 @@ export default function ScanPage() {
   };
 
   const handleTakePhoto = () => {
+    if (capturedPhotos.length >= 3) {
+      showToast('Maximum 3 photos allowed', 'warning');
+      return;
+    }
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -106,27 +123,33 @@ export default function ScanPage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      showToast('Please select an image file', 'error');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image too large. Please choose an image under 5MB.');
+      showToast('Image too large. Please choose an image under 5MB', 'error');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      setCapturedPhoto({
+      setCapturedPhotos(prev => [...prev, {
         dataUrl: reader.result,
-        file: file
-      });
+        file: file,
+        uploaded: false
+      }]);
     };
     reader.readAsDataURL(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  const uploadPhoto = async () => {
-    if (!capturedPhoto?.file || !result) return;
+  const uploadPhoto = async (photoIndex) => {
+    const photo = capturedPhotos[photoIndex];
+    if (!photo?.file || !result || photo.uploaded) return;
 
     setUploadingPhoto(true);
     setError('');
@@ -134,7 +157,7 @@ export default function ScanPage() {
     try {
       const formData = new FormData();
       formData.append('bookingReference', result);
-      formData.append('image', capturedPhoto.file);
+      formData.append('image', photo.file);
 
       const token = localStorage.getItem('token');
       const uploadResponse = await fetch('/api/partner/application/upload-luggage-photo', {
@@ -151,27 +174,24 @@ export default function ScanPage() {
         throw new Error(data.error || 'Failed to upload photo');
       }
 
-      alert('✅ Photo uploaded successfully!');
-      
+      // Mark photo as uploaded
+      setCapturedPhotos(prev => prev.map((p, i) => 
+        i === photoIndex ? { ...p, uploaded: true } : p
+      ));
+
+      showToast('Photo uploaded successfully!', 'success');
       await fetchBookingDetails(result);
-      setCapturedPhoto(null);
       
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err.message);
+      showToast(err.message, 'error');
     } finally {
       setUploadingPhoto(false);
     }
   };
 
-  const cancelPhoto = () => {
-    setCapturedPhoto(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+  const removePhoto = (photoIndex) => {
+    setCapturedPhotos(prev => prev.filter((_, i) => i !== photoIndex));
   };
 
   const handleConfirmDropoff = async () => {
@@ -199,13 +219,17 @@ export default function ScanPage() {
         throw new Error(data.error || 'Failed to confirm drop-off');
       }
 
-alert(`✅ Drop-off confirmed for booking: ${result}`);
-window.location.href = '/partner/application/dashboard';
-} catch (err) {
-  console.error('Confirm drop-off error:', err);
-  setError(err.message);
-  setProcessing(false);
-}
+      showToast(`Drop-off confirmed for ${result}`, 'success');
+      
+      // Redirect after showing toast
+      setTimeout(() => {
+        window.location.href = '/partner/application/dashboard';
+      }, 1500);
+    } catch (err) {
+      console.error('Confirm drop-off error:', err);
+      setError(err.message);
+      setProcessing(false);
+    }
   };
 
   const handleConfirmPickup = async () => {
@@ -233,25 +257,41 @@ window.location.href = '/partner/application/dashboard';
         throw new Error(data.error || 'Failed to confirm pick-up');
       }
 
-alert(`✅ Pick-up confirmed for booking: ${result}`);
-window.location.href = '/partner/application/dashboard';
-} catch (err) {
-  console.error('Confirm pick-up error:', err);
-  setError(err.message);
-  setProcessing(false);
-}
+      showToast(`Pick-up confirmed for ${result}`, 'success');
+      
+      // Redirect after showing toast
+      setTimeout(() => {
+        window.location.href = '/partner/application/dashboard';
+      }, 1500);
+    } catch (err) {
+      console.error('Confirm pick-up error:', err);
+      setError(err.message);
+      setProcessing(false);
+    }
   };
 
   const handleScanAgain = () => {
     setResult(null);
     setBookingData(null);
     setError('');
-    setCapturedPhoto(null);
+    setCapturedPhotos([]);
     window.location.reload();
   };
 
   return (
     <div className={styles.container}>
+      {/* ✅ TOAST NOTIFICATION */}
+      {toast && (
+        <div className={`${styles.toast} ${styles[`toast${toast.type.charAt(0).toUpperCase() + toast.type.slice(1)}`]}`}>
+          <span className={styles.toastIcon}>
+            {toast.type === 'success' && '✓'}
+            {toast.type === 'error' && '✕'}
+            {toast.type === 'warning' && '⚠'}
+          </span>
+          <span className={styles.toastMessage}>{toast.message}</span>
+        </div>
+      )}
+
       <div className={styles.header}>
         <button className={styles.backButton} onClick={() => router.push('/partner/application/dashboard')}>
           ← Back
@@ -274,7 +314,6 @@ window.location.href = '/partner/application/dashboard';
             Position the QR code within the frame
           </p>
           
-          {/* ✅ Simple container - NO UI will appear */}
           <div id="qr-reader" style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}></div>
 
           {scanning && (
@@ -322,52 +361,78 @@ window.location.href = '/partner/application/dashboard';
             </div>
           )}
 
+          {/* MULTI-PHOTO SECTION */}
           {bookingData && (
             <div className={styles.photoSection}>
-              {bookingData.luggagePhotoUrl ? (
-                <div className={styles.existingPhoto}>
-                  <h4 className={styles.photoTitle}>📸 Luggage Photo</h4>
-                  <img 
-                    src={bookingData.luggagePhotoUrl} 
-                    alt="Luggage" 
-                    className={styles.luggagePhoto}
-                  />
-                  <p className={styles.photoHint}>Photo taken during drop-off</p>
+              {bookingData.status === 'stored' ? (
+                <div className={styles.photoGallery}>
+                  <h4 className={styles.photoTitle}>📸 Luggage Photos ({capturedPhotos.length})</h4>
+                  <div className={styles.photoGrid}>
+                    {capturedPhotos.map((photo, index) => (
+                      <div key={index} className={styles.photoGridItem}>
+                        <img 
+                          src={photo.dataUrl} 
+                          alt={`Luggage ${index + 1}`} 
+                          className={styles.luggagePhoto}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className={styles.photoHint}>Photos taken during drop-off</p>
                 </div>
-              ) : bookingData.status === 'confirmed' || bookingData.status === 'pending' ? (
+              ) : (bookingData.status === 'confirmed' || bookingData.status === 'pending') ? (
                 <div className={styles.photoCapture}>
-                  {!capturedPhoto ? (
+                  <h4 className={styles.photoTitle}>
+                    📸 Luggage Photos ({capturedPhotos.length}/3)
+                  </h4>
+
+                  {capturedPhotos.length > 0 && (
+                    <div className={styles.photoGrid}>
+                      {capturedPhotos.map((photo, index) => (
+                        <div key={index} className={styles.photoGridItem}>
+                          <img 
+                            src={photo.dataUrl} 
+                            alt={`Luggage ${index + 1}`} 
+                            className={styles.capturedImage}
+                          />
+                          <div className={styles.photoActions}>
+                            {!photo.uploaded ? (
+                              <>
+                                <button 
+                                  className={styles.uploadButton}
+                                  onClick={() => uploadPhoto(index)}
+                                  disabled={uploadingPhoto}
+                                >
+                                  {uploadingPhoto ? '⏳' : '✓'}
+                                </button>
+                                <button 
+                                  className={styles.removeButton}
+                                  onClick={() => removePhoto(index)}
+                                  disabled={uploadingPhoto}
+                                >
+                                  ✕
+                                </button>
+                              </>
+                            ) : (
+                              <div className={styles.uploadedBadge}>✓ Uploaded</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {capturedPhotos.length < 3 && (
                     <button 
                       className={styles.photoButton}
                       onClick={handleTakePhoto}
                     >
-                      📷 Take Luggage Photo
+                      📷 Add Photo ({capturedPhotos.length}/3)
                     </button>
-                  ) : (
-                    <div className={styles.photoPreview}>
-                      <h4 className={styles.photoTitle}>Preview</h4>
-                      <img 
-                        src={capturedPhoto.dataUrl} 
-                        alt="Captured luggage" 
-                        className={styles.capturedImage}
-                      />
-                      <div className={styles.photoActions}>
-                        <button 
-                          className={styles.uploadButton}
-                          onClick={uploadPhoto}
-                          disabled={uploadingPhoto}
-                        >
-                          {uploadingPhoto ? '⏳ Uploading...' : '✓ Save Photo'}
-                        </button>
-                        <button 
-                          className={styles.retakeButton}
-                          onClick={cancelPhoto}
-                          disabled={uploadingPhoto}
-                        >
-                          🔄 Retake
-                        </button>
-                      </div>
-                    </div>
+                  )}
+
+                  {capturedPhotos.length === 3 && (
+                    <p className={styles.photoMaxNote}>Maximum 3 photos reached ✓</p>
                   )}
                 </div>
               ) : null}

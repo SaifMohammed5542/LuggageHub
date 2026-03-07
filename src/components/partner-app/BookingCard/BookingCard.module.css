@@ -1,198 +1,308 @@
-/* components/partner-app/BookingCard.module.css */
+/* components/partner-app/BookingCard/BookingCard.module.css */
+/* COMPACT COLLAPSIBLE CARD - OCEAN BLUE THEME */
 
 .card {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: 1.5px solid rgba(2, 132, 199, 0.15);
   overflow: hidden;
-  transition: box-shadow 0.3s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.1);
 }
 
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.2);
+  border-color: rgba(2, 132, 199, 0.3);
 }
 
+/* ══ COMPACT HEADER ═══════════════════════════════ */
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
-  color: #fff;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.cardHeader:active {
+  background: linear-gradient(135deg, #0369A1 0%, #075985 100%);
+}
+
+.headerLeft {
+  flex: 1;
+  min-width: 0;
 }
 
 .customerName {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.statusBadge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+.bookingRef {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.refCode {
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 600;
+  color: #fff;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ══ STATUS BADGE ═════════════════════════════════ */
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .statusPending {
-  background: #fff3cd;
-  color: #856404;
+  background: #FEF3C7;
+  color: #92400E;
 }
 
 .statusStored {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: #DBEAFE;
+  color: #1E40AF;
 }
 
 .statusCompleted {
-  background: #d4edda;
-  color: #155724;
+  background: #D1FAE5;
+  color: #065F46;
 }
 
 .statusCancelled {
-  background: #f8d7da;
-  color: #721c24;
+  background: #FEE2E2;
+  color: #991B1B;
 }
 
 .statusDefault {
-  background: #e9ecef;
-  color: #495057;
+  background: #F3F4F6;
+  color: #374151;
+}
+
+/* ══ EXPAND BUTTON ════════════════════════════════ */
+.expandButton {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.expandButton.expanded {
+  transform: rotate(180deg);
+}
+
+.expandButton:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ══ QUICK INFO ROW ═══════════════════════════════ */
+.quickInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 12px 16px;
+  background: rgba(2, 132, 199, 0.04);
+  border-bottom: 1px solid rgba(2, 132, 199, 0.1);
+}
+
+.quickInfoItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quickIcon {
+  font-size: 16px;
+}
+
+.quickValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A2B3C;
+}
+
+.quickInfoDivider {
+  width: 1px;
+  height: 20px;
+  background: rgba(2, 132, 199, 0.2);
+}
+
+/* ══ EXPANDED CONTENT ═════════════════════════════ */
+.expandedContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expandedContent.show {
+  max-height: 1000px;
 }
 
 .cardBody {
-  padding: 20px;
+  padding: 16px;
 }
 
 .infoRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   gap: 12px;
 }
 
 .label {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
+  font-size: 13px;
+  color: #5A6C7D;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
 .value {
-  font-size: 14px;
-  color: #333;
+  font-size: 13px;
+  color: #1A2B3C;
   text-align: right;
   word-break: break-word;
+  font-weight: 500;
 }
 
 .valueHighlight {
-  font-size: 16px;
-  color: #1a73e8;
+  font-size: 15px;
+  color: #0284C7;
   font-weight: 700;
   text-align: right;
 }
 
 .divider {
   height: 1px;
-  background: #e0e0e0;
-  margin: 16px 0;
+  background: rgba(2, 132, 199, 0.1);
+  margin: 12px 0;
 }
 
 .instructions {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .instructionsText {
-  font-size: 14px;
-  color: #333;
-  background: #f5f5f5;
-  padding: 12px;
+  font-size: 13px;
+  color: #1A2B3C;
+  background: rgba(2, 132, 199, 0.04);
+  padding: 10px;
   border-radius: 8px;
-  margin: 8px 0 0 0;
+  border: 1px solid rgba(2, 132, 199, 0.1);
+  margin: 6px 0 0 0;
   line-height: 1.5;
 }
 
+/* ══ ACTION FOOTER ════════════════════════════════ */
 .cardFooter {
-  padding: 16px 20px;
-  background: #f8f9fa;
-  border-top: 1px solid #e0e0e0;
+  padding: 12px 16px;
+  background: rgba(2, 132, 199, 0.04);
+  border-top: 1px solid rgba(2, 132, 199, 0.1);
 }
 
 .actionButton {
   width: 100%;
-  padding: 12px 24px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .actionButton.primary {
-  background: #1a73e8;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
-.actionButton.primary:hover {
-  background: #1565c0;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+.actionButton.primary:active {
+  transform: scale(0.96);
 }
 
 .actionButton.success {
-  background: #28a745;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.actionButton.success:hover {
-  background: #218838;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+.actionButton.success:active {
+  transform: scale(0.96);
 }
 
-.actionButton:active {
-  transform: translateY(0);
-}
-
-.cardReference {
-  padding: 12px 20px;
-  background: #f0f0f0;
-  font-size: 12px;
-  color: #666;
-  text-align: center;
-  border-top: 1px solid #e0e0e0;
-}
-
-.refCode {
-  font-family: 'Courier New', monospace;
-  background: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1a73e8;
-}
-
-/* Mobile responsiveness */
+/* ══ RESPONSIVE ═══════════════════════════════════ */
 @media (max-width: 600px) {
   .cardHeader {
-    padding: 12px 16px;
+    padding: 12px 14px;
   }
 
   .customerName {
-    font-size: 16px;
+    font-size: 15px;
+  }
+
+  .statusBadge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .expandButton {
+    width: 26px;
+    height: 26px;
+  }
+
+  .quickInfo {
+    padding: 10px 14px;
+  }
+
+  .quickValue {
+    font-size: 13px;
   }
 
   .cardBody {
-    padding: 16px;
+    padding: 14px;
   }
 
   .infoRow {
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 10px;
+    gap: 3px;
+    margin-bottom: 8px;
   }
 
   .value,
@@ -202,6 +312,31 @@
 
   .actionButton {
     font-size: 14px;
-    padding: 10px 20px;
+    padding: 11px 18px;
   }
+}
+
+@media (min-width: 601px) {
+  .quickInfoItem {
+    gap: 8px;
+  }
+
+  .quickIcon {
+    font-size: 18px;
+  }
+
+  .quickValue {
+    font-size: 15px;
+  }
+}
+
+/* ══ ACCESSIBILITY ════════════════════════════════ */
+.actionButton:focus-visible {
+  outline: 3px solid rgba(2, 132, 199, 0.5);
+  outline-offset: 2px;
+}
+
+.cardHeader:focus-visible {
+  outline: 3px solid rgba(245, 158, 11, 0.6);
+  outline-offset: -3px;
 }

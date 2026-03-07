@@ -1,5 +1,5 @@
 /* app/partner/application/history/History.module.css */
-/* OCEAN BLUE & GOLDEN AMBER THEME */
+/* OCEAN BLUE THEME - MOBILE FIRST */
 
 .container {
   max-width: 1000px;
@@ -9,83 +9,76 @@
 
 .header {
   text-align: center;
-  margin-bottom: 24px;
-  padding: 20px 0;
+  margin-bottom: 20px;
+  padding: 12px 0;
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
-  background: var(--gradient-primary);
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  font-size: 16px;
-  color: var(--text-muted);
+  font-size: 14px;
+  color: #5A6C7D;
   margin: 0;
+  font-weight: 500;
 }
 
+/* ══ FILTERS ══════════════════════════════════════ */
 .filters {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-color: #CBD5E1 transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 .filters::-webkit-scrollbar {
-  height: 4px;
-}
-
-.filters::-webkit-scrollbar-track {
-  background: transparent;
+  height: 3px;
 }
 
 .filters::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+  background: #CBD5E1;
   border-radius: 10px;
 }
 
 .filterButton {
-  padding: 10px 20px;
-  background: var(--panel-bg);
-  border: 2px solid var(--panel-border);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
+  padding: 10px 16px;
+  background: #fff;
+  border: 1.5px solid rgba(2, 132, 199, 0.2);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #5A6C7D;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.filterButton:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--info-bg);
+.filterButton:active {
+  transform: scale(0.95);
 }
 
 .filterActive {
-  background: var(--cta-grad);
-  border-color: var(--primary);
-  color: var(--cta-fg);
-  box-shadow: var(--cta-shadow);
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  border-color: #0284C7;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
-.filterActive:hover {
-  background: var(--gradient-primary);
-  border-color: var(--primary);
-  box-shadow: var(--cta-hover-shadow);
-}
-
+/* ══ LOADING ══════════════════════════════════════ */
 .loadingContainer {
   display: flex;
   flex-direction: column;
@@ -93,34 +86,34 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  min-height: 400px;
+  min-height: 300px;
 }
 
 .loadingContainer p {
-  color: var(--text-muted);
-  font-size: 16px;
-  font-weight: 500;
+  color: #5A6C7D;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 16px;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid var(--border-light);
-  border-top: 4px solid var(--primary);
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(2, 132, 199, 0.2);
+  border-top: 3px solid #0284C7;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
+/* ══ ERROR ════════════════════════════════════════ */
 .errorContainer {
   padding: 40px 20px;
   text-align: center;
-  min-height: 300px;
+  min-height: 250px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -128,185 +121,142 @@
 }
 
 .errorText {
-  color: var(--error);
-  font-size: 16px;
+  color: #EF4444;
+  font-size: 15px;
   margin-bottom: 16px;
   font-weight: 600;
 }
 
 .retryButton {
   padding: 12px 24px;
-  background: var(--cta-grad);
-  color: var(--cta-fg);
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--cta-shadow);
-}
-
-.retryButton:hover {
-  background: var(--gradient-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--cta-hover-shadow);
+  transition: transform 0.15s;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .retryButton:active {
-  transform: translateY(0);
+  transform: scale(0.95);
 }
 
+/* ══ EMPTY STATE ══════════════════════════════════ */
 .emptyState {
   text-align: center;
-  padding: 60px 20px;
-  background: var(--panel-bg);
+  padding: 48px 20px;
+  background: #fff;
   border-radius: 16px;
-  border: 2px dashed var(--border-light);
+  border: 2px dashed rgba(2, 132, 199, 0.2);
   margin: 20px 0;
 }
 
 .emptyIcon {
-  font-size: 64px;
-  margin-bottom: 16px;
+  font-size: 56px;
+  margin-bottom: 12px;
   filter: grayscale(0.3);
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .emptyText {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #5A6C7D;
   margin: 0;
 }
 
+/* ══ BOOKINGS LIST ════════════════════════════════ */
 .bookingsList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
+/* ══ FOOTER ═══════════════════════════════════════ */
 .footer {
   text-align: center;
-  padding: 24px 0;
+  padding: 20px 0 32px;
 }
 
 .refreshButton {
-  padding: 12px 32px;
-  background: var(--panel-bg);
-  border: 2px solid var(--secondary);
-  border-radius: 8px;
-  color: var(--secondary);
-  font-size: 16px;
-  font-weight: 600;
+  padding: 12px 28px;
+  background: #fff;
+  border: 2px solid #F59E0B;
+  border-radius: 12px;
+  color: #F59E0B;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-sm);
-}
-
-.refreshButton:hover {
-  background: var(--cta-secondary-grad);
-  color: var(--cta-secondary-fg);
-  border-color: var(--secondary);
-  transform: translateY(-2px);
-  box-shadow: var(--cta-secondary-shadow);
+  transition: all 0.15s;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .refreshButton:active {
-  transform: translateY(0);
+  transform: scale(0.95);
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #fff;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-  .container {
-    padding: 0 12px;
+/* ══ RESPONSIVE ═══════════════════════════════════ */
+@media (min-width: 600px) {
+  .header {
+    margin-bottom: 24px;
   }
 
   .title {
-    font-size: 24px;
+    font-size: 30px;
   }
 
   .subtitle {
-    font-size: 14px;
-  }
-
-  .filters {
-    gap: 6px;
-  }
-
-  .filterButton {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .emptyIcon {
-    font-size: 48px;
-  }
-
-  .emptyText {
     font-size: 16px;
-  }
-
-  .loadingContainer {
-    padding: 40px 20px;
-    min-height: 300px;
-  }
-
-  .errorContainer {
-    padding: 30px 15px;
-    min-height: 250px;
-  }
-}
-
-/* Tablet responsiveness */
-@media (min-width: 601px) and (max-width: 900px) {
-  .container {
-    padding: 0 24px;
   }
 
   .filters {
     gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .filterButton {
+    padding: 11px 20px;
+    font-size: 14px;
+  }
+
+  .bookingsList {
+    gap: 14px;
   }
 }
 
-/* Accessibility - Reduced motion */
+@media (min-width: 900px) {
+  .container {
+    padding: 0 24px;
+  }
 
-
-/* Focus states for keyboard navigation */
-.filterButton:focus-visible,
-.retryButton:focus-visible,
-.refreshButton:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+  .bookingsList {
+    gap: 16px;
+  }
 }
 
-/* Loading state improvements */
-.loadingContainer {
+/* ══ ANIMATIONS ═══════════════════════════════════ */
+.loadingContainer,
+.emptyState {
   animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Empty state animation */
-.emptyState {
-  animation: slideUp 0.4s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ══ ACCESSIBILITY ════════════════════════════════ */
+.filterButton:focus-visible,
+.retryButton:focus-visible,
+.refreshButton:focus-visible {
+  outline: 3px solid rgba(2, 132, 199, 0.5);
+  outline-offset: 2px;
 }
