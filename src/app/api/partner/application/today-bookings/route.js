@@ -1,9 +1,11 @@
-// app/api/partner/applicationlication/today-bookings/route.js
+// app/api/partner/application/today-bookings/route.js
+// ✅ USES COOKIES (NOT Authorization header)
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
 import User from '@/models/User';
-import jwt from 'jsonwebtoken';
+import { verifyJWT } from '@/lib/auth';
 
 /**
  * GET /api/partner/application/today-bookings
@@ -14,21 +16,20 @@ export async function GET(request) {
   try {
     await dbConnect();
 
-    // 1. Verify authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    // ✅ Get token from cookie instead of Authorization header
+    const token = request.cookies.get('auth_session')?.value;
+    
+    if (!token) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.split(' ')[1];
-    let decoded;
+    // ✅ Verify token using your auth helper
+    const decoded = verifyJWT(token);
     
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
+    if (!decoded || decoded.expired) {
       return NextResponse.json(
         { success: false, error: 'Invalid or expired token' },
         { status: 401 }
@@ -42,7 +43,7 @@ export async function GET(request) {
       );
     }
 
-    const partnerId = decoded.id || decoded.userId;
+    const partnerId = decoded.userId;
 
     // 2. Get partner's assigned station
     const partner = await User.findById(partnerId).lean();

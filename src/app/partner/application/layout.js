@@ -1,4 +1,6 @@
 // app/partner/application/layout.js
+// ✅ USES COOKIES (SAME AS WEBSITE) - NO localStorage TOKEN
+
 'use client';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -15,35 +17,48 @@ export default function PartnerAppLayout({ children }) {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    
-    // Skip auth check on login page
     if (pathname === '/partner/application/login') {
       setIsLoading(false);
       return;
     }
 
-    if (!token || role !== 'partner') {
-      router.push('/partner/application/login');
-      return;
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include'
+        });
 
-    // Get partner name from localStorage
-    const username = localStorage.getItem('username');
-    setPartnerName(username || 'Partner');
-    setIsLoading(false);
+        if (!response.ok) {
+          router.push('/partner/application/login');
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.role !== 'partner') {
+          router.push('/partner/application/login');
+          return;
+        }
+
+        const username = localStorage.getItem('username') || data.username;
+        setPartnerName(username || 'Partner');
+        setIsLoading(false);
+
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/partner/application/login');
+      }
+    };
+
+    checkAuth();
   }, [pathname, router]);
 
   // PWA Install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent the default install prompt
       e.preventDefault();
-      // Save the event for later use
       setDeferredPrompt(e);
-      // Show our custom install button
       setShowInstallPrompt(true);
     };
 
@@ -53,7 +68,6 @@ export default function PartnerAppLayout({ children }) {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
-
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -67,39 +81,35 @@ export default function PartnerAppLayout({ children }) {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    // Show the install prompt
     deferredPrompt.prompt();
-
-    // Wait for the user's response
     const { outcome } = await deferredPrompt.userChoice;
     
     console.log(`User response to install prompt: ${outcome}`);
-
-    // Clear the saved prompt
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };
 
-const handleLogout = () => {
-  try {
-    // Clear all auth data
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('email');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('role');
-    
-    // Reset state immediately
-    setPartnerName('');
-    setIsLoading(true);
-    
-    // Use window.location for full page reload
-    window.location.href = '/partner/application/login';
-  } catch (error) {
-    console.error('Logout error:', error);
-    window.location.href = '/partner/application/login';
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      localStorage.removeItem('role');
+      
+      setPartnerName('');
+      setIsLoading(true);
+      
+      window.location.href = '/partner/application/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      window.location.href = '/partner/application/login';
+    }
+  };
 
   // Show loading on protected pages
   if (isLoading && pathname !== '/partner/application/login') {
@@ -117,7 +127,7 @@ const handleLogout = () => {
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-          <meta name="theme-color" content="#1a73e8" />
+          <meta name="theme-color" content="#0284C7" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-title" content="LT Partner" />
@@ -127,14 +137,13 @@ const handleLogout = () => {
         {children}
       </>
     );
-    
   }
 
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-        <meta name="theme-color" content="#1a73e8" />
+        <meta name="theme-color" content="#0284C7" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="LT Partner" />
@@ -169,6 +178,7 @@ const handleLogout = () => {
                 alt="Luggage Terminal Partner"
                 width={150}
                 height={50}
+                priority
               />
             </div>
             <div className={styles.headerRight}>
