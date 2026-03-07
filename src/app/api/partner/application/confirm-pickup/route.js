@@ -1,5 +1,5 @@
 // app/api/partner/application/confirm-pickup/route.js
-// ✅ UPDATED TO DELETE ALL PHOTOS (up to 3)
+// ✅ USES COOKIES + DELETES ALL PHOTOS
 
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
@@ -10,13 +10,14 @@ export async function POST(request) {
   try {
     await dbConnect();
 
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    // ✅ Get token from cookie
+    const token = request.cookies.get('auth_session')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyJWT(token);
-    if (!decoded || decoded.role !== 'partner') {
+    if (!decoded || decoded.expired || decoded.role !== 'partner') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -44,11 +45,11 @@ export async function POST(request) {
 
     // ✅ UPDATE STATUS
     booking.status = 'completed';
-    booking.pickUpTime = new Date();
+    booking.checkOutTime = new Date();
 
     // ✅ DELETE ALL PHOTOS
-    booking.luggagePhotoUrl = null;        // Old field
-    booking.luggagePhotos = [];            // New array field
+    booking.luggagePhotoUrl = null;
+    booking.luggagePhotos = [];
     
     await booking.save();
 
@@ -58,7 +59,7 @@ export async function POST(request) {
       booking: {
         bookingReference: booking.bookingReference,
         status: booking.status,
-        pickUpTime: booking.pickUpTime,
+        checkOutTime: booking.checkOutTime,
         photosDeleted: true
       }
     });

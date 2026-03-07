@@ -1,4 +1,6 @@
 // app/partner/application/login/page.js
+// ✅ USES COOKIES (SAME AS WEBSITE)
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,7 +17,6 @@ export default function PartnerLogin() {
   const [error, setError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
-  // Capture the install prompt event (Android only)
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
@@ -31,7 +32,6 @@ export default function PartnerLogin() {
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
-      // Show instructions for iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
       if (isIOS) {
@@ -42,7 +42,6 @@ export default function PartnerLogin() {
       return;
     }
 
-    // Android/Chrome automatic install
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`Install outcome: ${outcome}`);
@@ -64,8 +63,10 @@ export default function PartnerLogin() {
     setError('');
 
     try {
+      // ✅ USE COOKIES - Same as website
       const response = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'include', // ✅ CRITICAL: Include cookies
         headers: {
           'Content-Type': 'application/json'
         },
@@ -75,19 +76,21 @@ export default function PartnerLogin() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || data.errors?.email || data.errors?.password || 'Login failed');
       }
 
       if (data.role !== 'partner') {
         throw new Error('Access denied. Partners only.');
       }
 
-      localStorage.setItem('token', data.token);
+      // ✅ Store only user info in localStorage (NOT the token)
+      // Token is automatically stored in HttpOnly cookie
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('role', data.role);
       localStorage.setItem('username', data.username || data.email);
+      localStorage.setItem('email', data.email);
 
-      console.log('✅ Partner login successful');
+      console.log('✅ Partner login successful (using cookies)');
       router.push('/partner/application/dashboard');
     } catch (err) {
       console.error('Login error:', err);
@@ -170,7 +173,6 @@ export default function PartnerLogin() {
           </button>
         </form>
 
-        {/* ✅ INSTALL BUTTON - ALWAYS VISIBLE */}
         <div className={styles.installSection}>
           <button
             type="button"
@@ -179,6 +181,9 @@ export default function PartnerLogin() {
           >
             📱 Install App
           </button>
+          <p style={{ fontSize: '13px', color: '#5A6C7D', textAlign: 'center', marginTop: '8px' }}>
+            🔒 You&apos;ll stay logged in for 30 days
+          </p>
         </div>
 
         <div className={styles.footer}>

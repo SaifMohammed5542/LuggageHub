@@ -1,4 +1,6 @@
 // app/api/partner/application/upload-luggage-photo/route.js
+// ✅ USES COOKIES + MULTI-PHOTO SUPPORT
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
@@ -8,14 +10,14 @@ export async function POST(request) {
   try {
     await dbConnect();
 
-    // ✅ VERIFY TOKEN
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    // ✅ Get token from cookie
+    const token = request.cookies.get('auth_session')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyJWT(token);
-    if (!decoded || decoded.role !== 'partner') {
+    if (!decoded || decoded.expired || decoded.role !== 'partner') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -81,4 +83,4 @@ export async function POST(request) {
       { status: 500 }
     );
   }
-}
+}s

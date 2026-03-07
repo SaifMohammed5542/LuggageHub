@@ -1,4 +1,6 @@
 // app/partner/application/dashboard/page.js
+// ✅ USES COOKIES (NO localStorage TOKEN)
+
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,11 +25,10 @@ export default function PartnerAppDashboard() {
     setConfirming(true);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/partner/application/confirm-dropoff', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -43,7 +44,6 @@ export default function PartnerAppDashboard() {
 
       alert(`✅ Drop-off confirmed for ${booking.fullName}`);
       
-      // Refresh the page to update the bookings list
       window.location.reload();
     } catch (err) {
       console.error('Confirm drop-off error:', err);
@@ -67,11 +67,10 @@ export default function PartnerAppDashboard() {
     setConfirming(true);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/partner/application/confirm-pickup', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -87,7 +86,6 @@ export default function PartnerAppDashboard() {
 
       alert(`✅ Pick-up confirmed for ${booking.fullName}`);
       
-      // Refresh the page to update the bookings list
       window.location.reload();
     } catch (err) {
       console.error('Confirm pick-up error:', err);
