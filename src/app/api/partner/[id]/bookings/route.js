@@ -1,23 +1,39 @@
+// app/api/partner/[id]/bookings/route.js
+// ✅ USES COOKIES (NOT Authorization header)
+
 import dbConnect from '../../../../../lib/dbConnect';
 import Booking from '../../../../../models/booking';
 import Station from '../../../../../models/Station';
 import User from '../../../../../models/User';
-import jwt from 'jsonwebtoken';
+import { verifyJWT } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { getNovember2025Range } from "@/utils/dateRange";
-
 
 // await params if it's a promise (handles Next versions where params is async)
 const getParams = async (p) => (typeof p?.then === 'function' ? await p : p);
 
 async function verifyAdminOrSelf(req, userId) {
   try {
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) return { error: 'Unauthorized', status: 401 };
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const decodedId = decoded.id || decoded.userId;
-    if (decoded.role !== 'admin' && decodedId !== userId) return { error: 'Forbidden', status: 403 };
+    // ✅ Get token from cookie instead of Authorization header
+    const token = req.cookies.get('auth_session')?.value;
+    
+    if (!token) {
+      return { error: 'Unauthorized', status: 401 };
+    }
+
+    // ✅ Verify token using your auth helper
+    const decoded = verifyJWT(token);
+    
+    if (!decoded || decoded.expired) {
+      return { error: 'Invalid or expired token', status: 401 };
+    }
+
+    const decodedId = decoded.userId;
+    
+    if (decoded.role !== 'admin' && decodedId !== userId) {
+      return { error: 'Forbidden', status: 403 };
+    }
+
     return { decoded };
   } catch (err) {
     console.error('Auth error:', err);
@@ -46,50 +62,50 @@ export async function GET(req, ctx) {
       return NextResponse.json({ success: false, error: 'Assigned station not found' }, { status: 404 });
     }
 
-const stationId = station._id;
-const stationIdStr = stationId.toString();
+    const stationId = station._id;
+    const stationIdStr = stationId.toString();
 
-// ✅ DEFINE FIRST
-const { start } = getNovember2025Range();
+    // ✅ DEFINE FIRST
+    const { start } = getNovember2025Range();
 
-// ✅ THEN USE
-const query = {
-  $and: [
-    // ✅ station matching (unchanged)
-    {
-      $or: [
-        { station: stationId },
-        { station: stationIdStr },
-        { stationId: stationIdStr },
-        { stationId: stationId },
-        { 'station._id': stationId },
-        { stationSlug: station.slug },
-        { stationName: station.name },
-      ],
-    },
-
-    // ✅ FROM NOVEMBER 2025 → PRESENT (CORE FIX)
-    {
-      $or: [
-        // booking starts on/after Nov 1
+    // ✅ THEN USE
+    const query = {
+      $and: [
+        // ✅ station matching (unchanged)
         {
-          dropOffDate: { $gte: start },
+          $or: [
+            { station: stationId },
+            { station: stationIdStr },
+            { stationId: stationIdStr },
+            { stationId: stationId },
+            { 'station._id': stationId },
+            { stationSlug: station.slug },
+            { stationName: station.name },
+          ],
         },
 
-        // booking started before Nov 1 but continues after
+        // ✅ FROM NOVEMBER 2025 → PRESENT (CORE FIX)
         {
-          dropOffDate: { $lt: start },
-          pickUpDate: { $gte: start },
+          $or: [
+            // booking starts on/after Nov 1
+            {
+              dropOffDate: { $gte: start },
+            },
+
+            // booking started before Nov 1 but continues after
+            {
+              dropOffDate: { $lt: start },
+              pickUpDate: { $gte: start },
+            },
+          ],
+        },
+
+        // ✅ exclude invalid states
+        {
+          status: { $nin: ["cancelled", "no_show"] },
         },
       ],
-    },
-
-    // ✅ exclude invalid states
-    {
-      status: { $nin: ["cancelled", "no_show"] },
-    },
-  ],
-};
+    };
 
     const bookings = await Booking.find(query)
       .sort({ dropOffDate: -1 })
