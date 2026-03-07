@@ -722,10 +722,7 @@ if (showMap && result) {
             <AvailBar current={s.currentCapacity || 0} max={s.capacity} />
           </div>
         </div>
-        <div className={styles.stationCardPriceWrap}>
-          <div className={styles.stationCardPrice}>A${PRICING.small}</div>
-          <div className={styles.stationCardPriceSub}>/day</div>
-        </div>
+        <div />
       </div>
     );
   };
@@ -1458,11 +1455,7 @@ function StepDates({ station, onDone, onChangeStation, onOpenPicker, staleNotice
                   : `${days} day${days > 1 ? "s" : ""}`}
               </div>
             </div>
-            <div className={styles.durationRight}>
-              <div className={styles.durationLabel}>Est. from</div>
-              <div className={styles.durationPrice}>A${(days * PRICING.small).toFixed(2)}</div>
-              <div className={styles.durationPriceSub}>small bag</div>
-            </div>
+            <div />
           </div>
         )}
 
