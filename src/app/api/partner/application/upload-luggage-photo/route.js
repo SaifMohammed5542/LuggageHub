@@ -1,98 +1,83 @@
 // app/api/partner/application/upload-luggage-photo/route.js
 import { NextResponse } from 'next/server';
-import dbConnect from '../../../../../lib/dbConnect';
-import Booking from '../../../../../models/booking';
-import { verifyJWT } from '../../../../../lib/auth';
+import dbConnect from '@/lib/dbConnect';
+import Booking from '@/models/booking';
+import { verifyJWT } from '@/lib/auth';
 
 export async function POST(request) {
   try {
     await dbConnect();
 
-    // Authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // ✅ VERIFY TOKEN
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.substring(7);
     const decoded = verifyJWT(token);
-    
-    if (!decoded || decoded.expired) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid or expired token' },
-        { status: 401 }
-      );
+    if (!decoded || decoded.role !== 'partner') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (decoded.role !== 'partner') {
-      return NextResponse.json(
-        { success: false, error: 'Forbidden - Partners only' },
-        { status: 403 }
-      );
-    }
-
-    console.log('📸 Upload request from partner:', decoded.id || decoded.userId);
-
-    // Get form data
+    // ✅ PARSE FORM DATA
     const formData = await request.formData();
     const bookingReference = formData.get('bookingReference');
     const imageFile = formData.get('image');
 
     if (!bookingReference || !imageFile) {
       return NextResponse.json(
-        { success: false, error: 'Booking reference and image are required' },
+        { error: 'Missing booking reference or image' },
         { status: 400 }
       );
     }
 
-    console.log('📦 Booking:', bookingReference);
-    console.log('📷 Image:', imageFile.name, imageFile.type, `${(imageFile.size / 1024).toFixed(2)}KB`);
-
-    // Validate image size (max 5MB to keep MongoDB document under 16MB limit)
-    if (imageFile.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { success: false, error: 'Image too large. Maximum size is 5MB.' },
-        { status: 400 }
-      );
-    }
-
-    // Find booking
+    // ✅ FIND BOOKING
     const booking = await Booking.findOne({ bookingReference });
     if (!booking) {
-      console.error('❌ Booking not found:', bookingReference);
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+
+    // ✅ CONVERT IMAGE TO BASE64
+    const bytes = await imageFile.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64Image = buffer.toString('base64');
+    const mimeType = imageFile.type || 'image/jpeg';
+    const dataUrl = `data:${mimeType};base64,${base64Image}`;
+
+    // ✅ STORE MULTIPLE PHOTOS (up to 3)
+    if (!booking.luggagePhotos) {
+      booking.luggagePhotos = [];
+    }
+
+    // Check if already have 3 photos
+    if (booking.luggagePhotos.length >= 3) {
       return NextResponse.json(
-        { success: false, error: 'Booking not found' },
-        { status: 404 }
+        { error: 'Maximum 3 photos allowed per booking' },
+        { status: 400 }
       );
     }
 
-    // ✅ Convert image to base64 data URL
-    const bytes = await imageFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64Image = `data:${imageFile.type};base64,${buffer.toString('base64')}`;
+    // Add new photo
+    booking.luggagePhotos.push(dataUrl);
+    
+    // Keep old field for backward compatibility
+    if (booking.luggagePhotos.length === 1) {
+      booking.luggagePhotoUrl = dataUrl;
+    }
 
-    console.log('💾 Saving to MongoDB...');
-
-    // ✅ Store base64 image directly in MongoDB
-    booking.luggagePhotoUrl = base64Image;
     await booking.save();
-
-    console.log(`✅ Photo saved in MongoDB for booking: ${bookingReference}`);
 
     return NextResponse.json({
       success: true,
       message: 'Photo uploaded successfully',
-      photoUrl: booking.luggagePhotoUrl,
-    }, { status: 200 });
+      photoCount: booking.luggagePhotos.length,
+      photoUrl: dataUrl
+    });
 
   } catch (error) {
-    console.error('❌ Upload error:', error.message);
-    console.error('❌ Stack:', error.stack);
+    console.error('❌ Upload photo error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to upload photo' },
+      { error: 'Failed to upload photo' },
       { status: 500 }
     );
   }

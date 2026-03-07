@@ -80,10 +80,26 @@ export default function PartnerAppLayout({ children }) {
     setShowInstallPrompt(false);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    router.push('/partner/application/login');
-  };
+const handleLogout = () => {
+  try {
+    // Clear all auth data
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('email');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
+    
+    // Reset state immediately
+    setPartnerName('');
+    setIsLoading(true);
+    
+    // Use window.location for full page reload
+    window.location.href = '/partner/application/login';
+  } catch (error) {
+    console.error('Logout error:', error);
+    window.location.href = '/partner/application/login';
+  }
+};
 
   // Show loading on protected pages
   if (isLoading && pathname !== '/partner/application/login') {

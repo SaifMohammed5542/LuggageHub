@@ -1,208 +1,149 @@
 /* app/partner/application/scan/Scan.module.css */
+/* FAST & BEAUTIFUL SCAN PAGE - MULTI-PHOTO SUPPORT */
 
 .container {
   max-width: 800px;
   margin: 0 auto;
 }
 
+/* ══ HEADER ═══════════════════════════════════════ */
 .header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a73e8;
-  margin: 0 0 8px 0;
-}
-
-.subtitle {
-  font-size: 16px;
-  color: #666;
-  margin: 0;
-}
-
-.scannerSection {
-  margin-bottom: 32px;
-}
-
-.loadingState {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #1a73e8;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.errorState {
-  text-align: center;
-  padding: 40px 20px;
-  background: #fff;
+.backButton {
+  padding: 10px 16px;
+  background: rgba(2, 132, 199, 0.08);
+  border: 1.5px solid rgba(2, 132, 199, 0.2);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #0284C7;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.errorIcon {
-  font-size: 64px;
+.backButton:active {
+  transform: scale(0.95);
+  background: rgba(2, 132, 199, 0.15);
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* ══ SCANNER SECTION ══════════════════════════════ */
+.scannerSection {
+  margin-bottom: 24px;
+}
+
+.instruction {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A2B3C;
   margin-bottom: 16px;
 }
 
-.errorTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: #d32f2f;
-  margin: 0 0 12px 0;
-}
-
-.errorMessage {
-  font-size: 16px;
-  color: #666;
-  margin: 0 0 24px 0;
-}
-
-.retryButton {
-  padding: 12px 24px;
-  background: #1a73e8;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+.status {
+  text-align: center;
+  font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  color: #0284C7;
+  margin-top: 12px;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-.retryButton:hover {
-  background: #1565c0;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-.retryButton:active {
-  transform: translateY(0);
+.errorText {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #EF4444;
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.hint {
+  text-align: center;
+  font-size: 13px;
+  color: #5A6C7D;
+  margin-top: 12px;
+}
+
+/* ══ RESULT SECTION ═══════════════════════════════ */
 .resultSection {
   animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.resultHeader {
-  text-align: center;
-  margin-bottom: 24px;
+.successBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
 }
 
-.resultTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: #28a745;
-  margin: 0;
+.successIcon {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
 
-.scanAnotherButton {
-  width: 100%;
-  max-width: 400px;
-  margin: 24px auto 0;
-  display: block;
-  padding: 14px 24px;
-  background: #fff;
-  color: #1a73e8;
-  border: 2px solid #1a73e8;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.scanAnotherButton:hover {
-  background: #1a73e8;
+.successTitle {
+  font-size: 18px;
+  font-weight: 900;
   color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+  letter-spacing: -0.01em;
 }
 
-.scanAnotherButton:active {
-  transform: translateY(0);
-}
-
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-  .title {
-    font-size: 24px;
-  }
-
-  .subtitle {
-    font-size: 14px;
-  }
-
-  .errorIcon {
-    font-size: 48px;
-  }
-
-  .errorTitle {
-    font-size: 20px;
-  }
-
-  .errorMessage {
-    font-size: 14px;
-  }
-
-  .resultTitle {
-    font-size: 20px;
-  }
-}
-
-/* Add these new styles to your existing Scan.module.css */
-
-/* Booking Details Card */
+/* ══ BOOKING DETAILS ══════════════════════════════ */
 .bookingDetails {
-  background: #f8f9fa;
-  border-radius: 12px;
+  background: #fff;
+  border-radius: 16px;
   padding: 20px;
-  margin: 20px 0;
-  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+  border: 1.5px solid rgba(2, 132, 199, 0.15);
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.1);
 }
 
 .detailsTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 900;
   margin-bottom: 16px;
-  color: #1a73e8;
+  color: #0284C7;
 }
 
 .detailRow {
   display: flex;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(2, 132, 199, 0.08);
 }
 
 .detailRow:last-child {
@@ -211,162 +152,323 @@
 
 .detailLabel {
   font-weight: 600;
-  color: #666;
+  color: #5A6C7D;
+  font-size: 14px;
 }
 
 .detailValue {
   font-weight: 700;
-  color: #333;
+  color: #1A2B3C;
+  font-size: 14px;
 }
 
-/* Photo Section */
+/* ══ PHOTO SECTION - MULTI-PHOTO GRID ════════════ */
 .photoSection {
   margin: 20px 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1.5px solid rgba(2, 132, 199, 0.15);
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.1);
 }
 
 .photoTitle {
   font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.existingPhoto {
+  font-weight: 900;
+  margin-bottom: 16px;
+  color: #0284C7;
   text-align: center;
 }
 
-.luggagePhoto {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  border-radius: 12px;
-  border: 2px solid #1a73e8;
-  margin: 12px 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.photoHint {
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
-}
-
-.photoCapture {
+.photoCapture,
+.photoGallery {
   text-align: center;
 }
 
-.photoButton {
-  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%);
-  color: white;
-  border: none;
-  padding: 16px 32px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s;
-  margin: 12px 0;
-}
-
-.photoButton:hover {
-  transform: scale(1.05);
-}
-
-.photoButton:active {
-  transform: scale(0.98);
-}
-
-/* Camera View */
-.cameraView {
-  margin: 20px 0;
-}
-
-.videoPreview {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
-  border: 2px solid #1a73e8;
-  background: #000;
-}
-
-.cameraControls {
-  display: flex;
+/* ✅ PHOTO GRID - 3 photos layout */
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
-  justify-content: center;
-  margin-top: 16px;
-}
-
-.captureButton {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.cancelButton {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* Photo Preview */
-.photoPreview {
-  margin: 20px 0;
-  text-align: center;
-}
-
-.capturedImage {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
-  border: 2px solid #4caf50;
   margin-bottom: 16px;
 }
 
+.photoGridItem {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f9fa;
+  aspect-ratio: 1;
+}
+
+.luggagePhoto,
+.capturedImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #0284C7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
 .photoActions {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
   display: flex;
-  gap: 12px;
+  gap: 6px;
+  justify-content: center;
+}
+
+.uploadButton,
+.removeButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
 .uploadButton {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #fff;
+}
+
+.removeButton {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: #fff;
+}
+
+.uploadButton:active,
+.removeButton:active {
+  transform: scale(0.9);
 }
 
 .uploadButton:disabled {
-  background: #ccc;
+  background: #CBD5E1;
   cursor: not-allowed;
 }
 
-.retakeButton {
-  background: #ff9800;
-  color: white;
+.uploadedBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Add Photo Button */
+.photoButton {
+  width: 100%;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  color: #fff;
   border: none;
   padding: 14px 28px;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.photoButton:active {
+  transform: scale(0.96);
+}
+
+.photoMaxNote {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #10B981;
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(16, 185, 129, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.photoHint {
+  font-size: 13px;
+  color: #5A6C7D;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ══ ACTION BUTTONS ═══════════════════════════════ */
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.dropoffButton,
+.pickupButton,
+.scanAgainButton {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.retakeButton:disabled {
-  background: #ccc;
+.dropoffButton {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
+}
+
+.pickupButton {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.scanAgainButton {
+  background: #fff;
+  color: #0284C7;
+  border: 2px solid #0284C7;
+  box-shadow: none;
+}
+
+.dropoffButton:active,
+.pickupButton:active,
+.scanAgainButton:active {
+  transform: scale(0.96);
+}
+
+.dropoffButton:disabled,
+.pickupButton:disabled {
+  background: #CBD5E1;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
+/* ══ ERROR BANNER ═════════════════════════════════ */
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(239, 68, 68, 0.2);
+  margin: 16px 0;
+}
+
+.errorIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+/* ══ TOAST NOTIFICATIONS ══════════════════════════ */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: toastSlideIn 0.3s ease-out;
+  min-width: 280px;
+  max-width: 90vw;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.toastSuccess {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.toastError {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.toastWarning {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.toastIcon {
+  font-size: 20px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.toastMessage {
+  flex: 1;
+  text-align: center;
+}
+
+/* ══ RESPONSIVE ═══════════════════════════════════ */
+@media (min-width: 600px) {
+  .title {
+    font-size: 26px;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .actionButtons {
+    flex-direction: row;
+  }
+
+  .scanAgainButton {
+    flex: 0 0 auto;
+    min-width: 200px;
+  }
+
+  .toast {
+    min-width: 320px;
+  }
+}
+
+@media (max-width: 400px) {
+  .photoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toast {
+    top: 70px;
+    font-size: 14px;
+    padding: 14px 20px;
+  }
+}
