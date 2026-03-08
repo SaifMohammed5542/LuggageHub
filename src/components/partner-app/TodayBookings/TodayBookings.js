@@ -1,4 +1,6 @@
 // components/partner-app/TodayBookings.js
+// ✅ USES COOKIES (NO localStorage TOKEN)
+
 'use client';
 import { useEffect, useState } from 'react';
 import BookingCard from '../BookingCard/BookingCard';
@@ -20,15 +22,8 @@ export default function TodayBookings({ onConfirmDropoff, onConfirmPickup }) {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const response = await fetch('/api/partner/application/today-bookings', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
 
       const data = await response.json();

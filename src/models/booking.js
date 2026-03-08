@@ -106,14 +106,15 @@ const bookingSchema = new mongoose.Schema({
   },
 
   // ✅✅ NEW FIELD - Multiple photos (up to 3)
+  // ✅✅ NEW FIELD - Multiple photos (up to 9)
   luggagePhotos: {
     type: [String],
     default: [],
     validate: {
       validator: function(photos) {
-        return photos.length <= 3;
+        return photos.length <= 9;
       },
-      message: 'Maximum 3 photos allowed per booking'
+      message: 'Maximum 9 photos allowed per booking'
     }
   },
   
