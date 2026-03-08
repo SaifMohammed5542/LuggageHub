@@ -10,11 +10,13 @@ export async function POST(request) {
 
     const token = request.cookies.get('auth_session')?.value;
     if (!token) {
+      console.error('Upload: No token found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyJWT(token);
     if (!decoded || decoded.expired || decoded.role !== 'partner') {
+      console.error('Upload: Token invalid or not partner');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -22,7 +24,15 @@ export async function POST(request) {
     const bookingReference = formData.get('bookingReference');
     const imageFile = formData.get('image');
 
+    console.log('Upload request:', {
+      bookingReference,
+      hasImage: !!imageFile,
+      imageType: imageFile?.type,
+      imageSize: imageFile?.size
+    });
+
     if (!bookingReference || !imageFile) {
+      console.error('Upload: Missing data', { bookingReference, hasImage: !!imageFile });
       return NextResponse.json(
         { error: 'Missing booking reference or image' },
         { status: 400 }
@@ -31,6 +41,7 @@ export async function POST(request) {
 
     const booking = await Booking.findOne({ bookingReference });
     if (!booking) {
+      console.error('Upload: Booking not found', bookingReference);
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
@@ -44,9 +55,12 @@ export async function POST(request) {
       booking.luggagePhotos = [];
     }
 
-    if (booking.luggagePhotos.length >= 3) {
+    console.log('Current photos count:', booking.luggagePhotos.length);
+
+    if (booking.luggagePhotos.length >= 9) {
+      console.error('Upload: Maximum photos reached');
       return NextResponse.json(
-        { error: 'Maximum 3 photos allowed per booking' },
+        { error: 'Maximum 9 photos allowed per booking' },
         { status: 400 }
       );
     }
@@ -58,6 +72,8 @@ export async function POST(request) {
     }
 
     await booking.save();
+    
+    console.log('Upload successful, total photos:', booking.luggagePhotos.length);
 
     return NextResponse.json({
       success: true,
@@ -69,7 +85,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Upload photo error:', error);
     return NextResponse.json(
-      { error: 'Failed to upload photo' },
+      { error: 'Failed to upload photo', details: error.message },
       { status: 500 }
     );
   }

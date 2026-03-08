@@ -1,38 +1,36 @@
 // app/api/partner/application/verify-qr/route.js
+// ✅ UPDATED: Uses GET + cookies (faster, simpler)
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
 import Station from '@/models/Station';
 import User from '@/models/User';
-import jwt from 'jsonwebtoken';
+import { verifyJWT } from '@/lib/auth';
 
 // Ensure Station model is registered
 void Station;
 
 /**
- * POST /api/partner/application/verify-qr
- * Verify a scanned QR code (booking reference) and return booking details
+ * GET /api/partner/application/verify-qr?bookingReference=XXX
+ * Verify a scanned QR code and return booking details
  * Only returns booking if it belongs to the partner's assigned station
  */
-export async function POST(request) {
+export async function GET(request) {
   try {
     await dbConnect();
 
-    // 1. Verify partner authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    // 1. Verify partner authentication (using cookies)
+    const token = request.cookies.get('auth_session')?.value;
+    if (!token) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized - No token provided' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.split(' ')[1];
-    let decoded;
-    
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
+    const decoded = verifyJWT(token);
+    if (!decoded || decoded.expired) {
       return NextResponse.json(
         { success: false, error: 'Invalid or expired token' },
         { status: 401 }
@@ -47,11 +45,11 @@ export async function POST(request) {
       );
     }
 
-    const partnerId = decoded.id || decoded.userId;
+    const partnerId = decoded.userId;
 
-    // 3. Get scanned booking reference from request body
-    const body = await request.json();
-    const { bookingReference } = body;
+    // 3. Get booking reference from query params
+    const { searchParams } = new URL(request.url);
+    const bookingReference = searchParams.get('bookingReference');
 
     if (!bookingReference) {
       return NextResponse.json(
@@ -62,12 +60,13 @@ export async function POST(request) {
 
     console.log('🔍 Verifying QR code:', bookingReference);
 
-    // 4. Find the booking by reference
+    // 4. Find the booking by reference (FAST - direct query)
     const booking = await Booking.findOne({ bookingReference })
       .populate('stationId')
       .lean();
 
     if (!booking) {
+      console.log('❌ Booking not found:', bookingReference);
       return NextResponse.json(
         { success: false, error: 'Booking not found', notFound: true },
         { status: 404 }
@@ -88,6 +87,7 @@ export async function POST(request) {
     const partnerStationId = partner.assignedStation;
 
     if (bookingStationId.toString() !== partnerStationId.toString()) {
+      console.log('❌ Wrong station. Booking:', bookingStationId, 'Partner:', partnerStationId);
       return NextResponse.json(
         { 
           success: false, 
@@ -100,7 +100,7 @@ export async function POST(request) {
 
     console.log('✅ QR verified successfully:', bookingReference);
 
-    // 7. Return booking details
+    // 7. Return booking details (including photos)
     return NextResponse.json({
       success: true,
       booking: {
@@ -119,6 +119,8 @@ export async function POST(request) {
         specialInstructions: booking.specialInstructions,
         checkInTime: booking.checkInTime,
         checkOutTime: booking.checkOutTime,
+        luggagePhotoUrl: booking.luggagePhotoUrl,
+        luggagePhotos: booking.luggagePhotos || [],
         stationName: booking.stationId?.name || 'Unknown Station',
         createdAt: booking.createdAt
       }
