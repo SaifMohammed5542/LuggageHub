@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
   try {
     await dbConnect();
     
-    const { slug } = params;
+    const { slug } = await params;
     
     if (!slug) {
       return NextResponse.json(

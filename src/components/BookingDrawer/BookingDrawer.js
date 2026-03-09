@@ -1861,7 +1861,7 @@ function draftStepLabel(screen) {
   return labels[screen] || null;
 }
 
-export default function BookingDrawer({ isOpen, onClose, onOpen, initialSearch }) {
+export default function BookingDrawer({ isOpen, onClose, onOpen, initialSearch, preselectedStation }) {
   const [screen,      setScreen]      = useState("station");
   const [userCoords,  setUserCoords]  = useState(null);
   const [station,     setStation]     = useState(null);
@@ -1931,9 +1931,32 @@ export default function BookingDrawer({ isOpen, onClose, onOpen, initialSearch }
     });
   };
 
+  console.log("screen:", screen, "station:", station, "resumeModal:", resumeModal);
   // On open: decide what to do based on how drawer was opened
-  useEffect(() => {
+    useEffect(() => {
     if (!isOpen) return;
+    console.log("drawer opened, preselectedStation:", preselectedStation);
+
+    // If a specific station was passed (from station page), skip straight to dates
+    if (preselectedStation) {
+      clearDraft();
+      history.current = ["station"];
+      unstable_batchedUpdates(() => {
+        setStation(preselectedStation);
+        setScreen("dates");
+        setDropOff(null);
+        setPickUp(null);
+        setHours(0);
+        setSmall(0);
+        setLarge(0);
+        setTotal(0);
+        setResumeModal(false);
+        setStaleTimesNotice(false);
+        setFreshKey(k => k + 1);
+      });
+      return;
+    }
+
     const draft = loadDraft();
     const hasValidDraft = draft && draft.confirmed && draft.station && draft.screen !== "done" && draft.screen !== "station";
 
@@ -1951,7 +1974,7 @@ export default function BookingDrawer({ isOpen, onClose, onOpen, initialSearch }
       setResumeModal(true);
     }
     viaRef.current = "button"; // reset for next open
-  }, [isOpen]); // eslint-disable-line
+}, [isOpen, preselectedStation]); // eslint-disable-line
 
   const mountedRef = useRef(false);
 

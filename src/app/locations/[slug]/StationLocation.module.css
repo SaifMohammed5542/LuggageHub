@@ -1,0 +1,198 @@
+/* app/locations/[slug]/StationLocation.module.css */
+/* ── MOBILE FIRST ── */
+
+.breadcrumb {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+.breadcrumb a { color: inherit; text-decoration: none; }
+
+/* Hero */
+.hero { padding: 28px 16px 24px; }
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(2,132,199,0.15);
+  color: #0284c7;
+  margin-bottom: 12px;
+}
+.h1 { font-size: 1.55rem; font-weight: 800; margin: 0 0 8px; line-height: 1.25; }
+.accent { color: #0284c7; }
+.addr { font-size: 0.85rem; opacity: 0.65; margin: 0 0 4px; line-height: 1.5; }
+.hours { font-size: 0.85rem; opacity: 0.75; margin: 0 0 16px; }
+
+.priceRow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.priceChip {
+  font-size: 0.85rem;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Full-width tap targets on mobile */
+.heroBtns { display: flex; flex-direction: column; gap: 10px; }
+.bookBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  background: #0284c7;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.bookBtn:active { background: #0369a1; transform: scale(0.99); }
+.bookBtn:disabled { background: #64748b; cursor: not-allowed; }
+.directionsBtn {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.directionsBtn:active { background: rgba(255,255,255,0.1); }
+
+/* Trust — 2 col grid */
+.trustSection { border-top: 1px solid rgba(255,255,255,0.07); padding: 20px 16px; }
+.trustInner { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.trustCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.trustIcon { font-size: 1.2rem; flex-shrink: 0; }
+.trustTitle { font-weight: 700; font-size: 0.75rem; margin-bottom: 2px; line-height: 1.3; }
+.trustDesc { font-size: 0.68rem; opacity: 0.55; line-height: 1.3; }
+
+/* Details — stacked */
+.detailsSection { border-top: 1px solid rgba(255,255,255,0.07); padding: 28px 16px; }
+.detailsInner { display: flex; flex-direction: column; gap: 28px; }
+.h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 14px; }
+.detailRow { display: flex; gap: 10px; font-size: 0.88rem; margin-bottom: 10px; opacity: 0.8; align-items: flex-start; line-height: 1.5; }
+.mapsLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: #0284c7;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(2,132,199,0.3);
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hours table */
+.open24 { color: #22c55e; font-weight: 600; font-size: 0.88rem; }
+.hoursTable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.hoursTable tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+.dayCell { padding: 10px 0; opacity: 0.7; width: 50%; }
+.timeCell { padding: 10px 0; font-weight: 500; }
+.todayRow .dayCell, .todayRow .timeCell { color: #0284c7; font-weight: 700; opacity: 1; }
+.closed { opacity: 0.4; font-style: italic; }
+
+/* How it works */
+.howSection { border-top: 1px solid rgba(255,255,255,0.07); padding: 28px 16px; }
+.steps { display: flex; flex-direction: column; gap: 16px; }
+.step { display: flex; gap: 14px; align-items: flex-start; }
+.stepNum {
+  width: 30px; height: 30px; min-width: 30px;
+  border-radius: 50%; background: #0284c7; color: #fff;
+  font-weight: 800; font-size: 0.82rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.stepTitle { font-weight: 700; font-size: 0.88rem; margin-bottom: 3px; }
+.stepDesc { font-size: 0.8rem; opacity: 0.65; line-height: 1.6; }
+
+/* FAQ — large tap targets */
+.faqSection { border-top: 1px solid rgba(255,255,255,0.07); padding: 28px 16px; }
+.faqList { display: flex; flex-direction: column; gap: 8px; }
+.faqItem {
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.faqQ {
+  padding: 16px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 48px; /* accessibility: min tap target */
+  align-items: center;
+}
+.faqQ::-webkit-details-marker { display: none; }
+.faqQ::after { content: '+'; font-size: 1.2rem; opacity: 0.5; flex-shrink: 0; }
+details[open] .faqQ::after { content: '−'; }
+.faqA { padding: 0 16px 16px; font-size: 0.84rem; line-height: 1.75; opacity: 0.75; margin: 0; }
+
+/* Bottom CTA */
+.bottomCta {
+  text-align: center;
+  padding: 40px 16px 56px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.bottomCta h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.35; }
+.bottomCta p { opacity: 0.7; margin-bottom: 20px; font-size: 0.88rem; line-height: 1.6; }
+
+/* ── TABLET+ ── */
+@media (min-width: 600px) {
+  .hero { padding: 40px 24px 32px; }
+  .h1 { font-size: 2rem; }
+  .priceRow { flex-direction: row; }
+  .heroBtns { flex-direction: row; }
+  .bookBtn { width: auto; padding: 13px 26px; }
+  .directionsBtn { width: auto; display: inline-block; padding: 13px 22px; }
+  .trustInner { grid-template-columns: repeat(4, 1fr); }
+  .detailsSection { padding: 40px 24px; }
+  .detailsInner { flex-direction: row; gap: 40px; }
+  .detailsInner > * { flex: 1; }
+  .mapsLink { width: auto; }
+  .howSection, .faqSection { padding: 40px 24px; }
+  .bottomCta { padding: 56px 24px; }
+  .bottomCta h2 { font-size: 1.7rem; }
+}
+
+@media (min-width: 960px) {
+  .breadcrumb { max-width: 960px; margin: 0 auto; padding: 12px 24px; }
+  .hero { max-width: 960px; margin: 0 auto; }
+  .trustSection > .trustInner { max-width: 960px; margin: 0 auto; }
+  .detailsSection { max-width: 960px; margin: 0 auto; }
+  .howSection { max-width: 960px; margin: 0 auto; }
+  .faqSection > .faqInner { max-width: 960px; margin: 0 auto; }
+  .bottomCta { max-width: 100%; }
+}
