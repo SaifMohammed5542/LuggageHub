@@ -1,6 +1,10 @@
 "use client"
+// app/page.tsx
+// NOTE: SEO metadata is now handled in layout.tsx via the metadata export.
+// Per-page overrides (if needed) go in a separate server component wrapper.
+// This page stays "use client" for scroll/ref/loading logic.
+
 import React, { useRef, useEffect, useState } from 'react';
-import Head from 'next/head';
 import "../../public/ALL CSS/Page.css"
 import Header from '@/components/Header';
 import Banner from '@/components/Banner';
@@ -10,34 +14,117 @@ import Testimonials from '@/components/Testimonials';
 import OurTopServices from '@/components/OurTopServices';
 import Queries from '@/components/Queries';
 import Footer from '@/components/Footer';
-// import Trustpilot from '@/components/Trustpilot';
 import Rotatingtext from '@/components/Rotator';
-// import BannerTwo from '../components/BannerTwo.js';
-// import Locations from '../components/Locations.js';
-// import GoogleMapsComponent from "../components/Map.js"
-// import Banerrr from '../components/tesxt'
-// import FindLocHere from '../components/FindLocHere.js' 
-// import LuggageStorage from '../components/Leaflet'
-// import MapWithDirections from "../components/Map.js";
-// import MapButton from "../components/MapButton"
-import Loader from '../components/Loader'; // ✅ Import your Loader
-// import TransitWidget from '../components/TransitWidget'; // ✅ Import TransitWidget
-import WhatsAppFloating from "../components/WhatsAppFloating"; // WhatsApp Floating Button;
+import Loader from '../components/Loader';
+import WhatsAppFloating from "../components/WhatsAppFloating";
 import BecomePartnerButton from '@/components/BecomePartnerButton/become-partner';
 
+// ============================================================
+// FAQ Schema for homepage — injected client-side
+// This powers expandable Q&As directly in Google search results!
+// Update questions/answers to match your real Queries component content.
+// ============================================================
+// ============================================================
+// UPDATED FAQ SCHEMA — paste this into page.tsx
+// Replace the existing faqSchema object (the whole const faqSchema = {...})
+// These questions EXACTLY match the new Queries.js accordion questions
+// so Google's FAQ rich results match what users see on the page.
+// ============================================================
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does luggage storage cost in Melbourne?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Luggage Terminal offers affordable luggage storage in Melbourne starting from A$3.99/day for small bags and backpacks, and A$8.49/day for large suitcases. Pricing is a flat daily rate — no hourly fees, no hidden charges. One straightforward price per item, per day.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Where can I store my luggage near Southern Cross Station?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Luggage Terminal has secure bag storage locations conveniently close to Southern Cross Station in Melbourne CBD. Simply book online, get an instant QR code, and drop your bags off in minutes. Perfect for travellers arriving on the SkyBus from Melbourne Airport or interstate trains.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Is my luggage safe at Luggage Terminal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — your bags are fully secure. Unlike coin lockers that can be tampered with, Luggage Terminal uses human-managed storage locations with on-site monitoring. Every item is stored at a verified, inspected location. Plus, all luggage is insured up to A$2,000 per booking for total peace of mind.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "How do I book luggage storage online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Booking is simple. Visit luggageterminal.com, select your nearest storage location, choose your drop-off and pick-up dates, and pay securely online. You'll receive an instant booking confirmation with a QR code — no printing needed, just show it on your phone at drop-off.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Can I store luggage for just a few hours or part of a day?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Luggage Terminal offers flexible bag storage for as short or as long as you need. Whether you want to drop your bags for a couple of hours while exploring Melbourne CBD, or store them for multiple days, our daily flat-rate pricing makes it easy and affordable.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer luggage storage near Melbourne Airport?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Luggage Terminal has storage options conveniently accessible from Melbourne Airport (Tullamarine). Catch the SkyBus to Southern Cross Station and drop your bags at our nearby location before heading out to explore Melbourne, or store them after check-out before your flight.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "What sizes of bags can I store?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We accept all bag sizes — backpacks, carry-on bags, standard suitcases, large suitcases, duffel bags, shopping bags, and oversized luggage. Small bags start at A$3.99/day. Large bags and suitcases are A$8.49/day. One flat rate, no size surprises.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Does Luggage Terminal offer key handover services in Melbourne?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! In addition to secure luggage storage, Luggage Terminal offers key handover services across Melbourne. Ideal for Airbnb hosts, short-term rental properties, and anyone who needs a reliable, secure way to hand off or receive keys without needing to be present in person.",
+      },
+    },
+  ],
+};
 
 function App() {
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {                          // ← START HERE
-    window.scrollTo(0, 0);
-    
-    // ✅ ADD THIS LINE
-    document.body.style.overscrollBehavior = 'none';
-    
-    const handleLoad = () => {
-      setLoading(false);
+  // Inject FAQ schema client-side (since this is a client component)
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "faq-schema";
+    script.text = JSON.stringify(faqSchema);
+    if (!document.getElementById("faq-schema")) {
+      document.head.appendChild(script);
+    }
+    return () => {
+      const el = document.getElementById("faq-schema");
+      if (el) el.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.style.overscrollBehavior = 'none';
+
+    const handleLoad = () => setLoading(false);
 
     if (document.readyState === "complete") {
       setLoading(false);
@@ -45,39 +132,29 @@ function App() {
       window.addEventListener("load", handleLoad);
       return () => {
         window.removeEventListener("load", handleLoad);
-        // ✅ ADD THIS LINE
         document.body.style.overscrollBehavior = '';
       };
     }
-  }, []);                                    // ← END HERE
+  }, []);
 
-  // ---------- ADD THIS (one-time hash handler) ----------
-useEffect(() => {
-  if (typeof window === "undefined") return;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
 
-  const hash = window.location.hash.replace("#", ""); // e.g. "services" or "how-it-works"
-  if (!hash) return;
+    const t = setTimeout(() => {
+      if (hash === "services") {
+        scrollToSection("services");
+      } else if (hash === "how-it-works" || hash === "howItWorks" || hash === "howitworks") {
+        scrollToSection("howItWorks");
+      } else {
+        const el = document.getElementById(hash);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
 
-  const t = setTimeout(() => {
-    if (hash === "services") {
-      scrollToSection("services");
-    } else if (
-      hash === "how-it-works" ||
-      hash === "howItWorks" ||
-      hash === "howitworks"
-    ) {
-      scrollToSection("howItWorks");
-    } else {
-      // fallback: try ID-based scroll
-      const el = document.getElementById(hash);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  }, 100); // small delay so refs mount & layout stabilises
-
-  return () => clearTimeout(t);
-}, []); 
-// ---------- END ADDITION ----------
-
+    return () => clearTimeout(t);
+  }, []);
 
   const servicesRef = useRef<HTMLDivElement | null>(null);
   const howItWorksRef = useRef<HTMLDivElement | null>(null);
@@ -94,58 +171,27 @@ useEffect(() => {
   };
 
   if (loading) {
-    return <Loader visible={loading} />;  // ✅ Show Loader while loading
+    return <Loader visible={loading} />;
   }
-
-
-
 
   return (
     <>
-      <Head>
-        <title>Luggage Terminal | Safe & Secure in Australia</title>
-        <meta
-          name="keywords"
-          content="luggage storage online, luggage, booking,luggage terminal, luggage booking, luggage storage australia, luggage terminal melbourne, luggage storage melbourne, luggage storage Southern cross, luggage storage Southern cross station, secure luggage storage, travel storage solutions, baggage storage services"
-        />
-        <meta
-          name="description"
-          content="Find reliable and secure luggage storage in Australia, including Melbourne. Book online and store your bags safely while you travel."
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Head>
-
-<script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" async></script>
-
-      </Head>
-
-      <Head>
-        <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-          rel="stylesheet"
-          />
-      </Head>
-
-
       <div className='Holder'>
-        <Header scrollToServices={() => scrollToSection("services")} scrollTohowItWorks={() => scrollToSection("howItWorks")} />
+        <Header
+          scrollToServices={() => scrollToSection("services")}
+          scrollTohowItWorks={() => scrollToSection("howItWorks")}
+        />
         <Banner />
       </div>
 
-      {/* Other Components */}
       <Rotatingtext />
-      {/* <TransitWidget /> */}
       <Amount />
       <br />
       <HowItWorks howItWorksRef={howItWorksRef} />
       <br />
       <WhatsAppFloating />
-      {/* <Locations /> */}
       <Testimonials />
       <br />
-      {/* <Trustpilot />
-      <br /> */}
       <OurTopServices servicesRef={servicesRef} />
       <br />
       <Queries />

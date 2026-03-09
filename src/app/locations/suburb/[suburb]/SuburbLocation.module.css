@@ -1,0 +1,200 @@
+/* app/locations/suburb/[suburb]/SuburbLocation.module.css */
+/* ── MOBILE FIRST ── */
+
+.breadcrumb {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+.breadcrumb a { color: inherit; text-decoration: none; }
+
+/* Hero */
+.hero { padding: 28px 16px 24px; }
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(2,132,199,0.15);
+  color: #0284c7;
+  margin-bottom: 12px;
+}
+.h1 { font-size: 1.55rem; font-weight: 800; margin: 0 0 12px; line-height: 1.25; }
+.accent { color: #0284c7; }
+.subtitle { font-size: 0.9rem; line-height: 1.7; opacity: 0.8; margin-bottom: 18px; }
+
+.priceRow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.priceChip {
+  font-size: 0.85rem;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ctaBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  background: #0284c7;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.ctaBtn:active { background: #0369a1; transform: scale(0.99); }
+
+/* Sections */
+.section { padding: 24px 16px; border-top: 1px solid rgba(255,255,255,0.07); }
+.sectionInner {}
+.h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 14px; }
+
+/* Nearby note */
+.nearbyNote { font-size: 0.82rem; opacity: 0.6; margin-bottom: 14px; line-height: 1.6; }
+
+/* Station cards — single column */
+.stationsGrid { display: flex; flex-direction: column; gap: 12px; }
+
+.stationCard {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stationCardNearby {
+  border-color: rgba(2,132,199,0.25);
+  background: rgba(2,132,199,0.04);
+}
+
+.nearbyTag {
+  font-size: 0.73rem;
+  color: #0284c7;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.distanceBadge { font-size: 0.72rem; opacity: 0.8; }
+
+.cardTop { display: flex; gap: 12px; }
+.cardIcon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+.cardInfo { flex: 1; }
+.cardName { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; line-height: 1.3; }
+.cardLocation { font-size: 0.78rem; opacity: 0.6; margin-bottom: 2px; }
+.cardHours { font-size: 0.75rem; opacity: 0.55; margin-bottom: 2px; }
+.cardRating { font-size: 0.75rem; opacity: 0.55; }
+
+.capacityWrap { display: flex; flex-direction: column; gap: 4px; }
+.capacityBar { height: 5px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.capacityFill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.capacityText { font-size: 0.72rem; opacity: 0.55; }
+
+/* Full-width action buttons */
+.cardActions { display: flex; gap: 8px; }
+.detailsBtn {
+  flex: 1;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.detailsBtn:active { background: rgba(255,255,255,0.1); }
+.bookBtn {
+  flex: 1;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: #0284c7;
+  border: none;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.bookBtn:active { background: #0369a1; }
+.bookBtn:disabled { background: #64748b; cursor: not-allowed; }
+
+/* SEO section */
+.seoSection { padding: 28px 16px; border-top: 1px solid rgba(255,255,255,0.07); }
+.seoInner {}
+.body { font-size: 0.88rem; line-height: 1.75; opacity: 0.8; margin-bottom: 12px; }
+
+/* FAQ */
+.faqList { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.faqItem {
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.faqQ {
+  padding: 16px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 48px;
+  align-items: center;
+}
+.faqQ::-webkit-details-marker { display: none; }
+.faqQ::after { content: '+'; font-size: 1.2rem; opacity: 0.5; flex-shrink: 0; }
+details[open] .faqQ::after { content: '−'; }
+.faqA { padding: 0 16px 16px; font-size: 0.84rem; line-height: 1.75; opacity: 0.75; margin: 0; }
+
+/* Bottom CTA */
+.bottomCta { text-align: center; padding: 40px 16px 56px; border-top: 1px solid rgba(255,255,255,0.07); }
+.bottomCta h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.35; }
+.bottomCta p { opacity: 0.7; margin-bottom: 20px; font-size: 0.88rem; }
+
+/* ── TABLET+ ── */
+@media (min-width: 600px) {
+  .hero { padding: 40px 24px 32px; }
+  .h1 { font-size: 2rem; }
+  .priceRow { flex-direction: row; }
+  .ctaBtn { width: auto; display: inline-flex; padding: 13px 26px; }
+  .section { padding: 32px 24px; }
+  .stationsGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .seoSection { padding: 36px 24px; }
+  .bottomCta { padding: 56px 24px; }
+  .bottomCta h2 { font-size: 1.7rem; }
+}
+
+@media (min-width: 960px) {
+  .breadcrumb { max-width: 960px; margin: 0 auto; padding: 12px 24px; }
+  .hero { max-width: 960px; margin: 0 auto; }
+  .section > .sectionInner { max-width: 960px; margin: 0 auto; }
+  .seoSection > .seoInner { max-width: 960px; margin: 0 auto; }
+  .stationsGrid { grid-template-columns: repeat(3, 1fr); }
+}
