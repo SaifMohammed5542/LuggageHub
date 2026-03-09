@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/help`,                 lastModified: TODAY, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE}/cancellation-policy`,  lastModified: TODAY, changeFrequency: 'yearly',  priority: 0.4 },
     { url: `${BASE}/privacy-policy`,       lastModified: TODAY, changeFrequency: 'yearly',  priority: 0.3 },
-    { url: `${BASE}/terms-&-conditions`,   lastModified: TODAY, changeFrequency: 'yearly',  priority: 0.3 },
+    { url: `${BASE}/terms-&amp;-conditions`,   lastModified: TODAY, changeFrequency: 'yearly',  priority: 0.3 },
     { url: `${BASE}/shipping-policy`,      lastModified: TODAY, changeFrequency: 'yearly',  priority: 0.3 },
 
     // ── Locations index ───────────────────────────────────────────────────────
