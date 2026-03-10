@@ -147,7 +147,7 @@ const schemaMarkup = {
     {
       "@type": "LocalBusiness",
       "@id": "https://www.luggageterminal.com/locations/660-bourke-st",
-      "name": "Luggage Terminal – EzyMart, 660 Bourke St",
+      "name": "EzyMart 660 Bourke St – Luggage Terminal",
       "description": "Secure luggage storage at 660 Bourke Street, Melbourne CBD. From A$3.99/day. Open Mon–Sat 7am–2am, Sun 7am–midnight. Human-managed, insured up to A$2,000.",
       "url": "https://www.luggageterminal.com/locations/660-bourke-st",
       "telephone": "+61-0406-177320",
@@ -204,7 +204,7 @@ const schemaMarkup = {
     {
       "@type": "LocalBusiness",
       "@id": "https://www.luggageterminal.com/locations/southern-cross-station",
-      "name": "Luggage Terminal – EzyMart, Southern Cross Station",
+      "name": "EzyMart Southern Cross Station – Luggage Terminal",
       "description": "Secure luggage storage at Southern Cross Station, 99 Spencer Street Level 1, Melbourne. From A$3.99/day. Open daily 9am–6pm. Perfect for SkyBus arrivals and interstate travellers.",
       "url": "https://www.luggageterminal.com/locations/southern-cross-station",
       "telephone": "+61-0406-177320",
@@ -254,7 +254,7 @@ const schemaMarkup = {
     {
       "@type": "LocalBusiness",
       "@id": "https://www.luggageterminal.com/locations/341-queen-street",
-      "name": "Luggage Terminal – EzyMart, 341 Queen Street",
+      "name": "EzyMart 341 Queen Street – Luggage Terminal",
       "description": "Secure luggage storage at 341 Queen Street, Melbourne CBD. From A$3.99/day. Open daily 8am–10pm. Human-managed, insured up to A$2,000.",
       "url": "https://www.luggageterminal.com/locations/341-queen-street",
       "telephone": "+61-0406-177320",
@@ -304,7 +304,7 @@ const schemaMarkup = {
     {
       "@type": "LocalBusiness",
       "@id": "https://www.luggageterminal.com/locations/520-bourke-st",
-      "name": "Luggage Terminal – Knit-on Australia, 520 Bourke St",
+      "name": "Knit-on Australia 520 Bourke St – Luggage Terminal",
       "description": "Secure luggage storage at 520 Bourke Street, Melbourne CBD. From A$3.99/day. Open Mon–Fri & Sun 10am–6pm. Human-managed, insured up to A$2,000.",
       "url": "https://www.luggageterminal.com/locations/520-bourke-st",
       "telephone": "+61-0406-177320",
