@@ -300,6 +300,56 @@ const schemaMarkup = {
       "parentOrganization": { "@id": "https://www.luggageterminal.com/#organization" },
     },
 
+    // ── 4. LocalBusiness — Luggage Terminal – 520 Bourke Street CBD ──
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://www.luggageterminal.com/locations/luggage-terminal-520-bourke-street-cbd",
+      "name": "Luggage Terminal – 520 Bourke Street CBD",
+      "description": "Secure luggage storage at 520 Bourke Street, Melbourne CBD. From A$3.99/day. Open Mon–Fri & Sun 10am–6pm. Human-managed, insured up to A$2,000.",
+      "url": "https://www.luggageterminal.com/locations/luggage-terminal-520-bourke-street-cbd",
+      "telephone": "+61-0406-177320",
+      "email": "support@luggageterminal.com",
+      "priceRange": "A$",
+      "image": "https://www.luggageterminal.com/og-image.jpg",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "520 Bourke Street",
+        "addressLocality": "Melbourne",
+        "addressRegion": "VIC",
+        "postalCode": "3000",
+        "addressCountry": "AU",
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -37.8153191,
+        "longitude": 144.9558164,
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Sunday"],
+          "opens": "10:00",
+          "closes": "18:00",
+        },
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "97",   
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Luggage Storage",
+        "itemListElement": [
+          { "@type": "Offer", "name": "Small Bag Storage", "price": "3.99", "priceCurrency": "AUD", "availability": "https://schema.org/InStock" },
+          { "@type": "Offer", "name": "Large Bag / Suitcase Storage", "price": "8.49", "priceCurrency": "AUD", "availability": "https://schema.org/InStock" },
+        ],
+      },
+      "parentOrganization": { "@id": "https://www.luggageterminal.com/#organization" },
+    },
+
     // ── 5. WebSite Schema ──
     {
       "@type": "WebSite",
