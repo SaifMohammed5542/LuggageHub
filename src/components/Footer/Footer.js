@@ -44,7 +44,7 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <ul className={styles["footer-links"]}>
                         <li>
-              <Link href="/terms-of-service" className={styles.link}>
+              <Link href="/terms-&-conditions" className={styles.link}>
                 Terms & Conditions
               </Link>
             </li>
