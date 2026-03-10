@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Luggage Terminal",
   },
   description:
-    "Secure luggage storage in Melbourne CBD from A$3.99/day. 3 locations near Southern Cross Station, Bourke Street & Queen Street. Human-managed, insured up to A$2,000. Book online instantly.",
+    "Secure luggage storage in Melbourne CBD from A$3.99/day. 4 locations near Southern Cross Station, Bourke Street & Queen Street. Human-managed, insured up to A$2,000. Book online instantly.",
   metadataBase: new URL("https://www.luggageterminal.com"),
   alternates: { canonical: "/" },
   keywords: [
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     siteName: "Luggage Terminal",
     title: "Luggage Storage Melbourne CBD | From A$3.99/Day – Luggage Terminal",
     description:
-      "Secure luggage storage in Melbourne CBD from A$3.99/day. 3 locations near Southern Cross Station, Bourke Street & Queen Street. Book online in seconds.",
+      "Secure luggage storage in Melbourne CBD from A$3.99/day. 4 locations near Southern Cross Station, Bourke Street & Queen Street. Book online in seconds.",
     images: [
       {
         url: "/og-image.jpg", // ← Create this: 1200x630px, your logo + "Luggage Storage Melbourne"
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Luggage Storage Melbourne CBD | From A$3.99/Day – Luggage Terminal",
-    description: "Secure luggage storage in Melbourne CBD from A$3.99/day. 3 locations. Book online in seconds.",
+    description: "Secure luggage storage in Melbourne CBD from A$3.99/day. 4 locations. Book online in seconds.",
     images: ["/og-image.jpg"],
   },
   applicationName: "Luggage Terminal",
@@ -146,10 +146,10 @@ const schemaMarkup = {
     // ── 2. LocalBusiness — EzyMart 660 Bourke St ──
     {
       "@type": "LocalBusiness",
-      "@id": "https://www.luggageterminal.com/locations/ezymart-660-bourke-st",
-      "name": "Luggage Terminal – EzyMart 660 Bourke St",
+      "@id": "https://www.luggageterminal.com/locations/660-bourke-st",
+      "name": "Luggage Terminal – EzyMart, 660 Bourke St",
       "description": "Secure luggage storage at 660 Bourke Street, Melbourne CBD. From A$3.99/day. Open Mon–Sat 7am–2am, Sun 7am–midnight. Human-managed, insured up to A$2,000.",
-      "url": "https://www.luggageterminal.com/locations/ezymart-660-bourke-st",
+      "url": "https://www.luggageterminal.com/locations/660-bourke-st",
       "telephone": "+61-0406-177320",
       "email": "support@luggageterminal.com",
       "priceRange": "A$",
@@ -203,10 +203,10 @@ const schemaMarkup = {
     // ── 3. LocalBusiness — Ezymart Southern Cross ──
     {
       "@type": "LocalBusiness",
-      "@id": "https://www.luggageterminal.com/locations/ezymart-southern-cross-station",
-      "name": "Luggage Terminal – Ezymart Southern Cross Station",
+      "@id": "https://www.luggageterminal.com/locations/southern-cross-station",
+      "name": "Luggage Terminal – EzyMart, Southern Cross Station",
       "description": "Secure luggage storage at Southern Cross Station, 99 Spencer Street Level 1, Melbourne. From A$3.99/day. Open daily 9am–6pm. Perfect for SkyBus arrivals and interstate travellers.",
-      "url": "https://www.luggageterminal.com/locations/ezymart-southern-cross-station",
+      "url": "https://www.luggageterminal.com/locations/southern-cross-station",
       "telephone": "+61-0406-177320",
       "email": "support@luggageterminal.com",
       "priceRange": "A$",
@@ -253,10 +253,10 @@ const schemaMarkup = {
     // ── 4. LocalBusiness — EzyMart Queen Street ──
     {
       "@type": "LocalBusiness",
-      "@id": "https://www.luggageterminal.com/locations/ezymart-queen-street",
-      "name": "Luggage Terminal – EzyMart Queen Street",
+      "@id": "https://www.luggageterminal.com/locations/341-queen-street",
+      "name": "Luggage Terminal – EzyMart, 341 Queen Street",
       "description": "Secure luggage storage at 341 Queen Street, Melbourne CBD. From A$3.99/day. Open daily 8am–10pm. Human-managed, insured up to A$2,000.",
-      "url": "https://www.luggageterminal.com/locations/ezymart-queen-street",
+      "url": "https://www.luggageterminal.com/locations/341-queen-street",
       "telephone": "+61-0406-177320",
       "email": "support@luggageterminal.com",
       "priceRange": "A$",
@@ -303,10 +303,10 @@ const schemaMarkup = {
     // ── 4. LocalBusiness — Luggage Terminal – 520 Bourke Street CBD ──
     {
       "@type": "LocalBusiness",
-      "@id": "https://www.luggageterminal.com/locations/luggage-terminal-520-bourke-street-cbd",
-      "name": "Luggage Terminal – 520 Bourke Street CBD",
+      "@id": "https://www.luggageterminal.com/locations/520-bourke-st",
+      "name": "Luggage Terminal – Knit-on Australia, 520 Bourke St",
       "description": "Secure luggage storage at 520 Bourke Street, Melbourne CBD. From A$3.99/day. Open Mon–Fri & Sun 10am–6pm. Human-managed, insured up to A$2,000.",
-      "url": "https://www.luggageterminal.com/locations/luggage-terminal-520-bourke-street-cbd",
+      "url": "https://www.luggageterminal.com/locations/520-bourke-st",
       "telephone": "+61-0406-177320",
       "email": "support@luggageterminal.com",
       "priceRange": "A$",
@@ -356,7 +356,7 @@ const schemaMarkup = {
       "@id": "https://www.luggageterminal.com/#website",
       "url": "https://www.luggageterminal.com",
       "name": "Luggage Terminal",
-      "description": "Secure luggage storage in Melbourne CBD, Australia. 3 locations from A$3.99/day.",
+      "description": "Secure luggage storage in Melbourne CBD, Australia. 4 locations from A$3.99/day.",
       "publisher": { "@id": "https://www.luggageterminal.com/#organization" },
       "potentialAction": {
         "@type": "SearchAction",
