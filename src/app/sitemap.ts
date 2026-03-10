@@ -44,21 +44,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Individual station pages ──────────────────────────────────────────────
     // "luggage storage Bourke Street"
     {
-      url: `${BASE}/locations/ezymart-660-bourke-st`,
+      url: `${BASE}/locations/660-bourke-st`,
       lastModified: TODAY,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     // "luggage storage Southern Cross Station"
     {
-      url: `${BASE}/locations/ezymart-southern-cross-station`,
+      url: `${BASE}/locations/southern-cross-station`,
       lastModified: TODAY,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     // "luggage storage Queen Street Melbourne"
     {
-      url: `${BASE}/locations/ezymart-queen-street`,
+      url: `${BASE}/locations/341-queen-street`,
+      lastModified: TODAY,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    // "luggage storage 520 Bourke Street Melbourne"
+    {
+      url: `${BASE}/locations/520-bourke-st`,
       lastModified: TODAY,
       changeFrequency: 'weekly',
       priority: 0.9,
