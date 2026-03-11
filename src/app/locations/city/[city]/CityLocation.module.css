@@ -178,3 +178,5 @@
   .seoSection > .inner { max-width: 960px; margin: 0 auto; }
   .grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+.cardWalk { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }

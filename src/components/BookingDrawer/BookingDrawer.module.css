@@ -963,10 +963,14 @@
 .stationPill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   font-size: 12px;
-  color: #5A6C7D;
+  color: var(--primary);
   margin-top: 4px;
+  font-weight: 700;
+  border: 1.5px solid #0284C7;
+  border-radius: 18px;
+  padding: 3px;
 }
 
 .stationPillRow {
@@ -1528,7 +1532,7 @@
 }
 
 .summaryRowLabel { color: #5A6C7D; }
-.summaryRowVal   { color: #1A2B3C; font-weight: 600; }
+.summaryRowVal   { color: #1A2B3C; font-weight: 600; text-align: right; }
 
 .summaryTotal {
   display: flex;

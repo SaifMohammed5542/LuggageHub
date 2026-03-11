@@ -196,3 +196,17 @@ details[open] .faqQ::after { content: '−'; }
   .faqSection > .faqInner { max-width: 960px; margin: 0 auto; }
   .bottomCta { max-width: 100%; }
 }
+
+.nearbySection { padding: 60px 20px; }
+.nearbyInner { max-width: 1100px; margin: 0 auto; }
+.nearbyNote { color: var(--text-muted); margin-bottom: 24px; }
+.nearbyGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.nearbyCard { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.nearbyCardTop { display: flex; gap: 12px; margin-bottom: 16px; }
+.nearbyCardIcon { font-size: 24px; }
+.nearbyCardName { font-weight: 600; margin-bottom: 4px; }
+.nearbyCardAddr, .nearbyCardDist, .nearbyCardWalk, .nearbyCardHours { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+.nearbyCardActions { display: flex; gap: 10px; }
+.walkTime { font-size: 0.9rem; color: var(--text-muted); margin: 4px 0; }
+
+.cardWalk { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }

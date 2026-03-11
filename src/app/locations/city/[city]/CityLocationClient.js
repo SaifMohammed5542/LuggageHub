@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BookingDrawer from '@/components/BookingDrawer/BookingDrawer';
 import styles from './CityLocation.module.css';
+import { useUserLocation, getWalkingTime } from '../../../hooks/useWalkingTime';
 
 const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 
@@ -19,9 +20,11 @@ function getTodayHours(timings) {
   return `Open today: ${t.open} – ${t.close}`;
 }
 
-function StationCard({ station, onBook }) {
+function StationCard({ station, onBook, userLocation }) {
   const todayHours = getTodayHours(station.timings);
   const isFull = station.capacity > 0 && station.currentCapacity >= station.capacity;
+  const coords = station.coordinates?.coordinates;
+  const walkingTime = getWalkingTime(userLocation, coords?.[1], coords?.[0]);
 
   return (
     <div className={styles.card}>
@@ -32,6 +35,7 @@ function StationCard({ station, onBook }) {
           <div className={styles.cardAddr}>📍 {station.location}</div>
           {station.suburb && <div className={styles.cardSuburb}>{station.suburb}</div>}
           {todayHours && <div className={styles.cardHours}>⏰ {todayHours}</div>}
+          <div className={styles.cardWalk}>🚶 {walkingTime}</div>
         </div>
       </div>
 
@@ -62,6 +66,7 @@ function StationCard({ station, onBook }) {
 export default function CityLocationClient({ cityName, stations, suburbs }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [initialSearch, setInitialSearch] = useState(null);
+  const userLocation = useUserLocation();
 
   const handleBook = (station) => {
     const c = station.coordinates?.coordinates;
@@ -128,7 +133,7 @@ export default function CityLocationClient({ cityName, stations, suburbs }) {
             </h2>
             <div className={styles.grid}>
               {stations.map(s => (
-                <StationCard key={s._id} station={s} onBook={handleBook} />
+                <StationCard key={s._id} station={s} onBook={handleBook} userLocation={userLocation} />
               ))}
             </div>
           </div>

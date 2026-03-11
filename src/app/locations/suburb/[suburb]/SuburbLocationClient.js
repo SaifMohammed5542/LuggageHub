@@ -7,9 +7,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BookingDrawer from '@/components/BookingDrawer/BookingDrawer';
 import styles from './SuburbLocation.module.css';
+import { useUserLocation, getWalkingTime } from '../../../hooks/useWalkingTime';
 
 const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-// const DAY_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 function getTodayHours(timings) {
   if (!timings) return null;
@@ -20,28 +20,19 @@ function getTodayHours(timings) {
   return `Open today: ${t.open} – ${t.close}`;
 }
 
-function DistanceBadge({ km }) {
-  if (km == null) return null;
-  const m = Math.round(km * 1000);
-  const walkMins = Math.round((km / 5) * 60);
-  const dist = km < 1 ? `${m}m` : `${km.toFixed(1)}km`;
-  return (
-    <span className={styles.distanceBadge}>
-      🚶 {dist} · {walkMins} min walk
-    </span>
-  );
-}
-
-function StationCard({ station, onBook, isNearby }) {
+function StationCard({ station, onBook, isNearby, userLocation }) {
   const todayHours = getTodayHours(station.timings);
   const isFull = station.capacity > 0 && station.currentCapacity >= station.capacity;
-  // const coords = station.coordinates?.coordinates;
+  const coords = station.coordinates?.coordinates;
+
+  // User location takes priority over suburb-center distance
+  const walkingTime = getWalkingTime(userLocation, coords?.[1], coords?.[0]);
 
   return (
     <div className={`${styles.stationCard} ${isNearby ? styles.stationCardNearby : ''}`}>
       {isNearby && (
         <div className={styles.nearbyTag}>
-          📍 Just outside — <DistanceBadge km={station.distanceKm} />
+          📍 Just outside this suburb
         </div>
       )}
 
@@ -51,6 +42,7 @@ function StationCard({ station, onBook, isNearby }) {
           <div className={styles.cardName}>{station.name}</div>
           <div className={styles.cardLocation}>📍 {station.location}</div>
           {todayHours && <div className={styles.cardHours}>⏰ {todayHours}</div>}
+          <div className={styles.cardWalk}>🚶 {walkingTime}</div>
           {station.rating > 0 && (
             <div className={styles.cardRating}>
               ⭐ {station.rating}/5
@@ -60,7 +52,6 @@ function StationCard({ station, onBook, isNearby }) {
         </div>
       </div>
 
-      {/* Capacity indicator */}
       {station.capacity > 0 && (
         <div className={styles.capacityWrap}>
           <div className={styles.capacityBar}>
@@ -97,6 +88,7 @@ function StationCard({ station, onBook, isNearby }) {
 export default function SuburbLocationClient({ suburbName, inSuburb, nearby }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [initialSearch, setInitialSearch] = useState(null);
+  const userLocation = useUserLocation();
 
   const handleBook = (station) => {
     const coords = station.coordinates?.coordinates;
@@ -148,7 +140,7 @@ export default function SuburbLocationClient({ suburbName, inSuburb, nearby }) {
               </h2>
               <div className={styles.stationsGrid}>
                 {inSuburb.map(s => (
-                  <StationCard key={s._id} station={s} onBook={handleBook} isNearby={false} />
+                  <StationCard key={s._id} station={s} onBook={handleBook} isNearby={false} userLocation={userLocation} />
                 ))}
               </div>
             </div>
@@ -168,7 +160,7 @@ export default function SuburbLocationClient({ suburbName, inSuburb, nearby }) {
               </p>
               <div className={styles.stationsGrid}>
                 {nearby.map(s => (
-                  <StationCard key={s._id} station={s} onBook={handleBook} isNearby={true} />
+                  <StationCard key={s._id} station={s} onBook={handleBook} isNearby={true} userLocation={userLocation} />
                 ))}
               </div>
             </div>
