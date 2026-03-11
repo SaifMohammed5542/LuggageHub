@@ -14,6 +14,28 @@ async function getStation(slug) {
   } catch { return null; }
 }
 
+async function getAllStations() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.luggageterminal.com'}/api/station/list`,
+      { next: { revalidate: 300 } }
+    );
+    const data = await res.json();
+    return data.stations || [];
+  } catch { return []; }
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 function formatHoursForSchema(timings) {
   if (!timings) return [];
   if (timings.is24Hours) return [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], "opens": "00:00", "closes": "23:59" }];
@@ -53,22 +75,33 @@ export async function generateMetadata({ params }) {
     title,
     description,
     alternates: { canonical: `https://www.luggageterminal.com/locations/${slug}` },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.luggageterminal.com/locations/${slug}`,
-    },
+    openGraph: { title, description, url: `https://www.luggageterminal.com/locations/${slug}` },
   };
 }
 
 export default async function StationLocationPage({ params }) {
   const { slug } = await params;
-  const station = await getStation(slug);
+  const [station, allStations] = await Promise.all([getStation(slug), getAllStations()]);
   if (!station) notFound();
 
   const coords = station.coordinates?.coordinates;
   const suburbSlug = station.suburb?.toLowerCase().replace(/\s+/g, '-');
   const citySlug = station.city?.toLowerCase().replace(/\s+/g, '-') || 'melbourne';
+
+  // ── 3 nearest stations (excluding current) ────────────────────────────────
+  const nearbyStations = coords
+    ? allStations
+        .filter(s => s.slug !== slug)
+        .map(s => {
+          const c = s.coordinates?.coordinates;
+          if (!c) return null;
+          const distanceKm = haversineKm(coords[1], coords[0], c[1], c[0]);
+          return { ...s, _id: s._id.toString(), distanceKm };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.distanceKm - b.distanceKm)
+        .slice(0, 3)
+    : [];
 
   const localBusinessSchema = {
     "@context": "https://schema.org",
@@ -179,6 +212,7 @@ export default async function StationLocationPage({ params }) {
         citySlug={citySlug}
         suburbSlug={suburbSlug}
         todayHours={getTodayHours(station.timings)}
+        nearbyStations={nearbyStations}
       />
     </>
   );

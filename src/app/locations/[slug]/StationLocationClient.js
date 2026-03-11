@@ -7,9 +7,19 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BookingDrawer from '@/components/BookingDrawer/BookingDrawer';
 import styles from './StationLocation.module.css';
+import { useUserLocation, getWalkingTime } from '../../hooks/useWalkingTime';
 
 const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 const DAY_LABELS = { monday:'Mon', tuesday:'Tue', wednesday:'Wed', thursday:'Thu', friday:'Fri', saturday:'Sat', sunday:'Sun' };
+
+function getTodayHours(timings) {
+  if (!timings) return null;
+  if (timings.is24Hours) return 'Open 24 hours';
+  const todayKey = DAYS[new Date().getDay()];
+  const t = timings[todayKey];
+  if (!t || t.closed) return 'Closed today';
+  return `Open today: ${t.open} – ${t.close}`;
+}
 
 function HoursTable({ timings }) {
   if (!timings) return null;
@@ -35,12 +45,61 @@ function HoursTable({ timings }) {
   );
 }
 
-export default function StationLocationClient({ station, citySlug, suburbSlug, todayHours }) {
+function NearbyStationCard({ station, onBook, userLocation }) {
+  const coords = station.coordinates?.coordinates;
+  const walkingTime = getWalkingTime(userLocation, coords?.[1], coords?.[0]);
+  const todayHours = getTodayHours(station.timings);
+  const isFull = station.capacity > 0 && station.currentCapacity >= station.capacity;
+
+  const distStr = station.distanceKm < 1
+    ? `${Math.round(station.distanceKm * 1000)}m away`
+    : `${station.distanceKm.toFixed(1)}km away`;
+
+  return (
+    <div className={styles.nearbyCard}>
+      <div className={styles.nearbyCardTop}>
+        <div className={styles.nearbyCardIcon}>🏪</div>
+        <div className={styles.nearbyCardInfo}>
+          <div className={styles.nearbyCardName}>{station.name}</div>
+          <div className={styles.nearbyCardAddr}>📍 {station.location}</div>
+          <div className={styles.nearbyCardDist}>📏 {distStr}</div>
+          <div className={styles.nearbyCardWalk}>🚶 {walkingTime}</div>
+          {todayHours && <div className={styles.nearbyCardHours}>⏰ {todayHours}</div>}
+        </div>
+      </div>
+      <div className={styles.nearbyCardActions}>
+        <Link href={`/locations/${station.slug}`} className={styles.detailsBtn}>
+          View Details
+        </Link>
+        <button
+          onClick={() => onBook(station)}
+          className={styles.bookBtn}
+          disabled={isFull}
+        >
+          {isFull ? 'Full' : 'Book Now →'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function StationLocationClient({ station, citySlug, suburbSlug, todayHours, nearbyStations = [] }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedStation, setSelectedStation] = useState(station);
+  const userLocation = useUserLocation();
   const coords = station.coordinates?.coordinates;
 
-  const handleBook = () => setDrawerOpen(true);
-//   const initialSearch = coords ? { label: station.name, lat: coords[1], lon: coords[0] } : null;
+  const walkingTime = getWalkingTime(userLocation, coords?.[1], coords?.[0]);
+
+  const handleBook = () => {
+    setSelectedStation(station);
+    setDrawerOpen(true);
+  };
+
+  const handleBookNearby = (s) => {
+    setSelectedStation(s);
+    setDrawerOpen(true);
+  };
 
   const mapsUrl = coords
     ? `https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`
@@ -66,9 +125,8 @@ export default function StationLocationClient({ station, citySlug, suburbSlug, t
             Luggage Storage at <span className={styles.accent}>{station.name}</span>
           </h1>
           <p className={styles.addr}>📍 {station.location}, Melbourne</p>
-          {todayHours && (
-            <p className={styles.hours}>⏰ {todayHours}</p>
-          )}
+          <p className={styles.walkTime}>🚶 {walkingTime}</p>
+          {todayHours && <p className={styles.hours}>⏰ {todayHours}</p>}
           <div className={styles.priceRow}>
             <span className={styles.priceChip}>🎒 Small bag — <strong>A$3.99/day</strong></span>
             <span className={styles.priceChip}>🧳 Large/Suitcase — <strong>A$8.49/day</strong></span>
@@ -190,6 +248,28 @@ export default function StationLocationClient({ station, citySlug, suburbSlug, t
           </div>
         </section>
 
+        {/* Other nearby stations */}
+        {nearbyStations.length > 0 && (
+          <section className={styles.nearbySection}>
+            <div className={styles.nearbyInner}>
+              <h2 className={styles.h2}>Other Luggage Storage Locations Nearby</h2>
+              <p className={styles.nearbyNote}>
+                Need an alternative? Here are the next closest Luggage Terminal locations.
+              </p>
+              <div className={styles.nearbyGrid}>
+                {nearbyStations.map(s => (
+                  <NearbyStationCard
+                    key={s._id}
+                    station={s}
+                    onBook={handleBookNearby}
+                    userLocation={userLocation}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Bottom CTA */}
         <section className={styles.bottomCta}>
           <h2>Ready to drop your bags at {station.name}?</h2>
@@ -201,12 +281,12 @@ export default function StationLocationClient({ station, citySlug, suburbSlug, t
       </main>
 
       <Footer />
-<BookingDrawer
-  isOpen={drawerOpen}
-  onClose={() => setDrawerOpen(false)}
-  onOpen={() => setDrawerOpen(true)}
-  preselectedStation={station}
-/>
+      <BookingDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onOpen={() => setDrawerOpen(true)}
+        preselectedStation={selectedStation}
+      />
     </>
   );
 }

@@ -198,3 +198,5 @@ details[open] .faqQ::after { content: '−'; }
   .seoSection > .seoInner { max-width: 960px; margin: 0 auto; }
   .stationsGrid { grid-template-columns: repeat(3, 1fr); }
 }
+
+.cardWalk { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
