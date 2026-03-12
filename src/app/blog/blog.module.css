@@ -1,0 +1,486 @@
+/* app/blog/blog.module.css */
+/* Covers both blog listing page and individual post page */
+
+/* ── SHARED ──────────────────────────────────────────────────────────────── */
+.breadcrumb {
+  max-width: 820px;
+  margin: 0 auto 24px;
+  padding: 20px 20px 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.breadcrumb a { color: var(--text-muted); text-decoration: none; }
+.breadcrumb a:hover { color: var(--primary); }
+
+/* ── BLOG LISTING ─────────────────────────────────────────────────────────── */
+.listMain {
+  min-height: 100vh;
+  background: var(--gradient-bg);
+  padding-bottom: 80px;
+}
+
+.listHero {
+  text-align: center;
+  padding: 80px 20px 40px;
+}
+
+.listTitle {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  background: var(--premium-text-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+
+.listSubtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Category filter chips */
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 0 20px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.filterChip {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.filterChip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filterChipActive {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.filterChipActive:hover {
+  color: #fff;
+}
+
+.listInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 0;
+  font-size: 1.1rem;
+}
+
+/* Blog card grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: slideUp 0.5s ease both;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  border-color: var(--primary);
+  box-shadow: var(--card-hover-shadow);
+}
+
+.cardImg {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.cardImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .cardImg img {
+  transform: scale(1.05);
+}
+
+.cardBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cardCategory {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cardRead {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.4;
+  color: var(--text);
+  transition: color 0.2s ease;
+}
+
+.card:hover .cardTitle { color: var(--primary); }
+
+.cardExcerpt {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  flex: 1;
+  margin-bottom: 16px;
+}
+
+.readMore {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: all 0.2s ease;
+}
+
+.card:hover .readMore { color: var(--secondary); }
+
+/* ── BLOG POST ────────────────────────────────────────────────────────────── */
+.postMain {
+  min-height: 100vh;
+  background: var(--gradient-bg);
+  padding-bottom: 80px;
+}
+
+.postContainer {
+  max-width: 820px;
+  margin: 0 auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  animation: fadeInUp 0.5s ease;
+  padding: 0 0 48px;
+  position: relative;
+}
+
+/* Gradient top bar */
+.postContainer::before {
+  content: '';
+  display: block;
+  height: 5px;
+  background: var(--premium-gradient);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.coverImg {
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.coverImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.postMeta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 24px 40px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.postTitle {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--text);
+  padding: 16px 40px 32px;
+}
+
+/* Post content — styles for HTML rendered from MongoDB */
+.postContent {
+  padding: 0 40px;
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+.postContent h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 40px 0 16px;
+  padding-left: 16px;
+  border-left: 4px solid var(--primary);
+}
+
+.postContent h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 28px 0 12px;
+}
+
+.postContent p {
+  margin-bottom: 24px;
+}
+
+.postContent p:first-child {
+  font-size: 1.125rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.postContent strong { color: var(--primary); font-weight: 700; }
+
+.postContent ul, .postContent ol {
+  padding-left: 0;
+  margin-bottom: 28px;
+  list-style: none;
+}
+
+.postContent li {
+  padding: 12px 16px 12px 44px;
+  position: relative;
+  margin-bottom: 10px;
+  background: var(--badge-bg);
+  border-radius: 10px;
+  border-left: 3px solid var(--primary);
+  color: var(--text-muted);
+}
+
+.postContent li::before {
+  content: '✓';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.postContent a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── SMART CTA SECTION ───────────────────────────────────────────────────── */
+.ctaSection {
+  margin: 48px 40px 0;
+  background: var(--info-bg);
+  border: 2px solid var(--primary);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ctaTop {
+  padding: 32px;
+  text-align: center;
+}
+
+.ctaTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.ctaSubtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.ctaMainBtn {
+  background: var(--cta-grad);
+  color: var(--cta-fg);
+  border: none;
+  padding: 14px 36px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: var(--cta-shadow);
+}
+
+.ctaMainBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cta-hover-shadow);
+}
+
+.ctaStations {
+  border-top: 1px solid var(--border);
+  padding: 24px 32px 32px;
+}
+
+.ctaStationsLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.ctaGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .ctaGrid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
+
+.ctaCard {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ctaCardName { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+.ctaCardAddr, .ctaCardDist, .ctaCardWalk, .ctaCardHours {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.ctaCardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.ctaDetailsBtn {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ctaDetailsBtn:hover { border-color: var(--primary); color: var(--primary); }
+
+.ctaBookBtn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ctaBookBtn:hover { opacity: 0.85; }
+.ctaBookBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Back link */
+.backRow {
+  max-width: 820px;
+  margin: 32px auto 0;
+  padding: 0 20px;
+}
+
+.backLink {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover { color: var(--primary); }
+
+/* ── MOBILE ──────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .postMeta { padding: 20px 20px 0; }
+  .postTitle { padding: 12px 20px 24px; }
+  .postContent { padding: 0 20px; }
+  .ctaSection { margin: 40px 20px 0; }
+  .ctaTop { padding: 24px 20px; }
+  .ctaStations { padding: 20px 20px 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .postContainer { animation: none; }
+  .card:hover { transform: none; }
+}

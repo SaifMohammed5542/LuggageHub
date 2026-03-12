@@ -182,13 +182,13 @@ const schemaMarkup = {
         },
       ],
       // ⚠️ Update these once you have real Google reviews
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "50",   // ← update with real count
-        "bestRating": "5",
-        "worstRating": "1",
-      },
+      // "aggregateRating": {
+      //   "@type": "AggregateRating",
+      //   "ratingValue": "4.8",
+      //   "reviewCount": "50",   
+      //   "bestRating": "5",
+      //   "worstRating": "1",
+      // },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Luggage Storage",
@@ -232,13 +232,13 @@ const schemaMarkup = {
           "closes": "18:00",
         },
       ],
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "50",   // ← update with real count
-        "bestRating": "5",
-        "worstRating": "1",
-      },
+      // "aggregateRating": {
+      //   "@type": "AggregateRating",
+      //   "ratingValue": "4.8",
+      //   "reviewCount": "50",   
+      //   "bestRating": "5",
+      //   "worstRating": "1",
+      // },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Luggage Storage",
@@ -282,13 +282,13 @@ const schemaMarkup = {
           "closes": "22:00",
         },
       ],
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "50",   // ← update with real count
-        "bestRating": "5",
-        "worstRating": "1",
-      },
+      // "aggregateRating": {
+      //   "@type": "AggregateRating",
+      //   "ratingValue": "4.8",
+      //   "reviewCount": "50",   
+      //   "bestRating": "5",
+      //   "worstRating": "1",
+      // },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Luggage Storage",
@@ -332,13 +332,13 @@ const schemaMarkup = {
           "closes": "18:00",
         },
       ],
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "97",   
-        "bestRating": "5",
-        "worstRating": "1",
-      },
+      // "aggregateRating": {
+      //   "@type": "AggregateRating",
+      //   "ratingValue": "4.8",
+      //   "reviewCount": "97",   
+      //   "bestRating": "5",
+      //   "worstRating": "1",
+      // },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Luggage Storage",

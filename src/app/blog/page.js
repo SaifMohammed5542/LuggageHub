@@ -1,69 +1,104 @@
+// app/blog/page.js
 import Link from 'next/link';
-import './blog-list.css'; // optional CSS (see below)
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import styles from './blog.module.css';
 
-const blogPosts = [
-  {
-    slug: 'luggage-storage-southern-cross',
-    title: '🧳 Luggage Storage Near Southern Cross Station',
-    excerpt: 'Discover convenient and secure luggage storage just minutes from Southern Cross Station...',
-  },
-  {
-    slug: 'melbourne-airport',
-    title: '✈️ Luggage Storage at Melbourne Airport',
-    excerpt: 'Flying in or out of MEL? Here’s where to leave your bags and explore stress-free...',
-  },
-  {
-    slug: 'melbourne-events-luggage-storage',
-    title: '🏎️ Melbourne Events – Grand Prix, NYE, MCG & More',
-    excerpt: 'Attending an event in Melbourne? Learn where to store your bags safely during...',
-  },
-
-  {
-    slug: 'store-luggage-near-southern-cross',
-    title: '👉 Book Luggage Storage Near Southern Cross',
-    excerpt: 'Looking for luggage storage near Southern Cross Station...',
-  },
-
-  {
-    slug: 'one-day-melbourne-itinerary',
-    title: '🚠 One-Day Melbourne Itinerary',
-    excerpt: 'Want a Quick guid for a One-Day MElbourne Itinerary? Well....',
-  },
-
-  {
-    slug: 'why-choose-luggage-terminal',
-    title: '🧳 Why choose Luggage Terminal?',
-    excerpt: 'TO begin with, Luggage Terminal is the cheapest and most Easy to store luggage...',
-  },
-  // Add more blogs here
-];
-
-export const metadata = {
-  title: 'Travel Blogs | Luggage Terminal',
-  description: 'Helpful travel guides, luggage storage tips, and local insights around Australia.',
+const CATEGORY_LABELS = {
+  'storage-keywords': '🧳 Luggage Storage',
+  'activity-guides':  '🗺️ Activity Guides',
+  'suburb-guides':    '📍 Suburb Guides',
+  'awareness':        '💡 Tips & Info',
 };
 
-export default function BlogListingPage() {
+async function getBlogs() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.luggageterminal.com'}/api/blog/list`,
+      { next: { revalidate: 300 } }
+    );
+    const data = await res.json();
+    return data.blogs || [];
+  } catch { return []; }
+}
+
+export const metadata = {
+  title: 'Travel Guides & Luggage Storage Tips | Luggage Terminal',
+  description: 'Helpful travel guides, luggage storage tips, and local insights for exploring Melbourne hands-free.',
+  alternates: { canonical: 'https://www.luggageterminal.com/blog' },
+};
+
+export default async function BlogListingPage({ searchParams }) {
+  const blogs = await getBlogs();
+  const activeCategory = searchParams?.category || 'all';
+
+  const filtered = activeCategory === 'all'
+    ? blogs
+    : blogs.filter(b => b.category === activeCategory);
+
+  const categories = ['all', ...Object.keys(CATEGORY_LABELS)];
+
   return (
     <>
       <Header />
-    <main className="blog-list-main">
-      <h1 className="blog-list-title">📰 Travel & Luggage Tips</h1>
-      <div className="blog-card-container">
-        {blogPosts.map((post) => (
-          <Link
-            key={post.slug}
-            href={`/blog/${post.slug}`}
-            className="blog-card"
-          >
-            <h2>{post.title}</h2>
-            <p>{post.excerpt}</p>
-            <span className="read-more">Read more →</span>
-          </Link>
-        ))}
-      </div>
-    </main>
+      <main className={styles.listMain}>
+        {/* Hero */}
+        <section className={styles.listHero}>
+          <h1 className={styles.listTitle}>Travel Guides & Tips</h1>
+          <p className={styles.listSubtitle}>
+            Explore Melbourne hands-free — storage tips, local guides, and itineraries.
+          </p>
+        </section>
+
+        {/* Category filters */}
+        <div className={styles.filterRow}>
+          {categories.map(cat => (
+            <Link
+              key={cat}
+              href={cat === 'all' ? '/blog' : `/blog?category=${cat}`}
+              className={`${styles.filterChip} ${activeCategory === cat ? styles.filterChipActive : ''}`}
+            >
+              {cat === 'all' ? '✨ All Posts' : CATEGORY_LABELS[cat]}
+            </Link>
+          ))}
+        </div>
+
+        {/* Blog grid */}
+        <div className={styles.listInner}>
+          {filtered.length === 0 ? (
+            <p className={styles.empty}>No posts yet — check back soon!</p>
+          ) : (
+            <div className={styles.grid}>
+              {filtered.map((post, i) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className={styles.card}
+                  style={{ animationDelay: `${i * 0.08}s` }}
+                >
+                  {post.coverImage && (
+                    <div className={styles.cardImg}>
+                      <img src={post.coverImage} alt={post.title} />
+                    </div>
+                  )}
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardMeta}>
+                      <span className={styles.cardCategory}>
+                        {CATEGORY_LABELS[post.category] || '💡 Tips'}
+                      </span>
+                      <span className={styles.cardRead}>☕ {post.readTime || 3} min read</span>
+                    </div>
+                    <h2 className={styles.cardTitle}>{post.title}</h2>
+                    <p className={styles.cardExcerpt}>{post.excerpt}</p>
+                    <span className={styles.readMore}>Read more →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
     </>
   );
 }
