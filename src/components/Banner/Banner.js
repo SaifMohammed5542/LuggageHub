@@ -224,18 +224,21 @@ export default function Banner() {
         aria-label="Why choose Luggage Terminal for secure bag storage in Melbourne"
       >
         <div className={styles.mobileTrustGrid}>
-          {[
-            { icon: "🔐", title: "Insured Luggage Storage",   sub: "Every bag fully covered up to A$2,000" },
-            { icon: "⚡", title: "Book in 60 Seconds",         sub: "Instant booking confirmation" },
-            { icon: "✓",  title: "Verified Storage Locations", sub: "All sites inspected & approved" },
-            { icon: "📱", title: "24/7 Support",               sub: "Always here to help you travel stress-free" },
-          ].map((c) => (
-            <div key={c.title} className={styles.mobileTrustCard}>
-              <div className={styles.mobileTrustIcon}>{c.icon}</div>
-              <div className={styles.mobileTrustTitle}>{c.title}</div>
-              <div className={styles.mobileTrustSub}>{c.sub}</div>
-            </div>
-          ))}
+{[
+  { icon: "🔐", title: "Insured Luggage Storage",   sub: "Every bag fully covered up to A$2,000", stat: "A$2K", bg: "#e0f2fe", statColor: "#0284c7" },
+  { icon: "⚡", title: "Book in 60 Seconds",         sub: "Instant booking confirmation",          stat: "60s",  bg: "#fef3c7", statColor: "#f59e0b" },
+  { icon: "✓",  title: "Verified Storage Locations", sub: "All sites inspected & approved",        stat: "100%", bg: "#dcfce7", statColor: "#16a34a" },
+  { icon: "📱", title: "24/7 Support",               sub: "Always here to help you travel stress-free", stat: "24/7", bg: "#ede9fe", statColor: "#8b5cf6" },
+].map((c) => (
+  <div key={c.title} className={styles.mobileTrustCard}>
+    <div className={styles.mobileTrustIcon} style={{ background: c.bg }}>{c.icon}</div>
+    <div style={{ flex: 1 }}>
+      <div className={styles.mobileTrustTitle}>{c.title}</div>
+      <div className={styles.mobileTrustSub}>{c.sub}</div>
+    </div>
+    <div style={{ fontSize: 13, fontWeight: 800, color: c.statColor, flexShrink: 0 }}>{c.stat}</div>
+  </div>
+))}
         </div>
       </section>
 

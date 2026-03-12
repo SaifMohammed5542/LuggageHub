@@ -18,6 +18,7 @@ import Rotatingtext from '@/components/Rotator';
 import Loader from '../components/Loader';
 import WhatsAppFloating from "../components/WhatsAppFloating";
 import BecomePartnerButton from '@/components/BecomePartnerButton/become-partner';
+import LocationsBanner from '@/components/LocationsBanner/LocationsBanner';
 
 // ============================================================
 // FAQ Schema for homepage — injected client-side
@@ -183,6 +184,7 @@ function App() {
         />
         <Banner />
       </div>
+      <LocationsBanner />
 
       <Rotatingtext />
       <Amount />
