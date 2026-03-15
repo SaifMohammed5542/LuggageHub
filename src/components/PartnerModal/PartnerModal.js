@@ -1,9 +1,4 @@
-//app/components/PartnerModal/PartnerModal.js
 'use client';
-
-// PartnerModal.jsx
-// Usage: import PartnerModal from '@/components/PartnerModal';
-//        <PartnerModal isOpen={open} onClose={() => setOpen(false)} />
 
 import { useState, useEffect } from 'react';
 import styles from './PartnerModal.module.css';
@@ -22,6 +17,7 @@ const BUSINESS_TYPES = [
 const INITIAL = {
   businessName: '',
   ownerName: '',
+  address: '',
   suburb: '',
   phone: '',
   email: '',
@@ -34,7 +30,6 @@ export default function PartnerModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Lock body scroll when open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -44,7 +39,6 @@ export default function PartnerModal({ isOpen, onClose }) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Reset on close
   useEffect(() => {
     if (!isOpen) {
       setTimeout(() => { setForm(INITIAL); setErrors({}); setSuccess(false); }, 300);
@@ -95,7 +89,6 @@ export default function PartnerModal({ isOpen, onClose }) {
       <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Partner Application">
 
         {success ? (
-          /* ── Success state ── */
           <div className={styles.success}>
             <div className={styles.successIcon}>🎉</div>
             <h2 className={styles.successTitle}>Application received!</h2>
@@ -119,7 +112,6 @@ export default function PartnerModal({ isOpen, onClose }) {
           </div>
         ) : (
           <>
-            {/* ── Header ── */}
             <div className={styles.header}>
               <div className={styles.headerText}>
                 <div className={styles.headerPill}>
@@ -132,7 +124,6 @@ export default function PartnerModal({ isOpen, onClose }) {
               <button className={styles.closeBtn} onClick={onClose} aria-label="Close">✕</button>
             </div>
 
-            {/* ── Form ── */}
             <div className={styles.body}>
               <div className={styles.fieldGrid}>
 
@@ -147,15 +138,14 @@ export default function PartnerModal({ isOpen, onClose }) {
                   {errors.businessName && <span className={styles.errorMsg}>{errors.businessName}</span>}
                 </div>
 
-                <div className={styles.field}>
-                  <label className={styles.label}>Your Name <span className={styles.required}>*</span></label>
+                <div className={`${styles.field} ${styles.fieldFull}`}>
+                  <label className={styles.label}>Full Address</label>
                   <input
-                    className={`${styles.input} ${errors.ownerName ? styles.inputError : ''}`}
-                    name="ownerName" value={form.ownerName}
-                    onChange={handleChange} placeholder="Full name"
-                    autoComplete="name"
+                    className={styles.input}
+                    name="address" value={form.address}
+                    onChange={handleChange} placeholder="e.g. 123 Collins St, Melbourne VIC 3000"
+                    autoComplete="street-address"
                   />
-                  {errors.ownerName && <span className={styles.errorMsg}>{errors.ownerName}</span>}
                 </div>
 
                 <div className={styles.field}>
@@ -166,6 +156,17 @@ export default function PartnerModal({ isOpen, onClose }) {
                     onChange={handleChange} placeholder="e.g. Melbourne CBD"
                   />
                   {errors.suburb && <span className={styles.errorMsg}>{errors.suburb}</span>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Your Name <span className={styles.required}>*</span></label>
+                  <input
+                    className={`${styles.input} ${errors.ownerName ? styles.inputError : ''}`}
+                    name="ownerName" value={form.ownerName}
+                    onChange={handleChange} placeholder="Full name"
+                    autoComplete="name"
+                  />
+                  {errors.ownerName && <span className={styles.errorMsg}>{errors.ownerName}</span>}
                 </div>
 
                 <div className={styles.field}>

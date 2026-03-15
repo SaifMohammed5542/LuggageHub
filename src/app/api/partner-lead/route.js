@@ -1,31 +1,14 @@
 // app/api/partner-lead/route.js
 
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
+import PartnerLead from '@/models/PartnerLead';
 import { sendPartnerLeadEmails } from '@/utils/emailTemplates';
 
-// ── Schema ──────────────────────────────────────────────────
-const PartnerLeadSchema = new mongoose.Schema({
-  businessName:  { type: String, required: true },
-  ownerName:     { type: String, required: true },
-  suburb:        { type: String, required: true },
-  phone:         { type: String, required: true },
-  email:         { type: String, required: true },
-  businessType:  { type: String, default: '' },
-  submittedAt:   { type: Date, default: Date.now },
-  status:        { type: String, default: 'new' },
-});
-
-const PartnerLead =
-  mongoose.models.PartnerLead ||
-  mongoose.model('PartnerLead', PartnerLeadSchema);
-
-// ── POST handler ─────────────────────────────────────────────
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { businessName, ownerName, suburb, phone, email, businessType } = body;
+    const { businessName, ownerName, suburb, address, phone, email, businessType } = body;
 
     if (!businessName || !ownerName || !suburb || !phone || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -37,14 +20,13 @@ export async function POST(req) {
       businessName,
       ownerName,
       suburb,
+      address,
       phone,
       email,
       businessType,
     });
 
-    // Uses sendPartnerLeadEmails from emailTemplates.js
-    // which sends via partnerTransporter (SMTP) from partners@luggageterminal.com
-    sendPartnerLeadEmails({ businessName, ownerName, suburb, phone, email, businessType })
+    sendPartnerLeadEmails({ businessName, ownerName, suburb, address, phone, email, businessType })
       .catch(err => console.error('❌ Partner lead email failed:', err));
 
     console.log(`✅ Partner lead saved — ${businessName} (${suburb})`);

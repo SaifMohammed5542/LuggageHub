@@ -255,6 +255,11 @@ export async function sendWelcomeEmail(email, username) {
  * 1. Notification to you (admin)
  * 2. Confirmation to the applicant
  */
+
+// ─────────────────────────────────────────────────────────────
+// PARTNER LEAD EMAILS — bottom of utils/emailTemplates.js
+// ─────────────────────────────────────────────────────────────
+
 const partnerTransporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
@@ -265,8 +270,7 @@ const partnerTransporter = nodemailer.createTransport({
   },
 });
 
-
-export async function sendPartnerLeadEmails({ businessName, ownerName, suburb, phone, email, businessType }) {
+export async function sendPartnerLeadEmails({ businessName, ownerName, suburb, address, phone, email, businessType }) {
   // 1. Notify you instantly
   await partnerTransporter.sendMail({
     from: `"Luggage Terminal Partners" <partners@luggageterminal.com>`,
@@ -300,8 +304,9 @@ export async function sendPartnerLeadEmails({ businessName, ownerName, suburb, p
           <table>
             ${[
               ['Business Name', businessName],
-              ['Owner / Manager', ownerName],
+              ['Address', address || '—'],
               ['Suburb', suburb],
+              ['Owner / Manager', ownerName],
               ['Phone', phone],
               ['Email', email],
               ['Business Type', businessType || '—'],
@@ -323,7 +328,7 @@ export async function sendPartnerLeadEmails({ businessName, ownerName, suburb, p
 
   // 2. Confirm to applicant
   await partnerTransporter.sendMail({
-    from: `"Luggage Terminal Partners" <partners@luggageterminal.com>`,    
+    from: `"Luggage Terminal Partners" <partners@luggageterminal.com>`,
     to: email,
     subject: `We received your application — Luggage Terminal`,
     html: `
@@ -357,7 +362,7 @@ export async function sendPartnerLeadEmails({ businessName, ownerName, suburb, p
               <li>Your station goes live and you start earning</li>
             </ol>
           </div>
-            <p>Any questions? Email us at <a href="mailto:partners@luggageterminal.com" style="color: #0284C7;">partners@luggageterminal.com</a></p>
+          <p>Any questions? Email us at <a href="mailto:partners@luggageterminal.com" style="color: #0284C7;">partners@luggageterminal.com</a></p>
           <p>— The Luggage Terminal Team</p>
           <div class="footer">
             <p>© ${new Date().getFullYear()} Luggage Terminal. All rights reserved.</p>
@@ -378,7 +383,7 @@ What happens next:
 2. We contact you to confirm details
 3. Your station goes live and you start earning
 
-Questions? Reply to this email or partners@luggageterminal.com
+Questions? Email us at partners@luggageterminal.com
 
 — The Luggage Terminal Team
     `,
