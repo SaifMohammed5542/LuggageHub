@@ -1,3 +1,4 @@
+//app/become-a-partner/page.js
 'use client';
 
 // BecomePartnerClient.jsx
@@ -8,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import styles from './BecomePartner.module.css';
 import Header from '@/components/Header';
+import PartnerModal from '@/components/PartnerModal/PartnerModal';
 
 const LARGE_RATE = 5 * 0.7 + 4 * 0.3;   // $4.70/bag/day
 const SMALL_RATE = 2.5 * 0.7 + 2 * 0.3; // $2.35/bag/day
@@ -19,9 +21,6 @@ const TIERS = [
   { max: 1800,     label: 'Active',      color: '#8b5cf6' },
   { max: Infinity, label: 'Top Partner', color: '#D97706' },
 ];
-
-const APPLY_URL =
-  'https://docs.google.com/forms/d/e/1FAIpQLSeQIAVNFb4Kv5XFkussZ9MYAqFZ4bMqx5XZSGqxF7ScdIVMvQ/viewform?usp=header';
 
 function fmt(n) { return Math.round(n).toLocaleString('en-AU'); }
 
@@ -110,6 +109,8 @@ function FormulaDropdown({ large, small, days, bonus, drops, total, styles }) {
 
 export default function BecomePartnerClient() {
   const [scrolled, setScrolled] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', h, { passive: true });
@@ -124,17 +125,23 @@ export default function BecomePartnerClient() {
   const [days,  setDays]  = useState(26);
   const { bonus, total, annual, drops, tier } = calcEarnings(large, small, days);
 
+  const openModal = () => setModalOpen(true);
+
   return (
     <>
     <Header />
+
+    {/* Partner application modal */}
+    <PartnerModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+
     <div className={styles.page}>
 
       {/* ── NAV ─────────────────────────────────────────────── */}
       <nav className={`${styles.nav} ${scrolled ? styles.navSolid : ''}`}>
         <span className={styles.navLogo}>Register Now!</span>
-        <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className={styles.navBtn}>
+        <button onClick={openModal} className={styles.navBtn}>
           Apply Free →
-        </a>
+        </button>
       </nav>
 
       {/* ── HERO ────────────────────────────────────────────── */}
@@ -158,18 +165,17 @@ export default function BecomePartnerClient() {
             Zero investment. Zero disruption.
           </p>
 
-          {/* Inline rate chips — replaces the hidden card on mobile */}
           <div className={styles.heroRates}>
             <div className={styles.rateChip}>🧳 <strong>$4.70</strong>/bag/day</div>
             <div className={styles.rateChip}>🎒 <strong>$2.35</strong>/bag/day</div>
           </div>
 
-          <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className={styles.heroCta}>
+          <button onClick={openModal} className={styles.heroCta}>
             Apply Now — It&apos;s Free
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </a>
+          </button>
 
           <div className={styles.heroProof}>
             {['$0 setup','No lock-in','2–3 min/booking','Monthly payout'].map(t => (
@@ -214,7 +220,6 @@ export default function BecomePartnerClient() {
             <p className={styles.calcSub}>Move the sliders — income updates instantly</p>
           </div>
 
-          {/* Total — always pinned at top, large, impossible to miss */}
           <div className={styles.calcTotal}>
             <div className={styles.ctLabel}>Your monthly income estimate</div>
             <div className={styles.ctAmount}>
@@ -229,12 +234,9 @@ export default function BecomePartnerClient() {
                 {tier.label}
               </span>
             </div>
-
-            {/* Collapsible formula */}
             <FormulaDropdown large={large} small={small} days={days} bonus={bonus} drops={drops} total={total} styles={styles} />
           </div>
 
-          {/* Sliders */}
           <div className={styles.calcSliders}>
 
             <div className={styles.sliderRow}>
@@ -275,7 +277,6 @@ export default function BecomePartnerClient() {
 
           </div>
 
-          {/* Milestone */}
           {drops >= 25 && (
             <div className={styles.calcMilestone}>
               🎉 You qualify for {Math.floor(drops/25)}× $20 bonus
@@ -283,15 +284,14 @@ export default function BecomePartnerClient() {
             </div>
           )}
 
-          {/* Note + CTA */}
           <div className={styles.calcFooter}>
             <p className={styles.calcNote}>
               Rates are weighted avg of online + walk-in pricing. 2.5-day avg stay included.
               Bonuses: +$20 every 25th · +$50 every 100th booking.
             </p>
-            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className={styles.calcCta}>
+            <button onClick={openModal} className={styles.calcCta}>
               Start Earning ${fmt(total)}/mo →
-            </a>
+            </button>
           </div>
 
         </div>
@@ -443,12 +443,12 @@ export default function BecomePartnerClient() {
             ))}
           </div>
 
-          <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className={styles.ctaBtn}>
+          <button onClick={openModal} className={styles.ctaBtn}>
             Apply to Become a Partner
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M7 14L12 9L7 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </a>
+          </button>
           <p className={styles.ctaFine}>Australia only · All business types welcome · No cost ever</p>
         </div>
       </section>
