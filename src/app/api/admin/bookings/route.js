@@ -32,14 +32,15 @@ export async function GET(req) {
     // ✅ select() only fetches the fields the dashboard actually uses
     // ✅ No populate() — stationId is already on the booking, admin fetches
     //    stations separately, so the N+1 populate is unnecessary
-    const bookings = await Booking.find(query)
-      .select(
-        "fullName email phone stationId dropOffDate pickUpDate " +
-        "smallBagCount largeBagCount luggageCount totalAmount " +
-        "paymentId specialInstructions status createdAt"
-      )
-      .sort({ dropOffDate: -1 })
-      .lean();
+const bookings = await Booking.find(query)
+  .select(
+    "fullName email phone stationId dropOffDate pickUpDate " +
+    "smallBagCount largeBagCount luggageCount totalAmount " +
+    "paymentId specialInstructions status createdAt"
+  )
+  .populate("stationId", "_id name")
+  .sort({ dropOffDate: -1 })
+  .lean();
 
     return NextResponse.json({ bookings }, { status: 200 });
   } catch (error) {
