@@ -164,38 +164,67 @@ const [editStation, setEditStation] = useState({
 
   // Add this useEffect at the top of your dashboard component
 useEffect(() => {
-  // Auto-refresh token every 10 minutes
-  const refreshInterval = setInterval(async () => {
-    const res = await fetch('/api/auth/refresh', { 
-      method: 'POST',
-      credentials: 'include' 
-    });
-    
-    if (res.ok) {
-      const data = await res.json();
-      // Update localStorage with new token
-      localStorage.setItem("token", data.token);
+  const init = async () => {
+    const storedRole = localStorage.getItem("role");
+    if (storedRole !== "admin") {
+      router.push("/");
+      return;
     }
-  }, 10 * 60 * 1000); // 10 minutes
+
+    let activeToken = localStorage.getItem("token");
+
+    try {
+      const refreshRes = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        activeToken = refreshData.token;
+        localStorage.setItem("token", activeToken);
+      }
+    } catch (e) {
+      console.warn("Token refresh on mount failed:", e);
+    }
+
+    if (!activeToken) {
+      router.push("/");
+      return;
+    }
+
+    setToken(activeToken);
+    setUserRole("admin");
+
+    await Promise.all([
+      fetchStations(activeToken),
+      fetchBookings(activeToken),
+      fetchKeyHandovers(activeToken),
+      fetchPartners(activeToken),
+    ]);
+  };
+
+  init();
+}, [router]);
+
+useEffect(() => {
+  const refreshInterval = setInterval(async () => {
+    try {
+      const res = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("token", data.token);
+        setToken(data.token);
+      }
+    } catch (e) {
+      console.warn("Background token refresh failed:", e);
+    }
+  }, 10 * 60 * 1000);
 
   return () => clearInterval(refreshInterval);
 }, []);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedRole = localStorage.getItem("role");
-
-    if (storedToken && storedRole === "admin") {
-      setToken(storedToken);
-      setUserRole("admin");
-      fetchStations(storedToken);
-      fetchBookings(storedToken);
-      fetchKeyHandovers(storedToken);
-      fetchPartners(storedToken);
-    } else {
-      router.push("/");
-    }
-  }, [router]);
 
   // Reset months panel when station or tab changes
   useEffect(() => {
