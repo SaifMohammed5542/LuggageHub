@@ -128,6 +128,8 @@ const bookingSchema = new mongoose.Schema({
 bookingSchema.index({ createdAt: -1 });
 bookingSchema.index({ stationId: 1, dropOffDate: 1, pickUpDate: 1 });
 bookingSchema.index({ email: 1, status: 1 });
+bookingSchema.index({ dropOffDate: -1 });
+bookingSchema.index({ stationId: 1, dropOffDate: -1 });
 
 // ✅ Virtual for station details
 bookingSchema.virtual('station', {
