@@ -1,3 +1,4 @@
+// verified claude code works
 "use client"
 // app/page.tsx
 // NOTE: SEO metadata is now handled in layout.tsx via the metadata export.

@@ -9,6 +9,7 @@ import LuggageBookingForm from "../../components/booking-form/LuggageBookingForm
 import StationPreviewCard from "../../components/StationPreviewCard/StationPreviewCard.js"; // 🆕 ADDED
 import { Search, X, MapPin, Navigation, ChevronUp, Loader as LoaderIcon, AlertCircle } from "lucide-react";
 import styles from "./MapBooking.module.css";
+import GoogleMapsWrapper from "@/components/GoogleMapsWrapper";
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   if ([lat1, lon1, lat2, lon2].some((v) => v == null || isNaN(v))) return Infinity;
@@ -694,6 +695,7 @@ function MapBookingContent() {
 
 export default function MapBookingPage() {
   return (
+    <GoogleMapsWrapper>
     <Suspense
       fallback={
         <div className={styles.pageWrapper}>
@@ -707,5 +709,6 @@ export default function MapBookingPage() {
     >
       <MapBookingContent />
     </Suspense>
+    </GoogleMapsWrapper>
   );
 }
