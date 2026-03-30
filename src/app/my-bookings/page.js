@@ -1,4 +1,4 @@
-// app/my-bookings/page.js
+// app/my-bookings/page.js - SIMPLE 1-BUTTON APPROACH
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,14 +7,12 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import styles from "./MyBookings.module.css";
+import DateChangeModal from "@/components/DateChangeModal/DateChangeModal";
 
 // ── Smart date-based status calculation ───────────────────
-// Always respect cancelled/no_show from DB.
-// For everything else, calculate from current date/time vs booking dates.
 function getDisplayStatus(booking) {
   const { status, dropOffDate, pickUpDate } = booking;
 
-  // These are always respected from the database
   if (status === "cancelled") {
     return {
       label: "Cancelled",
@@ -36,7 +34,6 @@ function getDisplayStatus(booking) {
   const dropOff = new Date(dropOffDate);
   const pickUp = new Date(pickUpDate);
 
-  // Now is AFTER pick-up time → Completed
   if (now > pickUp) {
     return {
       label: "Completed",
@@ -46,7 +43,6 @@ function getDisplayStatus(booking) {
     };
   }
 
-  // Now is AFTER drop-off AND BEFORE pick-up → Stored
   if (now > dropOff && now <= pickUp) {
     return {
       label: "Stored",
@@ -56,7 +52,6 @@ function getDisplayStatus(booking) {
     };
   }
 
-  // Now is BEFORE drop-off → Active / upcoming
   return {
     label: "Active",
     emoji: "✅",
@@ -152,12 +147,32 @@ function GuestPrompt() {
 }
 
 // ── Booking Card ───────────────────────────────────────────
-function BookingCard({ booking }) {
+function BookingCard({ booking, onChangeDates }) {
   const [expanded, setExpanded] = useState(false);
   const status = getDisplayStatus(booking);
   const days = calcDays(booking.dropOffDate, booking.pickUpDate);
   const stationName = booking.stationId?.name || "Unknown Station";
   const stationLocation = booking.stationId?.location || booking.stationId?.address || "";
+
+  // ✅ Check if date changes are allowed
+  const canChangeDates = () => {
+    const now = new Date();
+    const dropOff = new Date(booking.dropOffDate);
+    const pickUp = new Date(booking.pickUpDate);
+    
+    const hoursUntilDropOff = (dropOff - now) / (1000 * 60 * 60);
+    const hoursUntilPickUp = (pickUp - now) / (1000 * 60 * 60);
+    
+    // Can change if:
+    // - Active: at least 2 hours until drop-off
+    // - Stored: at least 1 hour until pick-up
+    if (status.label === "Active" && hoursUntilDropOff >= 2) return true;
+    if (status.label === "Stored" && hoursUntilPickUp >= 1) return true;
+    
+    return false;
+  };
+
+  const canChange = canChangeDates();
 
   return (
     <div className={`${styles.card} ${styles[`card_${status.color}`]}`}>
@@ -223,6 +238,26 @@ function BookingCard({ booking }) {
           </span>
         )}
       </div>
+
+      {/* ✅ ONE SIMPLE BUTTON */}
+      {canChange && (
+        <button
+          className={styles.changeDatesBtn}
+          onClick={() => onChangeDates(booking)}
+        >
+          📅 Change Dates
+        </button>
+      )}
+
+      {/* Show why changes are blocked */}
+      {!canChange && (status.label === "Active" || status.label === "Stored") && (
+        <div className={styles.extensionBlocked}>
+          <span className={styles.blockedIcon}>🔒</span>
+          <span className={styles.blockedText}>
+            Date changes not available - booking times are too close
+          </span>
+        </div>
+      )}
 
       {/* Expand Button */}
       <button
@@ -337,6 +372,12 @@ export default function MyBookingsPage() {
 
   const [activeFilter, setActiveFilter] = useState("all");
   const [username, setUsername] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState(true);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  // Date change modal state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -372,6 +413,7 @@ export default function MyBookingsPage() {
       }
 
       setBookings(data.bookings || []);
+      setIsEmailVerified(data.isEmailVerified ?? true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -379,14 +421,32 @@ export default function MyBookingsPage() {
     }
   };
 
-  // Not logged in → show guest prompt
+  // ✅ Date change handler
+  const handleChangeDates = (booking) => {
+    setSelectedBooking(booking);
+    setShowModal(true);
+  };
+
+  const handleChangeSuccess = (result) => {
+    setShowModal(false);
+    setSelectedBooking(null);
+
+    const dropOff = new Date(result.booking.newDropOffDate).toLocaleString("en-AU");
+    const pickUp  = new Date(result.booking.newPickUpDate).toLocaleString("en-AU");
+    const charge  = result.booking.charge > 0 ? ` · Charged: A$${result.booking.charge.toFixed(2)}` : " · No extra charge";
+
+    setSuccessMessage(`Dates updated — Drop-off: ${dropOff} · Pick-up: ${pickUp}${charge}`);
+
+    const token = localStorage.getItem("token");
+    if (token) fetchBookings(token);
+  };
+
   if (!isLoggedIn && !loading) {
     return <GuestPrompt />;
   }
 
   const filtered = filterBookings(bookings, activeFilter);
 
-  // Count per filter
   const counts = {
     all: bookings.length,
     active: bookings.filter((b) => getDisplayStatus(b).label === "Active").length,
@@ -400,8 +460,6 @@ export default function MyBookingsPage() {
       <Header />
       <main className={styles.page}>
         <div className={styles.container}>
-
-          {/* Page Header */}
           <div className={styles.pageHeader}>
             <div>
               <h1 className={styles.pageTitle}>My Bookings</h1>
@@ -414,7 +472,28 @@ export default function MyBookingsPage() {
             </Link>
           </div>
 
-          {/* Loading */}
+          {/* Success banner */}
+          {successMessage && (
+            <div className={styles.successBanner}>
+              <span>✅</span>
+              <div>
+                <strong>Booking updated!</strong>
+                <p>{successMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Unverified email warning */}
+          {!isEmailVerified && (
+            <div className={styles.verifyWarning}>
+              <span>📧</span>
+              <div>
+                <strong>Verify your email to see all bookings</strong>
+                <p>Guest bookings made before creating your account will appear once you verify your email address. Check your inbox for the verification link.</p>
+              </div>
+            </div>
+          )}
+
           {loading && (
             <div className={styles.loadingState}>
               <div className={styles.loadingSpinner} />
@@ -422,7 +501,6 @@ export default function MyBookingsPage() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div className={styles.errorState}>
               <span>⚠️</span>
@@ -431,10 +509,8 @@ export default function MyBookingsPage() {
             </div>
           )}
 
-          {/* Content */}
           {!loading && !error && (
             <>
-              {/* Filter Tabs */}
               <div className={styles.filterTabs}>
                 {FILTERS.map((f) => (
                   <button
@@ -450,7 +526,6 @@ export default function MyBookingsPage() {
                 ))}
               </div>
 
-              {/* Bookings List */}
               {filtered.length === 0 ? (
                 <div className={styles.emptyState}>
                   <span className={styles.emptyIcon}>🧳</span>
@@ -473,7 +548,11 @@ export default function MyBookingsPage() {
               ) : (
                 <div className={styles.bookingsList}>
                   {filtered.map((booking) => (
-                    <BookingCard key={booking._id} booking={booking} />
+                    <BookingCard 
+                      key={booking._id} 
+                      booking={booking}
+                      onChangeDates={handleChangeDates}
+                    />
                   ))}
                 </div>
               )}
@@ -482,6 +561,18 @@ export default function MyBookingsPage() {
         </div>
       </main>
       <Footer />
+      
+      {/* ✅ Simple Date Change Modal */}
+      {showModal && selectedBooking && (
+        <DateChangeModal
+          booking={selectedBooking}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedBooking(null);
+          }}
+          onSuccess={handleChangeSuccess}
+        />
+      )}
     </>
   );
 }

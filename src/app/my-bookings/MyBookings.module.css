@@ -165,7 +165,7 @@
 .card_confirmed  { border-left: 4px solid var(--success); }
 .card_pending    { border-left: 4px solid var(--warning); }
 .card_stored     { border-left: 4px solid var(--primary); }
-.card_completed  { border-left: 4px solid var(--text-muted); }
+.card_completed  { border-left: 4px solid var(--secondary); }
 .card_cancelled  { border-left: 4px solid var(--error); }
 .card_noshow     { border-left: 4px solid var(--warning); }
 
@@ -682,4 +682,122 @@
 @media (max-width: 360px) {
   .guestCard { padding: 28px 20px; }
   .card { padding: 16px; }
+}
+
+/* ── CHANGE DATES BUTTON ─────────────────────────────────── */
+.changeDatesBtn {
+  width: 100%;
+  padding: 10px;
+  background: var(--cta-grad);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+  box-shadow: var(--cta-shadow);
+}
+
+.changeDatesBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--cta-hover-shadow);
+}
+
+.changeDatesBtn:active {
+  transform: translateY(0);
+}
+
+/* ── SUCCESS BANNER ──────────────────────────────────────── */
+.successBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--success-bg);
+  border: 1px solid var(--success);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  animation: slideDown 0.25s ease;
+}
+
+.successBanner span:first-child {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.successBanner strong {
+  display: block;
+  color: var(--success);
+  margin-bottom: 4px;
+}
+
+.successBanner p {
+  color: var(--text);
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── EMAIL VERIFY WARNING ────────────────────────────────── */
+.verifyWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+
+.verifyWarning span:first-child {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.verifyWarning strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+.verifyWarning p {
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── DUAL EXTENSION BUTTONS ──────────────────────────────── */
+.extensionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.extensionBlocked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface-base);
+  border: 1px dashed var(--border-base);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.blockedIcon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.blockedText {
+  line-height: 1.4;
 }
