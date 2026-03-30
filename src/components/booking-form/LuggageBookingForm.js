@@ -227,49 +227,42 @@ useEffect(() => {
 
  useEffect(() => {
   const fetchStations = async () => {
-    // ✅ NEW: Skip fetching stations if we already have a locked prefilled station
-    if (isStationLocked && prefilledStation) {
-      console.log('⚡ Skipping station list fetch - station already locked');
-      return;
-    }
+    // Skip if station is already locked
+    if (isStationLocked && prefilledStation) return;
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/station/list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch("/api/station/list");
+      if (!response.ok) throw new Error("Failed to fetch stations");
       const data = await response.json();
       let stationsList = data.stations || [];
 
-      // ✅ NEW: Only try to get user location if station is NOT locked
-      if (!isStationLocked) {
-        const getUserPosition = () =>
-          new Promise((resolve, reject) => {
-            if (!navigator.geolocation) return reject(new Error('Geolocation not available'));
+      // Sort by distance if geolocation is available
+      if (!isStationLocked && navigator.geolocation) {
+        try {
+          const coords = await new Promise((resolve, reject) =>
             navigator.geolocation.getCurrentPosition(
               (pos) => resolve(pos.coords),
-              (err) => reject(err),
+              reject,
               { timeout: 5000 }
-            );
-          });
+            )
+          );
 
-        try {
-          const coords = await getUserPosition();
-          const userLat = coords.latitude;
-          const userLon = coords.longitude;
+          const { latitude, longitude } = coords;
+
           stationsList = stationsList
             .map((s) => {
               const ll = getStationLatLng(s);
-              if (ll && !Number.isNaN(ll.lat) && !Number.isNaN(ll.lon)) {
-                return { ...s, distance: haversineDistance(userLat, userLon, ll.lat, ll.lon) };
+              if (ll) {
+                return {
+                  ...s,
+                  distance: haversineDistance(latitude, longitude, ll.lat, ll.lon),
+                };
               }
               return s;
             })
             .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-        } catch (err) {
-          console.warn('⚠️ Could not obtain user location', err);
-          // Continue without sorting by distance
+        } catch {
+          // Geolocation denied or unavailable — continue without sorting
         }
       }
 
@@ -278,9 +271,9 @@ useEffect(() => {
       console.error("Failed to fetch stations:", error);
     }
   };
-  
+
   fetchStations();
-}, [isStationLocked, prefilledStation]); // ✅ Added dependencies
+}, [isStationLocked, prefilledStation]);
 
 
 
