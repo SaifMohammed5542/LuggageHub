@@ -6,8 +6,8 @@ import Station from "../../../../../models/Station";
 export async function GET(request, { params }) {
   try {
     await dbConnect();
-    
-    const { stationId } = params;
+
+    const { stationId } = await params;
     
     if (!stationId) {
       return NextResponse.json(

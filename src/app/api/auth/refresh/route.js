@@ -51,9 +51,10 @@ try {
       {
         userId: decoded.userId,
         username: decoded.username,
+        email: decoded.email,
         role: decoded.role,
         assignedStation: decoded.assignedStation,
-        lastActivity: Date.now() // ⬅️ Update activity timestamp
+        lastActivity: Date.now()
       },
       process.env.JWT_SECRET,
       { expiresIn: "15m" }

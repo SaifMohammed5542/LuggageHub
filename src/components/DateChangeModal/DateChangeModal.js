@@ -10,6 +10,16 @@ const LUGGAGE_PRICING = {
   medium_large: 8.49,
 };
 
+const toDateTimeLocal = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export default function DateChangeModal({ booking, onClose, onSuccess }) {
   const [newDropOff, setNewDropOff] = useState("");
   const [newPickUp, setNewPickUp] = useState("");
@@ -26,8 +36,8 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
 
   // Initialize with current dates
   useEffect(() => {
-    setNewDropOff(currentDropOff.toISOString().slice(0, 16));
-    setNewPickUp(currentPickUp.toISOString().slice(0, 16));
+    setNewDropOff(toDateTimeLocal(currentDropOff));
+    setNewPickUp(toDateTimeLocal(currentPickUp));
   }, []);
 
   // ✅ Fetch station timings
@@ -209,8 +219,8 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
       const newDropOffDate = new Date(newDropOff);
       const timeDiff = currentPickUp - currentDropOff; // Duration in ms
       const newPickUpDate = new Date(newDropOffDate.getTime() + timeDiff);
-      
-      setNewPickUp(newPickUpDate.toISOString().slice(0, 16));
+
+      setNewPickUp(toDateTimeLocal(newPickUpDate));
     };
 
     handleShift();
@@ -258,9 +268,9 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
         try {
           const refreshResponse = await fetch("/api/auth/refresh", {
             method: "POST",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
             },
           });
           
