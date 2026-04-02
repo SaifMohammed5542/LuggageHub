@@ -5,6 +5,7 @@ import "./globals.css";
 import "./theme.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import Script from "next/script";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -379,6 +380,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
         />
+
+        <Script
+  src="https://www.googletagmanager.com/gtag/js?id=AW-17821617933"
+  strategy="afterInteractive"
+/>
+<Script id="google-gtag-init" strategy="afterInteractive">
+  {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-27TV1KMWWH');
+    gtag('config', 'AW-17821617933');
+  `}
+</Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <main className="min-h-dvh">{children}</main>

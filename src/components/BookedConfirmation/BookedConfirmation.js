@@ -1,7 +1,9 @@
+"use client";
 // components/BookedConfirmation/BookedConfirmation.js
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import styles from './BookedConfirmation.module.css';
 import Header from '../Header';
+import { trackBookingConversion } from '../../lib/gtag';
 
 const BookedConfirmationPage = () => {
   const [bookingData, setBookingData] = useState(null);
@@ -17,6 +19,10 @@ const BookedConfirmationPage = () => {
         const parsedData = JSON.parse(storedBooking);
         console.log('✅ Loaded booking data from sessionStorage:', parsedData);
         setBookingData(parsedData);
+        trackBookingConversion({
+  value: Number(parsedData.totalAmount) || 15.0,
+  transactionId: parsedData.bookingReference || '',
+});
       } else {
         console.warn('⚠️ No booking data found in sessionStorage');
         setError('No booking information found. Please check your email for confirmation details.');
