@@ -34,10 +34,10 @@ export default function StationMapMapbox({
   allStations,
   selected,
   onSelect,
-  onBook,
   userCoords,
   mapSearchResult,
   onClearMapSearch,
+  onRouteUpdate,
 }) {
   const mapRef = useRef(null);
 
@@ -47,10 +47,8 @@ export default function StationMapMapbox({
     zoom: 13.5,
   });
 
-  const [routeGeoJSON, setRouteGeoJSON]   = useState(null);
-  const [routeInfo,    setRouteInfo]      = useState(null);
-  const [routeLoading, setRouteLoading]   = useState(false);
-  const [toast,        setToast]          = useState(null);
+  const [routeGeoJSON, setRouteGeoJSON] = useState(null);
+  const [toast,        setToast]        = useState(null);
 
   // ── Inject mapbox-gl CSS once (avoids Next.js global CSS import restrictions) ─
   useEffect(() => {
@@ -131,7 +129,7 @@ export default function StationMapMapbox({
   useEffect(() => {
     if (!selected || !origin) {
       setRouteGeoJSON(null);
-      setRouteInfo(null);
+      onRouteUpdate?.(null, false);
       return;
     }
     const dest = getCoords(selected);
@@ -143,9 +141,8 @@ export default function StationMapMapbox({
     // Don't attempt routing across cities / countries — Mapbox walking won't work
     if (distKm > 50) return;
 
-    setRouteLoading(true);
     setRouteGeoJSON(null);
-    setRouteInfo(null);
+    onRouteUpdate?.(null, true);
 
     fetch(
       `https://api.mapbox.com/directions/v5/mapbox/walking/` +
@@ -154,12 +151,11 @@ export default function StationMapMapbox({
     )
       .then((r) => r.json())
       .then((data) => {
-        if (!data.routes?.[0]) return;
-        const route      = data.routes[0];
+        if (!data.routes?.[0]) { onRouteUpdate?.(null, false); return; }
+        const route       = data.routes[0];
         const durationMin = Math.round(route.duration / 60);
         const distM       = Math.round(route.distance);
-        setRouteGeoJSON(route.geometry);
-        setRouteInfo({
+        const info = {
           durationMin,
           distM,
           isTransit,
@@ -169,10 +165,11 @@ export default function StationMapMapbox({
               `&destination=${dest.lat},${dest.lon}` +
               `&travelmode=transit`
             : null,
-        });
+        };
+        setRouteGeoJSON(route.geometry);
+        onRouteUpdate?.(info, false);
       })
-      .catch(() => {})
-      .finally(() => setRouteLoading(false));
+      .catch(() => { onRouteUpdate?.(null, false); });
   }, [selected?._id, origin?.lat, origin?.lon]); // eslint-disable-line
 
   // ── Fly to search result, check for nearby stations ───────────────────────
@@ -245,9 +242,9 @@ export default function StationMapMapbox({
   useEffect(() => {
     if (!selected) {
       setRouteGeoJSON(null);
-      setRouteInfo(null);
+      onRouteUpdate?.(null, false);
     }
-  }, [selected]);
+  }, [selected]); // eslint-disable-line
 
   const handleShowNearest = () => {
     if (!toast?.nearest) return;
@@ -260,9 +257,6 @@ export default function StationMapMapbox({
 
   const pinPool = allStations?.length ? allStations : stations || [];
 
-  // ─── Format distance string ───────────────────────────────────────────────
-  const fmtDist = (m) =>
-    m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1)} km`;
 
   return (
     <div className={styles.stationMapWrap}>
@@ -383,48 +377,6 @@ export default function StationMapMapbox({
         </div>
       )}
 
-      {/* ── Selected station popup with route info ── */}
-      {selected && (
-        <div className={styles.stationMapPopup}>
-          <div className={styles.stationMapPopupInner}>
-            <div className={styles.stationMapPopupIcon}>🏪</div>
-            <div className={styles.stationMapPopupInfo}>
-              <div className={styles.stationMapPopupName}>{selected.name}</div>
-              <div className={styles.stationMapPopupSub}>
-                {selected.location}
-                {routeLoading && <span> · ⏳</span>}
-                {!routeLoading && routeInfo && !routeInfo.isTransit && (
-                  <span> · 🚶 {routeInfo.durationMin} min · {fmtDist(routeInfo.distM)}</span>
-                )}
-                {!routeLoading && routeInfo && routeInfo.isTransit && (
-                  <>
-                    <span> · {fmtDist(routeInfo.distM)} · 🚶 {routeInfo.durationMin} min · </span>
-                    <a
-                      href={routeInfo.transitUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.transitLink}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      🚌 Transit →
-                    </a>
-                  </>
-                )}
-                {!routeLoading && !routeInfo && selected.distance && (
-                  <span> · {selected.distance.toFixed(1)} km</span>
-                )}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => onBook(selected)}
-              className={styles.stationMapPopupBtn}
-            >
-              Book →
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

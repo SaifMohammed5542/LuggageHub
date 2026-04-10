@@ -470,6 +470,8 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
 
   const [locateError, setLocateError] = useState(false);
   const [mapSearchResult, setMapSearchResult] = useState(null);
+  const [mapRouteInfo,    setMapRouteInfo]    = useState(null);
+  const [mapRouteLoading, setMapRouteLoading] = useState(false);
 
   const locateMe = () => {
     if (!navigator.geolocation) return;
@@ -863,7 +865,7 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
                       onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                       onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); setSelected(null); handleSearchSubmit(); } }}
                       placeholder="Search area or landmark…"
-                      style={{ border:"none", outline:"none", fontSize:13, flex:1, background:"transparent", color:"#1e293b" }}
+                      style={{ border:"none", outline:"none", fontSize:16, flex:1, background:"transparent", color:"#1e293b", touchAction:"manipulation" }}
                     />
                     {search && (
                       <>
@@ -924,21 +926,53 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
               })()}
             </div>
 
-            {/* Station count bubble — top left, below search bar */}
-            <div style={{ position:"absolute", top:68, left:12, zIndex:900, background:"white", borderRadius:12, padding:"6px 10px", fontSize:11, color:"#64748b", boxShadow:"0 2px 10px rgba(0,0,0,0.12)", pointerEvents:"none" }}>
-              {filtered.length} station{filtered.length !== 1 ? "s" : ""}{userCoords ? " near you" : ""}
-            </div>
-
             <StationMapMapbox
               stations={filtered}
               allStations={stations}
               selected={selected}
               onSelect={s => setSelected(s)}
-              onBook={s => { setSelected(s); onSelect(s); }}
               userCoords={userCoords}
               mapSearchResult={mapSearchResult}
               onClearMapSearch={() => setMapSearchResult(null)}
+              onRouteUpdate={(info, loading) => { setMapRouteInfo(info); setMapRouteLoading(loading); }}
             />
+
+            {/* ── Station popup — rendered here (outside map canvas) for reliable stacking ── */}
+            {selected && (
+              <div className={styles.stationMapPopup}>
+                <div className={styles.stationMapPopupInner}>
+                  <div className={styles.stationMapPopupIcon}>🏪</div>
+                  <div className={styles.stationMapPopupInfo}>
+                    <div className={styles.stationMapPopupName}>{selected.name}</div>
+                    <div className={styles.stationMapPopupSub}>
+                      {selected.location}
+                      {mapRouteLoading && <span> · ⏳</span>}
+                      {!mapRouteLoading && mapRouteInfo && !mapRouteInfo.isTransit && (
+                        <span> · 🚶 {mapRouteInfo.durationMin} min · {mapRouteInfo.distM < 1000 ? `${mapRouteInfo.distM} m` : `${(mapRouteInfo.distM / 1000).toFixed(1)} km`}</span>
+                      )}
+                      {!mapRouteLoading && mapRouteInfo && mapRouteInfo.isTransit && (
+                        <>
+                          <span> · {mapRouteInfo.distM < 1000 ? `${mapRouteInfo.distM} m` : `${(mapRouteInfo.distM / 1000).toFixed(1)} km`} · 🚶 {mapRouteInfo.durationMin} min · </span>
+                          <a href={mapRouteInfo.transitUrl} target="_blank" rel="noopener noreferrer" className={styles.transitLink} onClick={e => e.stopPropagation()}>
+                            🚌 Transit →
+                          </a>
+                        </>
+                      )}
+                      {!mapRouteLoading && !mapRouteInfo && selected.distance && (
+                        <span> · {selected.distance.toFixed(1)} km</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setSelected(selected); onSelect(selected); }}
+                    className={styles.stationMapPopupBtn}
+                  >
+                    Book →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className={styles.stationList}>
