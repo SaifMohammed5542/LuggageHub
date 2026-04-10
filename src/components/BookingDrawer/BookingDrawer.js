@@ -1,8 +1,11 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { unstable_batchedUpdates } from "react-dom";
+import dynamic from "next/dynamic";
 import styles from "./BookingDrawer.module.css";
 import PayPalPayment from "@/components/LuggagePay";
+
+const StationMapMapbox = dynamic(() => import("./StationMapMapbox"), { ssr: false });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -435,25 +438,6 @@ function ProgressBar({ step, onBack }) {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// ─── Leaflet loader (shared, runs once) ───────────────────────────────────────
-async function loadLeaflet() {
-  if (window.L) return window.L;
-  if (!document.getElementById("leaflet-css")) {
-    const link = document.createElement("link");
-    link.id   = "leaflet-css";
-    link.rel  = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
-  }
-  await new Promise((res, rej) => {
-    const s  = document.createElement("script");
-    s.src    = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
-  });
-  return window.L;
-}
-
 // ─── Nominatim geocoder — proxied through /api/geocode to avoid SW CORS issues ─
 async function geocodeQuery(q) {
   try {
@@ -483,7 +467,6 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
   const [locating,      setLocating]      = useState(false);
   const suggestTimeout = useRef(null);
   const pendingSuggestion = useRef(null);
-  const lMapRef        = useRef(null);
 
   const [locateError, setLocateError] = useState(false);
   const [mapSearchResult, setMapSearchResult] = useState(null);
@@ -507,9 +490,6 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
             .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
         );
         setSelected(null);
-        if (lMapRef.current) {
-          try { lMapRef.current.flyTo([coords.latitude, coords.longitude], 14, { animate: true, duration: 1.2 }); } catch {}
-        }
         setMapSearchResult({ lat: coords.latitude, lon: coords.longitude, label: "your location" });
         setLocating(false);
         setSearch("");
@@ -948,7 +928,7 @@ if (showMap && result) {
               {filtered.length} station{filtered.length !== 1 ? "s" : ""}{userCoords ? " near you" : ""}
             </div>
 
-            <StationMap
+            <StationMapMapbox
               stations={filtered}
               allStations={stations}
               selected={selected}
@@ -957,7 +937,6 @@ if (showMap && result) {
               userCoords={userCoords}
               mapSearchResult={mapSearchResult}
               onClearMapSearch={() => setMapSearchResult(null)}
-              onMapReady={map => { lMapRef.current = map || null; }}
             />
           </div>
         ) : (
@@ -1024,243 +1003,6 @@ if (showMap && result) {
           <button type="button" onClick={() => onSelect(selected)} className={styles.ctaBlue}>
             Book {selected.name} →
           </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Station Map ──────────────────────────────────────────────────────────────
-function StationMap({ stations, allStations, selected, onSelect, onBook, userCoords, mapSearchResult, onClearMapSearch, onMapReady }) {
-  const containerRef  = useRef(null);
-  const mapRef        = useRef(null);
-  const markersRef    = useRef({});
-  const userMarkerRef = useRef(null);
-  const [ready, setReady] = useState(false);
-  const [toast, setToast] = useState(null); // { label, nearest: { station, dist } } | null
-
-  // ── helpers ────────────────────────────────────────────────────────────────
-  function hav(lat1, lon1, lat2, lon2) {
-    const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-
-  function findNearest(lat, lon, pool) {
-    let best = null, bestD = Infinity;
-    for (const s of pool) {
-      const c = getCoords(s); if (!c) continue;
-      const d = hav(lat, lon, c.lat, c.lon);
-      if (d < bestD) { bestD = d; best = s; }
-    }
-    return best ? { station: best, dist: bestD } : null;
-  }
-
-  // Fit map to the densest 80% of stations (ignores outliers)
-function fitDenseCluster(map, pool) {
-    const pts = pool.map(s => getCoords(s)).filter(Boolean);
-    if (!pts.length) return;
-    if (pts.length === 1) { map.setView([pts[0].lat, pts[0].lon], 14); return; }
-    // Find centroid
-    const cLat = pts.reduce((s,p) => s+p.lat, 0)/pts.length;
-    const cLon = pts.reduce((s,p) => s+p.lon, 0)/pts.length;
-    // Sort by distance from centroid
-    const sorted = [...pts].sort((a,b) => hav(cLat,cLon,a.lat,a.lon) - hav(cLat,cLon,b.lat,b.lon));
-    // Median distance from centroid
-    const medianDist = hav(cLat, cLon, sorted[Math.floor(sorted.length/2)].lat, sorted[Math.floor(sorted.length/2)].lon);
-    // Keep only points within 3x the median distance — rejects distant outliers
-    const threshold = Math.max(medianDist * 3, 5); // at least 5km radius
-    const keep = sorted.filter(p => hav(cLat, cLon, p.lat, p.lon) <= threshold);
-    const L = window.L;
-    map.fitBounds(L.latLngBounds(keep.map(p => [p.lat, p.lon])), { padding: [40,40], maxZoom: 15 });
-  }
-
-  function makePinHTML(s, isSel) {
-    const isFull = s.capacity > 0 && s.currentCapacity >= s.capacity;
-    const bg     = isFull ? "#94a3b8" : isSel ? "#f59e0b" : "#0284c7";
-    const shadow = isFull ? "none" : isSel ? "0 3px 10px rgba(245,158,11,0.5)" : "0 3px 10px rgba(2,132,199,0.45)";
-    const icon   = isFull ? "🔒" : "🧳";
-    const sc     = isSel ? "scale(1.15)" : "scale(1)";
-    return `
-      <div style="position:relative;display:inline-flex;transform:${sc};transition:transform .2s;cursor:${isFull?"not-allowed":"pointer"};">
-        <div style="width:34px;height:34px;border-radius:9px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:${shadow};border:2.5px solid #fff;">
-          ${icon}
-        </div>
-        <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid ${bg};"></div>
-      </div>
-    `;
-  }
-
-  // ── load Leaflet ───────────────────────────────────────────────────────────
-  useEffect(() => {
-    loadLeaflet().then(() => setReady(true));
-  }, []);
-
-  // ── init map ───────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!ready || !containerRef.current || mapRef.current) return;
-    const L = window.L;
-    const map = L.map(containerRef.current, { zoomControl: true, attributionControl: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
-    mapRef.current = map;
-    onMapReady?.(map);
-    // Fit to densest cluster of ALL stations on first open
-    fitDenseCluster(map, allStations?.length ? allStations : stations);
-  }, [ready]); // eslint-disable-line
-
-  // ── sync pins ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mapRef.current || !ready) return;
-    const L = window.L;
-    const map = mapRef.current;
-    const pinPool = allStations?.length ? allStations : stations;
-    const ids = new Set(pinPool.map(s => s._id));
-    // Remove stale pins
-    for (const [id, marker] of Object.entries(markersRef.current)) {
-      if (!ids.has(id)) { marker.remove(); delete markersRef.current[id]; }
-    }
-    // Add / refresh pins
-    for (const s of pinPool) {
-      const c = getCoords(s);
-      if (!c) continue;
-      const isFull = s.capacity > 0 && s.currentCapacity >= s.capacity;
-      const isSel  = selected?._id === s._id;
-      const icon = L.divIcon({ className: "", html: makePinHTML(s, isSel), iconAnchor: [0,0] });
-      if (markersRef.current[s._id]) {
-        markersRef.current[s._id].setIcon(icon);
-      } else {
-        const m = L.marker([c.lat, c.lon], { icon, zIndexOffset: isFull ? 0 : 100 })
-          .addTo(map)
-          .on("click", () => { if (!isFull) onSelect(s); });
-        markersRef.current[s._id] = m;
-      }
-    }
-  }, [stations, selected, ready, allStations]); // eslint-disable-line
-
-  // ── user location dot ──────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mapRef.current || !ready) return;
-    const L = window.L;
-    userMarkerRef.current?.remove();
-    userMarkerRef.current = null;
-    if (!userCoords) return;
-    const icon = L.divIcon({
-      className: "",
-      html: `<div style="position:relative;width:48px;height:48px;transform:translate(-50%,-50%)"><div style="position:absolute;inset:0;border-radius:50%;background:rgba(59,130,246,.2);animation:uPulse 2s ease-out infinite;"></div><div style="position:absolute;inset:8px;border-radius:50%;background:rgba(59,130,246,.35);"></div><div style="position:absolute;inset:14px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 2px 10px rgba(59,130,246,.7);"></div></div><style>@keyframes uPulse{0%{transform:scale(.8);opacity:.9}70%{transform:scale(2);opacity:0}100%{transform:scale(.8);opacity:0}}</style>`,
-      iconSize: [48,48], iconAnchor: [24,24],
-    });
-    userMarkerRef.current = L.marker(
-      [userCoords.latitude, userCoords.longitude],
-      { icon, zIndexOffset: 1000, interactive: false }
-    ).addTo(mapRef.current);
-  }, [userCoords, ready]);
-
-  // ── react to search result ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mapRef.current || !ready || !mapSearchResult) return;
-    const { lat, lon, label } = mapSearchResult;
-    const NEARBY_KM = 5;
-    mapRef.current.flyTo([lat, lon], 14, { animate: true, duration: 1.2 });
-    const nearby = stations.filter(s => { const c = getCoords(s); return c && hav(lat, lon, c.lat, c.lon) <= NEARBY_KM; });
-    if (nearby.length === 0) {
-      const pool = allStations?.length ? allStations : stations;
-      const nearest = findNearest(lat, lon, pool);
-      setToast({ label, nearest });
-    } else {
-      setToast(null);
-    }
-  }, [mapSearchResult, ready]); // eslint-disable-line
-
-  // ── pan to selected ────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mapRef.current || !ready || !selected) return;
-    const c = getCoords(selected);
-    if (c) mapRef.current.panTo([c.lat, c.lon], { animate: true });
-  }, [selected, ready]);
-
-  // ── cleanup ────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    return () => {
-      if (mapRef.current) {
-        try { mapRef.current.remove(); } catch {}
-        mapRef.current = null;
-      }
-      markersRef.current = {};
-      onMapReady?.(null);
-    };
-  }, []); // eslint-disable-line
-
-  const handleShowNearest = () => {
-    if (!toast?.nearest || !mapRef.current) return;
-    const c = getCoords(toast.nearest.station);
-    if (c) mapRef.current.flyTo([c.lat, c.lon], 15, { animate: true, duration: 1 });
-    onSelect(toast.nearest.station);
-    setToast(null);
-    onClearMapSearch?.();
-  };
-
-  return (
-    <div className={styles.stationMapWrap}>
-      <div ref={containerRef} className={styles.stationMapCanvas} />
-
-      {!ready && (
-        <div style={{ position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#f8fafc",zIndex:10 }}>
-          <div className={styles.spinner} />
-        </div>
-      )}
-
-      {/* No-nearby toast — persistent, no auto-dismiss */}
-      {toast && (
-        <div className={styles.noNearbyToast}>
-          <div className={styles.noNearbyMsg}>
-            <span>📍</span>
-            <div>
-              <div className={styles.noNearbyTitle}>No stations near &ldquo;{toast.label}&rdquo;</div>
-              {toast.nearest && (
-                <div className={styles.noNearbySub}>
-                  Nearest: {toast.nearest.station.name} · {toast.nearest.dist.toFixed(1)} km away
-                </div>
-              )}
-            </div>
-          </div>
-          <div style={{ display:"flex", gap:6 }}>
-            {toast.nearest && (
-              <button type="button" onClick={handleShowNearest} className={styles.noNearbyBtn}>
-                Show me →
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => { setToast(null); onClearMapSearch?.(); }}
-              className={styles.noNearbyDismiss}
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
-
-      {userCoords && !selected && !toast && (
-        <div className={styles.stationMapHint}>
-          📍 You are here · Pinch to zoom out and see more stations
-        </div>
-      )}
-
-      {selected && (
-        <div className={styles.stationMapPopup}>
-          <div className={styles.stationMapPopupInner}>
-            <div className={styles.stationMapPopupIcon}>🏪</div>
-            <div className={styles.stationMapPopupInfo}>
-              <div className={styles.stationMapPopupName}>{selected.name}</div>
-              <div className={styles.stationMapPopupSub}>
-                {selected.location}
-                {selected.distance ? ` · ${selected.distance.toFixed(1)} km away` : ""}
-              </div>
-            </div>
-            <button type="button" onClick={() => onBook(selected)} className={styles.stationMapPopupBtn}>
-              Book →
-            </button>
-          </div>
         </div>
       )}
     </div>
