@@ -623,8 +623,6 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
     }
     pendingSuggestion.current = null;
 
-    setCommittedSearch(val);
-
     const stationsWithDist = result
       ? stations
           .map(s => { const c = getCoords(s); return c ? { ...s, distFromSearch: haversine(result.lat, result.lon, c.lat, c.lon) } : null; })
@@ -632,10 +630,13 @@ function StepStation({ userCoords: initialCoords, onSelect, initialSearch }) {
           .sort((a, b) => a.distFromSearch - b.distFromSearch)
       : [];
 
-if (showMap && result) {
+    if (showMap && result) {
+      // In map mode, don't update committedSearch — it only affects list filtering
+      // and setting it to an area name (e.g. "Melbourne Museum") would make filtered=[]
       setSelected(null);
       setMapSearchResult({ lat: result.lat, lon: result.lon, label: search.trim() });
     } else if (!showMap) {
+      setCommittedSearch(val);
       const hasNearby = stationsWithDist.some(s => s.distFromSearch <= 10);
       setListGeoResult({ area: search.trim(), stations: stationsWithDist, hasNearby });
     }
@@ -923,8 +924,8 @@ if (showMap && result) {
               })()}
             </div>
 
-            {/* Station count bubble — bottom left */}
-            <div style={{ position:"absolute", bottom: selected ? 178 : 20, left:12, zIndex:1100, background:"white", borderRadius:12, padding:"7px 11px", fontSize:11, color:"#64748b", boxShadow:"0 4px 14px rgba(0,0,0,0.12)", transition:"bottom 0.3s ease", pointerEvents:"none" }}>
+            {/* Station count bubble — top left, below search bar */}
+            <div style={{ position:"absolute", top:68, left:12, zIndex:900, background:"white", borderRadius:12, padding:"6px 10px", fontSize:11, color:"#64748b", boxShadow:"0 2px 10px rgba(0,0,0,0.12)", pointerEvents:"none" }}>
               {filtered.length} station{filtered.length !== 1 ? "s" : ""}{userCoords ? " near you" : ""}
             </div>
 
