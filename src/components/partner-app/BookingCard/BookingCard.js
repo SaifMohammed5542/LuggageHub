@@ -3,39 +3,27 @@
 import { useState } from 'react';
 import styles from './BookingCard.module.css';
 
-const PARTNER_SHARE = 0.4; // 40% partner share
+// Partner flat rates: A$2/small bag/day, A$4/large bag/day
+const SMALL_BAG_PARTNER_RATE = 2;
+const LARGE_BAG_PARTNER_RATE = 4;
 
 export default function BookingCard({ booking, onAction, actionLabel, actionVariant = 'primary' }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    const year = date.getUTCFullYear();
-    const month = date.getUTCMonth();
-    const day = date.getUTCDate();
-    const hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
-    
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    const dayOfWeek = dayNames[date.getUTCDay()];
-    const monthName = monthNames[month];
-    const hour12 = hours % 12 || 12;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const minuteStr = minutes.toString().padStart(2, '0');
-    
-    return `${dayOfWeek}, ${monthName} ${day}, ${year} ${hour12}:${minuteStr} ${ampm}`;
+    const d = new Date(dateString);
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const h = d.getUTCHours();
+    return `${days[d.getUTCDay()]}, ${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${h % 12 || 12}:${String(d.getUTCMinutes()).padStart(2,'0')} ${h >= 12 ? 'pm' : 'am'}`;
   };
 
   const formatDateShort = (dateString) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    const month = date.getUTCMonth();
-    const day = date.getUTCDate();
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${monthNames[month]} ${day}`;
+    const d = new Date(dateString);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${d.getUTCDate()} ${months[d.getUTCMonth()]}`;
   };
 
   const getStatusBadge = (status) => {
@@ -57,8 +45,16 @@ export default function BookingCard({ booking, onAction, actionLabel, actionVari
   };
 
   const calculatePartnerShare = (booking) => {
-    if (!booking.totalAmount) return 0;
-    return Number(booking.totalAmount) * PARTNER_SHARE;
+    const dropOff = new Date(booking.dropOffDate);
+    const pickUp = new Date(booking.pickUpDate);
+    const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
+    const smallCount = booking.smallBagCount || 0;
+    const largeCount = booking.largeBagCount || 0;
+    if (smallCount > 0 || largeCount > 0) {
+      return (smallCount * days * SMALL_BAG_PARTNER_RATE) + (largeCount * days * LARGE_BAG_PARTNER_RATE);
+    }
+    // Legacy bookings with only luggageCount — treat as small bags
+    return (booking.luggageCount || 0) * days * SMALL_BAG_PARTNER_RATE;
   };
 
   const partnerShare = calculatePartnerShare(booking);
@@ -154,7 +150,7 @@ export default function BookingCard({ booking, onAction, actionLabel, actionVari
 
           {partnerShare > 0 && (
             <div className={styles.infoRow}>
-              <span className={styles.label}>💰 Your Share (40%):</span>
+              <span className={styles.label}>💰 Your Earnings:</span>
               <span className={styles.valueHighlight}>A${partnerShare.toFixed(2)}</span>
             </div>
           )}

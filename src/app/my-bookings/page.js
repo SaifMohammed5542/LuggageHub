@@ -85,60 +85,174 @@ function calcDays(dropOff, pickUp) {
   return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
+// ── Ref formatter: BK-20260418-ABC1 ───────────────────────
+function formatRef(raw) {
+  const clean = raw.replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 14);
+  if (clean.length < 2) return clean;
+  if (clean.length < 10) return clean.slice(0, 2) + "-" + clean.slice(2);
+  return clean.slice(0, 2) + "-" + clean.slice(2, 10) + "-" + clean.slice(10);
+}
+
+const STATUS_CFG = {
+  pending:   { label: "Pending",   color: "#92400e", bg: "#FEF3C7", icon: "⏳" },
+  confirmed: { label: "Confirmed", color: "#92400e", bg: "#FEF3C7", icon: "✅" },
+  stored:    { label: "Stored",    color: "#1d4ed8", bg: "#DBEAFE", icon: "🧳" },
+  completed: { label: "Completed", color: "#15803d", bg: "#DCFCE7", icon: "🎉" },
+  cancelled: { label: "Cancelled", color: "#DC2626", bg: "#FEE2E2", icon: "❌" },
+  no_show:   { label: "No Show",   color: "#92400e", bg: "#FEF3C7", icon: "⚠️"  },
+};
+
 // ── Guest Prompt ───────────────────────────────────────────
 function GuestPrompt() {
+  const [input, setInput] = useState("");
+  const [booking, setBooking] = useState(null);
+  const [lookupError, setLookupError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const lookup = async () => {
+    const ref = input.trim();
+    if (!ref) { setLookupError("Enter your booking reference"); return; }
+    setLoading(true); setLookupError(""); setBooking(null);
+    try {
+      const res = await fetch(`/api/booking/status?ref=${encodeURIComponent(ref)}`);
+      const data = await res.json();
+      if (!res.ok) setLookupError(data.error || "Booking not found");
+      else setBooking(data);
+    } catch { setLookupError("Something went wrong. Please try again."); }
+    finally { setLoading(false); }
+  };
+
+  const cfg = booking ? (STATUS_CFG[booking.status] || { label: booking.status, color: "#6b7280", bg: "#f3f4f6", icon: "📦" }) : null;
+
   return (
     <div className={styles.guestPage}>
       <Header />
       <main className={styles.guestMain}>
-        <div className={styles.guestCard}>
-          <div className={styles.guestIconWrapper}>
-            <span className={styles.guestIcon}>🧳</span>
+        <div className={styles.guestCard} style={{ maxWidth: 560, textAlign: "left" }}>
+
+          {/* ── Track section ── */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+              <span style={{ fontSize: 22 }}>🔍</span>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "var(--text)" }}>Track a booking</h2>
+            </div>
+            <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text-muted)" }}>
+              Enter your booking reference from your confirmation email — no login needed.
+            </p>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                value={input}
+                onChange={e => { setInput(formatRef(e.target.value)); setLookupError(""); setBooking(null); }}
+                onKeyDown={e => e.key === "Enter" && lookup()}
+                placeholder="BK-20260418-ABC1"
+                style={{
+                  flex: 1, borderRadius: 10, border: "1.5px solid var(--border-base)",
+                  padding: "11px 14px", fontSize: 15, fontFamily: "monospace",
+                  letterSpacing: "0.05em", outline: "none", background: "var(--surface-base)",
+                }}
+                autoFocus
+              />
+              <button
+                onClick={lookup}
+                disabled={loading}
+                style={{
+                  borderRadius: 10, background: loading ? "#d1d5db" : "#0284C7",
+                  color: "#fff", border: "none", padding: "11px 20px",
+                  fontWeight: 700, fontSize: 14, cursor: loading ? "not-allowed" : "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {loading ? "…" : "Track"}
+              </button>
+            </div>
+
+            {/* Error */}
+            {lookupError && (
+              <div style={{ marginTop: 10, background: "#FEE2E2", color: "#DC2626", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
+                ❌ {lookupError}
+              </div>
+            )}
+
+            {/* Result card */}
+            {booking && cfg && (
+              <div style={{ marginTop: 14, border: `2px solid ${cfg.bg}`, borderRadius: 12, overflow: "hidden", background: "#fff" }}>
+                {/* Status banner */}
+                <div style={{ background: cfg.bg, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>{cfg.icon}</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: cfg.color }}>{cfg.label}</div>
+                    <code style={{ fontSize: 12, color: "#6b7280" }}>{booking.bookingReference}</code>
+                  </div>
+                </div>
+                {/* Details */}
+                <div style={{ padding: "12px 16px", fontSize: 13, display: "flex", flexDirection: "column", gap: 6 }}>
+                  {booking.station && (
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span style={{ color: "#6b7280" }}>📍 Station</span>
+                      <span style={{ fontWeight: 600, textAlign: "right" }}>{booking.station.name}</span>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ color: "#6b7280" }}>📦 Drop-off</span>
+                    <span style={{ fontWeight: 600 }}>{formatDate(booking.dropOffDate)}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ color: "#6b7280" }}>📤 Pick-up</span>
+                    <span style={{ fontWeight: 600 }}>{formatDate(booking.pickUpDate)}</span>
+                  </div>
+                  {(booking.smallBagCount > 0 || booking.largeBagCount > 0) && (
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span style={{ color: "#6b7280" }}>🧳 Bags</span>
+                      <span style={{ fontWeight: 600 }}>
+                        {booking.smallBagCount > 0 && `${booking.smallBagCount} small`}
+                        {booking.smallBagCount > 0 && booking.largeBagCount > 0 && " · "}
+                        {booking.largeBagCount > 0 && `${booking.largeBagCount} large`}
+                      </span>
+                    </div>
+                  )}
+                  {booking.totalAmount != null && (
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, paddingTop: 6, borderTop: "1px solid #f3f4f6", marginTop: 2 }}>
+                      <span style={{ color: "#6b7280" }}>💳 Paid</span>
+                      <span style={{ fontWeight: 700, color: "#0284C7" }}>A${Number(booking.totalAmount).toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          <h1 className={styles.guestTitle}>Access Your Bookings</h1>
-          <p className={styles.guestSubtitle}>
-            Login to view and manage all your luggage storage bookings
-          </p>
-
-          <div className={styles.guestInfoBox}>
-            <div className={styles.guestInfoItem}>
-              <span className={styles.guestInfoIcon}>🔑</span>
-              <div>
-                <strong>Already have an account?</strong>
-                <p>Simply login using the same email address you used when making your booking — all your bookings will be right there waiting for you.</p>
-              </div>
-            </div>
-            <div className={styles.guestDivider} />
-            <div className={styles.guestInfoItem}>
-              <span className={styles.guestInfoIcon}>📧</span>
-              <div>
-                <strong>Booked as a guest? No problem!</strong>
-                <p>Create a free account using the same email address you used when booking. Once you verify your email and log in, all your previous guest bookings will automatically appear here.</p>
-              </div>
-            </div>
-            <div className={styles.guestDivider} />
-            <div className={styles.guestInfoItem}>
-              <span className={styles.guestInfoIcon}>✨</span>
-              <div>
-                <strong>What you can do once logged in</strong>
-                <p>View full booking details, check drop-off and pick-up times, track your luggage status, and see your complete booking history — all in one place.</p>
-              </div>
-            </div>
+          {/* ── Divider ── */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+            <div style={{ flex: 1, height: 1, background: "var(--border-light)" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.05em" }}>OR</span>
+            <div style={{ flex: 1, height: 1, background: "var(--border-light)" }} />
           </div>
 
-          <div className={styles.guestButtons}>
-            <Link href="/auth/login" className={styles.guestLoginBtn}>
-              Login to View My Bookings
-            </Link>
-            <Link href="/auth/register" className={styles.guestRegisterBtn}>
-              Create a Free Account
-            </Link>
+          {/* ── Login section ── */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+              <span style={{ fontSize: 22 }}>🔑</span>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "var(--text)" }}>Sign in for full access</h2>
+            </div>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--text-muted)" }}>
+              Log in with the same email you used when booking to see all your bookings, change dates, and more.
+            </p>
+
+            <div className={styles.guestButtons} style={{ marginBottom: 14 }}>
+              <Link href="/auth/login" className={styles.guestLoginBtn}>
+                Login to My Bookings
+              </Link>
+              <Link href="/auth/register" className={styles.guestRegisterBtn}>
+                Create a Free Account
+              </Link>
+            </div>
+
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0, lineHeight: 1.5 }}>
+              💡 Use the same email address you booked with — your history will appear automatically.
+            </p>
           </div>
 
-          <p className={styles.guestNote}>
-            💡 Important: Use the same email address you used when making your booking to access your booking history.
-          </p>
         </div>
       </main>
       <Footer />
@@ -146,33 +260,71 @@ function GuestPrompt() {
   );
 }
 
+const PRICING = { small: 3.99, large: 8.49 };
+function calcAmount(b, dropOff, pickUp) {
+  const days = Math.max(1, Math.ceil((new Date(pickUp) - new Date(dropOff)) / 86400000));
+  const s = b.smallBagCount || 0, l = b.largeBagCount || 0;
+  if (s > 0 || l > 0) return +(s * days * PRICING.small + l * days * PRICING.large).toFixed(2);
+  return +((b.luggageCount || 0) * days * PRICING.small).toFixed(2);
+}
+
 // ── Booking Card ───────────────────────────────────────────
-function BookingCard({ booking, onChangeDates }) {
+function BookingCard({ booking, onChangeDates, onRequestSubmitted }) {
   const [expanded, setExpanded] = useState(false);
+  const [cancelModal, setCancelModal] = useState(false);
+  const [reduceModal, setReduceModal] = useState(false);
+  const [reduceDropOff, setReduceDropOff] = useState('');
+  const [reducePickUp, setReducePickUp] = useState('');
+  const [customerNote, setCustomerNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [reqError, setReqError] = useState('');
+  const [reqSuccess, setReqSuccess] = useState('');
+
   const status = getDisplayStatus(booking);
   const days = calcDays(booking.dropOffDate, booking.pickUpDate);
   const stationName = booking.stationId?.name || "Unknown Station";
   const stationLocation = booking.stationId?.location || booking.stationId?.address || "";
 
-  // ✅ Check if date changes are allowed
-  const canChangeDates = () => {
-    const now = new Date();
-    const dropOff = new Date(booking.dropOffDate);
-    const pickUp = new Date(booking.pickUpDate);
-    
-    const hoursUntilDropOff = (dropOff - now) / (1000 * 60 * 60);
-    const hoursUntilPickUp = (pickUp - now) / (1000 * 60 * 60);
-    
-    // Can change if:
-    // - Active: at least 2 hours until drop-off
-    // - Stored: at least 1 hour until pick-up
-    if (status.label === "Active" && hoursUntilDropOff >= 2) return true;
-    if (status.label === "Stored" && hoursUntilPickUp >= 1) return true;
-    
-    return false;
+  const hoursUntilDropOff = (new Date(booking.dropOffDate) - new Date()) / 3600000;
+  const canCancel = (status.label === "Active") && hoursUntilDropOff >= 2;
+
+  // Extend allowed if Active (≥2h) or Stored (≥1h until pickup)
+  const hoursUntilPickUp = (new Date(booking.pickUpDate) - new Date()) / 3600000;
+  const canExtend = (status.label === "Active" && hoursUntilDropOff >= 2) ||
+                    (status.label === "Stored" && hoursUntilPickUp >= 1);
+
+  const toDateTimeLocal = (d) => {
+    const x = new Date(d);
+    return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}T${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;
   };
 
-  const canChange = canChangeDates();
+  // Reduce preview
+  const reduceRefundAmt = (reduceDropOff && reducePickUp && new Date(reducePickUp) > new Date(reduceDropOff))
+    ? Math.max(0, +(booking.totalAmount - calcAmount(booking, reduceDropOff, reducePickUp)).toFixed(2))
+    : null;
+  const reduceIsValid = reduceRefundAmt !== null && reduceRefundAmt > 0;
+
+  const submitRequest = async (type) => {
+    setSubmitting(true); setReqError('');
+    const token = localStorage.getItem('token');
+    try {
+      const body = { bookingId: booking._id, type, customerNote };
+      if (type === 'reduce') { body.requestedDropOff = reduceDropOff; body.requestedPickUp = reducePickUp; }
+      const res = await fetch('/api/user/refund-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      setReqSuccess(data.message);
+      setCancelModal(false); setReduceModal(false);
+      if (onRequestSubmitted) onRequestSubmitted();
+    } catch (err) { setReqError(err.message); }
+    finally { setSubmitting(false); }
+  };
+
+  const canChange = canExtend;
 
   return (
     <div className={`${styles.card} ${styles[`card_${status.color}`]}`}>
@@ -239,23 +391,117 @@ function BookingCard({ booking, onChangeDates }) {
         )}
       </div>
 
-      {/* ✅ ONE SIMPLE BUTTON */}
-      {canChange && (
-        <button
-          className={styles.changeDatesBtn}
-          onClick={() => onChangeDates(booking)}
-        >
-          📅 Change Dates
-        </button>
+      {/* Request success banner */}
+      {reqSuccess && (
+        <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#15803d', marginBottom: 8, fontWeight: 600 }}>
+          ✅ {reqSuccess}
+        </div>
       )}
 
-      {/* Show why changes are blocked */}
-      {!canChange && (status.label === "Active" || status.label === "Stored") && (
+      {/* Action buttons */}
+      {canExtend && (
+        <button className={styles.changeDatesBtn} onClick={() => onChangeDates(booking)}>
+          📅 Extend Stay
+        </button>
+      )}
+      {canCancel && !reqSuccess && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          <button
+            onClick={() => { setReduceModal(true); setReduceDropOff(toDateTimeLocal(booking.dropOffDate)); setReducePickUp(toDateTimeLocal(booking.pickUpDate)); setReqError(''); }}
+            style={{ flex: 1, padding: '9px 0', border: '1.5px solid #0284C7', background: '#fff', color: '#0284C7', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+          >
+            ✂️ Shorten Stay
+          </button>
+          <button
+            onClick={() => { setCancelModal(true); setReqError(''); }}
+            style={{ flex: 1, padding: '9px 0', border: '1.5px solid #dc2626', background: '#fff', color: '#dc2626', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+          >
+            ❌ Cancel Booking
+          </button>
+        </div>
+      )}
+
+      {/* Locked message */}
+      {!canExtend && !canCancel && (status.label === "Active" || status.label === "Stored") && !reqSuccess && (
         <div className={styles.extensionBlocked}>
           <span className={styles.blockedIcon}>🔒</span>
-          <span className={styles.blockedText}>
-            Date changes not available - booking times are too close
-          </span>
+          <span className={styles.blockedText}>Changes not available — drop-off is less than 2 hours away</span>
+        </div>
+      )}
+
+      {/* ── Cancel confirmation modal ── */}
+      {cancelModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={e => e.target === e.currentTarget && setCancelModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 14, maxWidth: 420, width: '100%', padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>❌</div>
+            <h3 style={{ margin: '0 0 8px', fontWeight: 800, fontSize: 17, textAlign: 'center' }}>Cancel Booking?</h3>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
+              A cancellation request will be sent to our team. Once reviewed, you&apos;ll receive a full refund of{' '}
+              <strong style={{ color: '#0284C7' }}>A${Number(booking.totalAmount).toFixed(2)}</strong>.
+            </p>
+            <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#92400e', marginBottom: 14 }}>
+              ⏱ Refunds are typically processed within 24 hours of your request.
+            </div>
+            <textarea
+              value={customerNote}
+              onChange={e => setCustomerNote(e.target.value)}
+              placeholder="Reason for cancellation (optional)"
+              rows={2}
+              style={{ width: '100%', borderRadius: 8, border: '1px solid #d1d5db', padding: '8px 12px', fontSize: 13, boxSizing: 'border-box', resize: 'none', marginBottom: 14 }}
+            />
+            {reqError && <div style={{ background: '#FEE2E2', color: '#DC2626', borderRadius: 8, padding: '8px 12px', fontSize: 13, marginBottom: 12 }}>⚠️ {reqError}</div>}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setCancelModal(false)} style={{ flex: 1, padding: '10px 0', border: '1px solid #d1d5db', borderRadius: 8, background: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Keep Booking</button>
+              <button onClick={() => submitRequest('cancel')} disabled={submitting} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 8, background: submitting ? '#d1d5db' : '#dc2626', color: '#fff', fontWeight: 700, fontSize: 14, cursor: submitting ? 'not-allowed' : 'pointer' }}>
+                {submitting ? 'Submitting…' : 'Request Cancellation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Shorten Stay modal ── */}
+      {reduceModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={e => e.target === e.currentTarget && setReduceModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 14, maxWidth: 440, width: '100%', padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>✂️</div>
+            <h3 style={{ margin: '0 0 8px', fontWeight: 800, fontSize: 17, textAlign: 'center' }}>Shorten Your Stay</h3>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6b7280', textAlign: 'center' }}>Select new (shorter) dates. The difference will be refunded once our team reviews.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontWeight: 600, fontSize: 12, display: 'block', marginBottom: 4 }}>New Drop-off</label>
+                <input type="datetime-local" value={reduceDropOff} onChange={e => setReduceDropOff(e.target.value)}
+                  style={{ width: '100%', borderRadius: 8, border: '1px solid #d1d5db', padding: '8px 10px', fontSize: 13, boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ fontWeight: 600, fontSize: 12, display: 'block', marginBottom: 4 }}>New Pick-up</label>
+                <input type="datetime-local" value={reducePickUp} onChange={e => setReducePickUp(e.target.value)}
+                  style={{ width: '100%', borderRadius: 8, border: '1px solid #d1d5db', padding: '8px 10px', fontSize: 13, boxSizing: 'border-box' }} />
+              </div>
+            </div>
+            {reduceIsValid && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#15803d', marginBottom: 14 }}>
+                💰 Estimated refund: <strong>A${reduceRefundAmt.toFixed(2)}</strong> — processed after review.
+              </div>
+            )}
+            {reduceRefundAmt !== null && reduceRefundAmt <= 0 && (
+              <div style={{ background: '#FEE2E2', color: '#DC2626', borderRadius: 8, padding: '8px 12px', fontSize: 13, marginBottom: 14 }}>
+                New dates must result in a shorter stay than your current booking.
+              </div>
+            )}
+            <textarea value={customerNote} onChange={e => setCustomerNote(e.target.value)} placeholder="Reason (optional)" rows={2}
+              style={{ width: '100%', borderRadius: 8, border: '1px solid #d1d5db', padding: '8px 12px', fontSize: 13, boxSizing: 'border-box', resize: 'none', marginBottom: 14 }} />
+            {reqError && <div style={{ background: '#FEE2E2', color: '#DC2626', borderRadius: 8, padding: '8px 12px', fontSize: 13, marginBottom: 12 }}>⚠️ {reqError}</div>}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setReduceModal(false)} style={{ flex: 1, padding: '10px 0', border: '1px solid #d1d5db', borderRadius: 8, background: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => submitRequest('reduce')} disabled={submitting || !reduceIsValid}
+                style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 8, background: (submitting || !reduceIsValid) ? '#d1d5db' : '#0284C7', color: '#fff', fontWeight: 700, fontSize: 14, cursor: (submitting || !reduceIsValid) ? 'not-allowed' : 'pointer' }}>
+                {submitting ? 'Submitting…' : 'Request Shorter Stay'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -548,10 +794,11 @@ export default function MyBookingsPage() {
               ) : (
                 <div className={styles.bookingsList}>
                   {filtered.map((booking) => (
-                    <BookingCard 
-                      key={booking._id} 
+                    <BookingCard
+                      key={booking._id}
                       booking={booking}
                       onChangeDates={handleChangeDates}
+                      onRequestSubmitted={() => { const tok = localStorage.getItem('token'); if (tok) fetchBookings(tok); }}
                     />
                   ))}
                 </div>
