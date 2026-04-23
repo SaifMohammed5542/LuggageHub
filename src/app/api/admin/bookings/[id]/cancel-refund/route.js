@@ -6,48 +6,29 @@ import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
 import { verifyJWT } from '../../../../../../lib/auth';
 
-// Get PayPal access token using client credentials
 async function getPayPalAccessToken() {
   const base = process.env.PAYPAL_MODE === 'sandbox'
     ? 'https://api-m.sandbox.paypal.com'
     : 'https://api-m.paypal.com';
-
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const secret = process.env.PAYPAL_SECRET;
-
-  if (!clientId || !secret) {
-    throw new Error('PAYPAL_CLIENT_ID or PAYPAL_SECRET is missing from environment variables');
-  }
-
+  if (!clientId || !secret) throw new Error('PAYPAL_CLIENT_ID or PAYPAL_SECRET is missing from environment variables');
   const credentials = Buffer.from(`${clientId}:${secret}`).toString('base64');
-
   const res = await fetch(`${base}/v1/oauth2/token`, {
     method: 'POST',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { Authorization: `Basic ${credentials}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'grant_type=client_credentials',
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`PayPal token error: ${err}`);
-  }
-
+  if (!res.ok) throw new Error(`PayPal token error: ${await res.text()}`);
   const data = await res.json();
   return { accessToken: data.access_token, base };
 }
 
-// Issue a refund via PayPal capture refund API
 async function issuePayPalRefund(captureId, amount, currency = 'AUD') {
   const { accessToken, base } = await getPayPalAccessToken();
-
-  // Empty body = full refund; amount body = partial refund
   const body = amount
     ? JSON.stringify({ amount: { value: amount.toFixed(2), currency_code: currency } })
     : '{}';
-
   const res = await fetch(`${base}/v2/payments/captures/${captureId}/refund`, {
     method: 'POST',
     headers: {
@@ -57,23 +38,15 @@ async function issuePayPalRefund(captureId, amount, currency = 'AUD') {
     },
     body,
   });
-
   const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(
-      data?.details?.[0]?.description || data?.message || `PayPal refund failed (${res.status})`
-    );
-  }
-
-  return data; // { id, status, amount, ... }
+  if (!res.ok) throw new Error(data?.details?.[0]?.description || data?.message || `PayPal refund failed (${res.status})`);
+  return data;
 }
 
 export async function POST(req, { params }) {
   try {
     await dbConnect();
 
-    // --- Auth: admin only ---
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -83,68 +56,74 @@ export async function POST(req, { params }) {
     if (!decoded || decoded.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
-
-    if (!mongoose.isValidObjectId(id)) {
-      return NextResponse.json({ error: 'Invalid booking ID' }, { status: 400 });
-    }
+    if (!mongoose.isValidObjectId(id)) return NextResponse.json({ error: 'Invalid booking ID' }, { status: 400 });
 
     const { reason, issueRefund, refundAmount } = await req.json();
+    if (!reason?.trim()) return NextResponse.json({ error: 'A cancellation reason is required' }, { status: 400 });
 
-    if (!reason?.trim()) {
-      return NextResponse.json({ error: 'A cancellation reason is required' }, { status: 400 });
-    }
-
-    // --- Find booking ---
     const booking = await Booking.findById(id);
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    if (booking.status === 'cancelled') return NextResponse.json({ error: 'Booking is already cancelled' }, { status: 400 });
 
-    if (booking.status === 'cancelled') {
-      return NextResponse.json({ error: 'Booking is already cancelled' }, { status: 400 });
-    }
-
-    // --- Find payment ---
-    const payment = await Payment.findOne({ bookingId: booking._id });
+    // All payments sorted newest-first
+    const allPayments = await Payment.find({ bookingId: booking._id }).sort({ createdAt: -1 });
 
     let refundResult = null;
 
     if (issueRefund) {
-      if (!payment) {
-        return NextResponse.json({ error: 'No payment record found for this booking — cannot issue refund' }, { status: 400 });
+      if (!allPayments.length) return NextResponse.json({ error: 'No payment record found for this booking — cannot issue refund' }, { status: 400 });
+
+      // Build list of captures that still have refundable balance
+      const refundableCaptures = [];
+      for (const p of allPayments) {
+        if (!p.paypalTransactionId) continue;
+        if (p.status === 'refunded') continue;
+        const used = p.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
+        const balance = +(p.amount - used).toFixed(2);
+        if (balance > 0.005) refundableCaptures.push({ payment: p, balance });
       }
-      if (!payment.paypalTransactionId) {
-        return NextResponse.json({ error: 'No PayPal transaction ID on payment record — cannot issue refund' }, { status: 400 });
+
+      if (!refundableCaptures.length) return NextResponse.json({ error: 'No refundable PayPal captures found — all payments already fully refunded' }, { status: 400 });
+
+      const results = [];
+
+      if (!refundAmount) {
+        // Bug 4 fix: full refund — loop through ALL captures and refund each completely
+        for (const { payment, balance } of refundableCaptures) {
+          const ppRefund = await issuePayPalRefund(payment.paypalTransactionId, null, payment.currency || 'AUD');
+          await payment.addRefund({
+            refundId: ppRefund.id,
+            amount: parseFloat(ppRefund.amount?.value || balance),
+            reason: reason.trim(),
+          });
+          results.push({ refundId: ppRefund.id, amount: parseFloat(ppRefund.amount?.value || balance) });
+        }
+      } else {
+        // Partial refund — distribute across captures newest-first until covered
+        let remaining = parseFloat(refundAmount);
+        for (const { payment, balance } of refundableCaptures) {
+          if (remaining <= 0.005) break;
+          const toRefund = +Math.min(remaining, balance).toFixed(2);
+          const ppRefund = await issuePayPalRefund(payment.paypalTransactionId, toRefund, payment.currency || 'AUD');
+          await payment.addRefund({
+            refundId: ppRefund.id,
+            amount: parseFloat(ppRefund.amount?.value || toRefund),
+            reason: reason.trim(),
+          });
+          results.push({ refundId: ppRefund.id, amount: parseFloat(ppRefund.amount?.value || toRefund) });
+          remaining = +(remaining - toRefund).toFixed(2);
+        }
       }
-      if (payment.status === 'refunded') {
-        return NextResponse.json({ error: 'This payment has already been fully refunded' }, { status: 400 });
-      }
 
-      // Determine refund amount: partial if provided, otherwise full
-      const amountToRefund = refundAmount && refundAmount < payment.amount
-        ? parseFloat(refundAmount)
-        : null; // null = full refund (PayPal default)
-
-      // Call PayPal
-      const paypalRefund = await issuePayPalRefund(
-        payment.paypalTransactionId,
-        amountToRefund,
-        payment.currency || 'AUD'
-      );
-
-      // Record in Payment model
-      await payment.addRefund({
-        refundId: paypalRefund.id,
-        amount: parseFloat(paypalRefund.amount?.value || amountToRefund || payment.amount),
-        reason: reason.trim(),
-      });
-
+      const totalRefunded = results.reduce((s, r) => s + r.amount, 0);
       refundResult = {
-        refundId: paypalRefund.id,
-        amount: paypalRefund.amount?.value ?? amountToRefund?.toFixed(2) ?? payment.amount.toFixed(2),
-        status: paypalRefund.status,
+        refundId: results.map(r => r.refundId).join(', '),
+        amount: totalRefunded.toFixed(2),
+        status: 'COMPLETED',
+        captures: results.length,
       };
     }
 
-    // --- Cancel the booking ---
     await booking.cancel(reason.trim());
 
     return NextResponse.json({

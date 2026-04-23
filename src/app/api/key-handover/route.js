@@ -12,6 +12,16 @@ import { sendErrorNotification } from "../../../utils/mailer";
 
 void User;
 
+function fmtDate(dateString) {
+  if (!dateString) return 'N/A';
+  const d = new Date(dateString);
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const h = d.getUTCHours() % 12 || 12;
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${DAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${h}:${m} ${d.getUTCHours() >= 12 ? 'pm' : 'am'}`;
+}
+
 export async function POST(request) {
   console.log('\n🎯 ========== KEY HANDOVER API CALLED ==========');
   
@@ -206,8 +216,8 @@ export async function POST(request) {
             <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin-top: 0;">Booking Details</h3>
               <p><strong>Station:</strong> ${stationName} - ${stationLocation}</p>
-              <p><strong>Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
-              <p><strong>Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+              <p><strong>Drop-off:</strong> ${fmtDate(dropOffDate)}</p>
+              <p><strong>Pick-up:</strong> ${fmtDate(pickUpDate)}</p>
               <p><strong>Duration:</strong> ${numberOfDays} day(s)</p>
               <p><strong>Amount:</strong> A$${totalAmount.toFixed(2)}</p>
               <p><strong>Payment ID:</strong> ${paymentId}</p>
@@ -255,8 +265,8 @@ export async function POST(request) {
                 <h3 style="margin-top: 0;">Storage Details</h3>
                 <p><strong>Station:</strong> ${stationName}</p>
                 <p><strong>Location:</strong> ${stationLocation}</p>
-                <p><strong>Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
-                <p><strong>Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+                <p><strong>Drop-off:</strong> ${fmtDate(dropOffDate)}</p>
+                <p><strong>Pick-up:</strong> ${fmtDate(pickUpDate)}</p>
               </div>
 
               <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -313,7 +323,7 @@ export async function POST(request) {
                 <h3 style="margin-top: 0;">Pickup Details</h3>
                 <p><strong>Station:</strong> ${stationName}</p>
                 <p><strong>Location:</strong> ${stationLocation}</p>
-                <p><strong>Pickup Date/Time:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+                <p><strong>Pickup Date/Time:</strong> ${fmtDate(pickUpDate)}</p>
               </div>
 
               <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">

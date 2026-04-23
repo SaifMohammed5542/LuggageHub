@@ -8,6 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import styles from "./AdminDashboard.module.css";
+import { formatDateTime as fmtDT } from "@/lib/formatDate";
 
 
 /**
@@ -52,11 +53,12 @@ export default function AdminDashboard() {
   });
 
   const openRescheduleModal = (booking) => {
+    // Dates are wall-clock UTC — extract UTC parts so the input shows Melbourne time regardless of browser timezone
     const toLocal = (iso) => {
       if (!iso) return '';
       const d = new Date(iso);
       const pad = n => String(n).padStart(2, '0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
     };
     setRescheduleModal({
       open: true, booking,
@@ -69,22 +71,24 @@ export default function AdminDashboard() {
   const closeRescheduleModal = () =>
     setRescheduleModal(prev => ({ ...prev, open: false, loading: false }));
 
-  const handlePartialRefund = async () => {
-    const { booking, result } = rescheduleModal;
-    const amount = Math.abs(result.amountDiff);
-    setRescheduleModal(prev => ({ ...prev, refunding: true }));
+  const handlePartialRefund = async (booking, amount, fromModal = false) => {
+    if (fromModal) setRescheduleModal(prev => ({ ...prev, refunding: true }));
     try {
       const res = await fetch(`/api/admin/bookings/${booking._id}/partial-refund`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount, note: `Rescheduled to shorter duration — A$${result.oldAmount} → A$${result.newAmount}` }),
+        body: JSON.stringify({ amount, note: `Rescheduled to shorter duration — refund of A$${Number(amount).toFixed(2)}` }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Refund failed');
-      setRescheduleModal(prev => ({ ...prev, refunding: false, refundDone: { amount, refundId: data.refundId } }));
-      showToast(`A$${amount.toFixed(2)} refunded to customer`, 'success');
+      // Update pending refund badge — use server-returned value (may still be > 0 if partial)
+      const remaining = data.pendingRefundAmount ?? 0;
+      setAllBookings(prev => prev.map(b => b._id === booking._id ? { ...b, pendingRefundAmount: remaining } : b));
+      setFilteredBookings(prev => prev.map(b => b._id === booking._id ? { ...b, pendingRefundAmount: remaining } : b));
+      if (fromModal) setRescheduleModal(prev => ({ ...prev, refunding: false, refundDone: { amount, refundId: data.refundId } }));
+      showToast(`A$${Number(amount).toFixed(2)} refunded to customer`, 'success');
     } catch (err) {
-      setRescheduleModal(prev => ({ ...prev, refunding: false }));
+      if (fromModal) setRescheduleModal(prev => ({ ...prev, refunding: false }));
       showToast(err.message, 'error');
     }
   };
@@ -92,18 +96,18 @@ export default function AdminDashboard() {
   const handleReschedule = async () => {
     const { booking, dropOffDate, pickUpDate, note } = rescheduleModal;
     if (!dropOffDate || !pickUpDate) { showToast('Both dates are required', 'error'); return; }
-    if (new Date(pickUpDate) <= new Date(dropOffDate)) { showToast('Pick-up must be after drop-off', 'error'); return; }
+    if (new Date(pickUpDate + ':00.000Z') <= new Date(dropOffDate + ':00.000Z')) { showToast('Pick-up must be after drop-off', 'error'); return; }
     setRescheduleModal(prev => ({ ...prev, loading: true }));
     try {
       const res = await fetch(`/api/admin/bookings/${booking._id}/reschedule`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ dropOffDate, pickUpDate, note }),
+        body: JSON.stringify({ dropOffDate: dropOffDate + ':00.000Z', pickUpDate: pickUpDate + ':00.000Z', note }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Reschedule failed');
-      setAllBookings(prev => prev.map(b => b._id === booking._id ? { ...b, dropOffDate: data.booking.dropOffDate, pickUpDate: data.booking.pickUpDate, totalAmount: data.booking.totalAmount } : b));
-      setFilteredBookings(prev => prev.map(b => b._id === booking._id ? { ...b, dropOffDate: data.booking.dropOffDate, pickUpDate: data.booking.pickUpDate, totalAmount: data.booking.totalAmount } : b));
+      setAllBookings(prev => prev.map(b => b._id === booking._id ? { ...b, dropOffDate: data.booking.dropOffDate, pickUpDate: data.booking.pickUpDate, totalAmount: data.booking.totalAmount, pendingRefundAmount: data.booking.pendingRefundAmount } : b));
+      setFilteredBookings(prev => prev.map(b => b._id === booking._id ? { ...b, dropOffDate: data.booking.dropOffDate, pickUpDate: data.booking.pickUpDate, totalAmount: data.booking.totalAmount, pendingRefundAmount: data.booking.pendingRefundAmount } : b));
       setRescheduleModal(prev => ({ ...prev, loading: false, result: data }));
       showToast(data.message, 'success', 6000);
     } catch (err) {
@@ -171,11 +175,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const formatSimpleDate = (dateString) => {
-    if (!dateString) return '-';
-    const d = new Date(dateString);
-    return `${d.getUTCDate()}/${d.getUTCMonth()+1}/${String(d.getUTCFullYear()).slice(-2)}, ${d.getUTCHours() % 12 || 12}:${String(d.getUTCMinutes()).padStart(2,'0')} ${d.getUTCHours() >= 12 ? 'pm' : 'am'}`;
-  };
+  const formatSimpleDate = fmtDT;
 
 
 //   const getPaymentStatus = (booking) => {
@@ -1509,7 +1509,7 @@ Total: ${booking.luggageCount}
               setSelectedStation(null);
             }}
           >
-            📊 Overview
+            📊 Over view
           </button>
           <button
             className={`${styles.tab} ${activeTab === "stations" ? styles.tabActive : ""}`}
@@ -1649,13 +1649,13 @@ Total: ${booking.luggageCount}
                                 </div>
                               )}
                               {r.customerNote && (
-                                <div style={{ fontSize: 12, color: '#374151', marginTop: 4, fontStyle: 'italic' }}>"{r.customerNote}"</div>
+                                <div style={{ fontSize: 12, color: '#374151', marginTop: 4, fontStyle: 'italic' }}>&quot;{r.customerNote}&quot;</div>
                               )}
                             </div>
                             <div style={{ flex: '0 0 auto', textAlign: 'right' }}>
                               <div style={{ fontWeight: 800, fontSize: 16, color: '#15803d' }}>A${Number(r.refundAmount).toFixed(2)}</div>
                               <div style={{ fontSize: 11, color: '#9ca3af' }}>
-                                {new Date(r.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })}
+                                {fmtDT(r.createdAt)}
                               </div>
                               <div style={{ display: 'flex', gap: 6, marginTop: 8, justifyContent: 'flex-end' }}>
                                 <button
@@ -1733,7 +1733,7 @@ Total: ${booking.luggageCount}
                           placeholder="Search name, email, date, ref…"
                           value={bookingSearch}
                           onChange={e => setBookingSearch(e.target.value)}
-                          style={{ flex: '1 1 180px', maxWidth: 280, borderRadius: 8, border: '1px solid #d1d5db', padding: '7px 12px', fontSize: 13 }}
+                          style={{ flex: '1 1 180px', maxWidth: 280, borderRadius: 8, border: '1px solid #d1d5db', padding: '7px 12px', fontSize: 16 }}
                           autoFocus
                         />
                         <button
@@ -2219,8 +2219,7 @@ Total: ${booking.luggageCount}
                                                   )}
                                                   <div className={styles.bookingMeta}>
                                                     {booking.smallBagCount ?? 0} small • {booking.largeBagCount ?? 0} large
-{formatSimpleDate(booking.dropOffDate)} → {formatSimpleDate(booking.pickUpDate)} →{" "}
-                                                    {new Date(booking.pickUpDate).toLocaleDateString()}
+{formatSimpleDate(booking.dropOffDate)} → {formatSimpleDate(booking.pickUpDate)}
                                                   </div>
                                                 </div>
                                               </div>
@@ -2246,6 +2245,15 @@ Total: ${booking.luggageCount}
                                                       onClick={() => openRescheduleModal(booking)}
                                                     >
                                                       Reschedule
+                                                    </button>
+                                                  )}
+                                                  {booking.pendingRefundAmount > 0 && (
+                                                    <button
+                                                      className={styles.smallButton}
+                                                      style={{ background: "#fef3c7", color: "#92400e", borderColor: "#fcd34d", fontWeight: 700 }}
+                                                      onClick={() => handlePartialRefund(booking, booking.pendingRefundAmount)}
+                                                    >
+                                                      Refund A${Number(booking.pendingRefundAmount).toFixed(2)} owed
                                                     </button>
                                                   )}
                                                   {booking.status !== "cancelled" && booking.status !== "no_show" && (
@@ -2994,7 +3002,7 @@ Total: ${booking.luggageCount}
                       </div>
                     ) : (
                       <button
-                        onClick={handlePartialRefund}
+                        onClick={() => handlePartialRefund(rescheduleModal.booking, Math.abs(rescheduleModal.result.amountDiff), true)}
                         disabled={rescheduleModal.refunding}
                         style={{ width: '100%', background: rescheduleModal.refunding ? '#d1d5db' : '#16a34a', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 0', fontWeight: 700, fontSize: 14, cursor: rescheduleModal.refunding ? 'not-allowed' : 'pointer' }}
                       >

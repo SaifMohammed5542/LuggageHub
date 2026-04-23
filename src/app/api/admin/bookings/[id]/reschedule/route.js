@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '../../../../../../lib/dbConnect';
 import Booking from '../../../../../../models/booking';
+import Payment from '../../../../../../models/Payment';
 import { verifyJWT } from '../../../../../../lib/auth';
 
 function adminAuth(req) {
@@ -46,7 +47,8 @@ export async function PATCH(req, { params }) {
     const booking = await Booking.findById(id);
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
 
-    const reschedulable = ['pending', 'confirmed'];
+    // Bug 2 fix: stored bookings can be rescheduled (e.g. customer calls to change pick-up)
+    const reschedulable = ['pending', 'confirmed', 'stored'];
     if (!reschedulable.includes(booking.status))
       return NextResponse.json({ error: `Cannot reschedule a booking with status "${booking.status}"` }, { status: 400 });
 
@@ -74,6 +76,23 @@ export async function PATCH(req, { params }) {
     booking.pickUpDate  = newPick;
     booking.totalAmount = newAmount;
 
+    // If amount decreased, accumulate pending refund and record which capture to refund from
+    if (amountDiff < 0) {
+      booking.pendingRefundAmount = +((booking.pendingRefundAmount || 0) + Math.abs(amountDiff)).toFixed(2);
+
+      // Bug 5 fix: lock in the correct PayPal capture at the time of shortening.
+      // The newest non-refunded capture is what covers the current booking period.
+      if (!booking.pendingRefundCaptureId) {
+        const payments = await Payment.find({ bookingId: booking._id }).sort({ createdAt: -1 });
+        for (const p of payments) {
+          if (!p.paypalTransactionId) continue;
+          if (p.status === 'refunded') continue;
+          const used = p.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
+          if (p.amount - used > 0.005) { booking.pendingRefundCaptureId = p.paypalTransactionId; break; }
+        }
+      }
+    }
+
     await booking.save();
 
     return NextResponse.json({
@@ -83,6 +102,7 @@ export async function PATCH(req, { params }) {
         dropOffDate: booking.dropOffDate,
         pickUpDate:  booking.pickUpDate,
         totalAmount: booking.totalAmount,
+        pendingRefundAmount: booking.pendingRefundAmount,
         status: booking.status,
       },
       oldDays,

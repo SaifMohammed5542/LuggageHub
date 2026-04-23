@@ -46,15 +46,33 @@ export async function POST(req, { params }) {
     const booking = await Booking.findById(id);
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
 
-    const payment = await Payment.findOne({ bookingId: booking._id });
-    if (!payment) return NextResponse.json({ error: 'No payment record found for this booking' }, { status: 400 });
-    if (!payment.paypalTransactionId) return NextResponse.json({ error: 'No PayPal transaction ID — cannot refund' }, { status: 400 });
-    if (payment.status === 'refunded') return NextResponse.json({ error: 'Payment already fully refunded' }, { status: 400 });
+    const payments = await Payment.find({ bookingId: booking._id }).sort({ createdAt: -1 });
+    if (!payments.length) return NextResponse.json({ error: 'No payment record found for this booking' }, { status: 400 });
+
+    // Bug 5 fix: if reschedule locked a specific capture, use it; otherwise fall back to newest with balance.
+    let payment = null;
+    if (booking.pendingRefundCaptureId) {
+      payment = payments.find(p => p.paypalTransactionId === booking.pendingRefundCaptureId) || null;
+      // If that specific capture is now fully refunded, fall through to newest-first
+      if (payment) {
+        const used = payment.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
+        if (payment.amount - used <= 0.005) payment = null;
+      }
+    }
+    if (!payment) {
+      for (const p of payments) {
+        if (!p.paypalTransactionId) continue;
+        if (p.status === 'refunded') continue;
+        const used = p.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
+        if (p.amount - used > 0.005) { payment = p; break; }
+      }
+    }
+    if (!payment) return NextResponse.json({ error: 'No refundable PayPal capture found — all payments already fully refunded' }, { status: 400 });
 
     const alreadyRefunded = payment.refunds?.reduce((sum, r) => sum + r.amount, 0) || 0;
-    const maxRefundable = payment.amount - alreadyRefunded;
+    const maxRefundable = +(payment.amount - alreadyRefunded).toFixed(2);
     if (refundAmt > maxRefundable)
-      return NextResponse.json({ error: `Max refundable is A$${maxRefundable.toFixed(2)}` }, { status: 400 });
+      return NextResponse.json({ error: `Max refundable from this capture is A$${maxRefundable.toFixed(2)}` }, { status: 400 });
 
     // Call PayPal
     const { accessToken, base } = await getPayPalAccessToken();
@@ -79,11 +97,19 @@ export async function POST(req, { params }) {
       reason: note || 'Partial refund — booking rescheduled to shorter duration',
     });
 
+    // Bug 5 fix: reduce pendingRefundAmount by the actual refunded amount rather than clearing to 0.
+    // If multiple shortens have accumulated, admin may need to click again for the remainder.
+    const actualRefunded = parseFloat(ppData.amount?.value || refundAmt);
+    booking.pendingRefundAmount = Math.max(0, +((booking.pendingRefundAmount || 0) - actualRefunded).toFixed(2));
+    if (booking.pendingRefundAmount <= 0) booking.pendingRefundCaptureId = null;
+    await booking.save();
+
     return NextResponse.json({
       success: true,
       refundId: ppData.id,
       amount: ppData.amount?.value || refundAmt.toFixed(2),
       status: ppData.status,
+      pendingRefundAmount: booking.pendingRefundAmount,
       message: `A$${refundAmt.toFixed(2)} refund issued to customer successfully`,
     });
   } catch (err) {

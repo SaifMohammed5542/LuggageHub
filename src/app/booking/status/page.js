@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { formatDateTimeLong } from '@/lib/formatDate';
 
 const STATUS_CONFIG = {
   pending:   { label: 'Pending',   color: '#F59E0B', bg: '#FEF3C7', icon: '⏳', desc: 'Your booking is confirmed and awaiting drop-off.' },
@@ -13,17 +14,7 @@ const STATUS_CONFIG = {
   no_show:   { label: 'No Show',   color: '#92400E', bg: '#FEF3C7', icon: '⚠️',  desc: 'Marked as no-show. Contact support if this is a mistake.' },
 };
 
-function formatDate(dateString) {
-  if (!dateString) return '—';
-  const d = new Date(dateString);
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const h = d.getUTCHours();
-  const ampm = h >= 12 ? 'pm' : 'am';
-  const h12 = h % 12 || 12;
-  const min = String(d.getUTCMinutes()).padStart(2, '0');
-  return `${days[d.getUTCDay()]}, ${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()} · ${h12}:${min} ${ampm}`;
-}
+const formatDate = formatDateTimeLong;
 
 // Format: BK-20260418-ABC1
 // Auto-inserts hyphens after "BK" and after the 8-digit date block
@@ -37,7 +28,6 @@ function formatRef(raw) {
 function StatusPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [ref, setRef] = useState('');
   const [input, setInput] = useState('');
   const [booking, setBooking] = useState(null);
   const [error, setError] = useState('');

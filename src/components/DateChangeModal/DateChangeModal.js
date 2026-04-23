@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./DateChangeModal.module.css";
+import { formatDateTime as fmtUTC, getMelbourneNow } from "@/lib/formatDate";
 import ExtensionPayPal from "../ExtensionPayPal";
 
 const LUGGAGE_PRICING = {
@@ -12,12 +13,7 @@ const LUGGAGE_PRICING = {
 
 const toDateTimeLocal = (date) => {
   const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}T${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;
 };
 
 export default function DateChangeModal({ booking, onClose, onSuccess }) {
@@ -123,8 +119,8 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
   const calculateChanges = () => {
     if (!newDropOff || !newPickUp) return null;
 
-    const requestedDropOff = new Date(newDropOff);
-    const requestedPickUp = new Date(newPickUp);
+    const requestedDropOff = new Date(newDropOff + ':00.000Z');
+    const requestedPickUp = new Date(newPickUp + ':00.000Z');
     
     // Validation
     if (requestedDropOff >= requestedPickUp) {
@@ -134,8 +130,8 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
       };
     }
 
-    // Check minimum times
-    const now = new Date();
+    // Check minimum times — use Melbourne fake-UTC now so comparison is in the same coordinate space
+    const now = getMelbourneNow();
     const hoursUntilDropOff = (requestedDropOff - now) / (1000 * 60 * 60);
 
     if (hoursUntilDropOff < 2 && requestedDropOff < currentDropOff) {
@@ -216,7 +212,7 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
     const handleShift = () => {
       if (!newDropOff) return;
       
-      const newDropOffDate = new Date(newDropOff);
+      const newDropOffDate = new Date(newDropOff + ':00.000Z');
       const timeDiff = currentPickUp - currentDropOff; // Duration in ms
       const newPickUpDate = new Date(newDropOffDate.getTime() + timeDiff);
 
@@ -295,8 +291,8 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
         },
         body: JSON.stringify({
           bookingId: booking._id,
-          newDropOffDate: newDropOff,
-          newPickUpDate: newPickUp,
+          newDropOffDate: newDropOff + ':00.000Z',
+          newPickUpDate: newPickUp + ':00.000Z',
           paymentData: paymentData,
         }),
       });
@@ -344,13 +340,13 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
           <div className={styles.summaryRow}>
             <span className={styles.summaryLabel}>Drop-off:</span>
             <span className={styles.summaryValue}>
-              {currentDropOff.toLocaleDateString('en-AU')} {currentDropOff.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
+              {fmtUTC(currentDropOff)}
             </span>
           </div>
           <div className={styles.summaryRow}>
             <span className={styles.summaryLabel}>Pick-up:</span>
             <span className={styles.summaryValue}>
-              {currentPickUp.toLocaleDateString('en-AU')} {currentPickUp.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
+              {fmtUTC(currentPickUp)}
             </span>
           </div>
           <div className={styles.summaryRow}>

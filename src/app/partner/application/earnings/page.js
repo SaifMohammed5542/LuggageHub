@@ -82,7 +82,7 @@ export default function EarningsPage() {
                 </div>
                 {offer.windowEnd && !offer.earned && (
                   <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 3 }}>
-                    Resets {new Date(offer.windowEnd).toLocaleDateString('en-AU')}
+                    Resets {(() => { const d = new Date(offer.windowEnd); return `${d.getUTCDate()}/${d.getUTCMonth()+1}/${d.getUTCFullYear()}`; })()}
                   </div>
                 )}
                 {offer.earned && (
@@ -115,7 +115,7 @@ export default function EarningsPage() {
               <div>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{m.month}</div>
                 {m.paid && m.paidAt && (
-                  <div style={{ fontSize: 11, color: '#16a34a' }}>Paid {new Date(m.paidAt).toLocaleDateString('en-AU')}</div>
+                  <div style={{ fontSize: 11, color: '#16a34a' }}>Paid {(() => { const d = new Date(m.paidAt); return `${d.getUTCDate()}/${d.getUTCMonth()+1}/${d.getUTCFullYear()}`; })()}</div>
                 )}
               </div>
             </div>

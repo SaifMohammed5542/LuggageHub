@@ -9,6 +9,17 @@ import { verifyJWT } from '../../../../lib/auth';
 const PRICING = { small: 3.99, large: 8.49 };
 const CUTOFF_HOURS = 2;
 
+function getMelbourneNow() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Australia/Melbourne',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const get = t => parts.find(p => p.type === t).value;
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  return new Date(`${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}:00.000Z`);
+}
+
 function userAuth(req) {
   const token = req.headers.get('authorization')?.split(' ')[1];
   if (!token) return null;
@@ -50,8 +61,8 @@ export async function POST(req) {
     if (!allowedStatuses.includes(booking.status))
       return NextResponse.json({ error: `Cannot request changes on a booking with status "${booking.status}"` }, { status: 400 });
 
-    // 2-hour cutoff check
-    const hoursUntilDropOff = (new Date(booking.dropOffDate) - new Date()) / 3600000;
+    // 2-hour cutoff check — both sides use fake-UTC so the diff is real Melbourne hours
+    const hoursUntilDropOff = (new Date(booking.dropOffDate) - getMelbourneNow()) / 3600000;
     if (hoursUntilDropOff < CUTOFF_HOURS)
       return NextResponse.json({ error: `Requests must be made at least ${CUTOFF_HOURS} hours before drop-off` }, { status: 400 });
 

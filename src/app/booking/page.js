@@ -15,38 +15,49 @@ const StationMapMapbox = dynamic(
 // ─── Helpers (mirrored from BookingDrawer) ────────────────────────────────────
 
 function getRoundedNow() {
-  const d = new Date();
-  d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Australia/Melbourne',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const get = t => parts.find(p => p.type === t).value;
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  const d = new Date(`${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}:00Z`);
+  const mins = d.getUTCMinutes(), rem = mins % 15;
+  if (rem !== 0) d.setUTCMinutes(mins + (15 - rem), 0, 0);
+  else d.setUTCSeconds(0, 0);
   return d;
 }
 function addHours(date, h) {
   return new Date(new Date(date).getTime() + h * 3600000);
 }
+const _WDAYS  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const _MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function toLocalISO(date) {
+  const d = new Date(date);
+  return [d.getUTCFullYear(), String(d.getUTCMonth()+1).padStart(2,'0'), String(d.getUTCDate()).padStart(2,'0')].join('-')
+    + 'T' + [String(d.getUTCHours()).padStart(2,'0'), String(d.getUTCMinutes()).padStart(2,'0')].join(':') + ':00.000Z';
+}
 function formatTime(d) {
-  return new Date(d).toLocaleTimeString("en-AU", {
-    hour: "2-digit", minute: "2-digit", hour12: true,
-  });
+  const dt = new Date(d);
+  const h = dt.getUTCHours() % 12 || 12;
+  return `${h}:${String(dt.getUTCMinutes()).padStart(2,'0')} ${dt.getUTCHours() >= 12 ? 'pm' : 'am'}`;
 }
 function formatDate(d) {
   const date = new Date(d);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const tom = new Date(today); tom.setDate(today.getDate() + 1);
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === tom.toDateString()) return "Tomorrow";
-  return date.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+  const now = getRoundedNow();
+  const todayKey = `${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}`;
+  const tom = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1));
+  const tomKey = `${tom.getUTCFullYear()}-${tom.getUTCMonth()}-${tom.getUTCDate()}`;
+  const dKey = `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}`;
+  if (dKey === todayKey) return "Today";
+  if (dKey === tomKey)   return "Tomorrow";
+  return `${_WDAYS[date.getUTCDay()]}, ${date.getUTCDate()} ${_MONTHS[date.getUTCMonth()]}`;
 }
 function formatDateFull(d) {
-  return new Date(d).toLocaleDateString("en-AU", {
-    weekday: "short", day: "numeric", month: "short", year: "numeric",
-  });
-}
-function toLocalISO(d) {
-  const x = new Date(d);
-  return (
-    [x.getFullYear(), String(x.getMonth() + 1).padStart(2, "0"), String(x.getDate()).padStart(2, "0")].join("-") +
-    "T" +
-    [String(x.getHours()).padStart(2, "0"), String(x.getMinutes()).padStart(2, "0")].join(":")
-  );
+  const date = new Date(d);
+  return `${_WDAYS[date.getUTCDay()]}, ${date.getUTCDate()} ${_MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -104,9 +115,9 @@ const PRESETS = [
 const MAX_DAYS = 60;
 
 function getDays() {
-  const days = [], today = new Date(); today.setHours(0, 0, 0, 0);
+  const days = [], now = getRoundedNow();
   for (let i = 0; i < 60; i++) {
-    const d = new Date(today); d.setDate(today.getDate() + i); days.push(d);
+    days.push(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i)));
   }
   return days;
 }
@@ -116,7 +127,7 @@ function getTimeSlots() {
     for (let m = 0; m < 60; m += 15)
       slots.push({
         h, m,
-        label: new Date(0, 0, 0, h, m).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }),
+        label: `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'pm' : 'am'}`,
       });
   return slots;
 }
@@ -207,23 +218,24 @@ function ScrollDrum({ items, selectedIndex, onSelect, getLabel }) {
 function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose, timings, dropOff }) {
   const DAYS = getDays(), TIME_SLOTS = getTimeSlots();
   const d = new Date(initialDate);
-  const initDay = Math.max(0, DAYS.findIndex(x => x.toDateString() === d.toDateString()));
-  const nm = Math.round(d.getMinutes() / 15) * 15;
-  const sh = nm === 60 ? d.getHours() + 1 : d.getHours();
+  const initDay = Math.max(0, DAYS.findIndex(x =>
+    x.getUTCFullYear() === d.getUTCFullYear() && x.getUTCMonth() === d.getUTCMonth() && x.getUTCDate() === d.getUTCDate()
+  ));
+  const nm = Math.round(d.getUTCMinutes() / 15) * 15;
+  const sh = nm === 60 ? d.getUTCHours() + 1 : d.getUTCHours();
   const sm = nm === 60 ? 0 : nm;
   const initSlot = Math.max(0, TIME_SLOTS.findIndex(s => s.h === sh && s.m === sm));
   const [dayIdx, setDayIdx] = useState(initDay);
   const [slotIdx, setSlotIdx] = useState(initSlot);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const tom = new Date(today); tom.setDate(today.getDate() + 1);
+  const today    = getRoundedNow();
+  const tomorrow = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
 
   const getResult = () => {
-    const day = new Date(DAYS[dayIdx]);
+    const day = DAYS[dayIdx];
     const s = TIME_SLOTS[slotIdx];
-    day.setHours(s.h, s.m, 0, 0);
-    return day;
+    return new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), s.h, s.m, 0, 0));
   };
-  const isValid = () => getResult() >= (minDate || new Date());
+  const isValid = () => getResult() >= (minDate || getRoundedNow());
 
   return (
     <div className={styles.pickerOverlay} onClick={onClose}>
@@ -255,9 +267,10 @@ function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose, timin
               selectedIndex={dayIdx}
               onSelect={setDayIdx}
               getLabel={d2 => {
-                if (d2.toDateString() === today.toDateString()) return "Today";
-                if (d2.toDateString() === tom.toDateString()) return "Tomorrow";
-                return d2.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+                const same = (a,b) => a.getUTCFullYear()===b.getUTCFullYear() && a.getUTCMonth()===b.getUTCMonth() && a.getUTCDate()===b.getUTCDate();
+                if (same(d2, today))    return "Today";
+                if (same(d2, tomorrow)) return "Tomorrow";
+                return `${_WDAYS[d2.getUTCDay()]}, ${d2.getUTCDate()} ${_MONTHS[d2.getUTCMonth()]}`;
               }}
             />
           </div>

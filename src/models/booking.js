@@ -76,6 +76,18 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  // Refund owed to customer (set when admin reschedules to shorter period, cleared after refund)
+  pendingRefundAmount: {
+    type: Number,
+    default: 0,
+  },
+
+  // PayPal capture ID to refund from when processing pendingRefundAmount
+  pendingRefundCaptureId: {
+    type: String,
+    default: null,
+  },
   
   // ✅ DEPRECATED: Keep for backward compatibility but use Payment model instead
   paymentId: {
@@ -99,6 +111,15 @@ const bookingSchema = new mongoose.Schema({
   cancelledAt: Date,
   
   notes: String,
+
+  rescheduleHistory: [{
+    rescheduledAt:  { type: Date },
+    rescheduledBy:  { type: String },
+    oldDropOffDate: { type: Date },
+    oldPickUpDate:  { type: Date },
+    oldAmount:      { type: Number },
+    note:           { type: String, default: '' },
+  }],
 
   luggagePhotoUrl: {
     type: String,

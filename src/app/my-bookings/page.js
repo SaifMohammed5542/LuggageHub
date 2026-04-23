@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import styles from "./MyBookings.module.css";
 import DateChangeModal from "@/components/DateChangeModal/DateChangeModal";
+import { getMelbourneNow } from "@/lib/formatDate";
 
 // ── Smart date-based status calculation ───────────────────
 function getDisplayStatus(booking) {
@@ -30,7 +31,7 @@ function getDisplayStatus(booking) {
     };
   }
 
-  const now = new Date();
+  const now = getMelbourneNow();
   const dropOff = new Date(dropOffDate);
   const pickUp = new Date(pickUpDate);
 
@@ -61,22 +62,21 @@ function getDisplayStatus(booking) {
 }
 
 // ── Helpers ───────────────────────────────────────────────
+const MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_S   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
 function formatDate(dateStr) {
   if (!dateStr) return "N/A";
-  return new Date(dateStr).toLocaleDateString("en-AU", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const d = new Date(dateStr);
+  return `${DAYS_S[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS_S[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 function formatTime(dateStr) {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleTimeString("en-AU", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(dateStr);
+  const h = d.getUTCHours() % 12 || 12;
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${h}:${m} ${d.getUTCHours() >= 12 ? 'pm' : 'am'}`;
 }
 
 function calcDays(dropOff, pickUp) {
@@ -285,22 +285,24 @@ function BookingCard({ booking, onChangeDates, onRequestSubmitted }) {
   const stationName = booking.stationId?.name || "Unknown Station";
   const stationLocation = booking.stationId?.location || booking.stationId?.address || "";
 
-  const hoursUntilDropOff = (new Date(booking.dropOffDate) - new Date()) / 3600000;
+  const melbNow = getMelbourneNow();
+  const hoursUntilDropOff = (new Date(booking.dropOffDate) - melbNow) / 3600000;
   const canCancel = (status.label === "Active") && hoursUntilDropOff >= 2;
 
   // Extend allowed if Active (≥2h) or Stored (≥1h until pickup)
-  const hoursUntilPickUp = (new Date(booking.pickUpDate) - new Date()) / 3600000;
+  const hoursUntilPickUp = (new Date(booking.pickUpDate) - melbNow) / 3600000;
   const canExtend = (status.label === "Active" && hoursUntilDropOff >= 2) ||
                     (status.label === "Stored" && hoursUntilPickUp >= 1);
 
   const toDateTimeLocal = (d) => {
+    // Return wall-clock ISO string — dates stored as fake UTC, so read UTC parts directly
     const x = new Date(d);
-    return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}T${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;
+    return `${x.getUTCFullYear()}-${String(x.getUTCMonth()+1).padStart(2,'0')}-${String(x.getUTCDate()).padStart(2,'0')}T${String(x.getUTCHours()).padStart(2,'0')}:${String(x.getUTCMinutes()).padStart(2,'0')}`;
   };
 
   // Reduce preview
-  const reduceRefundAmt = (reduceDropOff && reducePickUp && new Date(reducePickUp) > new Date(reduceDropOff))
-    ? Math.max(0, +(booking.totalAmount - calcAmount(booking, reduceDropOff, reducePickUp)).toFixed(2))
+  const reduceRefundAmt = (reduceDropOff && reducePickUp && new Date(reducePickUp + ':00.000Z') > new Date(reduceDropOff + ':00.000Z'))
+    ? Math.max(0, +(booking.totalAmount - calcAmount(booking, reduceDropOff + ':00.000Z', reducePickUp + ':00.000Z')).toFixed(2))
     : null;
   const reduceIsValid = reduceRefundAmt !== null && reduceRefundAmt > 0;
 
@@ -309,7 +311,7 @@ function BookingCard({ booking, onChangeDates, onRequestSubmitted }) {
     const token = localStorage.getItem('token');
     try {
       const body = { bookingId: booking._id, type, customerNote };
-      if (type === 'reduce') { body.requestedDropOff = reduceDropOff; body.requestedPickUp = reducePickUp; }
+      if (type === 'reduce') { body.requestedDropOff = reduceDropOff + ':00.000Z'; body.requestedPickUp = reducePickUp + ':00.000Z'; }
       const res = await fetch('/api/user/refund-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -323,8 +325,6 @@ function BookingCard({ booking, onChangeDates, onRequestSubmitted }) {
     } catch (err) { setReqError(err.message); }
     finally { setSubmitting(false); }
   };
-
-  const canChange = canExtend;
 
   return (
     <div className={`${styles.card} ${styles[`card_${status.color}`]}`}>
@@ -677,8 +677,8 @@ export default function MyBookingsPage() {
     setShowModal(false);
     setSelectedBooking(null);
 
-    const dropOff = new Date(result.booking.newDropOffDate).toLocaleString("en-AU");
-    const pickUp  = new Date(result.booking.newPickUpDate).toLocaleString("en-AU");
+    const dropOff = `${formatDate(result.booking.newDropOffDate)} ${formatTime(result.booking.newDropOffDate)}`;
+    const pickUp  = `${formatDate(result.booking.newPickUpDate)} ${formatTime(result.booking.newPickUpDate)}`;
     const charge  = result.booking.charge > 0 ? ` · Charged: A$${result.booking.charge.toFixed(2)}` : " · No extra charge";
 
     setSuccessMessage(`Dates updated — Drop-off: ${dropOff} · Pick-up: ${pickUp}${charge}`);

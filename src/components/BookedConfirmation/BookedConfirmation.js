@@ -63,16 +63,13 @@ const BookedConfirmationPage = () => {
   const formatDateTime = useCallback((dateString) => {
     if (!dateString) return 'N/A';
     try {
-      const date = new Date(dateString);
-      return date.toLocaleString('en-AU', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
+      const d = new Date(dateString);
+      const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const h = d.getUTCHours() % 12 || 12;
+      const m = String(d.getUTCMinutes()).padStart(2, '0');
+      const ampm = d.getUTCHours() >= 12 ? 'pm' : 'am';
+      return `${DAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${h}:${m} ${ampm}`;
     } catch {
       return 'Invalid date';
     }

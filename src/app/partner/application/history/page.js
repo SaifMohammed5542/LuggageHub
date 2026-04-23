@@ -49,7 +49,7 @@ export default function HistoryPage() {
       (b.fullName || '').toLowerCase().includes(q) ||
       (b.email || '').toLowerCase().includes(q) ||
       (b.bookingReference || '').toLowerCase().includes(q) ||
-      new Date(b.dropOffDate).toLocaleDateString('en-AU').includes(q)
+      (() => { const d = new Date(b.dropOffDate); return `${d.getUTCDate()}/${d.getUTCMonth()+1}/${d.getUTCFullYear()}`; })().includes(q)
     );
   });
 

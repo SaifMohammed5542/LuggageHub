@@ -11,6 +11,16 @@ import { sendErrorNotification } from "../../../utils/mailer";
 import { generateBookingReference, generatePaymentReference } from "../../../utils/generateReference";
 import { generateQRCode } from '../../../utils/qrGenerator';
 
+function fmtDate(dateString) {
+  if (!dateString) return 'N/A';
+  const d = new Date(dateString);
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const h = d.getUTCHours() % 12 || 12;
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${DAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${h}:${m} ${d.getUTCHours() >= 12 ? 'pm' : 'am'}`;
+}
+
 void User;
 
 // ✅ Helper function for capacity warnings (unchanged)
@@ -63,7 +73,7 @@ async function sendCapacityWarningEmails(station, capacityPercentage, dropOffDat
             ${capacityPercentage}% FULL
           </p>
           <p><strong>Time Period:</strong></p>
-          <p>${new Date(dropOffDate).toLocaleString()} - ${new Date(pickUpDate).toLocaleString()}</p>
+          <p>${fmtDate(dropOffDate)} — ${fmtDate(pickUpDate)}</p>
         </div>
 
         ${warningLevel === 'full' ? `
@@ -355,8 +365,8 @@ try {
               <h3 style="margin-top: 0;">Booking Details</h3>
               <p><strong>📍 Station:</strong> ${stationName}</p>
               ${stationLocation ? `<p><strong>Location:</strong> ${stationLocation}</p>` : ''}
-              <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
-              <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+              <p><strong>📅 Drop-off:</strong> ${fmtDate(dropOffDate)}</p>
+              <p><strong>📦 Pick-up:</strong> ${fmtDate(pickUpDate)}</p>
               <p style="font-size: 18px; font-weight: bold; color: #2e7d32;"><strong>💰 Total Amount:</strong> A${totalAmount ? Number(totalAmount).toFixed(2) : '0.00'}</p>
             </div>
           </div>
@@ -434,8 +444,8 @@ try {
               <h3 style="margin-top: 0;">Storage Details</h3>
               <p><strong>📍 Location:</strong> ${stationName}</p>
               ${stationLocation ? `<p><strong>Address:</strong> ${stationLocation}</p>` : ''}
-              <p><strong>📅 Drop-off Date:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
-              <p><strong>📦 Pick-up Date:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+              <p><strong>📅 Drop-off Date:</strong> ${fmtDate(dropOffDate)}</p>
+              <p><strong>📦 Pick-up Date:</strong> ${fmtDate(pickUpDate)}</p>
             </div>
 
             ${specialInstructions ? `
@@ -529,8 +539,8 @@ await transporter.sendMail({
       <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="margin-top: 0;">Booking Details</h3>
         <p><strong>📍 Station:</strong> ${stationName}</p>
-        <p><strong>📅 Drop-off:</strong> ${new Date(dropOffDate).toLocaleString()}</p>
-        <p><strong>📦 Pick-up:</strong> ${new Date(pickUpDate).toLocaleString()}</p>
+        <p><strong>📅 Drop-off:</strong> ${fmtDate(dropOffDate)}</p>
+        <p><strong>📦 Pick-up:</strong> ${fmtDate(pickUpDate)}</p>
       </div>
 
       <div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50; text-align: center;">

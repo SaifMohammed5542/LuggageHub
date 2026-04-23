@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import styles from "./Booking.module.css";
 import Header from "@/components/Header";
+import { formatDateTime as fmtDT } from "@/lib/formatDate";
 import PayPalPayment from "../LuggagePay";
 import VisualDateTimePicker from "../DateTimePicker/VisualDateTimePicker";
 import StationPreviewCard from "../StationPreviewCard/StationPreviewCard.js";
@@ -1275,13 +1276,13 @@ const handlePaymentSuccess = async (paymentData) => {
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Drop-off:</span>
                             <span className={styles.reviewValue}>
-                              {new Date(formData.dropOffDate).toLocaleString()}
+                              {fmtDT(formData.dropOffDate)}
                             </span>
                           </div>
                           <div className={styles.reviewItem}>
                             <span className={styles.reviewLabel}>Pick-up:</span>
                             <span className={styles.reviewValue}>
-                              {new Date(formData.pickUpDate).toLocaleString()}
+                              {fmtDT(formData.pickUpDate)}
                             </span>
                           </div>
                         </div>

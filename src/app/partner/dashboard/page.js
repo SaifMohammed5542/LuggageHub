@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { decodeToken } from '../../../utils/decodeToken';
 import styles from './PartnerDashboard.module.css';
+import { formatDateTime as fmtDT } from '@/lib/formatDate';
 
 /**
  * Partner Dashboard (updated)
@@ -46,37 +47,9 @@ export default function PartnerDashboard() {
   };
 
 
-  const formatUTC = (dateString) => {
-    if (!dateString) return '-';
-    const d = new Date(dateString);
-    return `${d.getUTCDate()}/${d.getUTCMonth()+1}/${String(d.getUTCFullYear()).slice(-2)}, ${d.getUTCHours() % 12 || 12}:${String(d.getUTCMinutes()).padStart(2,'0')} ${d.getUTCHours() >= 12 ? 'pm' : 'am'}`;
-  };
+  const formatUTC = fmtDT;
 
 
-const bookingGrossAmount = (booking) => {
-  // ✅ CASE 1: New bookings with totalAmount field
-  if (booking?.totalAmount != null && booking.totalAmount > 0) {
-    return Number(booking.totalAmount);
-  }
-  
-  // Calculate days for fallback calculations
-  const dropOff = new Date(booking.dropOffDate);
-  const pickUp = new Date(booking.pickUpDate);
-  const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
-  
-  // ✅ CASE 2: Bookings with ACTUAL bag breakdown (at least one bag type > 0)
-  const hasSmallBags = (booking.smallBagCount || 0) > 0;
-  const hasLargeBags = (booking.largeBagCount || 0) > 0;
-  
-  if (hasSmallBags || hasLargeBags) {
-    const smallBagTotal = (booking.smallBagCount || 0) * days * 3.99;
-    const largeBagTotal = (booking.largeBagCount || 0) * days * 8.49;
-    return smallBagTotal + largeBagTotal;
-  }
-  
-  // ✅ CASE 3: Old bookings with only luggageCount (all bags were 7.99)
-  return (booking.luggageCount || 0) * days * 7.99;
-};
 
 
   const bookingPartnerShare = (booking) => {

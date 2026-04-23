@@ -35,7 +35,7 @@ export async function GET(req) {
 const bookings = await Booking.find(query)
   .select(
     "bookingReference fullName email phone stationId dropOffDate pickUpDate " +
-    "smallBagCount largeBagCount luggageCount totalAmount " +
+    "smallBagCount largeBagCount luggageCount totalAmount pendingRefundAmount " +
     "paymentId specialInstructions status cancellationReason cancelledAt createdAt"
   )
   .populate("stationId", "_id name")

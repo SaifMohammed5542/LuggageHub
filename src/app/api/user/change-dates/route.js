@@ -10,6 +10,18 @@ import { generatePaymentReference } from "@/utils/generateReference";
 
 void Station;
 
+// Returns a fake-UTC Date where UTC hours = Melbourne wall-clock hours, for comparing against stored dates
+function getMelbourneNow() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Australia/Melbourne',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const get = t => parts.find(p => p.type === t).value;
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  return new Date(`${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}:00.000Z`);
+}
+
 export async function POST(request) {
   try {
     await dbConnect();
@@ -42,6 +54,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
+    // Bug 3 fix: only allow date changes on active bookings
+    if (!['pending', 'confirmed', 'stored'].includes(booking.status)) {
+      return NextResponse.json(
+        { error: `Cannot change dates on a booking with status "${booking.status}"` },
+        { status: 400 }
+      );
+    }
+
     // Verify ownership
     const userIdMatch = booking.userId?.toString() === decoded.userId;
     const emailMatch = booking.email === decoded.email;
@@ -69,7 +89,7 @@ export async function POST(request) {
       );
     }
 
-    const now = new Date();
+    const now = getMelbourneNow();
     if (requestedDropOff < currentDropOff) {
       const hoursUntilNewDropOff = (requestedDropOff - now) / (1000 * 60 * 60);
       if (hoursUntilNewDropOff < 2) {
@@ -81,7 +101,7 @@ export async function POST(request) {
     }
 
     if (requestedPickUp > currentPickUp) {
-      const hoursFromCurrentPickUp = (requestedPickUp - currentPickUp) / (1000 * 60 * 60);
+      const hoursFromCurrentPickUp = (requestedPickUp - currentPickUp) / (1000 * 60 * 60); // both fake-UTC, diff is real
       if (hoursFromCurrentPickUp < 1) {
         return NextResponse.json(
           { error: "Pick-up extension must be at least 1 hour later" },
@@ -159,15 +179,14 @@ export async function POST(request) {
         },
       });
 
-      const fmtDate = (d) =>
-        new Date(d).toLocaleString("en-AU", {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+      const fmtDate = (d) => {
+        const dt = new Date(d);
+        const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = dt.getUTCHours() % 12 || 12;
+        const m = String(dt.getUTCMinutes()).padStart(2, '0');
+        return `${DAYS[dt.getUTCDay()]}, ${dt.getUTCDate()} ${MONTHS[dt.getUTCMonth()]} ${dt.getUTCFullYear()}, ${h}:${m} ${dt.getUTCHours() >= 12 ? 'pm' : 'am'}`;
+      };
 
       const chargeNote =
         extraCharge > 0
