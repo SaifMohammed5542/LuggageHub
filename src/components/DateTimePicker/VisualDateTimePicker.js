@@ -3,53 +3,44 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import styles from "./VisualDateTimePicker.module.css";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+// All dates are fake-UTC: UTC hour = Melbourne wall-clock hour
+
+const WDAYS  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const getRoundedNow = () => {
-  const d = new Date();
-  const mins = d.getMinutes();
-  d.setMinutes(mins < 30 ? 30 : 60, 0, 0);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Australia/Melbourne',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const get = t => parts.find(p => p.type === t).value;
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  const d = new Date(`${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}:00Z`);
+  const mins = d.getUTCMinutes();
+  const rem = mins % 15;
+  if (rem !== 0) d.setUTCMinutes(mins + (15 - rem), 0, 0);
+  else d.setUTCSeconds(0, 0);
   return d;
 };
 
 const addHours = (date, h) => new Date(date.getTime() + h * 3600000);
 
-const toLocalISO = (date) => {
-  const y = date.getFullYear();
-  const mo = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const h = String(date.getHours()).padStart(2, "0");
-  const m = String(date.getMinutes()).padStart(2, "0");
-  return `${y}-${mo}-${d}T${h}:${m}`;
+const fmt12 = (date) => {
+  const h = date.getUTCHours() % 12 || 12;
+  const m = String(date.getUTCMinutes()).padStart(2, '0');
+  return `${h}:${m} ${date.getUTCHours() >= 12 ? 'pm' : 'am'}`;
 };
 
-const fmt12 = (date) =>
-  date.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true });
-
-// const fmtDate = (date) => {
-//   const today = new Date();
-//   const tomorrow = new Date(today);
-//   tomorrow.setDate(today.getDate() + 1);
-//   if (date.toDateString() === today.toDateString()) return "Today";
-//   if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-//   return date.toLocaleDateString("en-AU", {
-//     weekday: "short", day: "numeric", month: "short",
-//   });
-// };
-
 const fmtDateFull = (date) =>
-  date.toLocaleDateString("en-AU", {
-    weekday: "short", day: "numeric", month: "short", year: "numeric",
-  });
+  `${WDAYS[date.getUTCDay()]}, ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 
-// Generate next N days starting from today
+// Generate next N days as Melbourne fake-UTC midnights
 const getNextDays = (n = 14) => {
   const days = [];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = getRoundedNow();
   for (let i = 0; i < n; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    days.push(d);
+    days.push(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i)));
   }
   return days;
 };
@@ -59,13 +50,13 @@ const getTimeSlots = () => {
   const slots = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
-      slots.push({ h, m, label: new Date(0, 0, 0, h, m).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }) });
+      const h12 = h % 12 || 12;
+      const mm  = String(m).padStart(2, '0');
+      slots.push({ h, m, label: `${h12}:${mm} ${h >= 12 ? 'pm' : 'am'}` });
     }
   }
   return slots;
 };
-
-
 
 const PRESETS = [
   { label: "2 hrs", hours: 2 },
@@ -138,23 +129,27 @@ function ScrollDrum({ items, selectedIndex, onSelect, getLabel }) {
 // ─── Date + Time Picker Panel ─────────────────────────────────────────────────
 
 function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose }) {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const initDayIdx = Math.max(0, DAYS.findIndex((d) => d.toDateString() === initialDate.toDateString()));
+  const today    = getRoundedNow();
+  const tomorrow = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
+  const initDayIdx = Math.max(0, DAYS.findIndex((d) =>
+    d.getUTCFullYear() === initialDate.getUTCFullYear() &&
+    d.getUTCMonth()    === initialDate.getUTCMonth()    &&
+    d.getUTCDate()     === initialDate.getUTCDate()
+  ));
   const initSlotIdx = Math.max(0, TIME_SLOTS.findIndex(
-    (s) => s.h === initialDate.getHours() && s.m <= initialDate.getMinutes()
+    (s) => s.h === initialDate.getUTCHours() && s.m <= initialDate.getUTCMinutes()
   ));
 
   const [dayIdx, setDayIdx] = useState(initDayIdx);
   const [slotIdx, setSlotIdx] = useState(initSlotIdx);
 
   const result = useMemo(() => {
-    const d = new Date(DAYS[dayIdx]);
-    const s = TIME_SLOTS[slotIdx];
-    d.setHours(s.h, s.m, 0, 0);
-    return d;
+    const day = DAYS[dayIdx];
+    const s   = TIME_SLOTS[slotIdx];
+    return new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), s.h, s.m, 0, 0));
   }, [dayIdx, slotIdx]);
 
-  const isValid = result >= (minDate || new Date());
+  const isValid = result >= (minDate || getRoundedNow());
 
   return (
     <div className={styles.pickerOverlay}>
@@ -196,10 +191,10 @@ function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose }) {
               selectedIndex={dayIdx}
               onSelect={setDayIdx}
               getLabel={(d) => {
-                if (d.toDateString() === today.toDateString()) return "Today";
-                const tom = new Date(today); tom.setDate(today.getDate() + 1);
-                if (d.toDateString() === tom.toDateString()) return "Tomorrow";
-                return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+                const same = (a, b) => a.getUTCFullYear() === b.getUTCFullYear() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCDate() === b.getUTCDate();
+                if (same(d, today))    return "Today";
+                if (same(d, tomorrow)) return "Tomorrow";
+                return `${WDAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
               }}
             />
           </div>

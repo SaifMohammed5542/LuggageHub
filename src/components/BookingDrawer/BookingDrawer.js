@@ -9,12 +9,34 @@ const StationMapMapbox = dynamic(() => import("./StationMapMapbox"), { ssr: fals
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// Picker creates fake-UTC Dates (UTC hour = Melbourne wall-clock hour).
+// Append Z so the server always parses as UTC regardless of its local timezone.
+function toLocalISO(date) {
+  const d = new Date(date);
+  return [
+    d.getUTCFullYear(),
+    String(d.getUTCMonth() + 1).padStart(2, '0'),
+    String(d.getUTCDate()).padStart(2, '0'),
+  ].join('-') + 'T' + [
+    String(d.getUTCHours()).padStart(2, '0'),
+    String(d.getUTCMinutes()).padStart(2, '0'),
+  ].join(':') + ':00.000Z';
+}
+
+// Current Melbourne wall-clock time as a fake-UTC Date
 function getRoundedNow() {
-  const d = new Date();
-  const mins = d.getMinutes();
-  // Round UP to next 15-min slot so drop-off is always in the future
-  const rounded = Math.ceil(mins / 15) * 15;
-  d.setMinutes(rounded, 0, 0);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Australia/Melbourne',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const get = type => parts.find(p => p.type === type).value;
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  const d = new Date(`${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}:00Z`);
+  const mins = d.getUTCMinutes();
+  const remainder = mins % 15;
+  if (remainder !== 0) d.setUTCMinutes(mins + (15 - remainder), 0, 0);
+  else d.setUTCSeconds(0, 0);
   return d;
 }
 
@@ -22,38 +44,33 @@ function addHours(date, h) {
   return new Date(date.getTime() + h * 3600000);
 }
 
+// Display helpers — read UTC parts (wall-clock model)
 function formatTime(date) {
-  return new Date(date).toLocaleTimeString("en-AU", {
-    hour: "2-digit", minute: "2-digit", hour12: true,
-  });
+  const d = new Date(date);
+  const h = d.getUTCHours() % 12 || 12;
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${h}:${m} ${d.getUTCHours() >= 12 ? 'pm' : 'am'}`;
 }
 
 function formatDate(date) {
   const d = new Date(date);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-  if (d.toDateString() === today.toDateString()) return "Today";
-  if (d.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-  return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+  const now = getRoundedNow();
+  const todayKey    = `${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}`;
+  const tomorrowD   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  const tomorrowKey = `${tomorrowD.getUTCFullYear()}-${tomorrowD.getUTCMonth()}-${tomorrowD.getUTCDate()}`;
+  const dKey = `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
+  if (dKey === todayKey) return 'Today';
+  if (dKey === tomorrowKey) return 'Tomorrow';
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${DAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
 }
 
 function formatDateFull(date) {
-  return new Date(date).toLocaleDateString("en-AU", {
-    weekday: "short", day: "numeric", month: "short", year: "numeric",
-  });
-}
-
-function toLocalISO(date) {
   const d = new Date(date);
-  return [
-    d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2, "0"),
-    String(d.getDate()).padStart(2, "0"),
-  ].join("-") + "T" +
-  [
-    String(d.getHours()).padStart(2, "0"),
-    String(d.getMinutes()).padStart(2, "0"),
-  ].join(":");
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${DAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 function calcDays(drop, pick) {
@@ -100,17 +117,17 @@ function getOpenStatus(timings) {
 function isWithinOpenHours(date, timings) {
   if (!timings || timings.is24Hours) return true;
   const d   = new Date(date);
-  const day = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"][d.getDay()];
+  // Use UTC methods — dates are fake-UTC (Melbourne wall-clock stored as UTC)
+  const day = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"][d.getUTCDay()];
   const t   = timings[day];
-  if (!t) return true; // unknown day — don't block
-  if (t.closed) return false; // explicitly closed this day
-  if (!t.open || !t.close) return true; // no hours set — don't block
-  const mins     = d.getHours() * 60 + d.getMinutes();
-  const openMins = Number(t.open.split(":")[0])  * 60 + Number(t.open.split(":")[1]);
+  if (!t) return true;
+  if (t.closed) return false;
+  if (!t.open || !t.close) return true;
+  const mins      = d.getUTCHours() * 60 + d.getUTCMinutes();
+  const openMins  = Number(t.open.split(":")[0])  * 60 + Number(t.open.split(":")[1]);
   const closeMins = Number(t.close.split(":")[0]) * 60 + Number(t.close.split(":")[1]);
-  // Handle cross-midnight
   if (closeMins < openMins) {
-    return mins >= openMins || mins < closeMins; // strict < at close, consistent with standard hours
+    return mins >= openMins || mins < closeMins;
   }
   return mins >= openMins && mins < closeMins;
 }
@@ -135,14 +152,13 @@ const PRESETS = [
 const STEPS = ["station", "dates", "bags", "pay", "done"];
 const STEP_LABELS = ["Station", "When", "Bags", "Pay", "✓"];
 
-// Next 60 days + 15-min time slots for the drum picker
+// Next 60 days as fake-UTC midnight Dates based on Melbourne calendar date
 function getNext14Days() {
   const days = [];
-  const today = new Date(); today.setHours(0,0,0,0);
+  const now = getRoundedNow(); // fake-UTC Melbourne now
   for (let i = 0; i < 60; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    days.push(d);
+    // Midnight of Melbourne day i from now (fake-UTC)
+    days.push(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i)));
   }
   return days;
 }
@@ -151,7 +167,7 @@ function getTimeSlots() {
   const slots = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
-      slots.push({ h, m, label: new Date(0,0,0,h,m).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", hour12: true }) });
+      slots.push({ h, m, label: `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'pm' : 'am'}` });
     }
   }
   return slots;
@@ -248,11 +264,15 @@ function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose, timin
   const DAYS       = getNext14Days();
   const TIME_SLOTS = getTimeSlots();
 
+  // All dates are fake-UTC (Melbourne wall-clock as UTC) — use UTC methods throughout
   const d = new Date(initialDate);
-  const initDay = Math.max(0, DAYS.findIndex(x => x.toDateString() === d.toDateString()));
-  // Snap to nearest 15-min slot for this hour
-  const nearestSlotMin = Math.round(d.getMinutes() / 15) * 15;
-  const slotH = nearestSlotMin === 60 ? d.getHours() + 1 : d.getHours();
+  const initDay = Math.max(0, DAYS.findIndex(x =>
+    x.getUTCFullYear() === d.getUTCFullYear() &&
+    x.getUTCMonth()    === d.getUTCMonth()    &&
+    x.getUTCDate()     === d.getUTCDate()
+  ));
+  const nearestSlotMin = Math.round(d.getUTCMinutes() / 15) * 15;
+  const slotH = nearestSlotMin === 60 ? d.getUTCHours() + 1 : d.getUTCHours();
   const slotM = nearestSlotMin === 60 ? 0 : nearestSlotMin;
   const initSlot = Math.max(0, TIME_SLOTS.findIndex(s => s.h === slotH && s.m === slotM));
 
@@ -260,16 +280,15 @@ function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose, timin
   const [slotIdx, setSlotIdx] = useState(initSlot);
 
   const getResult = () => {
-    const day  = new Date(DAYS[dayIdx]);
+    const day  = DAYS[dayIdx]; // fake-UTC midnight
     const slot = TIME_SLOTS[slotIdx];
-    day.setHours(slot.h, slot.m, 0, 0);
-    return day;
+    return new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), slot.h, slot.m, 0, 0));
   };
 
-  const isValid = () => getResult() >= (minDate || new Date());
+  const isValid = () => getResult() >= (minDate || getRoundedNow());
 
-  const today = new Date(); today.setHours(0,0,0,0);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const today    = getRoundedNow();
+  const tomorrow = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
 
   return (
     <div className={styles.pickerOverlay} onClick={onClose}>
@@ -308,9 +327,12 @@ function DateTimePicker({ title, initialDate, minDate, onConfirm, onClose, timin
               selectedIndex={dayIdx}
               onSelect={setDayIdx}
               getLabel={d2 => {
-                if (d2.toDateString() === today.toDateString()) return "Today";
-                if (d2.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-                return d2.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+                const WDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const MTHS  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                const sameUTCDay = (a, b) => a.getUTCFullYear() === b.getUTCFullYear() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCDate() === b.getUTCDate();
+                if (sameUTCDay(d2, today))    return "Today";
+                if (sameUTCDay(d2, tomorrow)) return "Tomorrow";
+                return `${WDAYS[d2.getUTCDay()]}, ${d2.getUTCDate()} ${MTHS[d2.getUTCMonth()]}`;
               }}
             />
           </div>
@@ -1132,7 +1154,7 @@ function StepDates({ station, onDone, onChangeStation, onOpenPicker, staleNotice
             onClick={() => onOpenPicker({
               title: "Drop-off Time",
               initialDate: dropOff,
-              minDate: new Date(),
+              minDate: getRoundedNow(),
               onConfirm: setDropOffCustom,
               timings,
             })}
@@ -1665,7 +1687,7 @@ export default function BookingDrawer({ isOpen, onClose, onOpen, initialSearch, 
 
   const applyDraft = (draft) => {
     if (!draft) return;
-    const now = new Date();
+    const now = getRoundedNow();
     const draftDropOff = draft.dropOff ? new Date(draft.dropOff) : null;
     const datesStale   = draftDropOff && draftDropOff < now;
 

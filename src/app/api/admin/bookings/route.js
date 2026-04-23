@@ -34,9 +34,9 @@ export async function GET(req) {
     //    stations separately, so the N+1 populate is unnecessary
 const bookings = await Booking.find(query)
   .select(
-    "fullName email phone stationId dropOffDate pickUpDate " +
-    "smallBagCount largeBagCount luggageCount totalAmount " +
-    "paymentId specialInstructions status createdAt"
+    "bookingReference fullName email phone stationId dropOffDate pickUpDate " +
+    "smallBagCount largeBagCount luggageCount totalAmount pendingRefundAmount " +
+    "paymentId specialInstructions status cancellationReason cancelledAt createdAt"
   )
   .populate("stationId", "_id name")
   .sort({ dropOffDate: -1 })

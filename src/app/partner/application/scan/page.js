@@ -5,6 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Html5Qrcode } from 'html5-qrcode';
+import { formatDate, formatTime } from '@/lib/formatDate';
 import styles from './Scan.module.css';
 
 export default function ScanPage() {
@@ -446,30 +447,22 @@ export default function ScanPage() {
                   
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Drop-off Date:</span>
-                    <span className={styles.detailValue}>
-                      {new Date(bookingData.dropOffDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </span>
+                    <span className={styles.detailValue}>{formatDate(bookingData.dropOffDate)}</span>
                   </div>
-                  
+
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Drop-off Time:</span>
-                    <span className={styles.detailValue}>
-                      {new Date(bookingData.dropOffDate).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                    </span>
+                    <span className={styles.detailValue}>{formatTime(bookingData.dropOffDate)}</span>
                   </div>
-                  
+
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Pick-up Date:</span>
-                    <span className={styles.detailValue}>
-                      {new Date(bookingData.pickUpDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </span>
+                    <span className={styles.detailValue}>{formatDate(bookingData.pickUpDate)}</span>
                   </div>
-                  
+
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Pick-up Time:</span>
-                    <span className={styles.detailValue}>
-                      {new Date(bookingData.pickUpDate).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                    </span>
+                    <span className={styles.detailValue}>{formatTime(bookingData.pickUpDate)}</span>
                   </div>
                   
                   <div className={styles.detailDivider}></div>
@@ -516,7 +509,7 @@ export default function ScanPage() {
                     <div className={styles.detailRow}>
                       <span className={styles.detailLabel}>Checked In:</span>
                       <span className={styles.detailValue}>
-                        {new Date(bookingData.checkInTime).toLocaleString('en-AU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        {formatDate(bookingData.checkInTime)} {formatTime(bookingData.checkInTime)}
                       </span>
                     </div>
                   )}

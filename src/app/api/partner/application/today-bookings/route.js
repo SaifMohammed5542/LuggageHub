@@ -56,15 +56,20 @@ export async function GET(request) {
 
     const stationId = partner.assignedStation;
 
-    // 3. Calculate today's date range (midnight to midnight)
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    // 3. Calculate today's date range in Melbourne wall-clock UTC
+    // Dates stored as fake-UTC (Melbourne wall-clock = UTC parts), so compare UTC midnight-to-midnight
+    const melbParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Australia/Melbourne',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(new Date());
+    const get = t => melbParts.find(p => p.type === t).value;
+    const todayStart = new Date(`${get('year')}-${get('month')}-${get('day')}T00:00:00.000Z`);
+    const todayEnd   = new Date(`${get('year')}-${get('month')}-${get('day')}T23:59:59.999Z`);
 
     console.log('📅 Fetching today\'s bookings:', {
       partner: partner.username,
       station: stationId,
-      date: todayStart.toLocaleDateString()
+      date: `${get('year')}-${get('month')}-${get('day')} (Melbourne)`
     });
 
     // 4. Find today's DROP-OFFS (status: pending or confirmed)

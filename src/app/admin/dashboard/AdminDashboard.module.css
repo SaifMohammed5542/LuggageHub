@@ -132,28 +132,19 @@
    ========================================== */
 
 .tabContainer {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
   animation: fadeIn 0.5s ease-out;
 }
 
-.tabContainer::-webkit-scrollbar {
-  height: 4px;
+@media (max-width: 480px) {
+  .tabContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.tabContainer::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.tabContainer::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 10px;
-}
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -161,7 +152,7 @@
 }
 
 .tab {
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
   border: none;
   border-radius: 10px;
   background: var(--panel-bg);
@@ -175,6 +166,15 @@
   position: relative;
   overflow: hidden;
   border: 1px solid var(--panel-border);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .tab {
+    font-size: 0.75rem;
+    padding: 0.6rem 0.5rem;
+    white-space: normal;
+  }
 }
 
 .tab::before {
@@ -247,8 +247,14 @@
 
 @media (min-width: 1024px) {
   .overviewGrid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .overviewGrid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
@@ -269,6 +275,8 @@
 .statCard:nth-child(2) { animation-delay: 0.2s; }
 .statCard:nth-child(3) { animation-delay: 0.3s; }
 .statCard:nth-child(4) { animation-delay: 0.4s; }
+.statCard:nth-child(5) { animation-delay: 0.5s; }
+.statCard:nth-child(6) { animation-delay: 0.6s; }
 
 @keyframes scaleIn {
   from {

@@ -220,6 +220,14 @@ export default function PartnerAppLayout({ children }) {
             <span className={styles.navIcon}>📋</span>
             <span className={styles.navLabel}>History</span>
           </button>
+
+          <button
+            className={`${styles.navItem} ${pathname === '/partner/application/earnings' ? styles.navItemActive : ''}`}
+            onClick={() => router.push('/partner/application/earnings')}
+          >
+            <span className={styles.navIcon}>💰</span>
+            <span className={styles.navLabel}>Earnings</span>
+          </button>
         </nav>
       </div>
     </>

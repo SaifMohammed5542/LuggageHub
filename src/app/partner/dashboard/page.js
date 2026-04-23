@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { decodeToken } from '../../../utils/decodeToken';
 import styles from './PartnerDashboard.module.css';
+import { formatDateTime as fmtDT } from '@/lib/formatDate';
 
 /**
  * Partner Dashboard (updated)
@@ -16,7 +17,10 @@ import styles from './PartnerDashboard.module.css';
  * with focusable <div role="button"> elements so inner <button>s are allowed.
  */
 
-const PARTNER_SHARE = 0.4; // 40% partner share (change if needed)
+// Partner flat rates: A$2/small bag/day, A$4/large bag/day
+const SMALL_BAG_PARTNER_RATE = 2;
+const LARGE_BAG_PARTNER_RATE = 4;
+const HANDOVER_PARTNER_SHARE = 0.4; // Key handovers remain at 40%
 
 export default function PartnerDashboard() {
   const [station, setStation] = useState(null);
@@ -27,6 +31,8 @@ export default function PartnerDashboard() {
   const [expandedMonth, setExpandedMonth] = useState(null);
   const [expandedWeeks, setExpandedWeeks] = useState({});
   const [detailBooking, setDetailBooking] = useState(null);
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [earningsSummary, setEarningsSummary] = useState(null);
   const router = useRouter();
 
   const getWeekRange = (date) => {
@@ -41,52 +47,27 @@ export default function PartnerDashboard() {
   };
 
 
-  // Format UTC dates without conversion
-const formatUTC = (dateString) => {
-  if (!dateString) return '-';
-  const d = new Date(dateString);
-  const month = d.getUTCMonth() + 1;
-  const day = d.getUTCDate();
-  const year = d.getUTCFullYear();
-  const hours = d.getUTCHours();
-  const minutes = d.getUTCMinutes();
-  const hour12 = hours % 12 || 12;
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  return `${month}/${day}/${year} ${hour12}:${String(minutes).padStart(2, '0')} ${ampm}`;
-};
+  const formatUTC = fmtDT;
 
 
-const bookingGrossAmount = (booking) => {
-  // ✅ CASE 1: New bookings with totalAmount field
-  if (booking?.totalAmount != null && booking.totalAmount > 0) {
-    return Number(booking.totalAmount);
-  }
-  
-  // Calculate days for fallback calculations
-  const dropOff = new Date(booking.dropOffDate);
-  const pickUp = new Date(booking.pickUpDate);
-  const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
-  
-  // ✅ CASE 2: Bookings with ACTUAL bag breakdown (at least one bag type > 0)
-  const hasSmallBags = (booking.smallBagCount || 0) > 0;
-  const hasLargeBags = (booking.largeBagCount || 0) > 0;
-  
-  if (hasSmallBags || hasLargeBags) {
-    const smallBagTotal = (booking.smallBagCount || 0) * days * 3.99;
-    const largeBagTotal = (booking.largeBagCount || 0) * days * 8.49;
-    return smallBagTotal + largeBagTotal;
-  }
-  
-  // ✅ CASE 3: Old bookings with only luggageCount (all bags were 7.99)
-  return (booking.luggageCount || 0) * days * 7.99;
-};
 
 
-  const bookingPartnerShare = (booking) => +(bookingGrossAmount(booking) * PARTNER_SHARE);
+  const bookingPartnerShare = (booking) => {
+    const dropOff = new Date(booking.dropOffDate);
+    const pickUp = new Date(booking.pickUpDate);
+    const days = Math.max(1, Math.ceil((pickUp - dropOff) / (1000 * 60 * 60 * 24)));
+    const smallCount = booking.smallBagCount || 0;
+    const largeCount = booking.largeBagCount || 0;
+    if (smallCount > 0 || largeCount > 0) {
+      return +((smallCount * days * SMALL_BAG_PARTNER_RATE) + (largeCount * days * LARGE_BAG_PARTNER_RATE));
+    }
+    // Legacy bookings with only luggageCount — treat as small bags
+    return +((booking.luggageCount || 0) * days * SMALL_BAG_PARTNER_RATE);
+  };
 
   const handoverPartnerShare = (handover) => {
     const gross = (handover.price !== undefined && handover.price !== null) ? Number(handover.price) : 0;
-    return +(gross * PARTNER_SHARE);
+    return +(gross * HANDOVER_PARTNER_SHARE);
   };
 
   const sumPartnerShares = (items, type = 'booking') => {
@@ -142,11 +123,26 @@ useEffect(() => {
 
   useEffect(() => {
     const fetchPartnerData = async () => {
-      const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       const role = localStorage.getItem('role');
 
-      if (!token || !userId || role !== 'partner') {
+      if (!userId || role !== 'partner') {
+        router.push('/login');
+        return;
+      }
+
+      // Always refresh token from cookie first — same pattern as admin dashboard
+      let token = localStorage.getItem('token');
+      try {
+        const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          token = refreshData.token;
+          localStorage.setItem('token', token);
+        }
+      } catch { /* use existing token if refresh fails */ }
+
+      if (!token) {
         router.push('/login');
         return;
       }
@@ -171,6 +167,12 @@ useEffect(() => {
           const sorted = [...(bookingsData.bookings || [])].sort((a, b) => new Date(b.dropOffDate) - new Date(a.dropOffDate));
           setBookings(sorted);
         }
+
+        // Earnings summary (cookie auth)
+        fetch('/api/partner/application/earnings', { credentials: 'include' })
+          .then(r => r.json())
+          .then(d => { if (!d.error) setEarningsSummary(d); })
+          .catch(() => {});
 
         const hoRes = await fetch(`/api/partner/${userId}/key-handovers`, { headers: { Authorization: `Bearer ${token}` } });
         const hoData = await hoRes.json();
@@ -245,7 +247,7 @@ useEffect(() => {
         { key: 'paymentId', label: 'Payment ID' },
         { key: 'status', label: 'Status' },
         { key: 'specialInstructions', label: 'Instructions' },
-        { key: 'yourShare', label: `Your Share (${Math.round(PARTNER_SHARE * 100)}%)` }
+        { key: 'yourShare', label: 'Your Earnings' }
       ];
       const csv = toCSV(rows, cols);
       downloadCSV(csv, filename);
@@ -271,7 +273,7 @@ useEffect(() => {
         { key: 'keyCode', label: 'Key code' },
         { key: 'status', label: 'Status' },
         { key: 'specialInstructions', label: 'Instructions' },
-        { key: 'yourShare', label: `Your Share (${Math.round(PARTNER_SHARE * 100)}%)` }
+        { key: 'yourShare', label: 'Your Earnings' }
       ];
       const csv = toCSV(rows, cols);
       downloadCSV(csv, filename);
@@ -320,6 +322,46 @@ useEffect(() => {
   const fmt = (n) => `A$${(Math.round(n * 100) / 100).toFixed(2)}`;
 
   const renderBookingsByMonth = () => {
+    // Search mode: flat filtered list
+    const q = bookingSearch.trim().toLowerCase();
+    if (q) {
+      const results = bookings.filter(b => {
+        const name = (b.fullName || '').toLowerCase();
+        const email = (b.email || '').toLowerCase();
+        const drop = formatUTC(b.dropOffDate).toLowerCase();
+        const ref = (b.bookingReference || '').toLowerCase();
+        return name.includes(q) || email.includes(q) || drop.includes(q) || ref.includes(q);
+      });
+      if (results.length === 0) return <div className={styles.empty}>No bookings match your search.</div>;
+      return (
+        <div>
+          {results.map(b => {
+            const partnerShare = bookingPartnerShare(b);
+            const statusColors = { confirmed: '#dbeafe', stored: '#dcfce7', completed: '#f3f4f6', cancelled: '#fee2e2', no_show: '#fef3c7' };
+            return (
+              <div key={b._id} className={styles.bookingRow} style={{ marginBottom: 8, borderRadius: 8, border: '1px solid #e5e7eb', padding: '10px 14px' }}>
+                <div className={styles.bookingHeaderRow}>
+                  <div className={styles.bookingName}>{b.fullName}</div>
+                  <div className={styles.amount}>Your Earnings: {fmt(partnerShare)}</div>
+                </div>
+                <div className={styles.bookingMeta}>
+                  <div><strong>Drop-off:</strong> {formatUTC(b.dropOffDate)}</div>
+                  <div><strong>Pick-up:</strong> {formatUTC(b.pickUpDate)}</div>
+                  <div><strong>Small:</strong> {b.smallBagCount ?? 0} · <strong>Large:</strong> {b.largeBagCount ?? 0}</div>
+                  <div>
+                    <span style={{ background: statusColors[b.status] || '#f3f4f6', borderRadius: 6, padding: '1px 8px', fontSize: 12, fontWeight: 600 }}>{b.status}</span>
+                  </div>
+                </div>
+                <div className={styles.bookingActions}>
+                  <button type="button" className={styles.smallButton} onClick={() => setDetailBooking(b)}>View</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
     const months = groupItemsByMonth(bookings);
     if (months.length === 0) return <div className={styles.empty}>No bookings found for your station.</div>;
 
@@ -593,12 +635,85 @@ useEffect(() => {
                   <div><strong>Bookings Payout:</strong> {fmt(currentBookingsPayout)}</div>
                   <div><strong>Handovers Payout:</strong> {fmt(currentHandoversPayout)}</div>
                   <div style={{ marginTop: 8, fontWeight: 900 }}><strong>Total Estimated Payout:</strong> {fmt(currentTotalPayout)}</div>
-                  <div style={{ marginTop: 8, color: 'var(--color-muted)', fontWeight:700, fontSize: 13 }}>
-                    Partner share is <strong>{Math.round(PARTNER_SHARE * 100)}%</strong>. These are estimated values based on completed bookings/handovers.
+                  <div style={{ marginTop: 8, color: 'var(--color-muted)', fontWeight: 700, fontSize: 13 }}>
+                    A$2/small bag/day · A$4/large bag/day
                   </div>
                 </div>
               </div>
             </section>
+
+            {/* Bonus progress */}
+            {earningsSummary?.bonusProgress?.length > 0 && (
+              <section className={styles.card} style={{ marginTop: 12 }}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>🎁 Bonus Progress</h3>
+                </div>
+                <div className={styles.cardBody}>
+                  {earningsSummary.bonusProgress.map(offer => {
+                    const pct = offer.earned ? 100 : Math.round((offer.current / offer.threshold) * 100);
+                    return (
+                      <div key={offer.offerId} style={{ marginBottom: 14 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
+                          <span style={{ fontWeight: 600 }}>{offer.name}</span>
+                          <span style={{ color: offer.earned ? '#16a34a' : 'var(--color-muted)' }}>
+                            {offer.earned ? `✓ Earned A$${offer.rewardAmount}` : `${offer.current}/${offer.threshold}`}
+                          </span>
+                        </div>
+                        <div style={{ background: '#e5e7eb', borderRadius: 99, height: 8, overflow: 'hidden' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', borderRadius: 99, background: offer.earned ? '#16a34a' : '#0284C7', transition: 'width 0.4s' }} />
+                        </div>
+                        {offer.windowEnd && !offer.earned && (
+                          <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 3 }}>
+                            Resets {new Date(offer.windowEnd).toLocaleDateString('en-AU')}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Monthly payout history */}
+            {earningsSummary?.monthlyBreakdown?.length > 0 && (
+              <section className={styles.card} style={{ marginTop: 12 }}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>📅 Monthly Earnings</h3>
+                </div>
+                <div className={styles.cardBody} style={{ padding: 0 }}>
+                  {earningsSummary.monthlyBreakdown.map((m, i) => (
+                    <div key={m.key} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 16px', gap: 10,
+                      borderBottom: i < earningsSummary.monthlyBreakdown.length - 1 ? '1px solid #f3f4f6' : 'none',
+                      background: m.paid ? '#f0fdf4' : 'transparent',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{
+                          width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12,
+                          background: m.paid ? '#dcfce7' : m.earnings > 0 ? '#fef3c7' : '#f3f4f6',
+                          color: m.paid ? '#16a34a' : m.earnings > 0 ? '#92400e' : '#9ca3af',
+                        }}>
+                          {m.paid ? '✓' : m.earnings > 0 ? '!' : '–'}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 13 }}>{m.month}</div>
+                          {m.paid && m.paidAt && <div style={{ fontSize: 11, color: '#16a34a' }}>Paid {new Date(m.paidAt).toLocaleDateString('en-AU')}</div>}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>A${m.earnings.toFixed(2)}</div>
+                        {m.paid
+                          ? <div style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>✓ Paid</div>
+                          : m.earnings > 0 ? <div style={{ fontSize: 11, color: '#d97706' }}>Pending</div> : null
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           <div className={styles.rightColumn}>
@@ -606,6 +721,15 @@ useEffect(() => {
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Bookings</h2>
                 <div className={styles.cardMeta}>Total bookings: {bookings.length}</div>
+              </div>
+              <div style={{ padding: '0 1rem 0.75rem' }}>
+                <input
+                  type="text"
+                  placeholder="Search by name, email, date…"
+                  value={bookingSearch}
+                  onChange={e => setBookingSearch(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', borderRadius: 8, border: '1px solid #d1d5db', padding: '8px 12px', fontSize: 14 }}
+                />
               </div>
               <div className={styles.cardBody}>
                 {renderBookingsByMonth()}
@@ -639,7 +763,7 @@ useEffect(() => {
               <p><strong>Drop-off:</strong> {formatUTC(detailBooking.dropOffDate)}</p>
 <p><strong>Pick-up:</strong> {formatUTC(detailBooking.pickUpDate)}</p>
               <p><strong>Status:</strong> {detailBooking.status}</p>
-              <p><strong>Your Share ({Math.round(PARTNER_SHARE * 100)}%):</strong> {fmt(bookingPartnerShare(detailBooking))}</p>
+              <p><strong>Your Earnings:</strong> {fmt(bookingPartnerShare(detailBooking))}</p>
               {detailBooking.specialInstructions && <p><strong>Instructions:</strong> {detailBooking.specialInstructions}</p>}
             </div>
             <div className={styles.modalFooter}>
