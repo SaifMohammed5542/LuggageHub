@@ -161,7 +161,7 @@ useEffect(() => {
         const stationData = await stationRes.json();
         if (stationRes.ok) setStation(stationData.station);
 
-        const bookingsRes = await fetch(`/api/partner/${userId}/bookings`, { headers: { Authorization: `Bearer ${token}` } });
+        const bookingsRes = await fetch(`/api/partner/${userId}/bookings`, { credentials: 'include' });
         const bookingsData = await bookingsRes.json();
         if (bookingsRes.ok) {
           const sorted = [...(bookingsData.bookings || [])].sort((a, b) => new Date(b.dropOffDate) - new Date(a.dropOffDate));
