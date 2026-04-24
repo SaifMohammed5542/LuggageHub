@@ -23,12 +23,10 @@ export default async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      // Harden against DNS / server selection stalls
-      serverSelectionTimeoutMS: 8000, // fail fast if cluster not reachable
-      connectTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 5000, // fail within 5s so Vercel's 10s limit isn't breached
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 30000,
       maxPoolSize: 10,
-      // ssl is implied with mongodb+srv, keeping explicit is fine:
       ssl: true,
     };
 
