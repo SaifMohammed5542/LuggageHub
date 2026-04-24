@@ -8,16 +8,14 @@ import { NextResponse } from 'next/server';
 const getParams = async (p) => (typeof p?.then === 'function' ? await p : p);
 
 export async function GET(req, context) {
-  await dbConnect();
-
-  // ✅ await params (not context)
-  const { id: userId } = await getParams(context.params);
-
-  const authHeader = req.headers.get('authorization');
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-  if (!token) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-
   try {
+    await dbConnect();
+
+    const { id: userId } = await getParams(context.params);
+
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    if (!token) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const decodedId = decoded.id || decoded.userId; // tolerate either key
 

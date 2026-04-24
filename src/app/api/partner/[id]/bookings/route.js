@@ -42,15 +42,14 @@ async function verifyAdminOrSelf(req, userId) {
 }
 
 export async function GET(req, ctx) {
-  await dbConnect();
-  const { id: userId } = await getParams(ctx.params);
-
-  const auth = await verifyAdminOrSelf(req, userId);
-  if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
-  }
-
   try {
+    await dbConnect();
+    const { id: userId } = await getParams(ctx.params);
+
+    const auth = await verifyAdminOrSelf(req, userId);
+    if (auth.error) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
+    }
     // 1) find partner & their station
     const user = await User.findById(userId).lean();
     if (!user?.assignedStation) {
