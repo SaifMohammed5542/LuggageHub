@@ -22,6 +22,7 @@ export default function PartnerAppLayout({ children }) {
       return;
     }
 
+    setIsLoading(true);
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/auth/refresh', {
