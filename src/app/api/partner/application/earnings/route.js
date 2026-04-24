@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
+import Station from '@/models/Station';
 import Booking from '@/models/booking';
 import BonusOffer from '@/models/BonusOffer';
 import PartnerBonus from '@/models/PartnerBonus';
