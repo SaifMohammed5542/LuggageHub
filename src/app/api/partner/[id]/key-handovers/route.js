@@ -10,17 +10,16 @@ import { NextResponse } from 'next/server';
 const getParams = async (p) => (typeof p?.then === 'function' ? await p : p);
 
 export async function GET(req, ctx) {
-  await dbConnect();
-
-  // ✅ Works for both sync and async params
-  const { id: userId } = await getParams(ctx.params);
-
-  const token = req.headers.get('authorization')?.split(' ')[1];
-  if (!token) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await dbConnect();
+
+    const { id: userId } = await getParams(ctx.params);
+
+    const token = req.headers.get('authorization')?.split(' ')[1];
+    if (!token) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const decodedId = decoded.id || decoded.userId;
 
@@ -43,6 +42,9 @@ export async function GET(req, ctx) {
     return NextResponse.json({ success: true, handovers });
   } catch (err) {
     console.error('Key Handovers Fetch Error:', err);
+    if (err instanceof jwt.JsonWebTokenError) {
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
+    }
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
