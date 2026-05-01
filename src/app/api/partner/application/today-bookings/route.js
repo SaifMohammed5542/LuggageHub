@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
+import Station from '@/models/Station';
 import User from '@/models/User';
 import { verifyJWT } from '@/lib/auth';
 
@@ -56,6 +57,10 @@ export async function GET(request) {
 
     const stationId = partner.assignedStation;
 
+    // Include any stations whose bookings this partner physically manages
+    const coveredStations = await Station.find({ coveredByPartnerStation: stationId }).select('_id').lean();
+    const validStationIds = [stationId, ...coveredStations.map(s => s._id)];
+
     // 3. Calculate today's date range in Melbourne wall-clock UTC
     // Dates stored as fake-UTC (Melbourne wall-clock = UTC parts), so compare UTC midnight-to-midnight
     const melbParts = new Intl.DateTimeFormat('en-CA', {
@@ -74,7 +79,7 @@ export async function GET(request) {
 
     // 4. Find today's DROP-OFFS (status: pending or confirmed)
     const todayDropOffs = await Booking.find({
-      stationId,
+      stationId: { $in: validStationIds },
       dropOffDate: {
         $gte: todayStart,
         $lte: todayEnd
@@ -87,7 +92,7 @@ export async function GET(request) {
 
     // 5. Find today's PICK-UPS (status: stored)
     const todayPickUps = await Booking.find({
-      stationId,
+      stationId: { $in: validStationIds },
       pickUpDate: {
         $gte: todayStart,
         $lte: todayEnd

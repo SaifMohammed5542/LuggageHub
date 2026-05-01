@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Booking from '@/models/booking';
+import Station from '@/models/Station';
 import User from '@/models/User';
 import { verifyJWT } from '@/lib/auth';
 
@@ -70,7 +71,10 @@ export async function POST(request) {
       );
     }
 
-    if (booking.stationId.toString() !== partner.assignedStation.toString()) {
+    const coveredStations = await Station.find({ coveredByPartnerStation: partner.assignedStation }).select('_id').lean();
+    const validStationIds = [partner.assignedStation.toString(), ...coveredStations.map(s => s._id.toString())];
+
+    if (!validStationIds.includes(booking.stationId.toString())) {
       return NextResponse.json(
         { success: false, error: 'This booking is not for your station' },
         { status: 403 }
