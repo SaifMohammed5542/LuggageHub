@@ -107,6 +107,7 @@ export async function GET(req, ctx) {
     };
 
     const bookings = await Booking.find(query)
+      .select('fullName email phone smallBagCount largeBagCount luggageCount dropOffDate pickUpDate status bookingReference specialInstructions paymentId checkInTime')
       .sort({ dropOffDate: -1 })
       .lean();
 
@@ -116,15 +117,12 @@ export async function GET(req, ctx) {
     if (debug) {
       const sample = bookings.slice(0, 3).map(b => ({
         _id: b._id,
-        station: b.station,
-        stationId: b.stationId,
-        stationName: b.stationName,
-        stationSlug: b.stationSlug,
         dropOffDate: b.dropOffDate,
+        status: b.status,
+        fullName: b.fullName,
       }));
       return NextResponse.json({
         success: true,
-        matchedBy: query.$or.map((q) => Object.keys(q)[0]),
         stationContext: { id: stationIdStr, name: station.name, slug: station.slug },
         count: bookings.length,
         sample,
