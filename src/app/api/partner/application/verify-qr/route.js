@@ -82,17 +82,20 @@ export async function GET(request) {
       );
     }
 
-    // 6. Verify booking belongs to partner's station
+    // 6. Verify booking belongs to partner's station (or a station they cover)
     const bookingStationId = booking.stationId?._id || booking.stationId;
     const partnerStationId = partner.assignedStation;
 
-    if (bookingStationId.toString() !== partnerStationId.toString()) {
+    const coveredStations = await Station.find({ coveredByPartnerStation: partnerStationId }).select('_id').lean();
+    const validStationIds = [partnerStationId.toString(), ...coveredStations.map(s => s._id.toString())];
+
+    if (!validStationIds.includes(bookingStationId.toString())) {
       console.log('❌ Wrong station. Booking:', bookingStationId, 'Partner:', partnerStationId);
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'This booking is not for your station',
-          wrongStation: true 
+          wrongStation: true
         },
         { status: 403 }
       );

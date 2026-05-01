@@ -110,6 +110,13 @@ const StationSchema = new mongoose.Schema({
     ref: 'User'
   }],
 
+  // Station whose assigned partner physically manages this station's bookings
+  coveredByPartnerStation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Station',
+    default: null
+  },
+
   rating: { 
     type: Number, 
     default: 4.8,

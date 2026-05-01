@@ -427,7 +427,12 @@ export default function ScanPage() {
                     <span className={styles.detailLabel}>Booking Ref:</span>
                     <span className={styles.detailValue}>{bookingData.bookingReference}</span>
                   </div>
-                  
+
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Station:</span>
+                    <span className={styles.detailValue}>{bookingData.stationName}</span>
+                  </div>
+
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Customer:</span>
                     <span className={styles.detailValue}>{bookingData.fullName}</span>

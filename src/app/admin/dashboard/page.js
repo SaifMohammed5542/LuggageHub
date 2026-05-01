@@ -346,6 +346,7 @@ const [editStation, setEditStation] = useState({
     is24Hours: false,
   });
   const [editStationCapacity, setEditStationCapacity] = useState(10);
+  const [editStationCoveredBy, setEditStationCoveredBy] = useState("");
 
   // UX states: months-first
   const [expandedMonth, setExpandedMonth] = useState(null); // month string like "November 2025"
@@ -490,6 +491,7 @@ useEffect(() => {
 
       setEditStationImages((selectedStation.images && selectedStation.images.join(", ")) || "");
       setEditStationCapacity(selectedStation.capacity || 10);
+      setEditStationCoveredBy(selectedStation.coveredByPartnerStation?._id || selectedStation.coveredByPartnerStation || "");
     }
     // include defaultDayTiming here so eslint won't complain that it's referenced above when creating timing defaults
   }, [selectedStation, allBookings, allKeyHandovers, defaultDayTiming]);
@@ -1115,6 +1117,7 @@ const getBookingAmount = (booking) => {
       },
       timings: { ...editStationTimings },
       capacity: editStationCapacity,
+      coveredByPartnerStation: editStationCoveredBy || null,
     };
 
     try {
@@ -2388,6 +2391,22 @@ Total: ${booking.luggageCount}
                       <input className={styles.input} value={editStation.latitude} onChange={(e) => setEditStation((s) => ({ ...s, latitude: e.target.value }))} placeholder="Latitude (e.g., -33.86)" />
                       <input className={styles.input} value={editStation.longitude} onChange={(e) => setEditStation((s) => ({ ...s, longitude: e.target.value }))} placeholder="Longitude (e.g., 151.20)" />
                       <input className={styles.input} value={editStationImages} onChange={(e) => setEditStationImages(e.target.value)} placeholder="Station images (optional) — comma separated URLs" />
+                    </div>
+                    <div style={{ marginTop: 12 }}>
+                      <label className={styles.label}>🔗 Physically managed by another station's partner (optional)</label>
+                      <select
+                        className={`${styles.input} ${styles.fullWidth}`}
+                        value={editStationCoveredBy}
+                        onChange={(e) => setEditStationCoveredBy(e.target.value)}
+                      >
+                        <option value="">— None (this station has its own partner) —</option>
+                        {stations.filter(s => s._id !== selectedStation._id).map(s => (
+                          <option key={s._id} value={s._id}>{s.name}</option>
+                        ))}
+                      </select>
+                      <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                        If set, the partner assigned to the selected station can also scan and manage bookings for this station.
+                      </p>
                     </div>
                   </div>
 
