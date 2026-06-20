@@ -222,6 +222,8 @@ export async function POST(request) {
 
     // ✅ Save the booking with reference
     console.log('💾 Saving booking to database...');
+    const isStripe = paymentData?.provider === "stripe";
+
     const newBooking = new Booking({
       bookingReference,
       fullName,
@@ -233,7 +235,7 @@ export async function POST(request) {
       largeBagCount,
       luggageCount,
       specialInstructions,
-      paymentId: paymentData?.paypalOrderId,
+      paymentId: isStripe ? paymentData?.stripePaymentIntentId : paymentData?.paypalOrderId,
       stationId,
       userId,
       totalAmount,
@@ -259,17 +261,22 @@ try {
 
     const newPayment = new Payment({
       paymentReference,
-      paypalOrderId: paymentData?.paypalOrderId,
-      paypalTransactionId: paymentData?.paypalTransactionId,
+      ...(isStripe
+        ? { stripePaymentIntentId: paymentData?.stripePaymentIntentId, paymentMethod: "stripe" }
+        : {
+            paypalOrderId: paymentData?.paypalOrderId,
+            paypalTransactionId: paymentData?.paypalTransactionId,
+            paymentMethod: "paypal",
+            paypalResponse: paymentData?.fullPayPalResponse,
+            payerId: paymentData?.payerId,
+          }
+      ),
       amount: totalAmount,
-      currency: paymentData?.currency || 'AUD',
-      status: 'completed',
+      currency: paymentData?.currency || "AUD",
+      status: "completed",
       payerEmail: paymentData?.payerEmail || email,
       payerName: paymentData?.payerName || fullName,
-      payerId: paymentData?.payerId,
       bookingId: newBooking._id,
-      paymentMethod: 'paypal',
-      paypalResponse: paymentData?.fullPayPalResponse,
     });
 
     await newPayment.save();
@@ -324,7 +331,7 @@ try {
     try {
       await transporter.sendMail({
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-        to:  process.env.EMAIL_ADMIN,
+        to:  'luggageterminal.errors@gmail.com',
         subject: `🧳 New Luggage Storage Booking - ${bookingReference}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -339,10 +346,10 @@ try {
                 <strong>Payment Ref:</strong> ${paymentReference}
               </p>
               <p style="font-size: 14px; color: #666; margin: 5px 0;">
-                <strong>PayPal Order:</strong> ${paymentData?.paypalOrderId || 'N/A'}
+                <strong>Provider:</strong> ${isStripe ? 'Stripe' : 'PayPal'}
               </p>
               <p style="font-size: 14px; color: #666; margin: 5px 0;">
-                <strong>PayPal Transaction:</strong> ${paymentData?.paypalTransactionId || 'N/A'}
+                <strong>Transaction ID:</strong> ${isStripe ? (paymentData?.stripePaymentIntentId || 'N/A') : (paymentData?.paypalTransactionId || 'N/A')}
               </p>
             </div>
 
@@ -460,7 +467,10 @@ try {
               <p style="font-size: 20px; font-weight: bold; color: #2e7d32; margin: 10px 0;"><strong>💰 Total Paid:</strong> A${totalAmount ? Number(totalAmount).toFixed(2) : '0.00'}</p>
               <p style="color: #4caf50; font-weight: bold;">✓ Payment Confirmed</p>
               <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                PayPal Transaction ID: ${paymentData?.paypalTransactionId || 'N/A'}
+                ${isStripe
+                  ? `Payment ID: ${paymentData?.stripePaymentIntentId || 'N/A'}`
+                  : `PayPal Transaction ID: ${paymentData?.paypalTransactionId || 'N/A'}`
+                }
               </p>
             </div>
 
@@ -493,7 +503,7 @@ try {
           try {
 await transporter.sendMail({
   from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-  to: partner.email,
+  to: 'luggageterminal.errors@gmail.com',
   subject: `🧳 New Booking - ${bookingReference}`,
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

@@ -1,11 +1,14 @@
 // app/api/admin/refund-requests/[id]/approve/route.js
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import Stripe from 'stripe';
 import dbConnect from '../../../../../../lib/dbConnect';
 import RefundRequest from '../../../../../../models/RefundRequest';
 import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
 import { verifyJWT } from '../../../../../../lib/auth';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 function adminAuth(req) {
   const token = req.headers.get('authorization')?.split(' ')[1];
@@ -57,14 +60,14 @@ export async function POST(req, { params }) {
     const payments = await Payment.find({ bookingId: booking._id }).sort({ createdAt: -1 });
     let payment = null;
     for (const p of payments) {
-      if (!p.paypalTransactionId) continue;
+      if (!p.paypalTransactionId && !p.stripePaymentIntentId) continue;
       if (p.status === 'refunded') continue;
       const used = p.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
       if (p.amount - used > 0.005) { payment = p; break; }
     }
     if (!payment) {
       await RefundRequest.findByIdAndUpdate(id, { $set: { status: 'pending' } });
-      return NextResponse.json({ error: 'No refundable PayPal capture found for this booking' }, { status: 400 });
+      return NextResponse.json({ error: 'No refundable payment found for this booking' }, { status: 400 });
     }
 
     const used = payment.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
@@ -72,39 +75,45 @@ export async function POST(req, { params }) {
     if (request.refundAmount > maxRefundable + 0.01) {
       await RefundRequest.findByIdAndUpdate(id, { $set: { status: 'pending' } });
       return NextResponse.json({
-        error: `Max refundable from the most recent payment is A$${maxRefundable.toFixed(2)}. The remaining refund may need to be issued manually via PayPal.`,
+        error: `Max refundable is A$${maxRefundable.toFixed(2)}.`,
       }, { status: 400 });
     }
 
-    // Fire PayPal refund
-    let ppData;
+    // Fire refund via the correct provider
+    let refundId;
     try {
-      const { accessToken, base } = await getPayPalAccessToken();
-      const ppRes = await fetch(`${base}/v2/payments/captures/${payment.paypalTransactionId}/refund`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'PayPal-Request-Id': `rfq-approve-${id}-${Date.now()}`,
-        },
-        body: JSON.stringify({ amount: { value: request.refundAmount.toFixed(2), currency_code: payment.currency || 'AUD' } }),
-      });
-      ppData = await ppRes.json();
-      if (!ppRes.ok) throw new Error(ppData?.details?.[0]?.description || ppData?.message || `PayPal refund failed (${ppRes.status})`);
-    } catch (paypalErr) {
-      // Revert claim so admin can retry
+      if (payment.stripePaymentIntentId) {
+        const refund = await stripe.refunds.create({
+          payment_intent: payment.stripePaymentIntentId,
+          amount: Math.round(request.refundAmount * 100),
+        });
+        refundId = refund.id;
+      } else {
+        const { accessToken, base } = await getPayPalAccessToken();
+        const ppRes = await fetch(`${base}/v2/payments/captures/${payment.paypalTransactionId}/refund`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'PayPal-Request-Id': `rfq-approve-${id}-${Date.now()}`,
+          },
+          body: JSON.stringify({ amount: { value: request.refundAmount.toFixed(2), currency_code: payment.currency || 'AUD' } }),
+        });
+        const ppData = await ppRes.json();
+        if (!ppRes.ok) throw new Error(ppData?.details?.[0]?.description || ppData?.message || `PayPal refund failed (${ppRes.status})`);
+        refundId = ppData.id;
+      }
+    } catch (providerErr) {
       await RefundRequest.findByIdAndUpdate(id, { $set: { status: 'pending' } });
-      throw paypalErr;
+      throw providerErr;
     }
 
-    // Record refund on Payment
     await payment.addRefund({
-      refundId: ppData.id,
+      refundId,
       amount: request.refundAmount,
       reason: request.type === 'cancel' ? 'Booking cancelled by customer' : 'Booking shortened by customer',
     });
 
-    // Update booking
     if (request.type === 'cancel') {
       booking.status = 'cancelled';
       booking.cancellationReason = 'Cancelled by customer — refund approved';
@@ -115,14 +124,13 @@ export async function POST(req, { params }) {
     }
     await booking.save();
 
-    // Finalise request with PayPal details
     await RefundRequest.findByIdAndUpdate(id, {
-      $set: { resolvedAt: new Date(), paypalRefundId: ppData.id },
+      $set: { resolvedAt: new Date(), paypalRefundId: refundId },
     });
 
     return NextResponse.json({
       success: true,
-      refundId: ppData.id,
+      refundId,
       amount: request.refundAmount,
       message: `Refund of A$${request.refundAmount.toFixed(2)} issued successfully`,
     });

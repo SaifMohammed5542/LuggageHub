@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./key-form.module.css";
-import PayPalPayment from "../LuggagePay"; // Import PayPal component
+import PayPalPayment from "../LuggagePay";
+import StripePayment from "../StripePayment";
+
+const PaymentComponent = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER === "stripe"
+  ? StripePayment
+  : PayPalPayment;
 import {
   getNearestAvailableTime,
   formatDateTime,
@@ -896,7 +901,7 @@ const handlePaymentSuccess = async (paymentId) => {
                         </div>
                       ) : canProceedStep3 ? (
                         <div className={styles.paymentSection}>
-                          <PayPalPayment
+                          <PaymentComponent
                             totalAmount={totalAmount}
                             onPaymentSuccess={handlePaymentSuccess}
                             formData={formData}
