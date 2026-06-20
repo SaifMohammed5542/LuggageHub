@@ -4,6 +4,11 @@ import { unstable_batchedUpdates } from "react-dom";
 import dynamic from "next/dynamic";
 import styles from "./BookingDrawer.module.css";
 import PayPalPayment from "@/components/LuggagePay";
+import StripePayment from "@/components/StripePayment";
+
+const PaymentComponent = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER === "stripe"
+  ? StripePayment
+  : PayPalPayment;
 
 const StationMapMapbox = dynamic(() => import("./StationMapMapbox"), { ssr: false });
 
@@ -1505,12 +1510,15 @@ function StepPay({ station, dropOff, pickUp, small, large, total, onDone }) {
         if (data.bookingData) sessionStorage.setItem("lastBooking", JSON.stringify(data.bookingData));
         onDone(data);
       } else {
-        setPayError(data.message || "Booking failed. Please try again.");
+        const msg = data.message || "Payment succeeded but booking creation failed. Please contact support@luggageterminal.com with your email address.";
+        setPayError(msg);
         setProcessing(false);
+        throw new Error(msg);
       }
     } catch (err) {
-      setPayError(`Something went wrong: ${err.message}. Please try again.`);
       setProcessing(false);
+      // Re-throw so LuggagePay can unfreeze its pay button
+      throw err;
     }
   };
 
@@ -1601,38 +1609,67 @@ function StepPay({ station, dropOff, pickUp, small, large, total, onDone }) {
             <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Privacy Policy</a>
           </span>
         </label>
-      </div>
 
-      {/* Payment sticky bar */}
-      {payError && (
-        <div className={styles.payError}>
-          ⚠️ {payError}
-          <button type="button" onClick={() => setPayError(null)} className={styles.payErrorDismiss}>✕</button>
-        </div>
-      )}
-      <div className={styles.payBar}>
-        {processing ? (
-          <div className={styles.processingState}>
-            <div className={styles.spinner} />
-            <div>
-              <div className={styles.processingTitle}>Processing payment…</div>
-              <div className={styles.processingSub}>Please don&apos;t close this window</div>
-            </div>
+        {/* Nudge: show when form is filled but terms not ticked */}
+        {name.trim() && EMAIL_RE.test(email) && phone.trim().length >= 6 && !terms && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            margin: "10px 0 4px",
+            padding: "11px 14px",
+            background: "linear-gradient(135deg, #EFF6FF, #F0FDF4)",
+            border: "1.5px solid #BAE6FD",
+            borderRadius: "14px",
+            animation: "lt-nudge-pulse 2s ease-in-out infinite",
+          }}>
+            <style>{`
+              @keyframes lt-nudge-pulse {
+                0%, 100% { box-shadow: 0 0 0 0 rgba(2,132,199,0.18); }
+                50%       { box-shadow: 0 0 0 6px rgba(2,132,199,0); }
+              }
+            `}</style>
+            <span style={{ fontSize: "20px", lineHeight: 1, flexShrink: 0 }}>☝️</span>
+            <span style={{ fontSize: "13px", fontWeight: "700", color: "#0369A1", lineHeight: "1.4" }}>
+              Tick the checkbox above to reveal your payment form
+            </span>
           </div>
-        ) : isValid ? (
-          <PayPalPayment
+        )}
+
+        {/* Card payment form — only when form is valid */}
+        {isValid && (
+          <PaymentComponent
             totalAmount={total}
             onPaymentSuccess={handlePaymentSuccess}
             formData={formData}
             disabled={processing}
             onProcessingChange={setProcessing}
           />
-        ) : (
-          <div className={styles.payBlocked}>
-            Fill in your details and accept the terms to pay
-          </div>
         )}
       </div>
+
+      {/* Sticky bar: processing spinner or fill-in prompt only */}
+      {payError && (
+        <div className={styles.payError}>
+          ⚠️ {payError}
+          <button type="button" onClick={() => setPayError(null)} className={styles.payErrorDismiss}>✕</button>
+        </div>
+      )}
+      {(!isValid || processing) && (
+        <div className={styles.payBar}>
+          {processing ? (
+            <div className={styles.processingState}>
+              <div className={styles.spinner} />
+              <div>
+                <div className={styles.processingTitle}>Processing payment…</div>
+                <div className={styles.processingSub}>Please don&apos;t close this window</div>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.payBlocked}>
+              Fill in your details and accept the terms to pay
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

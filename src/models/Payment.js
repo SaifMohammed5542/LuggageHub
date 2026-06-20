@@ -10,17 +10,24 @@ const paymentSchema = new mongoose.Schema({
     index: true,
   },
   
-  // ✅ PayPal identifiers
+  // PayPal identifiers (populated for PayPal payments, empty for Stripe)
   paypalOrderId: {
     type: String,
-    required: true,
     index: true,
   },
-  
+
   paypalTransactionId: {
     type: String,
-    required: true,
     unique: true,
+    sparse: true,
+    index: true,
+  },
+
+  // Stripe identifiers (populated for Stripe payments, empty for PayPal)
+  stripePaymentIntentId: {
+    type: String,
+    unique: true,
+    sparse: true,
     index: true,
   },
   
@@ -59,14 +66,14 @@ const paymentSchema = new mongoose.Schema({
     index: true,
   },
   
-  // ✅ Payment method
+  // Payment method
   paymentMethod: {
     type: String,
-    enum: ['paypal', 'card', 'other'],
-    default: 'paypal',
+    enum: ['paypal', 'card', 'stripe', 'other'],
+    default: 'card',
   },
-  
-  // ✅ Raw PayPal response (for debugging/disputes)
+
+  // Raw provider response (for debugging/disputes)
   paypalResponse: {
     type: mongoose.Schema.Types.Mixed,
   },
@@ -147,6 +154,10 @@ paymentSchema.statics.findByPayPalOrderId = function(paypalOrderId) {
 
 paymentSchema.statics.findByPayPalTransactionId = function(paypalTransactionId) {
   return this.findOne({ paypalTransactionId });
+};
+
+paymentSchema.statics.findByStripePaymentIntentId = function(stripePaymentIntentId) {
+  return this.findOne({ stripePaymentIntentId });
 };
 
 export default mongoose.models.Payment || mongoose.model('Payment', paymentSchema);

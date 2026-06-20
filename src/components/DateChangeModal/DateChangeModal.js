@@ -5,6 +5,11 @@ import { useState, useEffect } from "react";
 import styles from "./DateChangeModal.module.css";
 import { formatDateTime as fmtUTC, getMelbourneNow } from "@/lib/formatDate";
 import ExtensionPayPal from "../ExtensionPayPal";
+import StripeExtension from "../StripeExtension";
+
+const ExtensionPayment = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER === "stripe"
+  ? StripeExtension
+  : ExtensionPayPal;
 
 const LUGGAGE_PRICING = {
   small: 3.99,
@@ -71,21 +76,22 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
   const validateStationHours = (dateTimeString) => {
     if (!stationTimings || stationTimings.is24Hours) return { valid: true, message: "" };
 
-    const selectedDate = new Date(dateTimeString);
-    const dayOfWeek = selectedDate.getDay();
+    // Append Z so it's parsed as fake-UTC (Melbourne wall-clock stored as UTC)
+    const selectedDate = new Date(dateTimeString + ':00.000Z');
+    const dayOfWeek = selectedDate.getUTCDay();
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
     const daySchedule = stationTimings[dayName];
 
     if (!daySchedule || daySchedule.closed) {
-      return { 
-        valid: false, 
-        message: `Station closed on ${dayName.charAt(0).toUpperCase() + dayName.slice(1)}s` 
+      return {
+        valid: false,
+        message: `Station closed on ${dayName.charAt(0).toUpperCase() + dayName.slice(1)}s`
       };
     }
 
-    const selectedHour = selectedDate.getHours();
-    const selectedMinute = selectedDate.getMinutes();
+    const selectedHour = selectedDate.getUTCHours();
+    const selectedMinute = selectedDate.getUTCMinutes();
     const selectedTime = selectedHour * 60 + selectedMinute;
 
     const [openHour, openMinute] = daySchedule.open.split(':').map(Number);
@@ -134,10 +140,17 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
     const now = getMelbourneNow();
     const hoursUntilDropOff = (requestedDropOff - now) / (1000 * 60 * 60);
 
-    if (hoursUntilDropOff < 2 && requestedDropOff < currentDropOff) {
-      return { 
-        valid: false, 
-        error: "Drop-off must be at least 2 hours from now" 
+    if (requestedDropOff < now) {
+      return {
+        valid: false,
+        error: "New drop-off date cannot be in the past",
+      };
+    }
+
+    if (hoursUntilDropOff < 2) {
+      return {
+        valid: false,
+        error: "Drop-off must be at least 2 hours from now"
       };
     }
 
@@ -516,7 +529,7 @@ export default function DateChangeModal({ booking, onClose, onSuccess }) {
                 <p>Processing update...</p>
               </div>
             ) : (
-              <ExtensionPayPal
+              <ExtensionPayment
                 extensionAmount={calculation.extraCharge}
                 bookingReference={booking.bookingReference}
                 onPaymentSuccess={handlePaymentSuccess}

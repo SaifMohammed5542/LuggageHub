@@ -11,6 +11,22 @@ import { generatePaymentReference } from "@/utils/generateReference";
 void Station;
 
 // Returns a fake-UTC Date where UTC hours = Melbourne wall-clock hours, for comparing against stored dates
+function isWithinStationHours(date, timings) {
+  if (!timings || timings.is24Hours) return true;
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const t = timings[dayNames[date.getUTCDay()]];
+  if (!t) return true;
+  if (t.closed) return false;
+  if (!t.open || !t.close) return true;
+  const mins = date.getUTCHours() * 60 + date.getUTCMinutes();
+  const [openH, openM] = t.open.split(':').map(Number);
+  const [closeH, closeM] = t.close.split(':').map(Number);
+  const openMins = openH * 60 + openM;
+  const closeMins = closeH * 60 + closeM;
+  if (closeMins < openMins) return mins >= openMins || mins <= closeMins;
+  return mins >= openMins && mins <= closeMins;
+}
+
 function getMelbourneNow() {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Australia/Melbourne',
@@ -82,6 +98,23 @@ export async function POST(request) {
       );
     }
 
+    const now = getMelbourneNow();
+
+    if (requestedDropOff < now) {
+      return NextResponse.json(
+        { error: "New drop-off date cannot be in the past" },
+        { status: 400 }
+      );
+    }
+
+    const hoursUntilNewDropOff = (requestedDropOff - now) / (1000 * 60 * 60);
+    if (hoursUntilNewDropOff < 2) {
+      return NextResponse.json(
+        { error: "Drop-off must be at least 2 hours from now" },
+        { status: 400 }
+      );
+    }
+
     if (requestedPickUp < currentPickUp) {
       return NextResponse.json(
         { error: "Cannot move pick-up earlier (no refunds for early pickup)" },
@@ -89,15 +122,19 @@ export async function POST(request) {
       );
     }
 
-    const now = getMelbourneNow();
-    if (requestedDropOff < currentDropOff) {
-      const hoursUntilNewDropOff = (requestedDropOff - now) / (1000 * 60 * 60);
-      if (hoursUntilNewDropOff < 2) {
-        return NextResponse.json(
-          { error: "Drop-off must be at least 2 hours from now" },
-          { status: 400 }
-        );
-      }
+    // Station hours validation
+    const stationTimings = booking.stationId?.timings;
+    if (!isWithinStationHours(requestedDropOff, stationTimings)) {
+      return NextResponse.json(
+        { error: "New drop-off time is outside station opening hours" },
+        { status: 400 }
+      );
+    }
+    if (!isWithinStationHours(requestedPickUp, stationTimings)) {
+      return NextResponse.json(
+        { error: "New pick-up time is outside station opening hours" },
+        { status: 400 }
+      );
     }
 
     if (requestedPickUp > currentPickUp) {
@@ -150,19 +187,25 @@ export async function POST(request) {
 
     // ✅ SAVE PAYMENT RECORD
     if (extraCharge > 0 && paymentData) {
+      const isStripe = paymentData.provider === "stripe";
       const payment = new Payment({
         paymentReference: generatePaymentReference(),
         bookingId: booking._id,
         amount: extraCharge,
         currency: paymentData.currency || "AUD",
-        paymentMethod: "paypal",
         status: "completed",
-        paypalOrderId: paymentData.paypalOrderId,
-        paypalTransactionId: paymentData.paypalTransactionId,
         payerEmail: paymentData.payerEmail,
         payerName: paymentData.payerName,
-        payerId: paymentData.payerId,
-        paypalResponse: paymentData.fullPayPalResponse,
+        ...(isStripe
+          ? { stripePaymentIntentId: paymentData.stripePaymentIntentId, paymentMethod: "stripe" }
+          : {
+              paypalOrderId: paymentData.paypalOrderId,
+              paypalTransactionId: paymentData.paypalTransactionId,
+              payerId: paymentData.payerId,
+              paypalResponse: paymentData.fullPayPalResponse,
+              paymentMethod: "paypal",
+            }
+        ),
       });
       await payment.save();
     }

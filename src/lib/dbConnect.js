@@ -21,16 +21,20 @@ export default async function dbConnect() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
+    const isVercel = process.env.VERCEL === "1";
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000, // fail within 5s so Vercel's 10s limit isn't breached
-      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: isVercel ? 5000 : 10000,
+      connectTimeoutMS: isVercel ? 5000 : 10000,
       socketTimeoutMS: 30000,
       maxPoolSize: 10,
       ssl: true,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => m);
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => m).catch((err) => {
+      cached.promise = null; // allow retry on next request
+      throw err;
+    });
   }
 
   cached.conn = await cached.promise;

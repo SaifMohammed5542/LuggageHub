@@ -1,6 +1,7 @@
 // app/api/admin/bookings/[id]/cancel-refund/route.js
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import Stripe from 'stripe';
 import dbConnect from '../../../../../../lib/dbConnect';
 import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
@@ -46,6 +47,7 @@ async function issuePayPalRefund(captureId, amount, currency = 'AUD') {
 export async function POST(req, { params }) {
   try {
     await dbConnect();
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
@@ -73,44 +75,57 @@ export async function POST(req, { params }) {
     if (issueRefund) {
       if (!allPayments.length) return NextResponse.json({ error: 'No payment record found for this booking — cannot issue refund' }, { status: 400 });
 
-      // Build list of captures that still have refundable balance
+      // Build list of payments that still have refundable balance
       const refundableCaptures = [];
       for (const p of allPayments) {
-        if (!p.paypalTransactionId) continue;
+        if (!p.paypalTransactionId && !p.stripePaymentIntentId) continue;
         if (p.status === 'refunded') continue;
         const used = p.refunds?.reduce((s, r) => s + r.amount, 0) || 0;
         const balance = +(p.amount - used).toFixed(2);
         if (balance > 0.005) refundableCaptures.push({ payment: p, balance });
       }
 
-      if (!refundableCaptures.length) return NextResponse.json({ error: 'No refundable PayPal captures found — all payments already fully refunded' }, { status: 400 });
+      if (!refundableCaptures.length) return NextResponse.json({ error: 'No refundable payments found — all payments already fully refunded' }, { status: 400 });
 
       const results = [];
 
       if (!refundAmount) {
-        // Bug 4 fix: full refund — loop through ALL captures and refund each completely
+        // Full refund — loop through ALL captures
         for (const { payment, balance } of refundableCaptures) {
-          const ppRefund = await issuePayPalRefund(payment.paypalTransactionId, null, payment.currency || 'AUD');
-          await payment.addRefund({
-            refundId: ppRefund.id,
-            amount: parseFloat(ppRefund.amount?.value || balance),
-            reason: reason.trim(),
-          });
-          results.push({ refundId: ppRefund.id, amount: parseFloat(ppRefund.amount?.value || balance) });
+          let refundId, amount;
+          if (payment.stripePaymentIntentId) {
+            const refund = await stripe.refunds.create({ payment_intent: payment.stripePaymentIntentId });
+            refundId = refund.id;
+            amount = refund.amount / 100;
+          } else {
+            const ppRefund = await issuePayPalRefund(payment.paypalTransactionId, null, payment.currency || 'AUD');
+            refundId = ppRefund.id;
+            amount = parseFloat(ppRefund.amount?.value || balance);
+          }
+          await payment.addRefund({ refundId, amount, reason: reason.trim() });
+          results.push({ refundId, amount });
         }
       } else {
-        // Partial refund — distribute across captures newest-first until covered
+        // Partial refund — distribute across captures newest-first
         let remaining = parseFloat(refundAmount);
         for (const { payment, balance } of refundableCaptures) {
           if (remaining <= 0.005) break;
           const toRefund = +Math.min(remaining, balance).toFixed(2);
-          const ppRefund = await issuePayPalRefund(payment.paypalTransactionId, toRefund, payment.currency || 'AUD');
-          await payment.addRefund({
-            refundId: ppRefund.id,
-            amount: parseFloat(ppRefund.amount?.value || toRefund),
-            reason: reason.trim(),
-          });
-          results.push({ refundId: ppRefund.id, amount: parseFloat(ppRefund.amount?.value || toRefund) });
+          let refundId, amount;
+          if (payment.stripePaymentIntentId) {
+            const refund = await stripe.refunds.create({
+              payment_intent: payment.stripePaymentIntentId,
+              amount: Math.round(toRefund * 100),
+            });
+            refundId = refund.id;
+            amount = refund.amount / 100;
+          } else {
+            const ppRefund = await issuePayPalRefund(payment.paypalTransactionId, toRefund, payment.currency || 'AUD');
+            refundId = ppRefund.id;
+            amount = parseFloat(ppRefund.amount?.value || toRefund);
+          }
+          await payment.addRefund({ refundId, amount, reason: reason.trim() });
+          results.push({ refundId, amount });
           remaining = +(remaining - toRefund).toFixed(2);
         }
       }

@@ -1,6 +1,7 @@
 // app/api/admin/bookings/[id]/partial-refund/route.js
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import Stripe from 'stripe';
 import dbConnect from '../../../../../../lib/dbConnect';
 import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
@@ -32,6 +33,7 @@ async function getPayPalAccessToken() {
 export async function POST(req, { params }) {
   try {
     await dbConnect();
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     if (!adminAuth(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
@@ -67,48 +69,56 @@ export async function POST(req, { params }) {
         if (p.amount - used > 0.005) { payment = p; break; }
       }
     }
-    if (!payment) return NextResponse.json({ error: 'No refundable PayPal capture found — all payments already fully refunded' }, { status: 400 });
+    if (!payment) return NextResponse.json({ error: 'No refundable payment found — all payments already fully refunded' }, { status: 400 });
 
     const alreadyRefunded = payment.refunds?.reduce((sum, r) => sum + r.amount, 0) || 0;
     const maxRefundable = +(payment.amount - alreadyRefunded).toFixed(2);
     if (refundAmt > maxRefundable)
-      return NextResponse.json({ error: `Max refundable from this capture is A$${maxRefundable.toFixed(2)}` }, { status: 400 });
+      return NextResponse.json({ error: `Max refundable is A$${maxRefundable.toFixed(2)}` }, { status: 400 });
 
-    // Call PayPal
-    const { accessToken, base } = await getPayPalAccessToken();
-    const ppRes = await fetch(`${base}/v2/payments/captures/${payment.paypalTransactionId}/refund`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        'PayPal-Request-Id': `partial-refund-${payment.paypalTransactionId}-${Date.now()}`,
-      },
-      body: JSON.stringify({ amount: { value: refundAmt.toFixed(2), currency_code: payment.currency || 'AUD' } }),
-    });
+    let refundId, actualRefunded;
 
-    const ppData = await ppRes.json();
-    if (!ppRes.ok)
-      throw new Error(ppData?.details?.[0]?.description || ppData?.message || `PayPal refund failed (${ppRes.status})`);
+    if (payment.stripePaymentIntentId) {
+      // Stripe refund
+      const refund = await stripe.refunds.create({
+        payment_intent: payment.stripePaymentIntentId,
+        amount: Math.round(refundAmt * 100),
+      });
+      refundId = refund.id;
+      actualRefunded = refund.amount / 100;
+    } else {
+      // PayPal refund
+      const { accessToken, base } = await getPayPalAccessToken();
+      const ppRes = await fetch(`${base}/v2/payments/captures/${payment.paypalTransactionId}/refund`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'PayPal-Request-Id': `partial-refund-${payment.paypalTransactionId}-${Date.now()}`,
+        },
+        body: JSON.stringify({ amount: { value: refundAmt.toFixed(2), currency_code: payment.currency || 'AUD' } }),
+      });
+      const ppData = await ppRes.json();
+      if (!ppRes.ok)
+        throw new Error(ppData?.details?.[0]?.description || ppData?.message || `PayPal refund failed (${ppRes.status})`);
+      refundId = ppData.id;
+      actualRefunded = parseFloat(ppData.amount?.value || refundAmt);
+    }
 
-    // Record refund on Payment
     await payment.addRefund({
-      refundId: ppData.id,
-      amount: parseFloat(ppData.amount?.value || refundAmt),
+      refundId,
+      amount: actualRefunded,
       reason: note || 'Partial refund — booking rescheduled to shorter duration',
     });
 
-    // Bug 5 fix: reduce pendingRefundAmount by the actual refunded amount rather than clearing to 0.
-    // If multiple shortens have accumulated, admin may need to click again for the remainder.
-    const actualRefunded = parseFloat(ppData.amount?.value || refundAmt);
     booking.pendingRefundAmount = Math.max(0, +((booking.pendingRefundAmount || 0) - actualRefunded).toFixed(2));
     if (booking.pendingRefundAmount <= 0) booking.pendingRefundCaptureId = null;
     await booking.save();
 
     return NextResponse.json({
       success: true,
-      refundId: ppData.id,
-      amount: ppData.amount?.value || refundAmt.toFixed(2),
-      status: ppData.status,
+      refundId,
+      amount: actualRefunded.toFixed(2),
       pendingRefundAmount: booking.pendingRefundAmount,
       message: `A$${refundAmt.toFixed(2)} refund issued to customer successfully`,
     });

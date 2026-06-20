@@ -4,7 +4,24 @@ import mongoose from 'mongoose';
 import dbConnect from '../../../../../../lib/dbConnect';
 import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
+import Station from '../../../../../../models/Station';
 import { verifyJWT } from '../../../../../../lib/auth';
+
+function isWithinStationHours(date, timings) {
+  if (!timings || timings.is24Hours) return true;
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const t = timings[dayNames[date.getUTCDay()]];
+  if (!t) return true;
+  if (t.closed) return false;
+  if (!t.open || !t.close) return true;
+  const mins = date.getUTCHours() * 60 + date.getUTCMinutes();
+  const [openH, openM] = t.open.split(':').map(Number);
+  const [closeH, closeM] = t.close.split(':').map(Number);
+  const openMins = openH * 60 + openM;
+  const closeMins = closeH * 60 + closeM;
+  if (closeMins < openMins) return mins >= openMins || mins <= closeMins;
+  return mins >= openMins && mins <= closeMins;
+}
 
 function adminAuth(req) {
   const token = req.headers.get('authorization')?.split(' ')[1];
@@ -43,9 +60,20 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
     if (newPick <= newDrop)
       return NextResponse.json({ error: 'Pick-up must be after drop-off' }, { status: 400 });
+    if (newDrop < new Date())
+      return NextResponse.json({ error: 'New drop-off date cannot be in the past' }, { status: 400 });
 
     const booking = await Booking.findById(id);
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+
+    // Station hours validation
+    const station = await Station.findById(booking.stationId).select('timings name');
+    if (station?.timings) {
+      if (!isWithinStationHours(newDrop, station.timings))
+        return NextResponse.json({ error: 'New drop-off time is outside station opening hours' }, { status: 400 });
+      if (!isWithinStationHours(newPick, station.timings))
+        return NextResponse.json({ error: 'New pick-up time is outside station opening hours' }, { status: 400 });
+    }
 
     // Bug 2 fix: stored bookings can be rescheduled (e.g. customer calls to change pick-up)
     const reschedulable = ['pending', 'confirmed', 'stored'];
