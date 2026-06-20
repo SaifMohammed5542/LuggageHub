@@ -7,8 +7,6 @@ import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
 import { verifyJWT } from '../../../../../../lib/auth';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 async function getPayPalAccessToken() {
   const base = process.env.PAYPAL_MODE === 'sandbox'
     ? 'https://api-m.sandbox.paypal.com'
@@ -49,6 +47,7 @@ async function issuePayPalRefund(captureId, amount, currency = 'AUD') {
 export async function POST(req, { params }) {
   try {
     await dbConnect();
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];

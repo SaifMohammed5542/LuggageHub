@@ -8,8 +8,6 @@ import Booking from '../../../../../../models/booking';
 import Payment from '../../../../../../models/Payment';
 import { verifyJWT } from '../../../../../../lib/auth';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 function adminAuth(req) {
   const token = req.headers.get('authorization')?.split(' ')[1];
   if (!token) return null;
@@ -36,6 +34,7 @@ async function getPayPalAccessToken() {
 export async function POST(req, { params }) {
   try {
     await dbConnect();
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     if (!adminAuth(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
