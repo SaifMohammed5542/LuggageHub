@@ -331,7 +331,7 @@ try {
     try {
       await transporter.sendMail({
         from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-        to:  'luggageterminal.errors@gmail.com',
+        to:  process.env.EMAIL_ADMIN,
         subject: `🧳 New Luggage Storage Booking - ${bookingReference}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -503,7 +503,7 @@ try {
           try {
 await transporter.sendMail({
   from: `"Luggage Terminal" <${process.env.EMAIL_USER}>`,
-  to: 'luggageterminal.errors@gmail.com',
+  to: partner.email,
   subject: `🧳 New Booking - ${bookingReference}`,
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
